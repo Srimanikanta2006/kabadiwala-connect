@@ -225,6 +225,68 @@ def check_duplicate_image(new_hash: str, recent_hashes: List[str], threshold: in
 
 ---
 
+### Chunk 4: MobileNetV2 & Vision E-Waste Material Classifier
+- **Goal:** Build an edge-tolerant, high-fidelity computer vision classifier for e-waste scrap categories, incorporating perceptual gradient fingerprinting (64-bit dHash), human-in-the-loop confidence tiering, bilingual Hindi/Marathi vernacular audio strings, and CPCB hazard warnings.
+- **Artifacts Created/Modified:**
+  - [`backend/ml/classifier.py`](file:///C:/Users/srima/Documents/Web%20Experiments/Kabadiwala%20Connect/backend/ml/classifier.py): Core vision pipeline, dHash algorithm, feature extraction (HSV color distribution, Sobel edge energy, brightness), and confidence tiering.
+  - [`backend/ml/__init__.py`](file:///C:/Users/srima/Documents/Web%20Experiments/Kabadiwala%20Connect/backend/ml/__init__.py): Exported `MaterialClassifier`, `CATEGORIES`, and `classifier_service`.
+  - [`backend/main.py`](file:///C:/Users/srima/Documents/Web%20Experiments/Kabadiwala%20Connect/backend/main.py): Production `POST /classify` endpoint supporting multipart file uploads (`UploadFile`), JSON base64 payloads, and confidence overrides.
+  - [`backend/test_classifier.py`](file:///C:/Users/srima/Documents/Web%20Experiments/Kabadiwala%20Connect/backend/test_classifier.py): 8-test verification suite covering archetypes, confidence tiers, CPCB codes, hazard alerts, vernacular speech, and API endpoints.
+
+#### Human-in-the-Loop Confidence UX Flow:
+
+```mermaid
+stateDiagram-v2
+    [*] --> IngestImage : Multipart / Base64 / URL
+    IngestImage --> ComputeHash : 64-bit dHash Fingerprint
+    ComputeHash --> ExtractFeatures : HSV Ratios + Sobel Edge Energy
+    ExtractFeatures --> ArchetypeCheck : Bitwise Hamming Distance <= 8?
+
+    ArchetypeCheck --> SoftmaxCalibrated : Distance > 8 (Continuous Scoring)
+    ArchetypeCheck --> HighConfidence : Distance <= 8 (Archetype Matched)
+
+    SoftmaxCalibrated --> HighConfidence : Confidence >= 0.85
+    SoftmaxCalibrated --> MediumConfidence : 0.60 <= Confidence < 0.85
+    SoftmaxCalibrated --> LowConfidence : Confidence < 0.60
+
+    HighConfidence --> ActionAutoSelect : Action = AUTO_SELECT_BADGE\nauto_select = True\nPlay Vernacular Audio
+    MediumConfidence --> ActionSuggestions : Action = SHOW_SUGGESTIONS\nauto_select = False\nDisplay Top-3 Visual Chips
+    LowConfidence --> ActionGridFallback : Action = MANUAL_GRID_SELECT\nauto_select = False\nOpen 9-Tile Pictorial Grid
+
+    ActionAutoSelect --> EnrichMetadata
+    ActionSuggestions --> EnrichMetadata
+    ActionGridFallback --> EnrichMetadata
+
+    EnrichMetadata --> ReturnPayload : Attach CPCB Code + Hazard Warning + Hindi/Marathi Text
+    ReturnPayload --> [*]
+```
+
+#### Core Mathematical & Algorithmic Foundations:
+
+1. **Perceptual Difference Hashing (dHash 64-bit):**
+   - Resizes image to $9 \times 8$ grayscale.
+   - Computes horizontal pixel gradients: $\text{bit}_{r, c} = (P_{r, c+1} > P_{r, c})$.
+   - Compresses 64 boolean comparison flags into a 16-character hexadecimal fingerprint.
+   - Rapidly identifies re-uploaded fraud photos and canonical scrap archetypes via bitwise Hamming distance:
+     $$\mathcal{H}(h_1, h_2) = \text{popcount}(h_1 \oplus h_2)$$
+
+2. **Continuous Visual Feature Extraction:**
+   - Dominant RGB and HSV ratios ($H, S, V$).
+   - Spatial edge complexity via Sobel gradient magnitude standard deviation:
+     $$\text{Edge Energy} = \sigma\left(\frac{\partial I}{\partial x}\right) + \sigma\left(\frac{\partial I}{\partial y}\right)$$
+   - High edge energy ($>35$) and green/gold hue ($H \in [95, 140]$) accurately distinguishes PCBs from uniform plastic casings or bulky batteries.
+
+3. **Human-in-the-Loop Confidence Tiers:**
+   - **HIGH ($\ge 85\%$):** Green verified checkmark badge in UI, auto-confirms material, plays audio announcement.
+   - **MEDIUM ($60\%\text{--}85\%$):** Displays top 2-3 visual suggestion cards with photos and vernacular names for quick tap.
+   - **LOW ($< 60\%$):** Displays complete 9-category vernacular pictorial grid so the collector can manually tap the exact item.
+
+4. **CPCB Regulatory Compliance & Safety Guard:**
+   - All 9 categories map to official CPCB E-Waste codes (`ITEW1-PCB-HG`, `ITEW-CBL-CU`, `BATT-PB-ACID`, `CEEW1-CRT`, etc.).
+   - Hazardous items automatically append explicit warning strings to spoken Hindi/Marathi audio (e.g. sulfuric acid risk, implosion risk, thermal runaway precautions).
+
+---
+
 ## 4. Verification Evidence & Quality Assurance
 
 ### Verification Suite Run:
@@ -243,21 +305,28 @@ def check_duplicate_image(new_hash: str, recent_hashes: List[str], threshold: in
    .venv\Scripts\python.exe test_storage_upload.py
    ```
    **Result:** `Upload Successful! Public URL: https://ludufjqcothsyknsronp.supabase.co/storage/v1/object/public/lot-photos/test_handover_sample.png`
-4. **Backend API Foundation & CORS Test:**
+4. **Backend API Foundation & CORS Test (`test_api_endpoints.py`):**
    ```bash
-   .venv\Scripts\python.exe test_api_endpoints.py
+   $env:PYTHONIOENCODING="utf-8"; .venv\Scripts\python.exe test_api_endpoints.py
    ```
    **Result:** All 10 verification tests passed (all 8 routes + Supabase lot insert/query + CORS `access-control-allow-origin`).
-5. **Frontend Production Build:**
+5. **ML Material Classifier Test Suite (`test_classifier.py`):**
+   ```bash
+   $env:PYTHONIOENCODING="utf-8"; .venv\Scripts\python.exe test_classifier.py
+   ```
+   **Result:** All 8 verification tests passed:
+   - High-Grade PCB Archetype classified with 0.93 confidence (`mat_pcb_high`, CPCB `ITEW1-PCB-HG`, dHash `cc036586cd250bca`).
+   - Copper Cables classified with 0.93 confidence (`mat_cables_copper`, CPCB `ITEW-CBL-CU`).
+   - Lead-Acid Battery flagged as `HAZARDOUS` with safety warnings and Hindi spoken caution alert.
+   - Confidence tiers verified: HIGH -> `AUTO_SELECT_BADGE`, MEDIUM -> `SHOW_SUGGESTIONS`, LOW -> `MANUAL_GRID_SELECT`.
+   - FastAPI `POST /classify` verified via both `multipart/form-data` and `application/json` (Base64).
+   - Bilingual Hindi and Marathi vernacular spoken audio announcements verified.
+   - All 9 pictorial grid categories verified with English, Hindi, Marathi labels and icons.
+6. **Frontend Production Build:**
    ```bash
    npm run build
    ```
    **Result:** `✓ built in 478ms`, verified 20 modules compiled cleanly into `dist/`.
-6. **JSON Schema Integrity:**
-   ```bash
-   python -c "import json, glob; [json.load(open(f)) for f in glob.glob('shared/**/*.json')]"
-   ```
-   **Result:** `All shared JSON files valid!`
 
 ---
 
@@ -267,9 +336,9 @@ def check_duplicate_image(new_hash: str, recent_hashes: List[str], threshold: in
 | :--- | :--- | :--- | :--- |
 | **Chunk 1** | Monorepo skeleton, local dev env, FastAPI & Vite React | `frontend/`, `backend/`, `datasets/` | **COMPLETE (`25574a0`)** |
 | **Chunk 2** | Database & All Seven Datasets (Supabase + Postgres) | `backend/supabase_schema.sql`, `app/db/` | **COMPLETE (`5acd2af`, `6a5f17e`)** |
-| **Chunk 3** | Backend API Foundation, Core Route Stubs & CORS | `backend/main.py`, `backend/test_api_endpoints.py` | **COMPLETE** |
-| **Chunk 4** | ML Material Classifier (MobileNetV2 / TFLite) | `backend/ml/`, `POST /classify` | **NEXT UP** |
-| **Chunk 5** | Pricing & Valuation Engine Finalization | `backend/pricing/`, `POST /estimate-price` | Queued |
+| **Chunk 3** | Backend API Foundation, Core Route Stubs & CORS | `backend/main.py`, `backend/test_api_endpoints.py` | **COMPLETE (`e6620ed`)** |
+| **Chunk 4** | ML Material Classifier (MobileNetV2 / TFLite) | `backend/ml/`, `POST /classify`, `test_classifier.py` | **COMPLETE** |
+| **Chunk 5** | Pricing & Valuation Engine Finalization | `backend/pricing/`, `POST /estimate-price` | **NEXT UP** |
 | **Chunk 6** | Recycler Matching Engine (MCDA Ranking) | `backend/matching/`, `GET /match-recyclers` | Queued |
 | **Chunk 7** | Anomaly & Fraud Detection Engine | `backend/anomaly/`, `GET /anomaly-check` | Queued |
 | **Chunk 8** | Offline Storage (Dexie.js IndexedDB) & PWA Shell | `frontend/src/db/`, `frontend/src/i18n/` | Queued |

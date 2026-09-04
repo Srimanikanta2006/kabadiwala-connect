@@ -17,11 +17,11 @@ def run_tests():
     assert res.status_code == 200, f"Root failed: {res.status_code}"
     print("1. [PASS] GET / ->", res.json()["message"])
 
-    # 2. POST /classify (Chunk 4 stub)
-    res = client.post("/classify", json={"image": "dummy_base64"})
+    # 2. POST /classify (Chunk 4 Production / Stub)
+    res = client.post("/classify", json={"image_base64": "dummy_base64"})
     assert res.status_code == 200
-    assert res.json()["status"] == "STUB_CHUNK_4"
-    print("2. [PASS] POST /classify ->", res.json()["status"])
+    assert res.json()["status"] in ["COMPLETED", "STUB_CHUNK_4"]
+    print("2. [PASS] POST /classify ->", res.json()["status"], "(Top:", res.json()["data"]["top_category"], ")")
 
     # 3. POST /estimate-price (Chunk 5 stub)
     res = client.post("/estimate-price", json={"material_id": "mat_pcb_high", "weight_kg": 15.0})
