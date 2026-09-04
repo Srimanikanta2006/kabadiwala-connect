@@ -15,7 +15,7 @@ from typing import Dict, Any, List, Optional
 from dotenv import load_dotenv
 load_dotenv()
 
-from fastapi import FastAPI, HTTPException, status, Body, Query, Request, UploadFile, File, Form
+from fastapi import FastAPI, HTTPException, status, Body, Query, Request, UploadFile, File, Form, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.db.supabase_client import get_supabase, get_materials, get_recyclers, get_prices, insert_lot
@@ -26,7 +26,8 @@ from anomaly.detector import (
     check_weight_bounds,
     check_weight_plausibility,
     check_duplicate_image,
-    check_price_outlier
+    check_price_outlier,
+    run_anomaly_background_sweep
 )
 from ml.classifier import classifier_service
 
@@ -416,13 +417,31 @@ def anomaly_check_post_endpoint(payload: Dict[str, Any] = Body(...)):
     return report
 
 
+@app.post("/anomaly-check/run-background-job", tags=["Anomaly"])
+def trigger_anomaly_background_sweep(
+    background_tasks: BackgroundTasks,
+    batch_size: int = Query(25, description="Number of recent lots/transactions to inspect")
+):
+    """
+    POST /anomaly-check/run-background-job
+    Triggers asynchronous statistical anomaly sweep across recent transactions and lots.
+    """
+    background_tasks.add_task(run_anomaly_background_sweep, batch_size=batch_size)
+    return {
+        "success": True,
+        "message": f"Background anomaly inspection job queued for batch size {batch_size}.",
+        "status": "QUEUED",
+        "timestamp": datetime.utcnow().isoformat()
+    }
+
+
 # ------------------------------------------------------------------------------
 # Material Lots API (Wired directly to Supabase table 'material_lots')
 # ------------------------------------------------------------------------------
 @app.post("/lots", tags=["Lots"])
-def create_new_lot(lot: Dict[str, Any] = Body(...)):
+def create_new_lot(lot: Dict[str, Any] = Body(...), background_tasks: BackgroundTasks = BackgroundTasks()):
     """
-    POST /lots -> Create a new material lot in Supabase.
+    POST /lots -> Create a new material lot in Supabase, and triggers background anomaly inspection.
     """
     # Ensure ID exists
     if "id" not in lot:
@@ -430,6 +449,10 @@ def create_new_lot(lot: Dict[str, Any] = Body(...)):
     if "quoted_price" not in lot:
         # Default price calculation if omitted
         lot["quoted_price"] = 245.0 * float(lot.get("approximate_weight", 1.0))
+
+    # Queue background anomaly check if background_tasks available
+    if background_tasks:
+        background_tasks.add_task(run_anomaly_background_sweep, batch_size=10)
 
     client = get_supabase()
     if client:
