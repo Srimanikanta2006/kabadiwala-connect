@@ -6,6 +6,7 @@
 [![Design System](https://img.shields.io/badge/Design_System-RE%3ALINK_Stitch-006948)](stitch-designs/design-system.md)
 [![EPR Compliance](https://img.shields.io/badge/EPR-CPCB_2022_Aligned-blue)](shared/taxonomy/material_taxonomy.md)
 [![Edge AI](https://img.shields.io/badge/Edge_AI-TFLite_INT8_%3C8MB-brightgreen)](docs/edge_vs_cloud.md)
+[![Engineering Logbook](https://img.shields.io/badge/Docs-Engineering_Logbook-orange)](docs/ENGINEERING_LOGBOOK.md)
 
 ---
 
