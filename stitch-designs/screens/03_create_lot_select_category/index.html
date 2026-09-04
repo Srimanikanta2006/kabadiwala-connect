@@ -1,0 +1,168 @@
+<!DOCTYPE html><html lang="en"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>RE:LINK - Lot Creation</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "tertiary": "#00647c",
+                        "primary": "#006948",
+                        "surface-dim": "#d9dadb",
+                        "surface": "#f8f9fa",
+                        "primary-fixed-dim": "#68dba9",
+                        "secondary-fixed": "#d9e3f4",
+                        "on-primary-fixed-variant": "#005137",
+                        "on-primary": "#ffffff",
+                        "on-secondary": "#ffffff",
+                        "on-tertiary-fixed-variant": "#004e61",
+                        "surface-bright": "#f8f9fa",
+                        "on-secondary-container": "#596372",
+                        "on-tertiary-fixed": "#001f28",
+                        "secondary": "#555f6d",
+                        "on-error-container": "#93000a",
+                        "primary-container": "#00855d",
+                        "inverse-surface": "#2e3132",
+                        "surface-container-high": "#e7e8e9",
+                        "on-primary-fixed": "#002114",
+                        "tertiary-fixed": "#b7eaff",
+                        "inverse-primary": "#68dba9",
+                        "on-error": "#ffffff",
+                        "on-tertiary-container": "#fafdff",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-tint": "#006c4a",
+                        "secondary-fixed-dim": "#bdc7d8",
+                        "surface-container-low": "#f3f4f5",
+                        "secondary-container": "#d6e0f1",
+                        "background": "#f8f9fa",
+                        "error": "#ba1a1a",
+                        "tertiary-container": "#007f9d",
+                        "tertiary-fixed-dim": "#6cd3f7",
+                        "on-background": "#191c1d",
+                        "on-tertiary": "#ffffff",
+                        "on-surface-variant": "#3d4a42",
+                        "on-secondary-fixed": "#121c28",
+                        "surface-container": "#edeeef",
+                        "primary-fixed": "#85f8c4",
+                        "on-surface": "#191c1d",
+                        "outline-variant": "#bccac0",
+                        "error-container": "#ffdad6",
+                        "inverse-on-surface": "#f0f1f2",
+                        "surface-variant": "#e1e3e4",
+                        "surface-container-highest": "#e1e3e4",
+                        "outline": "#6d7a72",
+                        "on-secondary-fixed-variant": "#3e4755",
+                        "on-primary-container": "#f5fff7"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "sm": "8px",
+                        "margin-mobile": "16px",
+                        "touch-target-min": "48px",
+                        "md": "16px",
+                        "xs": "4px",
+                        "lg": "24px",
+                        "gutter-mobile": "12px",
+                        "xl": "32px",
+                        "unit": "4px"
+                    },
+                    "fontFamily": {
+                        "body-md": ["Inter"],
+                        "headline-md": ["Inter"],
+                        "label-lg": ["Inter"],
+                        "headline-lg": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "headline-lg-mobile": ["Inter"],
+                        "label-md": ["Inter"],
+                        "action-xl": ["Inter"]
+                    },
+                    "fontSize": {
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "headline-md": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+                        "label-lg": ["16px", { "lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "600" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "body-lg": ["18px", { "lineHeight": "26px", "fontWeight": "400" }],
+                        "headline-lg-mobile": ["26px", { "lineHeight": "32px", "fontWeight": "700" }],
+                        "label-md": ["14px", { "lineHeight": "18px", "fontWeight": "500" }],
+                        "action-xl": ["20px", { "lineHeight": "24px", "fontWeight": "700" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings:
+            'FILL' 0,
+            'wght' 400,
+            'GRAD' 0,
+            'opsz' 24
+        }
+        .material-symbols-outlined.filled {
+            font-variation-settings: 'FILL' 1;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background min-h-screen pb-[80px]">
+<!-- TopAppBar -->
+<header class="bg-surface dark:bg-on-background border-b border-outline-variant dark:border-outline docked full-width top-0 sticky z-40"><div class="flex justify-between items-center w-full px-margin-mobile h-touch-target-min"><div class="flex items-center gap-2"><button class="w-10 h-10 -ml-2 rounded-full flex items-center justify-center text-on-surface hover:bg-surface-container transition-colors" aria-label="Back"><span class="material-symbols-outlined" data-icon="arrow_back">arrow_back</span></button><div class="flex flex-col"><span class="font-headline-md text-headline-md font-bold text-primary leading-tight">RE:LINK</span><span class="text-[11px] text-on-surface-variant font-medium leading-none">Material Selection</span></div></div><div class="flex items-center gap-2"><button class="flex items-center gap-1 px-2.5 py-1 rounded-full bg-surface-container border border-outline-variant text-on-surface text-label-md hover:bg-surface-container-high transition-colors font-medium"><span class="material-symbols-outlined text-[16px]" data-icon="language">language</span><span class="">हि / म / EN</span></button><div class="w-8 h-8 rounded-full bg-surface-container overflow-hidden border border-outline-variant"><img alt="User avatar" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCFZ1R342us_SVZCBlb57OAqh3BgmCJaVJIQ_Pa1sfjvZkVmR3TMLGpm9ElnjWrbRg3D06L-rvoXMXhsfDv3P-LXNc0R7OhYPz8hANroU2fCvrkRo8HaHpcMJcnUM8jocTCkxEScMQi-RItz6Kwijo8J-VfaMntIur6zKJlnGDu-usyN5vNGLIt79tIcFMBwgej0VQesQ3ByUfnWwmI-pdemgiEU7CRzJpNthVlH202H33figGXPqQP"></div></div></div></header>
+<!-- Main Content -->
+<main class="px-margin-mobile py-lg">
+<!-- Header with Audio -->
+<div class="mb-lg flex flex-col gap-2"><div class="flex items-center gap-2"><span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-secondary-container text-on-secondary-fixed text-label-md font-semibold"><span class="material-symbols-outlined text-[16px]" data-icon="tune">tune</span>Manual Correction / श्रेणी सुधार</span></div><div class="flex items-center justify-between gap-sm"><div class="flex flex-col"><h1 class="font-headline-lg-mobile text-headline-lg-mobile md:font-headline-lg md:text-headline-lg text-on-surface font-bold">Select Material / सामग्री चुनें</h1><p class="text-body-md text-on-surface-variant">Tap card or speaker to verify / सुनने के लिए स्पीकर दबाएं</p></div><button class="w-touch-target-min h-touch-target-min rounded-full flex items-center justify-center text-tertiary bg-tertiary-fixed hover:bg-tertiary-container hover:text-on-tertiary-container transition-colors shadow-sm border border-outline-variant shrink-0" title="Read heading aloud"><span class="material-symbols-outlined filled" data-icon="volume_up">volume_up</span></button></div></div>
+<!-- Material Grid -->
+<div class="grid grid-cols-2 gap-gutter-mobile md:grid-cols-3 lg:grid-cols-4">
+<!-- Card: CRT -->
+<button class="flex flex-col bg-surface shadow-md border-2 border-outline-variant rounded-xl overflow-hidden active:bg-surface-container-low hover:border-primary transition-all text-left group"><div class="w-full aspect-square bg-surface-container-low flex items-center justify-center relative overflow-hidden"><img alt="CRT Monitor scrap photo" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBfYXZOuB0w32hdrpQ2hYu7MVLU8m3cb89Gn0E9N-0rF7mlK3I_zH4McJKioU7GV6LkYs0MgX3ZOt4xUJKQuc7mI2xypFa252gRD_ILuT1SqcSPiVtP4kexadwGvNTfifSpR0a0MPoyjX1pHC5ZZSJBZVtiVfX71rYGkLG_P11GdIEnSynAaO1-GvKUJUpH31Oy0WhFJABoLHnKp-VdscW18dhDq22-2YldYCi4I2UR4EMnHnKWS7kr"><div class="absolute top-2 right-2"><span class="w-10 h-10 rounded-full flex items-center justify-center text-tertiary bg-surface/95 shadow-md border border-outline-variant hover:bg-tertiary-fixed transition-colors" title="Pronounce in Hindi / Marathi"><span class="material-symbols-outlined filled text-[20px]" data-icon="volume_up">volume_up</span></span></div></div><div class="p-md border-t border-outline-variant w-full bg-surface flex flex-col items-center text-center"><span class="font-headline-md text-headline-md font-bold text-on-surface group-hover:text-primary transition-colors">CRT Monitor</span><span class="font-label-md text-label-md text-primary font-bold">टीवी / मॉनिटर</span></div></button>
+<!-- Card: LCD -->
+<button class="flex flex-col bg-surface shadow-md border-2 border-outline-variant rounded-xl overflow-hidden active:bg-surface-container-low hover:border-primary transition-all text-left group"><div class="w-full aspect-square bg-primary-container/10 flex items-center justify-center relative overflow-hidden"><img alt="LCD Icon" class="w-28 h-28 object-contain group-hover:scale-105 transition-transform duration-200" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDtEyOx8Ugyz1nXho5fqUpiAW_WTkC35IVfkF1VUKYsAIOopYVt6L8_O6RP33VAsoFzvakBfdLpcWUGRdPSdcZNcx72doDS3frx4wRQK4gI5vzc7Z_H5q42Wbzve5gYgv-3yN9HHuIvQTjolyFR-EYm2Hw50HiSRcuxJ7tYg38ocUKhCbfSklpLondnIy9vGWL0WUCY_f8MrxXuKYIO0iBuoA_c0iFbfCwuvLY_ptaYcvw1T7IcusJ1"><div class="absolute top-2 right-2"><span class="w-10 h-10 rounded-full flex items-center justify-center text-tertiary bg-surface/95 shadow-md border border-outline-variant hover:bg-tertiary-fixed transition-colors" title="Pronounce in Hindi / Marathi"><span class="material-symbols-outlined filled text-[20px]" data-icon="volume_up">volume_up</span></span></div></div><div class="p-md border-t border-outline-variant w-full bg-surface flex flex-col items-center text-center"><span class="font-headline-md text-headline-md font-bold text-on-surface group-hover:text-primary transition-colors">LCD / LED Screen</span><span class="font-label-md text-label-md text-primary font-bold">स्क्रीन / डिस्प्ले</span></div></button>
+<!-- Card: Cable -->
+<button class="flex flex-col bg-surface shadow-md border-2 border-outline-variant rounded-xl overflow-hidden active:bg-surface-container-low hover:border-primary transition-all text-left group"><div class="w-full aspect-square bg-surface-container-low flex items-center justify-center relative overflow-hidden"><img alt="Copper Cable scrap photo" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBGKj8KRJRJgco4b7M7Pgpxibea-Lq10FqtUsobeplyXqvXdougegxuKhCZbLIfPqFJvtfEoU_bV3llxV_Jzw5_e-n2phYvAKXYYzFbGCVkudTiABQa66aokYpWo4Rnvmk5WkKHAQjXPpaDTU47xwcvKSZPqs5BT2n0FnbtRJB0s-1MW4HFiooFluRkYKFY4HY0LtXIXLQhHkH3kVfgKL-3XfXleL3drRbYwpwBKEdi8qKmIibEmXh6"><div class="absolute top-2 right-2"><span class="w-10 h-10 rounded-full flex items-center justify-center text-tertiary bg-surface/95 shadow-md border border-outline-variant hover:bg-tertiary-fixed transition-colors" title="Pronounce in Hindi / Marathi"><span class="material-symbols-outlined filled text-[20px]" data-icon="volume_up">volume_up</span></span></div></div><div class="p-md border-t border-outline-variant w-full bg-surface flex flex-col items-center text-center"><span class="font-headline-md text-headline-md font-bold text-on-surface group-hover:text-primary transition-colors">Copper Cable</span><span class="font-label-md text-label-md text-primary font-bold">तांबे के तार</span></div></button>
+<!-- Card: Battery -->
+<button class="flex flex-col bg-surface shadow-md border-2 border-outline-variant rounded-xl overflow-hidden active:bg-surface-container-low hover:border-primary transition-all text-left group"><div class="w-full aspect-square bg-surface-container-low flex items-center justify-center relative overflow-hidden"><img alt="Battery scrap photo" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBwlAe9K0CDtXrpz1da7B9u44Kn2Zw0zqIjV1zIlMd_1Lf3CzSig2iVXRxeroSAuNL3xhQ4VYmGcerwdcJznw0K-W5kMaBYwahmb3gSoEPauZYi_clPjMZaNiPh_xAA5xI5EA3St9CH4iNaOtF1hlUSR6So93DuLpLy9FhAvsVAsAsJ4T9li2nAiM2I4YVTbBKM0A0im7QWEAcVJnAo7mgzkuh2SYAHI0q75UgFEeRreTZZhjefUI2p"><div class="absolute top-2 right-2"><span class="w-10 h-10 rounded-full flex items-center justify-center text-tertiary bg-surface/95 shadow-md border border-outline-variant hover:bg-tertiary-fixed transition-colors" title="Pronounce in Hindi / Marathi"><span class="material-symbols-outlined filled text-[20px]" data-icon="volume_up">volume_up</span></span></div></div><div class="p-md border-t border-outline-variant w-full bg-surface flex flex-col items-center text-center"><span class="font-headline-md text-headline-md font-bold text-on-surface group-hover:text-primary transition-colors">Battery</span><span class="font-label-md text-label-md text-primary font-bold">बैटरी (लीड / लीथियम)</span></div></button>
+<!-- Card: PCB -->
+<button class="flex flex-col bg-surface shadow-md border-2 border-outline-variant rounded-xl overflow-hidden active:bg-surface-container-low hover:border-primary transition-all text-left group"><div class="w-full aspect-square bg-surface-container-low flex items-center justify-center relative overflow-hidden"><img alt="Circuit Board PCB scrap photo" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA0_YqtMM-8LZ6BsfCuCKu_Q8Lz9odO_Cv1n6Ui4H-5CYV-MQUkulZKEaKM2J-WY8bN0qRZMWYQhBD8MnFPX2TkxprUQWMAvVoWTUOgvm6x6A1-6T7pdXLr56WhOB-T2spijs9QajElCjExBnpy15voycK6noqBphs_VcM0Bflgdl426ozPfdmJaB2xxZCwcJ4eT0K3GXrLX_ZnN6i4Rr0ttbToM7uynjbQe3dAgG2ZoGrku5RXkTmn"><div class="absolute top-2 right-2"><span class="w-10 h-10 rounded-full flex items-center justify-center text-tertiary bg-surface/95 shadow-md border border-outline-variant hover:bg-tertiary-fixed transition-colors" title="Pronounce in Hindi / Marathi"><span class="material-symbols-outlined filled text-[20px]" data-icon="volume_up">volume_up</span></span></div></div><div class="p-md border-t border-outline-variant w-full bg-surface flex flex-col items-center text-center"><span class="font-headline-md text-headline-md font-bold text-on-surface group-hover:text-primary transition-colors">Circuit Board (PCB)</span><span class="font-label-md text-label-md text-primary font-bold">प्लेट / मदरबोर्ड</span></div></button>
+<!-- Card: Motor -->
+<button class="flex flex-col bg-surface shadow-md border-2 border-outline-variant rounded-xl overflow-hidden active:bg-surface-container-low hover:border-primary transition-all text-left group"><div class="w-full aspect-square bg-primary-container/10 flex items-center justify-center relative overflow-hidden"><img alt="Motor Icon" class="w-28 h-28 object-contain group-hover:scale-105 transition-transform duration-200" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAtvdmbxQII78S5QBPq-vnuvZsisgOAHpw5ZD39_drLoPC-Kel4c17WXqBPjSqs6LlWw8aHNJTQ_oI4ky57UobXk-UhLgOix26_3jymR7S_FKjc9-uKk5em_6Sm-_HEsbhBIKMypXH9hj9tAjOxO6eFv5s-LUJFR_eNx7DsUPQ37-tbl7z9KKBe-Y63eeiMf4cmiXX3O3fHWSKYdfsiS07g6FnZQYp7jzvQljtmQSuoRGEQdqUJO1Kx"><div class="absolute top-2 right-2"><span class="w-10 h-10 rounded-full flex items-center justify-center text-tertiary bg-surface/95 shadow-md border border-outline-variant hover:bg-tertiary-fixed transition-colors" title="Pronounce in Hindi / Marathi"><span class="material-symbols-outlined filled text-[20px]" data-icon="volume_up">volume_up</span></span></div></div><div class="p-md border-t border-outline-variant w-full bg-surface flex flex-col items-center text-center"><span class="font-headline-md text-headline-md font-bold text-on-surface group-hover:text-primary transition-colors">Electric Motor</span><span class="font-label-md text-label-md text-primary font-bold">मोटर / तांबा कोर</span></div></button>
+</div>
+</main>
+<!-- BottomNavBar -->
+<nav class="md:hidden bg-surface dark:bg-on-background border-t border-outline-variant dark:border-outline docked full-width bottom-0 rounded-t-xl shadow-md fixed left-0 w-full z-50 flex justify-around items-center px-2 py-2">
+<a class="flex flex-col items-center justify-center bg-primary-container dark:bg-on-primary-fixed-variant text-on-primary-container dark:text-primary-fixed rounded-full px-4 py-1 hover:bg-surface-container-low dark:hover:bg-surface-container-high transition-all duration-200" href="#">
+<span class="material-symbols-outlined filled" data-icon="home">home</span>
+<span class="font-label-md text-label-md mt-1">Home</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-surface-variant hover:bg-surface-container-low dark:hover:bg-surface-container-high px-4 py-1 transition-all duration-200 rounded-full" href="#">
+<span class="material-symbols-outlined" data-icon="inventory_2">inventory_2</span>
+<span class="font-label-md text-label-md mt-1">My Lots</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-surface-variant hover:bg-surface-container-low dark:hover:bg-surface-container-high px-4 py-1 transition-all duration-200 rounded-full" href="#">
+<span class="material-symbols-outlined" data-icon="payments">payments</span>
+<span class="font-label-md text-label-md mt-1">Earnings</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-surface-variant hover:bg-surface-container-low dark:hover:bg-surface-container-high px-4 py-1 transition-all duration-200 rounded-full" href="#">
+<span class="material-symbols-outlined" data-icon="info">info</span>
+<span class="font-label-md text-label-md mt-1">Safety</span>
+</a>
+</nav>
+
+
+</body></html>

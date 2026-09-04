@@ -1,0 +1,50 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "RecyclerProfile",
+  "type": "object",
+  "required": [
+    "recycler_id",
+    "facility_name",
+    "cpcb_registration_no",
+    "authorization_status",
+    "location",
+    "accepted_materials"
+  ],
+  "properties": {
+    "recycler_id": { "type": "string", "format": "uuid" },
+    "facility_name": { "type": "string" },
+    "cpcb_registration_no": { "type": "string" },
+    "authorization_status": { 
+      "type": "string", 
+      "enum": ["ACTIVE", "SUSPENDED", "UNDER_RENEWAL", "EXPIRED"] 
+    },
+    "valid_upto": { "type": "string", "format": "date" },
+    "contact_phone": { "type": "string" },
+    "location": {
+      "type": "object",
+      "required": ["latitude", "longitude", "address_text", "city", "state"],
+      "properties": {
+        "latitude": { "type": "number", "minimum": -90, "maximum": 90 },
+        "longitude": { "type": "number", "minimum": -180, "maximum": 180 },
+        "address_text": { "type": "string" },
+        "city": { "type": "string" },
+        "state": { "type": "string" }
+      }
+    },
+    "accepted_materials": {
+      "type": "array",
+      "items": { "type": "string", "pattern": "^mat_[a-z0-9_]+$" }
+    },
+    "offered_rates": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "number",
+        "minimum": 0
+      }
+    },
+    "service_radius_km": { "type": "number", "default": 25.0 },
+    "pickup_available": { "type": "boolean", "default": false },
+    "min_pickup_weight_kg": { "type": "number", "default": 20.0 },
+    "fulfillment_rating": { "type": "number", "minimum": 1.0, "maximum": 5.0, "default": 4.5 }
+  }
+}

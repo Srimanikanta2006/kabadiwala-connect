@@ -1,0 +1,250 @@
+<!DOCTYPE html><html class="light" lang="en"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>RE:LINK - Collector Home</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "tertiary": "#00647c",
+                    "primary": "#006948",
+                    "surface-dim": "#d9dadb",
+                    "surface": "#f8f9fa",
+                    "primary-fixed-dim": "#68dba9",
+                    "secondary-fixed": "#d9e3f4",
+                    "on-primary-fixed-variant": "#005137",
+                    "on-primary": "#ffffff",
+                    "on-secondary": "#ffffff",
+                    "on-tertiary-fixed-variant": "#004e61",
+                    "surface-bright": "#f8f9fa",
+                    "on-secondary-container": "#596372",
+                    "on-tertiary-fixed": "#001f28",
+                    "secondary": "#555f6d",
+                    "on-error-container": "#93000a",
+                    "primary-container": "#00855d",
+                    "inverse-surface": "#2e3132",
+                    "surface-container-high": "#e7e8e9",
+                    "on-primary-fixed": "#002114",
+                    "tertiary-fixed": "#b7eaff",
+                    "inverse-primary": "#68dba9",
+                    "on-error": "#ffffff",
+                    "on-tertiary-container": "#fafdff",
+                    "surface-container-lowest": "#ffffff",
+                    "surface-tint": "#006c4a",
+                    "secondary-fixed-dim": "#bdc7d8",
+                    "surface-container-low": "#f3f4f5",
+                    "secondary-container": "#d6e0f1",
+                    "background": "#f8f9fa",
+                    "error": "#ba1a1a",
+                    "tertiary-container": "#007f9d",
+                    "tertiary-fixed-dim": "#6cd3f7",
+                    "on-background": "#191c1d",
+                    "on-tertiary": "#ffffff",
+                    "on-surface-variant": "#3d4a42",
+                    "on-secondary-fixed": "#121c28",
+                    "surface-container": "#edeeef",
+                    "primary-fixed": "#85f8c4",
+                    "on-surface": "#191c1d",
+                    "outline-variant": "#bccac0",
+                    "error-container": "#ffdad6",
+                    "inverse-on-surface": "#f0f1f2",
+                    "surface-variant": "#e1e3e4",
+                    "surface-container-highest": "#e1e3e4",
+                    "outline": "#6d7a72",
+                    "on-secondary-fixed-variant": "#3e4755",
+                    "on-primary-container": "#f5fff7"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "sm": "8px",
+                    "margin-mobile": "16px",
+                    "touch-target-min": "48px",
+                    "md": "16px",
+                    "xs": "4px",
+                    "lg": "24px",
+                    "gutter-mobile": "12px",
+                    "xl": "32px",
+                    "unit": "4px"
+            },
+            "fontFamily": {
+                    "body-md": ["Inter"],
+                    "headline-md": ["Inter"],
+                    "label-lg": ["Inter"],
+                    "headline-lg": ["Inter"],
+                    "body-lg": ["Inter"],
+                    "headline-lg-mobile": ["Inter"],
+                    "label-md": ["Inter"],
+                    "action-xl": ["Inter"]
+            },
+            "fontSize": {
+                    "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "headline-md": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                    "label-lg": ["16px", {"lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "600"}],
+                    "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "body-lg": ["18px", {"lineHeight": "26px", "fontWeight": "400"}],
+                    "headline-lg-mobile": ["26px", {"lineHeight": "32px", "fontWeight": "700"}],
+                    "label-md": ["14px", {"lineHeight": "18px", "fontWeight": "500"}],
+                    "action-xl": ["20px", {"lineHeight": "24px", "fontWeight": "700"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background min-h-screen pb-24 relative overflow-x-hidden">
+<!-- TopAppBar -->
+<header class="bg-surface dark:bg-on-background w-full sticky top-0 z-40">
+<div class="flex justify-between items-center w-full px-margin-mobile h-touch-target-min border-b border-outline-variant dark:border-outline"><div class="flex items-center gap-sm cursor-pointer hover:bg-surface-container dark:hover:bg-surface-container-high rounded-full p-1 transition-colors"><img class="w-8 h-8 rounded-full object-cover border border-outline-variant" data-alt="A close up, high quality profile photo of a hard working industrial worker wearing a high visibility vest, outdoors in a bright sunny environment. The style is realistic and rugged, fitting for an e-waste collection app interface." src="https://lh3.googleusercontent.com/aida-public/AB6AXuC-8GOR4moxykM0THRch4wB47oxkBKlq74IyAEgA_vyfCkajhiEANq7ekbipk_ARf1p07oDkvFZ1dT05zlSi8JQiqSMapVVkxk_VWzI5Qu2RkPqG2Kwfm2HjEqYXpCzWrlRY6UVU_oI4hKeaUYQNuD-eMn_6GnH7296CyHZ6se8NG7OldveDRPNBxhdk_MSuVF1yX8QomuUUMLC2nqu8Zybw6Oc3TJafV_WNcDQcePji22s5zHf4Ad3"><div><h1 class="font-headline-md text-headline-md font-bold text-primary dark:text-primary-fixed-dim leading-none">RE:LINK</h1></div></div><div class="flex items-center gap-xs"><button aria-label="Switch Language" class="flex items-center gap-xs px-2 py-1 rounded-full bg-surface-container border border-outline-variant text-on-surface hover:bg-surface-container-high transition-colors text-xs font-label-md"><span class="material-symbols-outlined text-base text-primary">language</span><span class="">EN | हि | म</span></button><div class="flex items-center gap-xs px-2 py-1 rounded-full bg-surface-container-low border border-outline-variant text-primary text-xs font-label-md" title="Cloud Sync Status"><span class="material-symbols-outlined text-primary text-base" data-weight="fill" style="font-variation-settings: 'FILL' 1;">cloud_done</span><span class="hidden sm:inline font-bold">Synced</span></div></div></div>
+</header>
+<main class="px-margin-mobile pt-lg pb-xl max-w-3xl mx-auto space-y-xl">
+<!-- Primary CTA -->
+<section>
+<button class="w-full bg-primary text-on-primary min-h-[56px] py-2 rounded-xl flex flex-col items-center justify-center shadow-md active:scale-[0.98] transition-transform"><div class="flex items-center gap-sm font-action-xl text-action-xl"><span class="material-symbols-outlined" style="font-size: 28px;">photo_camera</span><span class="">Scan &amp; Identify E-Waste</span></div><span class="text-xs text-on-primary/90 font-label-md mt-1 flex items-center gap-1"><span class="material-symbols-outlined text-xs">auto_awesome</span> AI Camera Detection • तुरंत पहचानें</span></button>
+</section>
+<!-- Current Market Rates (Bento/Card Grid) -->
+<section class="space-y-md">
+<div class="flex items-center gap-xs">
+<h2 class="font-headline-md text-headline-md text-on-background">Current Market Rates</h2>
+<button aria-label="Play audio instruction for current market rates" class="w-8 h-8 rounded-full flex items-center justify-center text-tertiary hover:bg-surface-container transition-colors">
+<span class="material-symbols-outlined text-tertiary">volume_up</span>
+</button>
+</div>
+<div class="grid grid-cols-2 gap-gutter-mobile">
+<!-- PCB Card -->
+<div class="bg-surface-container-low border border-outline-variant rounded-xl p-md shadow-sm relative overflow-hidden group">
+<div class="absolute -right-4 -top-4 w-16 h-16 bg-primary/10 rounded-full pointer-events-none group-hover:scale-110 transition-transform"></div>
+<div class="flex flex-col gap-xs relative z-10">
+<div class="w-10 h-10 rounded-lg bg-surface flex items-center justify-center border border-outline-variant shadow-sm mb-sm">
+<span class="material-symbols-outlined text-primary">memory</span>
+</div>
+<h3 class="font-label-lg text-label-lg text-on-surface-variant">Circuit Boards</h3>
+<p class="font-body-md text-body-md text-secondary">A-Grade PCB</p>
+<p class="font-headline-md text-headline-md text-on-background mt-sm">₹780 <span class="font-body-md text-body-md text-secondary">/ kg</span></p>
+</div>
+</div>
+<!-- Cable Card -->
+<div class="bg-surface-container-low border border-outline-variant rounded-xl p-md shadow-sm relative overflow-hidden group">
+<div class="absolute -right-4 -top-4 w-16 h-16 bg-primary/10 rounded-full pointer-events-none group-hover:scale-110 transition-transform"></div>
+<div class="flex flex-col gap-xs relative z-10">
+<div class="w-10 h-10 rounded-lg bg-surface flex items-center justify-center border border-outline-variant shadow-sm mb-sm">
+<span class="material-symbols-outlined text-primary">cable</span>
+</div>
+<h3 class="font-label-lg text-label-lg text-on-surface-variant">Copper Cables</h3>
+<p class="font-body-md text-body-md text-secondary">Insulated Wire</p>
+<p class="font-headline-md text-headline-md text-on-background mt-sm">₹420 <span class="font-body-md text-body-md text-secondary">/ kg</span></p>
+</div>
+</div>
+<!-- Battery Card (Spans full width on very small screens, 1 col otherwise) -->
+<div class="col-span-2 md:col-span-1 bg-surface-container-low border border-outline-variant rounded-xl p-md shadow-sm relative overflow-hidden group flex justify-between items-center">
+<div class="flex items-center gap-md relative z-10">
+<div class="w-10 h-10 rounded-lg bg-surface flex items-center justify-center border border-outline-variant shadow-sm">
+<span class="material-symbols-outlined text-primary">battery_charging_full</span>
+</div>
+<div>
+<h3 class="font-label-lg text-label-lg text-on-surface-variant">Li-ion Batteries</h3>
+<p class="font-body-md text-body-md text-secondary">Mixed lot</p>
+</div>
+</div>
+<p class="font-headline-md text-headline-md text-on-background text-right">₹110 <span class="font-body-md text-body-md text-secondary block md:inline">/ kg</span></p>
+</div>
+</div>
+</section>
+<!-- Recent Lots -->
+<section class="space-y-md">
+<div class="flex items-center gap-xs">
+<h2 class="font-headline-md text-headline-md text-on-background">Recent Lots</h2>
+<button aria-label="Play audio instruction for recent lots" class="w-8 h-8 rounded-full flex items-center justify-center text-tertiary hover:bg-surface-container transition-colors">
+<span class="material-symbols-outlined text-tertiary">volume_up</span>
+</button>
+</div>
+<div class="space-y-sm">
+<!-- Lot 1 -->
+<div class="bg-surface rounded-lg p-md border border-outline-variant shadow-sm flex flex-col sm:flex-row justify-between gap-sm active:bg-surface-container-low transition-colors cursor-pointer">
+<div class="flex gap-md items-start">
+<div class="w-12 h-12 rounded bg-surface-container flex items-center justify-center flex-shrink-0">
+<span class="material-symbols-outlined text-secondary">inventory_2</span>
+</div>
+<div>
+<h3 class="font-label-lg text-label-lg text-on-background">Lot #8402</h3>
+<p class="font-body-md text-body-md text-secondary">Mixed PCB &amp; Cables • 42kg</p>
+<div class="inline-flex items-center px-2 py-1 mt-1 rounded-full bg-tertiary-container/20 border border-tertiary-container/30">
+<span class="w-2 h-2 rounded-full bg-tertiary mr-2"></span>
+<span class="font-label-md text-label-md text-on-tertiary-container text-xs">Offer Received</span>
+</div>
+</div>
+</div>
+<div class="flex flex-row sm:flex-col justify-between sm:justify-start items-center sm:items-end w-full sm:w-auto border-t sm:border-t-0 border-outline-variant pt-2 sm:pt-0 mt-2 sm:mt-0">
+<span class="font-body-md text-body-md text-secondary sm:hidden">Est. Value</span>
+<span class="font-headline-md text-headline-md text-primary">~₹9,450</span>
+</div>
+</div>
+<!-- Lot 2 -->
+<div class="bg-surface rounded-lg p-md border border-outline-variant shadow-sm flex flex-col sm:flex-row justify-between gap-sm active:bg-surface-container-low transition-colors cursor-pointer opacity-80">
+<div class="flex gap-md items-start">
+<div class="w-12 h-12 rounded bg-surface-container flex items-center justify-center flex-shrink-0">
+<span class="material-symbols-outlined text-secondary">inventory_2</span>
+</div>
+<div>
+<h3 class="font-label-lg text-label-lg text-on-background">Lot #8399</h3>
+<p class="font-body-md text-body-md text-secondary">CRT Monitors • 115kg</p>
+<div class="inline-flex items-center px-2 py-1 mt-1 rounded-full bg-surface-container-high border border-outline-variant">
+<span class="w-2 h-2 rounded-full bg-secondary mr-2"></span>
+<span class="font-label-md text-label-md text-secondary text-xs">Pending Verification</span>
+</div>
+</div>
+</div>
+<div class="flex flex-row sm:flex-col justify-between sm:justify-start items-center sm:items-end w-full sm:w-auto border-t sm:border-t-0 border-outline-variant pt-2 sm:pt-0 mt-2 sm:mt-0">
+<span class="font-body-md text-body-md text-secondary sm:hidden">Est. Value</span>
+<span class="font-headline-md text-headline-md text-on-background">~₹3,200</span>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-2 py-2 bg-surface dark:bg-on-background border-t border-outline-variant dark:border-outline shadow-md rounded-t-xl md:hidden">
+<!-- Home (Active) -->
+<button aria-label="Home" class="flex flex-col items-center justify-center min-h-[48px] min-w-[64px] scale-90 transition-all duration-200">
+<div class="flex flex-col items-center justify-center bg-primary-container dark:bg-on-primary-fixed-variant text-on-primary-container dark:text-primary-fixed rounded-full px-4 py-1">
+<span class="material-symbols-outlined" data-weight="fill" style="font-variation-settings: 'FILL' 1;">home</span>
+</div>
+<span class="font-label-md text-label-md mt-1 text-primary dark:text-primary-fixed-dim">Home</span>
+</button>
+<!-- My Lots (Inactive) -->
+<button aria-label="My Lots" class="flex flex-col items-center justify-center min-h-[48px] min-w-[64px] text-on-surface-variant dark:text-surface-variant hover:bg-surface-container-low dark:hover:bg-surface-container-high rounded-lg p-1 transition-colors">
+<span class="material-symbols-outlined">inventory_2</span>
+<span class="font-label-md text-label-md mt-1">My Lots</span>
+</button>
+<!-- Earnings (Inactive) -->
+<button aria-label="Earnings" class="flex flex-col items-center justify-center min-h-[48px] min-w-[64px] text-on-surface-variant dark:text-surface-variant hover:bg-surface-container-low dark:hover:bg-surface-container-high rounded-lg p-1 transition-colors">
+<span class="material-symbols-outlined">payments</span>
+<span class="font-label-md text-label-md mt-1">Earnings</span>
+</button>
+<!-- Safety (Inactive) -->
+<button aria-label="Safety" class="flex flex-col items-center justify-center min-h-[48px] min-w-[64px] text-on-surface-variant dark:text-surface-variant hover:bg-surface-container-low dark:hover:bg-surface-container-high rounded-lg p-1 transition-colors">
+<span class="material-symbols-outlined">info</span>
+<span class="font-label-md text-label-md mt-1">Safety</span>
+</button>
+</nav>
+
+
+</body></html>

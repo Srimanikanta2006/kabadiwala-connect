@@ -1,0 +1,36 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "MaterialItem",
+  "type": "object",
+  "required": ["id", "slug", "name_en", "parent_category", "hazard_level", "cpcb_e_waste_code"],
+  "properties": {
+    "id": { "type": "string", "pattern": "^mat_[a-z0-9_]+$" },
+    "slug": { "type": "string" },
+    "name_en": { "type": "string" },
+    "name_hi": { "type": "string" },
+    "name_mr": { "type": "string" },
+    "parent_category": { 
+      "type": "string", 
+      "enum": ["PCB", "DISPLAYS", "CABLES", "BATTERIES", "MOTORS_MAGNETS", "PLASTICS"] 
+    },
+    "hazard_level": { 
+      "type": "string", 
+      "enum": ["LOW", "MEDIUM", "HIGH", "HAZARDOUS"] 
+    },
+    "hazard_warnings": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "cpcb_e_waste_code": { "type": "string" },
+    "base_mandi_rate_range_inr": {
+      "type": "object",
+      "required": ["min", "max", "unit"],
+      "properties": {
+        "min": { "type": "number" },
+        "max": { "type": "number" },
+        "unit": { "type": "string", "enum": ["kg", "unit"] }
+      }
+    },
+    "pictorial_icon": { "type": "string" }
+  }
+}

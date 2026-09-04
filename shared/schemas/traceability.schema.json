@@ -1,0 +1,34 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "TraceabilityHandoverRecord",
+  "type": "object",
+  "required": [
+    "traceability_id",
+    "lot_id",
+    "collector_id",
+    "recycler_id",
+    "handover_timestamp",
+    "verified_weight_kg",
+    "qr_signature"
+  ],
+  "properties": {
+    "traceability_id": { "type": "string", "format": "uuid" },
+    "lot_id": { "type": "string", "format": "uuid" },
+    "collector_id": { "type": "string" },
+    "recycler_id": { "type": "string", "format": "uuid" },
+    "handover_timestamp": { "type": "string", "format": "date-time" },
+    "handover_gps": {
+      "type": "object",
+      "required": ["latitude", "longitude"],
+      "properties": {
+        "latitude": { "type": "number" },
+        "longitude": { "type": "number" }
+      }
+    },
+    "collector_photo_proof_url": { "type": "string" },
+    "recycler_weighbridge_photo_url": { "type": "string" },
+    "verified_weight_kg": { "type": "number", "minimum": 0.05 },
+    "qr_signature": { "type": "string", "description": "HMAC-SHA256 signature validating offline exchange" },
+    "cpcb_epr_certificate_ref": { "type": "string" }
+  }
+}

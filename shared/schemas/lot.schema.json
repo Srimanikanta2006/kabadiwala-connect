@@ -1,0 +1,56 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "MaterialLot",
+  "type": "object",
+  "required": [
+    "lot_id",
+    "collector_id",
+    "material_id",
+    "approximate_weight_kg",
+    "created_at",
+    "sync_status"
+  ],
+  "properties": {
+    "lot_id": { "type": "string", "format": "uuid" },
+    "collector_id": { "type": "string", "example": "col_8832a901" },
+    "material_id": { "type": "string", "pattern": "^mat_[a-z0-9_]+$" },
+    "approximate_weight_kg": { "type": "number", "minimum": 0.05 },
+    "condition_rating": { 
+      "type": "string", 
+      "enum": ["CLEAN_INTACT", "DIRTY_MIXED", "DAMAGED_BURNT"],
+      "default": "CLEAN_INTACT"
+    },
+    "ai_prediction": {
+      "type": "object",
+      "properties": {
+        "detected_material_id": { "type": "string" },
+        "confidence_score": { "type": "number", "minimum": 0.0, "maximum": 1.0 },
+        "model_version": { "type": "string" },
+        "user_corrected": { "type": "boolean" }
+      }
+    },
+    "image_phash": { "type": "string", "description": "64-bit perceptual hash for duplicate detection" },
+    "image_url": { "type": "string" },
+    "valuation_estimate_inr": {
+      "type": "object",
+      "required": ["min_inr", "max_inr"],
+      "properties": {
+        "min_inr": { "type": "number" },
+        "max_inr": { "type": "number" }
+      }
+    },
+    "location": {
+      "type": "object",
+      "properties": {
+        "latitude": { "type": "number" },
+        "longitude": { "type": "number" }
+      }
+    },
+    "created_at": { "type": "string", "format": "date-time" },
+    "sync_status": { 
+      "type": "string", 
+      "enum": ["LOCAL_PENDING", "SYNCED", "MATCHED", "ACCEPTED", "HANDED_OVER", "CANCELLED"],
+      "default": "LOCAL_PENDING"
+    }
+  }
+}

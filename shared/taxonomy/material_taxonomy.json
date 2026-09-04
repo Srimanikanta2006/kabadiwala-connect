@@ -1,0 +1,260 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "version": "1.0.0",
+  "last_updated": "2026-09-04",
+  "categories": [
+    {
+      "id": "mat_pcb_high",
+      "slug": "pcb-high-grade",
+      "name_en": "High-Grade PCB",
+      "name_hi": "हाई-ग्रेड सर्किट बोर्ड (मदरबोर्ड)",
+      "name_mr": "हाय-ग्रेड सर्किट बोर्ड (मदरबोर्ड)",
+      "parent_category": "PCB",
+      "hazard_level": "LOW",
+      "cpcb_e_waste_code": "ITEW1-PCB-HG",
+      "base_mandi_rate_range_inr": {
+        "min": 180,
+        "max": 320,
+        "unit": "kg"
+      },
+      "typical_density_range_kg_per_unit": {
+        "min": 0.2,
+        "max": 1.5
+      },
+      "visual_markers": ["Gold-plated edge connectors", "High chip density", "Computer motherboards", "Server boards", "RAM sticks"],
+      "pictorial_icon": "assets/icons/pcb_high.svg",
+      "safety_audio": {
+        "hi": "assets/audio/hi/safety_pcb.mp3",
+        "mr": "assets/audio/mr/safety_pcb.mp3"
+      }
+    },
+    {
+      "id": "mat_pcb_low",
+      "slug": "pcb-low-grade",
+      "name_en": "Low-Grade / Single-Sided PCB",
+      "name_hi": "लो-ग्रेड सर्किट बोर्ड (पावर सप्लाई)",
+      "name_mr": "लो-ग्रेड सर्किट बोर्ड (पॉवर सप्लाय)",
+      "parent_category": "PCB",
+      "hazard_level": "LOW",
+      "cpcb_e_waste_code": "ITEW1-PCB-LG",
+      "base_mandi_rate_range_inr": {
+        "min": 35,
+        "max": 75,
+        "unit": "kg"
+      },
+      "typical_density_range_kg_per_unit": {
+        "min": 0.3,
+        "max": 2.0
+      },
+      "visual_markers": ["Brown/phenolic single-layer board", "Transformers", "Large capacitors", "Power supplies", "CRT chassis"],
+      "pictorial_icon": "assets/icons/pcb_low.svg",
+      "safety_audio": {
+        "hi": "assets/audio/hi/safety_pcb.mp3",
+        "mr": "assets/audio/mr/safety_pcb.mp3"
+      }
+    },
+    {
+      "id": "mat_crt_monitor",
+      "slug": "crt-monitor-tube",
+      "name_en": "CRT Monitor / TV Tube",
+      "name_hi": "सीआरटी मॉनिटर / पुराना टीवी ट्यूब",
+      "name_mr": "सीआरटी मॉनिटर / जुना टीव्ही ट्यूब",
+      "parent_category": "DISPLAYS",
+      "hazard_level": "HAZARDOUS",
+      "hazard_warnings": [
+        "Contains heavy lead oxide in funnel glass",
+        "Toxic phosphor powder coating",
+        "Implosion hazard under physical shock",
+        "Do NOT break glass manually"
+      ],
+      "cpcb_e_waste_code": "CEEW1-CRT",
+      "base_mandi_rate_range_inr": {
+        "min": 8,
+        "max": 18,
+        "unit": "kg"
+      },
+      "typical_density_range_kg_per_unit": {
+        "min": 8.0,
+        "max": 28.0
+      },
+      "visual_markers": ["Bulky vacuum glass tube", "Curved screen", "Heavy funnel geometry", "Copper yoke coil at neck"],
+      "pictorial_icon": "assets/icons/crt_tube.svg",
+      "safety_audio": {
+        "hi": "assets/audio/hi/safety_crt.mp3",
+        "mr": "assets/audio/mr/safety_crt.mp3"
+      }
+    },
+    {
+      "id": "mat_lcd_panel",
+      "slug": "lcd-led-panel",
+      "name_en": "LCD / LED Display Panel",
+      "name_hi": "एलसीडी / एलईडी डिस्प्ले स्क्रीन",
+      "name_mr": "एलसीडी / एलईडी डिस्प्ले स्क्रीन",
+      "parent_category": "DISPLAYS",
+      "hazard_level": "MEDIUM",
+      "hazard_warnings": [
+        "CCFL backlights may contain vaporized mercury",
+        "Handle without crushing panel glass"
+      ],
+      "cpcb_e_waste_code": "CEEW1-FPD",
+      "base_mandi_rate_range_inr": {
+        "min": 25,
+        "max": 60,
+        "unit": "kg"
+      },
+      "typical_density_range_kg_per_unit": {
+        "min": 1.5,
+        "max": 12.0
+      },
+      "visual_markers": ["Flat glass panel", "Thin profile", "Diffuser layers", "Backlight array"],
+      "pictorial_icon": "assets/icons/lcd_panel.svg",
+      "safety_audio": {
+        "hi": "assets/audio/hi/safety_lcd.mp3",
+        "mr": "assets/audio/mr/safety_lcd.mp3"
+      }
+    },
+    {
+      "id": "mat_cables_copper",
+      "slug": "cables-insulated-copper",
+      "name_en": "Insulated Copper Cables & Wire Harness",
+      "name_hi": "तांबे के तार और केबल (इन्सुलेटेड)",
+      "name_mr": "तांब्याची वायर आणि केबल (इन्सुलेटेड)",
+      "parent_category": "CABLES",
+      "hazard_level": "LOW",
+      "hazard_warnings": [
+        "Strictly prohibited: Open-air cable burning (releases toxic dioxins & furans)",
+        "Sell with insulation directly to mechanical granulators"
+      ],
+      "cpcb_e_waste_code": "ITEW-CBL-CU",
+      "base_mandi_rate_range_inr": {
+        "min": 240,
+        "max": 420,
+        "unit": "kg"
+      },
+      "typical_density_range_kg_per_unit": {
+        "min": 0.1,
+        "max": 15.0
+      },
+      "visual_markers": ["Bundled electrical wiring", "PVC or rubber jacketed", "Copper stranded cores", "Power cords"],
+      "pictorial_icon": "assets/icons/cables_copper.svg",
+      "safety_audio": {
+        "hi": "assets/audio/hi/safety_cables_no_burn.mp3",
+        "mr": "assets/audio/mr/safety_cables_no_burn.mp3"
+      }
+    },
+    {
+      "id": "mat_batteries_lead",
+      "slug": "batteries-lead-acid",
+      "name_en": "Lead-Acid Battery (Inverter / UPS / Auto)",
+      "name_hi": "लेड-एसिड बैटरी (इन्वर्टर / ऑटो)",
+      "name_mr": "लेड-अ‍ॅसिड बॅटरी (इन्व्हर्टर / ऑटो)",
+      "parent_category": "BATTERIES",
+      "hazard_level": "HAZARDOUS",
+      "hazard_warnings": [
+        "Highly corrosive sulfuric acid electrolyte",
+        "Toxic lead plates",
+        "Never drain acid into open drains",
+        "Store upright in ventilated area"
+      ],
+      "cpcb_e_waste_code": "BATT-PB-ACID",
+      "base_mandi_rate_range_inr": {
+        "min": 85,
+        "max": 115,
+        "unit": "kg"
+      },
+      "typical_density_range_kg_per_unit": {
+        "min": 5.0,
+        "max": 35.0
+      },
+      "visual_markers": ["Heavy plastic casing", "Terminal posts (red/black)", "Vent caps", "Fluid sloshing sound"],
+      "pictorial_icon": "assets/icons/batt_lead.svg",
+      "safety_audio": {
+        "hi": "assets/audio/hi/safety_lead_battery.mp3",
+        "mr": "assets/audio/mr/safety_lead_battery.mp3"
+      }
+    },
+    {
+      "id": "mat_batteries_li_ion",
+      "slug": "batteries-li-ion",
+      "name_en": "Lithium-Ion / Li-Polymer Battery",
+      "name_hi": "लिथियम-आयन बैटरी (मोबाइल / लैपटॉप)",
+      "name_mr": "लिथियम-आयन बॅटरी (मोबाईल / लॅपटॉप)",
+      "parent_category": "BATTERIES",
+      "hazard_level": "HAZARDOUS",
+      "hazard_warnings": [
+        "High risk of thermal runaway and fire if punctured or bent",
+        "Do NOT solder, puncture, or submerge in water",
+        "Tape terminals with non-conductive tape"
+      ],
+      "cpcb_e_waste_code": "BATT-LI-ION",
+      "base_mandi_rate_range_inr": {
+        "min": 120,
+        "max": 250,
+        "unit": "kg"
+      },
+      "typical_density_range_kg_per_unit": {
+        "min": 0.05,
+        "max": 0.5
+      },
+      "visual_markers": ["Silver pouch cells", "18650 cylindrical cells with plastic sleeves", "Laptop battery packs"],
+      "pictorial_icon": "assets/icons/batt_li_ion.svg",
+      "safety_audio": {
+        "hi": "assets/audio/hi/safety_li_ion.mp3",
+        "mr": "assets/audio/mr/safety_li_ion.mp3"
+      }
+    },
+    {
+      "id": "mat_motors_magnets",
+      "slug": "motors-and-magnets",
+      "name_en": "Motors & Magnet-Bearing Assemblies",
+      "name_hi": "इलेक्ट्रिक मोटर और चुंबक असेंबली",
+      "name_mr": "इलेक्ट्रिक मोटर आणि मॅग्नेट असेंब्ली",
+      "parent_category": "MOTORS_MAGNETS",
+      "hazard_level": "LOW",
+      "cpcb_e_waste_code": "ITEW-MTR-MAG",
+      "base_mandi_rate_range_inr": {
+        "min": 45,
+        "max": 95,
+        "unit": "kg"
+      },
+      "typical_density_range_kg_per_unit": {
+        "min": 1.0,
+        "max": 18.0
+      },
+      "visual_markers": ["Cast iron or aluminum motor body", "Copper field windings", "Neodymium magnets (hard disk drives)", "Rotors"],
+      "pictorial_icon": "assets/icons/motor_magnets.svg",
+      "safety_audio": {
+        "hi": "assets/audio/hi/safety_general.mp3",
+        "mr": "assets/audio/mr/safety_general.mp3"
+      }
+    },
+    {
+      "id": "mat_mixed_plastics",
+      "slug": "mixed-technical-plastics",
+      "name_en": "Mixed Engineering Plastics (ABS / HIPS / PC)",
+      "name_hi": "मिक्स्ड टेक्निकल प्लास्टिक (ABS / HIPS)",
+      "name_mr": "मिक्स्ड टेक्निकल प्लास्टिक (ABS / HIPS)",
+      "parent_category": "PLASTICS",
+      "hazard_level": "LOW",
+      "hazard_warnings": [
+        "Contains flame retardants (BFRs) - do not melt or incinerate in open flames"
+      ],
+      "cpcb_e_waste_code": "PLAST-ENG-MIX",
+      "base_mandi_rate_range_inr": {
+        "min": 18,
+        "max": 38,
+        "unit": "kg"
+      },
+      "typical_density_range_kg_per_unit": {
+        "min": 0.5,
+        "max": 8.0
+      },
+      "visual_markers": ["Rigid electronic housings", "Printer shells", "Keyboard casings", "Black and grey molded plastics"],
+      "pictorial_icon": "assets/icons/plastics_mixed.svg",
+      "safety_audio": {
+        "hi": "assets/audio/hi/safety_general.mp3",
+        "mr": "assets/audio/mr/safety_general.mp3"
+      }
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "PriceIndex",
+  "type": "object",
+  "required": ["price_id", "material_id", "region_code", "base_mandi_buy_rate_per_kg", "effective_date"],
+  "properties": {
+    "price_id": { "type": "string", "format": "uuid" },
+    "material_id": { "type": "string", "pattern": "^mat_[a-z0-9_]+$" },
+    "region_code": { "type": "string", "example": "IN-MH-MUM" },
+    "base_mandi_buy_rate_per_kg": { "type": "number", "minimum": 0 },
+    "fair_range_min_per_kg": { "type": "number", "minimum": 0 },
+    "fair_range_max_per_kg": { "type": "number", "minimum": 0 },
+    "daily_delta_percentage": { "type": "number" },
+    "benchmark_source": { "type": "string" },
+    "effective_date": { "type": "string", "format": "date-time" }
+  }
+}

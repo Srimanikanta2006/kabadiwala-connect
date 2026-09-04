@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kabadiwala Connect (RE:LINK) - Design Gallery</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #006948;
+      --primary-container: #00855d;
+      --secondary: #555f6d;
+      --bg: #f8f9fa;
+      --surface: #ffffff;
+      --text: #191c1d;
+      --border: #e1e3e4;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+      padding: 32px 20px;
+    }
+    .header {
+      max-width: 1280px;
+      margin: 0 auto 32px auto;
+      border-bottom: 2px solid var(--border);
+      padding-bottom: 24px;
+    }
+    .badge {
+      display: inline-block;
+      background-color: #85f8c4;
+      color: #002114;
+      padding: 4px 12px;
+      border-radius: 9999px;
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+    h1 { font-size: 32px; font-weight: 700; color: var(--primary); margin-bottom: 8px; }
+    p.sub { font-size: 16px; color: var(--secondary); max-width: 800px; }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+      gap: 24px;
+      max-width: 1280px;
+      margin: 0 auto 48px auto;
+    }
+    .card {
+      background: var(--surface);
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      overflow: hidden;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.04);
+      display: flex;
+      flex-direction: column;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 10px 20px rgba(0,0,0,0.08);
+    }
+    .card-img-wrap {
+      background: #f1f3f4;
+      height: 480px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      border-bottom: 1px solid var(--border);
+    }
+    .card-img-wrap img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: top center;
+    }
+    .card-body {
+      padding: 20px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .card-step {
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--primary-container);
+      margin-bottom: 4px;
+    }
+    .card-title {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      color: var(--text);
+    }
+    .card-actions {
+      display: flex;
+      gap: 12px;
+      margin-top: 16px;
+    }
+    .btn {
+      flex: 1;
+      text-align: center;
+      padding: 10px 16px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: background 0.15s;
+    }
+    .btn-primary {
+      background-color: var(--primary);
+      color: #ffffff;
+    }
+    .btn-primary:hover {
+      background-color: var(--primary-container);
+    }
+    .btn-secondary {
+      background-color: #f3f4f5;
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+    .btn-secondary:hover {
+      background-color: #e7e8e9;
+    }
+    .assets-section {
+      max-width: 1280px;
+      margin: 0 auto;
+    }
+    .assets-section h2 {
+      font-size: 24px;
+      font-weight: 700;
+      margin-bottom: 16px;
+      color: var(--text);
+    }
+    .asset-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 16px;
+    }
+    .asset-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px;
+      text-align: center;
+    }
+    .asset-card img {
+      width: 100%;
+      height: 180px;
+      object-fit: cover;
+      border-radius: 6px;
+      margin-bottom: 8px;
+    }
+    .asset-card p {
+      font-size: 14px;
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <span class="badge">Stitch Design Sync &bull; RE:LINK System</span>
+    <h1>Kabadiwala Connect UI Prototypes</h1>
+    <p class="sub">
+      Vernacular, offline-tolerant, low-literacy mobile workflows for informal scrap collectors and CPCB-authorized recyclers.
+    </p>
+  </div>
+
+  <div class="grid">
+    <!-- Screen 1 -->
+    <div class="card">
+      <div class="card-img-wrap">
+        <img src="screens/01_collector_home/screenshot.png" alt="Collector Home" />
+      </div>
+      <div class="card-body">
+        <div>
+          <div class="card-step">Step 1 &bull; Entry Screen</div>
+          <h2 class="card-title">RE:LINK - Collector Home</h2>
+          <p>Quick lot creation CTA, price ticker banner, pending pickups, and vernacular audio guidance trigger.</p>
+        </div>
+        <div class="card-actions">
+          <a class="btn btn-primary" href="screens/01_collector_home/index.html" target="_blank">View Live HTML</a>
+          <a class="btn btn-secondary" href="screens/01_collector_home/screenshot.png" target="_blank">Screenshot</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Screen 2 -->
+    <div class="card">
+      <div class="card-img-wrap">
+        <img src="screens/02_ai_material_identification/screenshot.png" alt="AI Material Identification" />
+      </div>
+      <div class="card-body">
+        <div>
+          <div class="card-step">Step 2 &bull; Camera AI Detection</div>
+          <h2 class="card-title">AI Material Identification</h2>
+          <p>Computer vision scanning with confidence scores (>85%), category verification chips, and vernacular audio readouts.</p>
+        </div>
+        <div class="card-actions">
+          <a class="btn btn-primary" href="screens/02_ai_material_identification/index.html" target="_blank">View Live HTML</a>
+          <a class="btn btn-secondary" href="screens/02_ai_material_identification/screenshot.png" target="_blank">Screenshot</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Screen 3 -->
+    <div class="card">
+      <div class="card-img-wrap">
+        <img src="screens/03_create_lot_select_category/screenshot.png" alt="Create Lot - Select Category" />
+      </div>
+      <div class="card-body">
+        <div>
+          <div class="card-step">Step 3 &bull; Manual / Fallback Category</div>
+          <h2 class="card-title">Create Lot - Select Category</h2>
+          <p>High-contrast pictorial 6-tile grid with Hindi/Marathi dual labels, touch-friendly weight entry, and safety hazard badges.</p>
+        </div>
+        <div class="card-actions">
+          <a class="btn btn-primary" href="screens/03_create_lot_select_category/index.html" target="_blank">View Live HTML</a>
+          <a class="btn btn-secondary" href="screens/03_create_lot_select_category/screenshot.png" target="_blank">Screenshot</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Screen 4 -->
+    <div class="card">
+      <div class="card-img-wrap">
+        <img src="screens/04_price_discovery_offers/screenshot.png" alt="Price Discovery & Offers" />
+      </div>
+      <div class="card-body">
+        <div>
+          <div class="card-step">Step 4 &bull; Valuation & Matcher</div>
+          <h2 class="card-title">Price Discovery & Offers</h2>
+          <p>Dynamic fair mandi price estimation range and ranked authorized CPCB recyclers with distance and payout indicators.</p>
+        </div>
+        <div class="card-actions">
+          <a class="btn btn-primary" href="screens/04_price_discovery_offers/index.html" target="_blank">View Live HTML</a>
+          <a class="btn btn-secondary" href="screens/04_price_discovery_offers/screenshot.png" target="_blank">Screenshot</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Screen 5 -->
+    <div class="card">
+      <div class="card-img-wrap">
+        <img src="screens/05_digital_handover_receipt/screenshot.png" alt="Digital Handover & Traceability" />
+      </div>
+      <div class="card-body">
+        <div>
+          <div class="card-step">Step 5 &bull; Handover & Traceability</div>
+          <h2 class="card-title">Digital Handover Receipt</h2>
+          <p>Cryptographic QR code token for offline physical handover verification, GPS location stamp, and weighbridge confirmation.</p>
+        </div>
+        <div class="card-actions">
+          <a class="btn btn-primary" href="screens/05_digital_handover_receipt/index.html" target="_blank">View Live HTML</a>
+          <a class="btn btn-secondary" href="screens/05_digital_handover_receipt/screenshot.png" target="_blank">Screenshot</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Screen 6 -->
+    <div class="card">
+      <div class="card-img-wrap">
+        <img src="screens/06_my_earnings_history/screenshot.png" alt="My Earnings History" />
+      </div>
+      <div class="card-body">
+        <div>
+          <div class="card-step">Step 6 &bull; Financial Ledger</div>
+          <h2 class="card-title">My Earnings History</h2>
+          <p>Transparent transaction ledger, pending dues, cash/UPI payment status, and formalization financial records for credit building.</p>
+        </div>
+        <div class="card-actions">
+          <a class="btn btn-primary" href="screens/06_my_earnings_history/index.html" target="_blank">View Live HTML</a>
+          <a class="btn btn-secondary" href="screens/06_my_earnings_history/screenshot.png" target="_blank">Screenshot</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="assets-section">
+    <h2>Realistic Scrap Imagery Assets</h2>
+    <div class="asset-grid">
+      <div class="asset-card">
+        <img src="assets/pcb_motherboards.png" alt="PCBs" />
+        <p>Printed Circuit Boards (PCBs)</p>
+      </div>
+      <div class="asset-card">
+        <img src="assets/copper_cables_wire.png" alt="Cables" />
+        <p>Copper Electrical Cables</p>
+      </div>
+      <div class="asset-card">
+        <img src="assets/scrap_batteries.png" alt="Batteries" />
+        <p>Lead-Acid & Lithium Batteries</p>
+      </div>
+      <div class="asset-card">
+        <img src="assets/crt_monitor_scrap.png" alt="CRT" />
+        <p>CRT Television & Monitors</p>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

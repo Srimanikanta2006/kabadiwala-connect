@@ -1,0 +1,29 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "StandardErrorResponse",
+  "type": "object",
+  "required": ["success", "error_code", "message_en", "message_hi", "message_mr"],
+  "properties": {
+    "success": { "type": "boolean", "default": false },
+    "error_code": { 
+      "type": "string",
+      "enum": [
+        "INVALID_MATERIAL_ID",
+        "WEIGHT_OUT_OF_BOUNDS",
+        "RATE_OUTLIER_DETECTED",
+        "DUPLICATE_IMAGE_DETECTED",
+        "RECYCLER_NOT_AUTHORIZED",
+        "QR_SIGNATURE_INVALID",
+        "SYNC_CONFLICT",
+        "UNAUTHENTICATED",
+        "SERVER_ERROR"
+      ]
+    },
+    "message_en": { "type": "string" },
+    "message_hi": { "type": "string" },
+    "message_mr": { "type": "string" },
+    "audio_url": { "type": "string" },
+    "details": { "type": "object" },
+    "timestamp": { "type": "string", "format": "date-time" }
+  }
+}
