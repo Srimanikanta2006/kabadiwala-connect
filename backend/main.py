@@ -50,6 +50,15 @@ except Exception:
     TAXONOMY_DATA = {"categories": []}
 
 
+@app.get("/", tags=["System"])
+def root():
+    return {
+        "message": "Hello World",
+        "service": "Kabadiwala Connect API (RE:LINK)",
+        "status": "running"
+    }
+
+
 @app.get("/health", tags=["System"])
 def health_check():
     return {

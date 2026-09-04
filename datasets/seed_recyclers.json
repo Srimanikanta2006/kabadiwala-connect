@@ -1,0 +1,80 @@
+[
+  {
+    "recycler_id": "9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d",
+    "facility_name": "EcoRecycle India Pvt Ltd",
+    "cpcb_registration_no": "CPCB/E-WASTE/REG/MH/2023/1042",
+    "authorization_status": "ACTIVE",
+    "valid_upto": "2027-12-31",
+    "contact_phone": "+91-98201-44521",
+    "location": {
+      "latitude": 19.0550,
+      "longitude": 72.8710,
+      "address_text": "Plot 42, Kurla Industrial Estate",
+      "city": "Mumbai",
+      "state": "Maharashtra"
+    },
+    "accepted_materials": ["mat_pcb_high", "mat_pcb_low", "mat_cables_copper", "mat_batteries_lead"],
+    "offered_rates": {
+      "mat_pcb_high": 255.0,
+      "mat_pcb_low": 58.0,
+      "mat_cables_copper": 395.0,
+      "mat_batteries_lead": 102.0
+    },
+    "service_radius_km": 30.0,
+    "pickup_available": true,
+    "min_pickup_weight_kg": 10.0,
+    "fulfillment_rating": 4.8
+  },
+  {
+    "recycler_id": "4e73b4d1-81f3-42e1-a083-d92e5912bb20",
+    "facility_name": "GreenCircle Urban Recyclers",
+    "cpcb_registration_no": "CPCB/E-WASTE/REG/MH/2022/0891",
+    "authorization_status": "ACTIVE",
+    "valid_upto": "2026-11-30",
+    "contact_phone": "+91-98205-77123",
+    "location": {
+      "latitude": 19.0410,
+      "longitude": 72.8620,
+      "address_text": "12 Dharavi Cross Road",
+      "city": "Mumbai",
+      "state": "Maharashtra"
+    },
+    "accepted_materials": ["mat_pcb_high", "mat_pcb_low", "mat_cables_copper", "mat_batteries_li_ion"],
+    "offered_rates": {
+      "mat_pcb_high": 248.0,
+      "mat_pcb_low": 54.0,
+      "mat_cables_copper": 385.0,
+      "mat_batteries_li_ion": 190.0
+    },
+    "service_radius_km": 15.0,
+    "pickup_available": false,
+    "min_pickup_weight_kg": 0.0,
+    "fulfillment_rating": 4.6
+  },
+  {
+    "recycler_id": "8a32d184-72c1-4099-b391-729abcc80104",
+    "facility_name": "MahaGreen Recovery Hub",
+    "cpcb_registration_no": "CPCB/E-WASTE/REG/MH/2021/0411",
+    "authorization_status": "ACTIVE",
+    "valid_upto": "2027-06-30",
+    "contact_phone": "+91-98112-99881",
+    "location": {
+      "latitude": 19.0980,
+      "longitude": 72.8940,
+      "address_text": "Ghatkopar West Industrial Zone",
+      "city": "Mumbai",
+      "state": "Maharashtra"
+    },
+    "accepted_materials": ["mat_pcb_high", "mat_crt_monitor", "mat_motors_magnets", "mat_mixed_plastics"],
+    "offered_rates": {
+      "mat_pcb_high": 240.0,
+      "mat_crt_monitor": 14.0,
+      "mat_motors_magnets": 75.0,
+      "mat_mixed_plastics": 30.0
+    },
+    "service_radius_km": 25.0,
+    "pickup_available": true,
+    "min_pickup_weight_kg": 25.0,
+    "fulfillment_rating": 4.2
+  }
+]

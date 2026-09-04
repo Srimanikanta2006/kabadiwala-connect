@@ -1,0 +1,70 @@
+{
+  "region_code": "IN-MH-MUM",
+  "effective_date": "2026-09-04T06:00:00Z",
+  "source": "Dharavi Mandi Scrap Association Bulletin",
+  "prices": [
+    {
+      "material_id": "mat_pcb_high",
+      "base_rate_per_kg": 245.0,
+      "fair_range_min": 230.0,
+      "fair_range_max": 265.0,
+      "trend": "UP"
+    },
+    {
+      "material_id": "mat_pcb_low",
+      "base_rate_per_kg": 55.0,
+      "fair_range_min": 50.0,
+      "fair_range_max": 62.0,
+      "trend": "STABLE"
+    },
+    {
+      "material_id": "mat_crt_monitor",
+      "base_rate_per_kg": 12.0,
+      "fair_range_min": 10.0,
+      "fair_range_max": 15.0,
+      "trend": "DOWN"
+    },
+    {
+      "material_id": "mat_lcd_panel",
+      "base_rate_per_kg": 42.0,
+      "fair_range_min": 38.0,
+      "fair_range_max": 48.0,
+      "trend": "STABLE"
+    },
+    {
+      "material_id": "mat_cables_copper",
+      "base_rate_per_kg": 380.0,
+      "fair_range_min": 360.0,
+      "fair_range_max": 405.0,
+      "trend": "UP"
+    },
+    {
+      "material_id": "mat_batteries_lead",
+      "base_rate_per_kg": 98.0,
+      "fair_range_min": 92.0,
+      "fair_range_max": 106.0,
+      "trend": "STABLE"
+    },
+    {
+      "material_id": "mat_batteries_li_ion",
+      "base_rate_per_kg": 185.0,
+      "fair_range_min": 170.0,
+      "fair_range_max": 210.0,
+      "trend": "UP"
+    },
+    {
+      "material_id": "mat_motors_magnets",
+      "base_rate_per_kg": 72.0,
+      "fair_range_min": 65.0,
+      "fair_range_max": 80.0,
+      "trend": "STABLE"
+    },
+    {
+      "material_id": "mat_mixed_plastics",
+      "base_rate_per_kg": 28.0,
+      "fair_range_min": 24.0,
+      "fair_range_max": 32.0,
+      "trend": "STABLE"
+    }
+  ]
+}

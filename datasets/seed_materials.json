@@ -1,0 +1,101 @@
+[
+  {
+    "id": "mat_pcb_high",
+    "slug": "pcb-high-grade",
+    "name_en": "High-Grade PCB",
+    "name_hi": "हाई-ग्रेड सर्किट बोर्ड",
+    "name_mr": "हाय-ग्रेड सर्किट बोर्ड",
+    "parent_category": "PCB",
+    "hazard_level": "LOW",
+    "cpcb_e_waste_code": "ITEW1-PCB-HG",
+    "base_mandi_rate_range_inr": { "min": 180, "max": 320, "unit": "kg" }
+  },
+  {
+    "id": "mat_pcb_low",
+    "slug": "pcb-low-grade",
+    "name_en": "Low-Grade PCB",
+    "name_hi": "लो-ग्रेड सर्किट बोर्ड",
+    "name_mr": "लो-ग्रेड सर्किट बोर्ड",
+    "parent_category": "PCB",
+    "hazard_level": "LOW",
+    "cpcb_e_waste_code": "ITEW1-PCB-LG",
+    "base_mandi_rate_range_inr": { "min": 35, "max": 75, "unit": "kg" }
+  },
+  {
+    "id": "mat_crt_monitor",
+    "slug": "crt-monitor-tube",
+    "name_en": "CRT Monitor / TV Tube",
+    "name_hi": "सीआरटी मॉनिटर ट्यूब",
+    "name_mr": "सीआरटी मॉनिटर ट्यूब",
+    "parent_category": "DISPLAYS",
+    "hazard_level": "HAZARDOUS",
+    "cpcb_e_waste_code": "CEEW1-CRT",
+    "base_mandi_rate_range_inr": { "min": 8, "max": 18, "unit": "kg" }
+  },
+  {
+    "id": "mat_lcd_panel",
+    "slug": "lcd-led-panel",
+    "name_en": "LCD / LED Display Panel",
+    "name_hi": "एलसीडी / एलईडी स्क्रीन",
+    "name_mr": "एलसीडी / एलईडी स्क्रीन",
+    "parent_category": "DISPLAYS",
+    "hazard_level": "MEDIUM",
+    "cpcb_e_waste_code": "CEEW1-FPD",
+    "base_mandi_rate_range_inr": { "min": 25, "max": 60, "unit": "kg" }
+  },
+  {
+    "id": "mat_cables_copper",
+    "slug": "cables-insulated-copper",
+    "name_en": "Insulated Copper Cables",
+    "name_hi": "तांबे के तार और केबल",
+    "name_mr": "तांब्याची वायर आणि केबल",
+    "parent_category": "CABLES",
+    "hazard_level": "LOW",
+    "cpcb_e_waste_code": "ITEW-CBL-CU",
+    "base_mandi_rate_range_inr": { "min": 240, "max": 420, "unit": "kg" }
+  },
+  {
+    "id": "mat_batteries_lead",
+    "slug": "batteries-lead-acid",
+    "name_en": "Lead-Acid Battery",
+    "name_hi": "लेड-एसिड बैटरी",
+    "name_mr": "लेड-अ‍ॅसिड बॅटरी",
+    "parent_category": "BATTERIES",
+    "hazard_level": "HAZARDOUS",
+    "cpcb_e_waste_code": "BATT-PB-ACID",
+    "base_mandi_rate_range_inr": { "min": 85, "max": 115, "unit": "kg" }
+  },
+  {
+    "id": "mat_batteries_li_ion",
+    "slug": "batteries-li-ion",
+    "name_en": "Lithium-Ion Battery",
+    "name_hi": "लिथियम-आयन बैटरी",
+    "name_mr": "लिथियम-आयन बॅटरी",
+    "parent_category": "BATTERIES",
+    "hazard_level": "HAZARDOUS",
+    "cpcb_e_waste_code": "BATT-LI-ION",
+    "base_mandi_rate_range_inr": { "min": 120, "max": 250, "unit": "kg" }
+  },
+  {
+    "id": "mat_motors_magnets",
+    "slug": "motors-and-magnets",
+    "name_en": "Motors & Magnets",
+    "name_hi": "मोटर और चुंबक असेंबली",
+    "name_mr": "मोटर आणि मॅग्नेट असेंब्ली",
+    "parent_category": "MOTORS_MAGNETS",
+    "hazard_level": "LOW",
+    "cpcb_e_waste_code": "ITEW-MTR-MAG",
+    "base_mandi_rate_range_inr": { "min": 45, "max": 95, "unit": "kg" }
+  },
+  {
+    "id": "mat_mixed_plastics",
+    "slug": "mixed-technical-plastics",
+    "name_en": "Mixed Technical Plastics (ABS/HIPS)",
+    "name_hi": "टेक्निकल प्लास्टिक",
+    "name_mr": "टेक्निकल प्लास्टिक",
+    "parent_category": "PLASTICS",
+    "hazard_level": "LOW",
+    "cpcb_e_waste_code": "PLAST-ENG-MIX",
+    "base_mandi_rate_range_inr": { "min": 18, "max": 38, "unit": "kg" }
+  }
+]
