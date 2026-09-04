@@ -217,17 +217,29 @@ def check_duplicate_image(new_hash: str, recent_hashes: List[str], threshold: in
    .venv\Scripts\python.exe -c "from fastapi.testclient import TestClient; from main import app; client = TestClient(app); res = client.get('/'); print('Status:', res.status_code); print('Body:', res.json())"
    ```
    **Result:** `Status: 200`, `Body: {'message': 'Hello World', 'service': 'Kabadiwala Connect API (RE:LINK)', 'status': 'running'}`
-2. **Database Client Verification:**
+2. **Live Supabase Database Verification:**
    ```bash
-   .venv\Scripts\python.exe -c "from app.db.supabase_client import get_materials, get_recyclers, get_prices; print(len(get_materials()), len(get_recyclers()), len(get_prices()))"
+   .venv\Scripts\python.exe verify_supabase.py
    ```
-   **Result:** `9 materials, 3 recyclers, 9 prices` loaded successfully with local fallback.
-3. **Frontend Production Build:**
+   **Result:**
+   - `collectors`: 2 rows
+   - `materials`: 9 rows
+   - `recyclers`: 2 rows
+   - `prices`: 8 rows
+   - `material_lots`: 1 rows
+   - `transactions`: 1 rows
+   - `traceability`: 1 rows
+3. **Live Supabase Storage Upload Verification:**
+   ```bash
+   .venv\Scripts\python.exe test_storage_upload.py
+   ```
+   **Result:** `Upload Successful! Public URL: https://ludufjqcothsyknsronp.supabase.co/storage/v1/object/public/lot-photos/test_handover_sample.png`
+4. **Frontend Production Build:**
    ```bash
    npm run build
    ```
    **Result:** `✓ built in 478ms`, verified 20 modules compiled cleanly into `dist/`.
-4. **JSON Schema Integrity:**
+5. **JSON Schema Integrity:**
    ```bash
    python -c "import json, glob; [json.load(open(f)) for f in glob.glob('shared/**/*.json')]"
    ```
