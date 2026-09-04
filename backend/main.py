@@ -1,27 +1,21 @@
 """
 Kabadiwala Connect (RE:LINK) - Main Backend API Application.
-Built with FastAPI. Supports Offline Sync, Dynamic Valuation, Recycler MCDA Matching,
-and Handover Traceability.
+FastAPI app wired to Supabase, with all core feature stubs and CORS enabled.
 """
 
 import json
 import os
 import uuid
 from datetime import datetime
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Optional
 
-from fastapi import FastAPI, HTTPException, status
+from dotenv import load_dotenv
+load_dotenv()
+
+from fastapi import FastAPI, HTTPException, status, Body, Query
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.schemas.pydantic_models import (
-    ValuationRequest,
-    ValuationResponseData,
-    RecyclerMatchRequest,
-    RecyclerMatchItem,
-    HandoverVerificationRequest,
-    HandoverVerificationResponse,
-    OfflineSyncBatchRequest
-)
+from app.db.supabase_client import get_supabase, get_materials, get_recyclers, get_prices, insert_lot
 from app.services.pricing_engine import calculate_valuation, REGIONAL_MANDI_CACHE
 from app.services.recycler_matcher import match_and_rank_recyclers
 from app.services.anomaly_detector import check_weight_plausibility
@@ -32,7 +26,7 @@ app = FastAPI(
     version="1.0.0"
 )
 
-# Enable CORS for Mobile PWA and Recycler Web Portal
+# Step 4: Enable CORS for React frontend on any port (localhost:5173, localhost:3000, etc.)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -41,143 +35,251 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Load material taxonomy
-TAXONOMY_PATH = os.path.join(os.path.dirname(__file__), "..", "shared", "taxonomy", "material_taxonomy.json")
-try:
-    with open(TAXONOMY_PATH, "r", encoding="utf-8") as f:
-        TAXONOMY_DATA = json.load(f)
-except Exception:
-    TAXONOMY_DATA = {"categories": []}
-
-
+# ------------------------------------------------------------------------------
+# System Health & Root Routes
+# ------------------------------------------------------------------------------
 @app.get("/", tags=["System"])
 def root():
+    """Root route returning basic Hello World for server status."""
     return {
         "message": "Hello World",
         "service": "Kabadiwala Connect API (RE:LINK)",
-        "status": "running"
+        "status": "running",
+        "timestamp": datetime.utcnow().isoformat()
     }
 
 
 @app.get("/health", tags=["System"])
 def health_check():
+    """Health check endpoint indicating database connection status."""
+    client = get_supabase()
+    db_status = "connected" if client else "offline_fallback"
     return {
         "status": "healthy",
+        "database": db_status,
         "service": "Kabadiwala Connect API",
         "timestamp": datetime.utcnow().isoformat()
     }
 
 
-@app.get("/api/v1/materials", tags=["Taxonomy"])
-def list_materials():
-    """Returns the standardized CPCB-aligned material taxonomy with vernacular labels."""
+# ------------------------------------------------------------------------------
+# Core Feature Stubs (Chunks 4 - 7, 10 - 11)
+# ------------------------------------------------------------------------------
+@app.post("/classify", tags=["AI/ML"])
+def classify_material(payload: Optional[Dict[str, Any]] = Body(default={})):
+    """
+    POST /classify -> Chunk 4
+    Stub for MobileNetV2 / TFLite scrap material classification.
+    """
     return {
-        "success": True,
-        "data": TAXONOMY_DATA.get("categories", []),
-        "timestamp": datetime.utcnow().isoformat()
-    }
-
-
-@app.get("/api/v1/prices/daily", tags=["Pricing"])
-def get_daily_prices(region: str = "IN-MH-MUM"):
-    """Returns regional cached Mandi price benchmarks."""
-    rates = REGIONAL_MANDI_CACHE.get(region, REGIONAL_MANDI_CACHE["IN-MH-MUM"])
-    price_items = []
-    for mat_id, rate in rates.items():
-        price_items.append({
-            "material_id": mat_id,
-            "base_rate_per_kg": rate,
-            "fair_range_min": round(rate * 0.94, 2),
-            "fair_range_max": round(rate * 1.08, 2),
-            "daily_trend": "STABLE"
-        })
-    return {
-        "success": True,
-        "data": {
-            "region_code": region,
-            "effective_date": datetime.utcnow().isoformat(),
-            "prices": price_items
+        "status": "STUB_CHUNK_4",
+        "message": "Classifier endpoint stub ready. Will be implemented in Chunk 4.",
+        "placeholder": {
+            "predicted_category": "mat_pcb_high",
+            "confidence": 0.89,
+            "suggestions": [
+                {"id": "mat_pcb_high", "name": "High-Grade PCB", "confidence": 0.89},
+                {"id": "mat_pcb_low", "name": "Low-Grade PCB", "confidence": 0.08},
+                {"id": "mat_cables_copper", "name": "Copper Cables", "confidence": 0.03}
+            ]
         },
         "timestamp": datetime.utcnow().isoformat()
     }
 
 
-@app.post("/api/v1/valuation/calculate", tags=["Pricing"])
-def get_valuation(req: ValuationRequest):
-    """Calculates fair value estimate with volume/condition multipliers & vernacular voice text."""
-    # Plausibility check
-    anomaly = check_weight_plausibility(req.material_id, req.weight_kg)
-    if anomaly:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=anomaly)
+@app.post("/estimate-price", tags=["Pricing"])
+def estimate_price(payload: Optional[Dict[str, Any]] = Body(default={})):
+    """
+    POST /estimate-price -> Chunk 5
+    Stub / entry point for dynamic fair valuation pricing engine.
+    """
+    material_id = payload.get("material_id", "mat_pcb_high") if payload else "mat_pcb_high"
+    weight_kg = float(payload.get("weight_kg", 10.0)) if payload else 10.0
+    condition = payload.get("condition", "CLEAN_INTACT") if payload else "CLEAN_INTACT"
 
-    result = calculate_valuation(
-        material_id=req.material_id,
-        weight_kg=req.weight_kg,
-        condition=req.condition,
-        region_code=req.region_code
-    )
+    # Use pricing engine calculation
+    val = calculate_valuation(material_id, weight_kg, condition)
     return {
-        "success": True,
-        "data": result,
+        "status": "STUB_CHUNK_5",
+        "message": "Pricing estimation stub ready. Will be finalized in Chunk 5.",
+        "data": val,
         "timestamp": datetime.utcnow().isoformat()
     }
 
 
-@app.post("/api/v1/recyclers/match", tags=["Matching"])
-def match_recyclers(req: RecyclerMatchRequest):
-    """Multi-Criteria Decision Analysis ranking for authorized CPCB recyclers."""
-    ranked = match_and_rank_recyclers(
-        material_id=req.material_id,
-        weight_kg=req.weight_kg,
-        collector_lat=req.collector_location.latitude,
-        collector_lng=req.collector_location.longitude,
-        require_pickup=req.require_pickup
-    )
+@app.get("/match-recyclers", tags=["Matching"])
+def match_recyclers_endpoint(
+    material_id: str = Query("mat_pcb_high", description="Material category ID"),
+    weight: float = Query(10.0, description="Approximate weight in kg"),
+    lat: float = Query(19.0435, description="Collector latitude"),
+    lng: float = Query(72.8567, description="Collector longitude")
+):
+    """
+    GET /match-recyclers -> Chunk 6
+    Stub for MCDA recycler matching engine.
+    """
+    ranked = match_and_rank_recyclers(material_id, weight, lat, lng)
     return {
-        "success": True,
-        "data": {
-            "ranked_recyclers": ranked
+        "status": "STUB_CHUNK_6",
+        "message": "Recycler matching stub ready. Will be finalized in Chunk 6.",
+        "ranked_recyclers": ranked,
+        "timestamp": datetime.utcnow().isoformat()
+    }
+
+
+@app.get("/anomaly-check", tags=["Anomaly"])
+def anomaly_check_endpoint(
+    lot_id: Optional[str] = Query(None, description="Lot UUID to inspect"),
+    weight: Optional[float] = Query(None, description="Weight to check for density bounds"),
+    material_id: Optional[str] = Query("mat_pcb_high", description="Material type")
+):
+    """
+    GET /anomaly-check -> Chunk 7
+    Stub for statistical rate/weight anomaly and fraud detection.
+    """
+    anomaly_flag = None
+    if weight is not None and material_id:
+        anomaly_flag = check_weight_plausibility(material_id, weight)
+
+    return {
+        "status": "STUB_CHUNK_7",
+        "message": "Anomaly check stub ready. Will be finalized in Chunk 7.",
+        "placeholder": {
+            "lot_id": lot_id,
+            "risk_score": 75 if anomaly_flag else 12,
+            "is_anomalous": anomaly_flag is not None,
+            "details": anomaly_flag
         },
         "timestamp": datetime.utcnow().isoformat()
     }
 
 
-@app.post("/api/v1/sync/batch", tags=["Offline Sync"])
-def sync_offline_batch(batch: OfflineSyncBatchRequest):
-    """Processes queued offline lots, handovers, and user feedback corrections."""
+# ------------------------------------------------------------------------------
+# Material Lots API (Wired directly to Supabase table 'material_lots')
+# ------------------------------------------------------------------------------
+@app.post("/lots", tags=["Lots"])
+def create_new_lot(lot: Dict[str, Any] = Body(...)):
+    """
+    POST /lots -> Create a new material lot in Supabase.
+    """
+    # Ensure ID exists
+    if "id" not in lot:
+        lot["id"] = str(uuid.uuid4())
+    if "quoted_price" not in lot:
+        # Default price calculation if omitted
+        lot["quoted_price"] = 245.0 * float(lot.get("approximate_weight", 1.0))
+
+    client = get_supabase()
+    if client:
+        try:
+            res = client.table("material_lots").insert(lot).execute()
+            if res.data:
+                return {
+                    "success": True,
+                    "message": "Lot created successfully in Supabase",
+                    "data": res.data[0]
+                }
+        except Exception as e:
+            return {
+                "success": False,
+                "error": str(e),
+                "fallback_data": lot
+            }
+
+    # Fallback to local memory mock
     return {
         "success": True,
-        "data": {
-            "batch_id": batch.batch_id,
-            "processed_lots": len(batch.lots),
-            "processed_handovers": len(batch.handover_records),
-            "user_corrections_logged": len(batch.user_feedback_corrections),
-            "status": "ALL_SYNCHRONIZED"
-        },
-        "timestamp": datetime.utcnow().isoformat()
+        "mode": "offline_fallback",
+        "data": lot
     }
 
 
-@app.post("/api/v1/handover/verify", tags=["Traceability"])
-def verify_handover(req: HandoverVerificationRequest):
-    """Verifies QR handover token and commits settled transaction with CPCB traceability."""
-    settled_amount = round(req.verified_weight_kg * req.agreed_rate_per_kg, 2)
-    trace_id = f"EPR-TRACE-{datetime.utcnow().strftime('%Y%m%d')}-MH-{uuid.uuid4().hex[:6].upper()}"
-    tx_id = f"tx_{uuid.uuid4().hex[:12]}"
+@app.get("/lots/{lot_id}", tags=["Lots"])
+def get_lot_by_id(lot_id: str):
+    """
+    GET /lots/{id} -> Fetch lot details by ID from Supabase.
+    """
+    client = get_supabase()
+    if client:
+        try:
+            res = client.table("material_lots").select("*").eq("id", lot_id).execute()
+            if res.data:
+                return {
+                    "success": True,
+                    "data": res.data[0]
+                }
+            else:
+                raise HTTPException(status_code=404, detail="Lot not found")
+        except HTTPException:
+            raise
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"Database query error: {e}")
 
     return {
-        "success": True,
-        "data": {
-            "transaction_id": tx_id,
-            "settled_amount_inr": settled_amount,
-            "cpcb_traceability_number": trace_id,
-            "payment_status": "PAID_CASH_CONFIRMED" if req.payment_mode == "CASH" else "PAID_UPI_SUCCESS",
-            "digital_receipt_url": f"/receipts/{tx_id}.pdf"
-        },
-        "timestamp": datetime.utcnow().isoformat()
+        "success": False,
+        "message": "Database client not connected"
+    }
+
+
+# ------------------------------------------------------------------------------
+# Handover & Earnings Stubs (Chunks 10 & 11)
+# ------------------------------------------------------------------------------
+@app.post("/handover", tags=["Handover"])
+def process_handover(payload: Optional[Dict[str, Any]] = Body(default={})):
+    """
+    POST /handover -> Chunk 10
+    Stub for QR token scanning and physical handover verification.
+    """
+    handover_ref = f"KC-TRACE-{datetime.utcnow().strftime('%Y%m%d')}-MH-{uuid.uuid4().hex[:6].upper()}"
+    return {
+        "status": "STUB_CHUNK_10",
+        "message": "Handover processing stub ready. Will be implemented in Chunk 10.",
+        "placeholder": {
+            "handover_ref": handover_ref,
+            "verified": True,
+            "timestamp": datetime.utcnow().isoformat()
+        }
+    }
+
+
+@app.get("/earnings/{collector_id}", tags=["Earnings"])
+def get_collector_earnings(collector_id: str):
+    """
+    GET /earnings/{collector_id} -> Chunk 11
+    Fetches collector transaction ledger from Supabase.
+    """
+    client = get_supabase()
+    if client:
+        try:
+            res = client.table("transactions").select("*").eq("collector_id", collector_id).execute()
+            total_earned = sum(float(t.get("final_price", 0)) for t in res.data)
+            return {
+                "success": True,
+                "collector_id": collector_id,
+                "total_earnings_inr": total_earned,
+                "transaction_count": len(res.data),
+                "transactions": res.data
+            }
+        except Exception as e:
+            pass
+
+    return {
+        "status": "STUB_CHUNK_11",
+        "collector_id": collector_id,
+        "total_earnings_inr": 3697.50,
+        "transaction_count": 1,
+        "transactions": [
+            {
+                "id": "b1eebc99-9c0b-4ef8-bb6d-6bb9bd380b22",
+                "material_category": "PCB",
+                "final_price": 3697.50,
+                "payment_mode": "CASH",
+                "status": "COMPLETED"
+            }
+        ]
     }
 
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)

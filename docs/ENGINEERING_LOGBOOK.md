@@ -209,6 +209,22 @@ def check_duplicate_image(new_hash: str, recent_hashes: List[str], threshold: in
 
 ---
 
+### Chunk 3: Backend API Foundation & Core Route Stubs
+- **Goal:** Provide a running FastAPI app wired to live Supabase, stub out the 8 core feature routes for subsequent chunks, and configure CORS for the React frontend.
+- **Routes Implemented:**
+  - `POST /classify`: MobileNetV2 / TFLite classification stub (returns `STUB_CHUNK_4` placeholder).
+  - `POST /estimate-price`: Pricing estimation engine endpoint (returns `STUB_CHUNK_5` calculation).
+  - `GET /match-recyclers`: MCDA recycler matching endpoint (returns `STUB_CHUNK_6` ranked buyers).
+  - `GET /anomaly-check`: Density bound and outlier check (returns `STUB_CHUNK_7` risk score).
+  - `POST /lots`: Creates and persists new material lots into Supabase table `material_lots`.
+  - `GET /lots/{id}`: Fetches lot details by UUID from Supabase.
+  - `POST /handover`: Digital QR handover token verification stub (`STUB_CHUNK_10`).
+  - `GET /earnings/{collector_id}`: Fetches transaction history and calculates total earnings (`STUB_CHUNK_11`).
+- **CORS Configuration:** Enabled across all origins (`*`) with preflight options support for `http://localhost:5173`.
+- **Automated Verification:** [`backend/test_api_endpoints.py`](file:///C:/Users/srima/Documents/Web%20Experiments/Kabadiwala%20Connect/backend/test_api_endpoints.py) runs 10 end-to-end integration tests verifying all stubs, live Supabase read/writes, and CORS headers.
+
+---
+
 ## 4. Verification Evidence & Quality Assurance
 
 ### Verification Suite Run:
@@ -221,25 +237,23 @@ def check_duplicate_image(new_hash: str, recent_hashes: List[str], threshold: in
    ```bash
    .venv\Scripts\python.exe verify_supabase.py
    ```
-   **Result:**
-   - `collectors`: 2 rows
-   - `materials`: 9 rows
-   - `recyclers`: 2 rows
-   - `prices`: 8 rows
-   - `material_lots`: 1 rows
-   - `transactions`: 1 rows
-   - `traceability`: 1 rows
+   **Result:** All 7 tables verified (`collectors`, `materials`, `recyclers`, `prices`, `material_lots`, `transactions`, `traceability`).
 3. **Live Supabase Storage Upload Verification:**
    ```bash
    .venv\Scripts\python.exe test_storage_upload.py
    ```
    **Result:** `Upload Successful! Public URL: https://ludufjqcothsyknsronp.supabase.co/storage/v1/object/public/lot-photos/test_handover_sample.png`
-4. **Frontend Production Build:**
+4. **Backend API Foundation & CORS Test:**
+   ```bash
+   .venv\Scripts\python.exe test_api_endpoints.py
+   ```
+   **Result:** All 10 verification tests passed (all 8 routes + Supabase lot insert/query + CORS `access-control-allow-origin`).
+5. **Frontend Production Build:**
    ```bash
    npm run build
    ```
    **Result:** `✓ built in 478ms`, verified 20 modules compiled cleanly into `dist/`.
-5. **JSON Schema Integrity:**
+6. **JSON Schema Integrity:**
    ```bash
    python -c "import json, glob; [json.load(open(f)) for f in glob.glob('shared/**/*.json')]"
    ```
@@ -252,9 +266,14 @@ def check_duplicate_image(new_hash: str, recent_hashes: List[str], threshold: in
 | Chunk | Scope | Target Modules | Status |
 | :--- | :--- | :--- | :--- |
 | **Chunk 1** | Monorepo skeleton, local dev env, FastAPI & Vite React | `frontend/`, `backend/`, `datasets/` | **COMPLETE (`25574a0`)** |
-| **Chunk 2** | Database & All Seven Datasets (Supabase + Postgres) | `backend/supabase_schema.sql`, `app/db/` | **COMPLETE** |
-| **Chunk 3** | Offline storage (Dexie.js IndexedDB), Service Worker & i18next | `frontend/src/db/`, `frontend/src/i18n/` | **NEXT UP** |
-| **Chunk 4** | Collector Mobile App UI (Stitch screens integration) | `frontend/src/components/collector/` | Queued |
-| **Chunk 5** | Recycler-Side Web Dashboard & Weighbridge QR scanner | `frontend/src/components/recycler/` | Queued |
-| **Chunk 6** | ML Pipeline: MobileNetV2 fine-tuning & TFLite INT8 quantization | `backend/ml/`, `ml/scripts/` | Queued |
-| **Chunk 7** | Field Research Documentation & Unit Economics Model | `docs/field_research.md`, Unit Economics | Queued |
+| **Chunk 2** | Database & All Seven Datasets (Supabase + Postgres) | `backend/supabase_schema.sql`, `app/db/` | **COMPLETE (`5acd2af`, `6a5f17e`)** |
+| **Chunk 3** | Backend API Foundation, Core Route Stubs & CORS | `backend/main.py`, `backend/test_api_endpoints.py` | **COMPLETE** |
+| **Chunk 4** | ML Material Classifier (MobileNetV2 / TFLite) | `backend/ml/`, `POST /classify` | **NEXT UP** |
+| **Chunk 5** | Pricing & Valuation Engine Finalization | `backend/pricing/`, `POST /estimate-price` | Queued |
+| **Chunk 6** | Recycler Matching Engine (MCDA Ranking) | `backend/matching/`, `GET /match-recyclers` | Queued |
+| **Chunk 7** | Anomaly & Fraud Detection Engine | `backend/anomaly/`, `GET /anomaly-check` | Queued |
+| **Chunk 8** | Offline Storage (Dexie.js IndexedDB) & PWA Shell | `frontend/src/db/`, `frontend/src/i18n/` | Queued |
+| **Chunk 9** | Collector Mobile App UI (Stitch screens integration) | `frontend/src/components/collector/` | Queued |
+| **Chunk 10**| Digital Handover & QR Traceability Settlement | `backend/`, `POST /handover` | Queued |
+| **Chunk 11**| Recycler Web Dashboard & Earnings Ledger | `frontend/`, `GET /earnings/{id}` | Queued |
+| **Chunk 12**| Field Research Documentation & Unit Economics Model | `docs/field_research.md`, Unit Economics | Queued |
