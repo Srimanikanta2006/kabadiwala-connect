@@ -23,23 +23,24 @@ def run_tests():
     assert res.json()["status"] in ["COMPLETED", "STUB_CHUNK_4"]
     print("2. [PASS] POST /classify ->", res.json()["status"], "(Top:", res.json()["data"]["top_category"], ")")
 
-    # 3. POST /estimate-price (Chunk 5 stub)
-    res = client.post("/estimate-price", json={"material_id": "mat_pcb_high", "weight_kg": 15.0})
+    # 3. POST /estimate-price (Chunk 5 Production / Stub)
+    res = client.post("/estimate-price", json={"material_id": "mat_pcb_high", "weight_kg": 15.0, "condition": "good"})
     assert res.status_code == 200
-    assert res.json()["status"] == "STUB_CHUNK_5"
-    print("3. [PASS] POST /estimate-price ->", res.json()["status"], f"(Calc: INR {res.json()['data']['calculated_rate_per_kg']}/kg)")
+    assert res.json()["status"] in ["COMPLETED", "STUB_CHUNK_5"]
+    val_inr = res.json()["data"].get("estimated_value_inr") or res.json()["data"].get("calculated_rate_per_kg")
+    print("3. [PASS] POST /estimate-price ->", res.json()["status"], f"(Valuation: INR {val_inr})")
 
-    # 4. GET /match-recyclers (Chunk 6 stub)
+    # 4. GET /match-recyclers (Chunk 6 Production / Stub)
     res = client.get("/match-recyclers?material_id=mat_pcb_high&weight=12.0")
     assert res.status_code == 200
-    assert res.json()["status"] == "STUB_CHUNK_6"
+    assert res.json()["status"] in ["COMPLETED", "STUB_CHUNK_6"]
     assert len(res.json()["ranked_recyclers"]) >= 1
     print("4. [PASS] GET /match-recyclers ->", res.json()["status"], f"({len(res.json()['ranked_recyclers'])} recyclers matched)")
 
-    # 5. GET /anomaly-check (Chunk 7 stub)
+    # 5. GET /anomaly-check (Chunk 7 Production / Stub)
     res = client.get("/anomaly-check?weight=10.0&material_id=mat_pcb_high")
     assert res.status_code == 200
-    assert res.json()["status"] == "STUB_CHUNK_7"
+    assert res.json()["status"] in ["COMPLETED", "STUB_CHUNK_7"]
     print("5. [PASS] GET /anomaly-check ->", res.json()["status"], f"(Risk: {res.json()['placeholder']['risk_score']})")
 
     # 6. POST /lots (Wired to Supabase)

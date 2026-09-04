@@ -21,7 +21,13 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.db.supabase_client import get_supabase, get_materials, get_recyclers, get_prices, insert_lot
 from app.services.pricing_engine import calculate_valuation, REGIONAL_MANDI_CACHE
 from app.services.recycler_matcher import match_and_rank_recyclers
-from app.services.anomaly_detector import check_weight_plausibility
+from anomaly.detector import (
+    evaluate_lot_anomaly,
+    check_weight_bounds,
+    check_weight_plausibility,
+    check_duplicate_image,
+    check_price_outlier
+)
 from ml.classifier import classifier_service
 
 logger = logging.getLogger("kabadiwala.api")
@@ -185,68 +191,229 @@ async def classify_material(request: Request):
 @app.post("/estimate-price", tags=["Pricing"])
 def estimate_price(payload: Optional[Dict[str, Any]] = Body(default={})):
     """
-    POST /estimate-price -> Chunk 5
-    Stub / entry point for dynamic fair valuation pricing engine.
+    POST /estimate-price -> Chunk 5 (Production)
+    Calculates fair valuation:
+    estimated_value = base_rate_per_kg * weight_kg * condition_multiplier
+    Dynamically looks up base rate from Supabase prices table by material/category + location.
     """
-    material_id = payload.get("material_id", "mat_pcb_high") if payload else "mat_pcb_high"
-    weight_kg = float(payload.get("weight_kg", 10.0)) if payload else 10.0
-    condition = payload.get("condition", "CLEAN_INTACT") if payload else "CLEAN_INTACT"
+    payload = payload or {}
+    material_id = payload.get("material_id") or payload.get("category") or "mat_pcb_high"
+    try:
+        weight_kg = float(payload.get("weight_kg", 10.0))
+        if weight_kg <= 0:
+            weight_kg = 1.0
+    except (ValueError, TypeError):
+        weight_kg = 10.0
 
-    # Use pricing engine calculation
-    val = calculate_valuation(material_id, weight_kg, condition)
+    condition = payload.get("condition", "good")
+    location = payload.get("location", "IN-MH-MUM")
+
+    try:
+        val = calculate_valuation(material_id, weight_kg, condition, location)
+        return {
+            "success": True,
+            "status": "COMPLETED",
+            "data": val,
+            "timestamp": datetime.utcnow().isoformat()
+        }
+    except Exception as e:
+        logger.error(f"Pricing calculation error: {e}", exc_info=True)
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail={
+                "success": False,
+                "error_code": "PRICING_FAILED",
+                "message_en": f"Valuation calculation failed: {str(e)}",
+                "message_hi": "मूल्य गणना विफल रही। कृपया सामग्री और वजन जांचें।",
+                "message_mr": "मूल्य गणना अयशस्वी झाली. कृपया साहित्य आणि वजन तपासा."
+            }
+        )
+
+
+@app.get("/prices/daily", tags=["Pricing"])
+def get_daily_prices_endpoint(location: str = Query("IN-MH-MUM", description="Regional location code")):
+    """
+    GET /prices/daily -> Mandi benchmark rates for regional scrap centers.
+    """
+    client = get_supabase()
+    if client:
+        try:
+            res = client.table("prices").select("*").eq("location", location).order("date", desc=True).execute()
+            if res.data and len(res.data) > 0:
+                return {
+                    "success": True,
+                    "location": location,
+                    "source": "SUPABASE_DATABASE",
+                    "prices": res.data,
+                    "timestamp": datetime.utcnow().isoformat()
+                }
+        except Exception as e:
+            logger.warning(f"Failed to fetch prices from DB: {e}")
+
+    rates = REGIONAL_MANDI_CACHE.get(location, REGIONAL_MANDI_CACHE["IN-MH-MUM"])
     return {
-        "status": "STUB_CHUNK_5",
-        "message": "Pricing estimation stub ready. Will be finalized in Chunk 5.",
-        "data": val,
+        "success": True,
+        "location": location,
+        "source": "LOCAL_MANDI_CACHE",
+        "prices": [{"material_id": k, "base_rate_per_kg": v, "unit": "kg"} for k, v in rates.items()],
         "timestamp": datetime.utcnow().isoformat()
     }
 
 
 @app.get("/match-recyclers", tags=["Matching"])
 def match_recyclers_endpoint(
-    material_id: str = Query("mat_pcb_high", description="Material category ID"),
-    weight: float = Query(10.0, description="Approximate weight in kg"),
-    lat: float = Query(19.0435, description="Collector latitude"),
-    lng: float = Query(72.8567, description="Collector longitude")
+    material_id: str = Query("mat_pcb_high", description="Material category ID or macro name"),
+    weight: float = Query(10.0, description="Approximate lot weight in kg"),
+    lat: float = Query(19.0435, description="Collector GPS latitude"),
+    lng: float = Query(72.8567, description="Collector GPS longitude"),
+    require_pickup: bool = Query(False, description="Require doorstep vehicle collection")
 ):
     """
-    GET /match-recyclers -> Chunk 6
-    Stub for MCDA recycler matching engine.
+    GET /match-recyclers -> Chunk 6 (Production)
+    MCDA Recycler Matching Engine.
+    Hard filters out unauthorized recyclers.
+    Ranks authorized CPCB facilities by Price (35%), Distance (25%), Material Fit (20%),
+    Pickup Availability (10%), and Authorization Status (10%).
     """
-    ranked = match_and_rank_recyclers(material_id, weight, lat, lng)
-    return {
-        "status": "STUB_CHUNK_6",
-        "message": "Recycler matching stub ready. Will be finalized in Chunk 6.",
-        "ranked_recyclers": ranked,
-        "timestamp": datetime.utcnow().isoformat()
-    }
+    try:
+        ranked = match_and_rank_recyclers(
+            material_id=material_id,
+            weight_kg=weight,
+            collector_lat=lat,
+            collector_lng=lng,
+            require_pickup=require_pickup
+        )
+        return {
+            "success": True,
+            "status": "COMPLETED",
+            "material_id": material_id,
+            "lot_weight_kg": weight,
+            "collector_location": {"latitude": lat, "longitude": lng},
+            "total_matches": len(ranked),
+            "ranked_recyclers": ranked,
+            "timestamp": datetime.utcnow().isoformat()
+        }
+    except Exception as e:
+        logger.error(f"Recycler matching error: {e}", exc_info=True)
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail={
+                "success": False,
+                "error_code": "MATCHING_FAILED",
+                "message_en": f"Recycler matching failed: {str(e)}",
+                "message_hi": "पुनर्चक्रणकर्ता मिलान विफल रहा।",
+                "message_mr": "पुनर्चक्रण केंद्र शोधणे अयशस्वी झाले."
+            }
+        )
 
 
 @app.get("/anomaly-check", tags=["Anomaly"])
 def anomaly_check_endpoint(
     lot_id: Optional[str] = Query(None, description="Lot UUID to inspect"),
-    weight: Optional[float] = Query(None, description="Weight to check for density bounds"),
-    material_id: Optional[str] = Query("mat_pcb_high", description="Material type")
+    weight: Optional[float] = Query(None, description="Weight to check for density bounds (kg)"),
+    material_id: Optional[str] = Query("mat_pcb_high", description="Material category ID"),
+    price: Optional[float] = Query(None, description="Quoted price (₹)"),
+    image_phash: Optional[str] = Query(None, description="64-bit dHash perceptual fingerprint"),
+    collector_id: Optional[str] = Query(None, description="Collector ID for velocity checks"),
+    location: str = Query("IN-MH-MUM", description="Regional location code")
 ):
     """
-    GET /anomaly-check -> Chunk 7
-    Stub for statistical rate/weight anomaly and fraud detection.
+    GET /anomaly-check -> Chunk 7 Production Engine
+    Inspects lot parameters or existing lot record against physical density bounds,
+    image duplicate hashes, price outliers, and collector submission velocity.
     """
-    anomaly_flag = None
-    if weight is not None and material_id:
-        anomaly_flag = check_weight_plausibility(material_id, weight)
+    inspected_material = material_id or "mat_pcb_high"
+    inspected_weight = weight
+    inspected_price = price
+    inspected_hash = image_phash
+    inspected_collector = collector_id
 
-    return {
-        "status": "STUB_CHUNK_7",
-        "message": "Anomaly check stub ready. Will be finalized in Chunk 7.",
-        "placeholder": {
-            "lot_id": lot_id,
-            "risk_score": 75 if anomaly_flag else 12,
-            "is_anomalous": anomaly_flag is not None,
-            "details": anomaly_flag
-        },
-        "timestamp": datetime.utcnow().isoformat()
+    # If lot_id is provided, fetch lot record from Supabase
+    if lot_id:
+        client = get_supabase()
+        if client:
+            try:
+                res = client.table("material_lots").select("*").eq("id", lot_id).execute()
+                if res.data and len(res.data) > 0:
+                    lot = res.data[0]
+                    inspected_material = lot.get("material_id") or inspected_material
+                    if inspected_weight is None and lot.get("approximate_weight") is not None:
+                        inspected_weight = float(lot["approximate_weight"])
+                    if inspected_price is None and lot.get("quoted_price") is not None:
+                        inspected_price = float(lot["quoted_price"])
+                    if not inspected_hash and lot.get("image_phash"):
+                        inspected_hash = lot["image_phash"]
+                    if not inspected_collector and lot.get("collector_id"):
+                        inspected_collector = lot["collector_id"]
+            except Exception as e:
+                logger.warning(f"Error fetching lot {lot_id} for anomaly check: {e}")
+
+    # Fallback weight if none provided
+    if inspected_weight is None:
+        inspected_weight = 10.0
+
+    report = evaluate_lot_anomaly(
+        material_id=inspected_material,
+        weight_kg=inspected_weight,
+        quoted_price=inspected_price,
+        image_phash=inspected_hash,
+        collector_id=inspected_collector,
+        location=location,
+        current_lot_id=lot_id
+    )
+
+    # Maintain backward compatibility with stub placeholder keys
+    report["placeholder"] = {
+        "lot_id": lot_id,
+        "risk_score": report["risk_score"],
+        "is_anomalous": report["is_anomalous"],
+        "details": report["anomalies"][0] if report["anomalies"] else None
     }
+    return report
+
+
+@app.post("/anomaly-check", tags=["Anomaly"])
+def anomaly_check_post_endpoint(payload: Dict[str, Any] = Body(...)):
+    """
+    POST /anomaly-check -> Pre-flight verification payload before lot creation on mobile PWA.
+    Accepts: material_id, weight_kg, quoted_price, image_phash, collector_id, location, lot_id.
+    """
+    payload = payload or {}
+    material_id = payload.get("material_id") or payload.get("category") or "mat_pcb_high"
+    try:
+        weight_kg = float(payload.get("weight_kg", payload.get("approximate_weight", 10.0)))
+    except (ValueError, TypeError):
+        weight_kg = 10.0
+
+    quoted_price = payload.get("quoted_price")
+    if quoted_price is not None:
+        try:
+            quoted_price = float(quoted_price)
+        except (ValueError, TypeError):
+            quoted_price = None
+
+    image_phash = payload.get("image_phash") or payload.get("image_dhash")
+    collector_id = payload.get("collector_id")
+    location = payload.get("location", "IN-MH-MUM")
+    lot_id = payload.get("lot_id") or payload.get("id")
+
+    report = evaluate_lot_anomaly(
+        material_id=material_id,
+        weight_kg=weight_kg,
+        quoted_price=quoted_price,
+        image_phash=image_phash,
+        collector_id=collector_id,
+        location=location,
+        current_lot_id=lot_id
+    )
+
+    report["placeholder"] = {
+        "lot_id": lot_id,
+        "risk_score": report["risk_score"],
+        "is_anomalous": report["is_anomalous"],
+        "details": report["anomalies"][0] if report["anomalies"] else None
+    }
+    return report
 
 
 # ------------------------------------------------------------------------------

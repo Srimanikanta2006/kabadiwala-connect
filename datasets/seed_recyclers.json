@@ -1,80 +1,197 @@
 [
   {
-    "recycler_id": "9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d",
-    "facility_name": "EcoRecycle India Pvt Ltd",
+    "id": "rec_ecorecycle_01",
+    "name": "EcoRecycle India Pvt Ltd (Ecoreco)",
     "cpcb_registration_no": "CPCB/E-WASTE/REG/MH/2023/1042",
+    "location_lat": 19.055,
+    "location_lng": 72.871,
+    "address": "Eco House, Western Express Highway, Goregaon East / Dharavi Hub, Mumbai",
+    "materials_accepted": [
+      "mat_pcb_high",
+      "mat_pcb_low",
+      "mat_cables_copper",
+      "mat_batteries_lead",
+      "mat_batteries_li_ion",
+      "mat_crt_monitor",
+      "mat_lcd_panel",
+      "mat_motors_magnets",
+      "mat_mixed_plastics"
+    ],
     "authorization_status": "ACTIVE",
-    "valid_upto": "2027-12-31",
-    "contact_phone": "+91-98201-44521",
-    "location": {
-      "latitude": 19.0550,
-      "longitude": 72.8710,
-      "address_text": "Plot 42, Kurla Industrial Estate",
-      "city": "Mumbai",
-      "state": "Maharashtra"
+    "contact": {
+      "phone": "+91-22-4005-2900",
+      "email": "info@ecoreco.com"
     },
-    "accepted_materials": ["mat_pcb_high", "mat_pcb_low", "mat_cables_copper", "mat_batteries_lead"],
     "offered_rates": {
       "mat_pcb_high": 255.0,
       "mat_pcb_low": 58.0,
       "mat_cables_copper": 395.0,
-      "mat_batteries_lead": 102.0
+      "mat_batteries_lead": 105.0,
+      "mat_batteries_li_ion": 190.0,
+      "mat_crt_monitor": 16.0,
+      "mat_lcd_panel": 45.0,
+      "mat_motors_magnets": 75.0,
+      "mat_mixed_plastics": 30.0
     },
-    "service_radius_km": 30.0,
-    "pickup_available": true,
-    "min_pickup_weight_kg": 10.0,
-    "fulfillment_rating": 4.8
+    "pickup_availability": true,
+    "service_area": "Greater Mumbai & Thane"
   },
   {
-    "recycler_id": "4e73b4d1-81f3-42e1-a083-d92e5912bb20",
-    "facility_name": "GreenCircle Urban Recyclers",
+    "id": "rec_greencircle_02",
+    "name": "GreenCircle Urban Recyclers",
     "cpcb_registration_no": "CPCB/E-WASTE/REG/MH/2022/0891",
+    "location_lat": 19.041,
+    "location_lng": 72.862,
+    "address": "Mahim East Industrial Zone, Dharavi Junction, Mumbai",
+    "materials_accepted": [
+      "mat_pcb_high",
+      "mat_pcb_low",
+      "mat_cables_copper",
+      "mat_mixed_plastics",
+      "mat_motors_magnets"
+    ],
     "authorization_status": "ACTIVE",
-    "valid_upto": "2026-11-30",
-    "contact_phone": "+91-98205-77123",
-    "location": {
-      "latitude": 19.0410,
-      "longitude": 72.8620,
-      "address_text": "12 Dharavi Cross Road",
-      "city": "Mumbai",
-      "state": "Maharashtra"
+    "contact": {
+      "phone": "+91-22-2407-1122",
+      "email": "contact@greencircle.org.in"
     },
-    "accepted_materials": ["mat_pcb_high", "mat_pcb_low", "mat_cables_copper", "mat_batteries_li_ion"],
     "offered_rates": {
       "mat_pcb_high": 248.0,
       "mat_pcb_low": 54.0,
       "mat_cables_copper": 385.0,
-      "mat_batteries_li_ion": 190.0
+      "mat_mixed_plastics": 32.0,
+      "mat_motors_magnets": 74.0
     },
-    "service_radius_km": 15.0,
-    "pickup_available": false,
-    "min_pickup_weight_kg": 0.0,
-    "fulfillment_rating": 4.6
+    "pickup_availability": false,
+    "service_area": "Dharavi, Sion, Kurla"
   },
   {
-    "recycler_id": "8a32d184-72c1-4099-b391-729abcc80104",
-    "facility_name": "MahaGreen Recovery Hub",
-    "cpcb_registration_no": "CPCB/E-WASTE/REG/MH/2021/0411",
+    "id": "rec_cerebra_03",
+    "name": "Cerebra Integrated Technologies Ltd",
+    "cpcb_registration_no": "CPCB/E-WASTE/REG/MH/2021/0432",
+    "location_lat": 19.082,
+    "location_lng": 73.015,
+    "address": "TTC Industrial Area, MIDC Turbhe, Navi Mumbai",
+    "materials_accepted": [
+      "mat_pcb_high",
+      "mat_pcb_low",
+      "mat_crt_monitor",
+      "mat_lcd_panel",
+      "mat_cables_copper",
+      "mat_batteries_li_ion"
+    ],
     "authorization_status": "ACTIVE",
-    "valid_upto": "2027-06-30",
-    "contact_phone": "+91-98112-99881",
-    "location": {
-      "latitude": 19.0980,
-      "longitude": 72.8940,
-      "address_text": "Ghatkopar West Industrial Zone",
-      "city": "Mumbai",
-      "state": "Maharashtra"
+    "contact": {
+      "phone": "+91-22-2763-8800",
+      "email": "ewaste@cerebracomputers.com"
     },
-    "accepted_materials": ["mat_pcb_high", "mat_crt_monitor", "mat_motors_magnets", "mat_mixed_plastics"],
     "offered_rates": {
-      "mat_pcb_high": 240.0,
-      "mat_crt_monitor": 14.0,
-      "mat_motors_magnets": 75.0,
-      "mat_mixed_plastics": 30.0
+      "mat_pcb_high": 260.0,
+      "mat_pcb_low": 60.0,
+      "mat_crt_monitor": 18.0,
+      "mat_lcd_panel": 48.0,
+      "mat_cables_copper": 390.0,
+      "mat_batteries_li_ion": 195.0
     },
-    "service_radius_km": 25.0,
-    "pickup_available": true,
-    "min_pickup_weight_kg": 25.0,
-    "fulfillment_rating": 4.2
+    "pickup_availability": true,
+    "service_area": "Navi Mumbai, Raigad, Mumbai"
+  },
+  {
+    "id": "rec_greenscape_04",
+    "name": "Greenscape Eco Management Pvt Ltd",
+    "cpcb_registration_no": "CPCB/E-WASTE/REG/MH/2023/1187",
+    "location_lat": 18.752,
+    "location_lng": 73.856,
+    "address": "MIDC Industrial Corridor, Chakan Phase 2, Pune",
+    "materials_accepted": [
+      "mat_pcb_high",
+      "mat_cables_copper",
+      "mat_batteries_lead",
+      "mat_motors_magnets",
+      "mat_mixed_plastics"
+    ],
+    "authorization_status": "ACTIVE",
+    "contact": {
+      "phone": "+91-20-6712-3400",
+      "email": "pune@greenscape.com"
+    },
+    "offered_rates": {
+      "mat_pcb_high": 252.0,
+      "mat_cables_copper": 388.0,
+      "mat_batteries_lead": 104.0,
+      "mat_motors_magnets": 76.0,
+      "mat_mixed_plastics": 29.0
+    },
+    "pickup_availability": true,
+    "service_area": "Pune, Pimpri-Chinchwad, Chakan"
+  },
+  {
+    "id": "rec_envirocare_05",
+    "name": "Enviro-Care Recycling Pvt Ltd",
+    "cpcb_registration_no": "CPCB/E-WASTE/REG/MH/2020/0219",
+    "location_lat": 19.145,
+    "location_lng": 72.938,
+    "address": "Bhandup Industrial Area, LBS Marg, Mumbai",
+    "materials_accepted": [
+      "mat_batteries_lead",
+      "mat_batteries_li_ion",
+      "mat_cables_copper"
+    ],
+    "authorization_status": "ACTIVE",
+    "contact": {
+      "phone": "+91-22-2594-5511",
+      "email": "support@envirocare.in"
+    },
+    "offered_rates": {
+      "mat_batteries_lead": 108.0,
+      "mat_batteries_li_ion": 198.0,
+      "mat_cables_copper": 382.0
+    },
+    "pickup_availability": true,
+    "service_area": "Central Suburbs, Mumbai"
+  },
+  {
+    "id": "rec_unauthorized_yard_06",
+    "name": "Backyard Unregistered Scrap Godown",
+    "cpcb_registration_no": "NONE",
+    "location_lat": 19.0436,
+    "location_lng": 72.8568,
+    "address": "Dharavi 90 Feet Road, Mumbai",
+    "materials_accepted": [
+      "mat_pcb_high",
+      "mat_cables_copper",
+      "mat_batteries_lead"
+    ],
+    "authorization_status": "UNAUTHORIZED",
+    "contact": {
+      "phone": "+91-98765-43210"
+    },
+    "offered_rates": {
+      "mat_pcb_high": 270.0,
+      "mat_cables_copper": 410.0
+    },
+    "pickup_availability": true,
+    "service_area": "Local"
+  },
+  {
+    "id": "rec_suspended_dismantler_07",
+    "name": "Suspended Heavy Metal Dismantlers",
+    "cpcb_registration_no": "CPCB/E-WASTE/SUSP/MH/2023/0014",
+    "location_lat": 19.068,
+    "location_lng": 72.879,
+    "address": "Kurla Industrial Estate, Mumbai",
+    "materials_accepted": [
+      "mat_pcb_high",
+      "mat_batteries_lead"
+    ],
+    "authorization_status": "SUSPENDED",
+    "contact": {
+      "phone": "+91-22-2650-9900"
+    },
+    "offered_rates": {
+      "mat_pcb_high": 265.0
+    },
+    "pickup_availability": false,
+    "service_area": "Kurla"
   }
 ]

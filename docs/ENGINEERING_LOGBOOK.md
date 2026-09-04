@@ -291,7 +291,76 @@ stateDiagram-v2
 
 4. **CPCB Regulatory Compliance & Safety Guard:**
    - All 9 categories map to official CPCB E-Waste codes (`ITEW1-PCB-HG`, `ITEW-CBL-CU`, `BATT-PB-ACID`, `CEEW1-CRT`, etc.).
-   - Hazardous items automatically append explicit warning strings to spoken Hindi/Marathi audio (e.g. sulfuric acid risk, implosion risk, thermal runaway precautions).
+    - Hazardous items automatically append explicit warning strings to spoken Hindi/Marathi audio (e.g. sulfuric acid risk, implosion risk, thermal runaway precautions).
+
+---
+
+### Chunk 5: Dynamic Rule-Based Pricing Engine
+- **Goal:** Turn classified scrap material, weight, and condition into a transparent rupee valuation range using a deterministic rule engine with dynamic base rates queried directly from Supabase.
+- **Rule Formulation:**
+  $$\text{estimated\_value} = \text{base\_rate\_per\_kg} \times \text{weight\_kg} \times \text{condition\_multiplier}$$
+  $$\text{Valuation Interval} = [\text{round}(\text{estimated\_value} \times 0.95, 2), \; \text{round}(\text{estimated\_value} \times 1.05, 2)]$$
+- **Condition Multipliers:**
+  - `good` = 1.00 (Clean, sorted, intact)
+  - `fair` = 0.80 (Dirty, mixed with casings)
+  - `poor` = 0.55 (Damaged, burnt, stripped, desoldered)
+- **Dynamic Database Lookup & Proof of Live Pricing:**
+  - Base rates are looked up live from Supabase `prices` table by `(material_id, location)` ordered by `created_at desc`.
+  - In unit test `test_5_dynamic_database_lookup_and_price_change`, changing the base rate of CRT monitors from ₹15.0/kg to ₹25.0/kg directly altered the 10kg valuation from ₹150.00 to ₹250.00 — proving it is a genuine database-driven calculation rather than hardcoded logic.
+- **Artifacts Created/Modified:**
+  - [`backend/pricing/engine.py`](file:///C:/Users/srima/Documents/Web%20Experiments/Kabadiwala%20Connect/backend/pricing/engine.py): Core calculation engine, Supabase live query, condition mapping, and Hindi/Marathi spoken audio generation.
+  - [`backend/app/services/pricing_engine.py`](file:///C:/Users/srima/Documents/Web%20Experiments/Kabadiwala%20Connect/backend/app/services/pricing_engine.py): Service layer wrapper re-exporting canonical pricing logic.
+  - [`backend/main.py`](file:///C:/Users/srima/Documents/Web%20Experiments/Kabadiwala%20Connect/backend/main.py): Production `POST /estimate-price` and `GET /prices/daily` routes.
+---
+
+### Chunk 6: Recycler Matching Engine (Multi-Criteria Decision Analysis)
+- **Goal:** Match each material lot with the optimal CPCB-authorized recycler using a multi-criteria scoring function, enforce regulatory compliance through hard exclusion filters, and calculate precise geodesic distances using the Haversine formula.
+- **Regulatory Foundation:**
+  - Sourced directly from Central Pollution Control Board (CPCB) authorized recycler registers under the *E-Waste (Management) Rules, 2022*.
+  - Seeded 7 benchmark facilities in Supabase & [`datasets/seed_recyclers.json`](file:///C:/Users/srima/Documents/Web%20Experiments/Kabadiwala%20Connect/datasets/seed_recyclers.json) (5 authorized facilities across Mumbai, Navi Mumbai, Pune, Thane; 2 negative control unauthorized/suspended scrap yards).
+- **MCDA Scoring Formula:**
+  $$\text{Score} = (w_1 \times P_{\text{norm}}) + (w_2 \times D_{\text{norm}}) + (w_3 \times M_{\text{fit}}) + (w_4 \times A_{\text{pickup}}) + (w_5 \times S_{\text{auth}})$$
+  - $w_1 = 0.35$ (Price offered relative to highest active bid in market)
+  - $w_2 = 0.25$ (Distance proximity factor: $\frac{1}{1 + d_{\text{km}} / 10}$)
+  - $w_3 = 0.20$ (Material category authorization & capacity fit)
+  - $w_4 = 0.10$ (Doorstep vehicle collection availability)
+  - $w_5 = 0.10$ (CPCB registration validation score)
+- **Hard Filter Enforcement (Zero Leakage into Informal Sector):**
+  - Any facility with `authorization_status != "ACTIVE_AUTHORIZED"` (e.g. `UNAUTHORIZED` or `SUSPENDED`) is categorically dropped *before* scoring.
+  - Facilities not officially authorized for the specific material category are excluded.
+- **Great-Circle Haversine Geodesic Distance:**
+  $$a = \sin^2\left(\frac{\Delta\phi}{2}\right) + \cos(\phi_1)\cos(\phi_2)\sin^2\left(\frac{\Delta\lambda}{2}\right)$$
+  $$d = 2 R \cdot \text{atan2}\left(\sqrt{a}, \sqrt{1-a}\right) \quad (R = 6371.0 \text{ km})$$
+- **Multilingual Low-Literacy Badges:**
+  - Automatically tags facilities with badges rendered in English, Hindi, and Marathi:
+    - Best Price: "सर्वोत्तम भाव" / "सर्वात जास्त दर"
+    - Closest: "सबसे नज़दीक" / "सर्वात जवळ"
+    - Free Pickup: "मुफ़्त पिकअप" / "मोफत पिकअप"
+    - CPCB Authorized: "सीपीसीबी अधिकृत"
+---
+
+### Chunk 7: Anomaly & Fraud Detection Engine
+- **Goal:** Protect the formal e-waste supply chain and financial settlement channels from bad actors by detecting physical density violations, duplicate photograph re-uploads, artificial pricing spikes, and high-velocity submission floods.
+- **Safeguard Modules:**
+  1. **Physical Weight-Density Bounds:** Validates entered weight against empirical single-collection capacity ranges per CPCB material category (e.g., `mat_batteries_lead` $\in [3.0, 800.0]\text{ kg}$, `mat_pcb_high` $\in [0.1, 250.0]\text{ kg}$). Catches negative weights (100 risk pts, `CRITICAL`), physical impossibilities under minimum (40 risk pts, `HIGH`), and excessive haul sizes (45 risk pts, `HIGH`).
+  2. **Perceptual Image Hashing (dHash 64-bit):** Computes horizontal pixel gradients and bitwise Hamming distance $\mathcal{H}(h_1, h_2) = \text{popcount}(h_1 \oplus h_2)$. Any scrap photo within $\mathcal{H} \le 4$ of an existing lot is immediately flagged as a duplicate photo re-upload (60 risk pts, `CRITICAL`).
+  3. **Mandi Market Outlier Detection:** Checks quoted price per kg against regional mandi base rates. Detects unnatural spikes ($> 50\%$ above mandi rate, 35 risk pts, `HIGH`) and predatory/stolen scrap discounts ($< 35\%$ of fair market value, 20 risk pts, `MEDIUM`).
+  4. **Collector Velocity Rate-Limiting:** Queries Supabase `material_lots` for rapid submissions ($> 5$ lots within 15 minutes by a single collector, 30 risk pts, `MEDIUM`).
+- **Composite Multi-Factor Risk Scoring:**
+  - Aggregates individual check penalties: $\text{Risk Score} = \min\left(100, \sum \text{Risk Points}\right)$.
+  - Maps to 4 operational decision tiers:
+    - **LOW ($0\text{--}25$):** `ALLOW` (Clean signal, auto-approved for matching and payout).
+    - **MEDIUM ($26\text{--}55$):** `FLAG_FOR_WEIGHBRIDGE` (Requires weighbridge scale validation photo at recycler yard).
+    - **HIGH ($56\text{--}85$):** `SUPERVISORY_HOLD` (Mandatory recycler supervisor review).
+    - **CRITICAL ($86\text{--}100$):** `BLOCK` (Blocked from digital payout, probable fraudulent submission).
+- **Low-Literacy Vernacular Feedback:**
+  - Automatically synthesizes spoken audio guidance in Hindi and Marathi (e.g., warnings about re-used photos or scale errors).
+- **Artifacts Created/Modified:**
+  - [`backend/anomaly/detector.py`](file:///C:/Users/srima/Documents/Web%20Experiments/Kabadiwala%20Connect/backend/anomaly/detector.py): Core multi-factor anomaly engine, density boundaries, Hamming distance evaluator, and vernacular generator.
+  - [`backend/anomaly/__init__.py`](file:///C:/Users/srima/Documents/Web%20Experiments/Kabadiwala%20Connect/backend/anomaly/__init__.py): Public module exports.
+  - [`backend/app/services/anomaly_detector.py`](file:///C:/Users/srima/Documents/Web%20Experiments/Kabadiwala%20Connect/backend/app/services/anomaly_detector.py): Service facade delegating to canonical detector.
+  - [`backend/main.py`](file:///C:/Users/srima/Documents/Web%20Experiments/Kabadiwala%20Connect/backend/main.py): Production `GET /anomaly-check` and `POST /anomaly-check` endpoints.
+  - [`backend/test_anomaly.py`](file:///C:/Users/srima/Documents/Web%20Experiments/Kabadiwala%20Connect/backend/test_anomaly.py): Comprehensive 7-test verification suite.
 
 ---
 
@@ -317,20 +386,49 @@ stateDiagram-v2
    ```bash
    $env:PYTHONIOENCODING="utf-8"; .venv\Scripts\python.exe test_api_endpoints.py
    ```
-   **Result:** All 10 verification tests passed (all 8 routes + Supabase lot insert/query + CORS `access-control-allow-origin`).
+   **Result:** All 10 verification tests passed (all routes + Supabase lot insert/query + CORS headers).
 5. **ML Material Classifier Test Suite (`test_classifier.py`):**
    ```bash
    $env:PYTHONIOENCODING="utf-8"; .venv\Scripts\python.exe test_classifier.py
    ```
+   **Result:** All 8 verification tests passed (PCB archetype, Copper cable, Battery hazard alert, Confidence tiers, Active learning queue logging, Vernacular speech).
+6. **Pricing Engine Test Suite (`test_pricing.py`):**
+   ```bash
+   $env:PYTHONIOENCODING="utf-8"; .venv\Scripts\python.exe test_pricing.py
+   ```
    **Result:** All 8 verification tests passed:
-   - High-Grade PCB Archetype classified with 0.93 confidence (`mat_pcb_high`, CPCB `ITEW1-PCB-HG`, dHash `cc036586cd250bca`).
-   - Copper Cables classified with 0.93 confidence (`mat_cables_copper`, CPCB `ITEW-CBL-CU`).
-   - Lead-Acid Battery flagged as `HAZARDOUS` with safety warnings and Hindi spoken caution alert.
-   - Confidence tiers verified: HIGH -> `AUTO_SELECT_BADGE`, MEDIUM -> `SHOW_SUGGESTIONS`, LOW -> `MANUAL_GRID_SELECT`.
-   - FastAPI `POST /classify` verified via both `multipart/form-data` and `application/json` (Base64).
-   - Bilingual Hindi and Marathi vernacular spoken audio announcements verified.
-   - All 9 pictorial grid categories verified with English, Hindi, Marathi labels and icons.
-6. **Frontend Production Build:**
+   - Hand-Calculated PCB (10kg, good): ₹2,400.00 [₹2,280.00 - ₹2,520.00] exact match.
+   - Hand-Calculated Battery (20kg, fair): ₹1,600.00 [₹1,520.00 - ₹1,680.00] exact match.
+   - Hand-Calculated CRT (12kg, poor): ₹99.00 [₹94.05 - ₹103.95] exact match.
+   - Hand-Calculated Copper Cable (5kg, good): ₹1,900.00 [₹1,805.00 - ₹1,995.00] exact match.
+   - Dynamic DB Lookup: Updating base rate in Supabase from ₹15 to ₹25 altered valuation from ₹150 to ₹250 (proved live lookup).
+   - FastAPI `POST /estimate-price` and `GET /prices/daily` verified.
+   - Vernacular Hindi & Marathi spoken summaries verified.
+7. **Recycler Matching Test Suite (`test_matching.py`):**
+   ```bash
+   $env:PYTHONIOENCODING="utf-8"; .venv\Scripts\python.exe test_matching.py
+   ```
+   **Result:** All 7 verification tests passed:
+   - Test 1: Hard filter excluded 100% of unauthorized/suspended facilities.
+   - Test 2: Material acceptance filter verified against CPCB codes.
+   - Test 3: Haversine distance formula validated (Dharavi to Ecoreco: 1.97 km; to Pune: 110.01 km).
+   - Test 4: Multi-criteria MCDA scoring strictly ranked by combined utility score.
+   - Test 5: Doorstep pickup filter isolated active vehicle collection services.
+   - Test 6: Bilingual Hindi/Marathi and English badges generated.
+   - Test 7: FastAPI `GET /match-recyclers` live endpoint returned HTTP 200 with structured ranked list.
+8. **Anomaly & Fraud Detection Test Suite (`test_anomaly.py`):**
+   ```bash
+   $env:PYTHONIOENCODING="utf-8"; .venv\Scripts\python.exe test_anomaly.py
+   ```
+   **Result:** All 7 verification tests passed:
+   - Test 1: Clean lot produces LOW risk score (0) and ALLOW decision.
+   - Test 2: Physical weight density checks catch under-weight, over-weight, and negative values.
+   - Test 3: Perceptual dHash detects exact duplicate (dist=0) and near-duplicate (dist=1 <= 4).
+   - Test 4: Pricing outlier checks detect market rate spikes (+150%) and depressed pricing (-92%).
+   - Test 5: Multi-factor risk scoring caps at 100 and maps to BLOCK (95 pts) and WEIGHBRIDGE (40 pts).
+   - Test 6: Vernacular Hindi and Marathi spoken feedback correctly synthesized.
+   - Test 7: FastAPI `GET /anomaly-check` and `POST /anomaly-check` verified with HTTP 200.
+9. **Frontend Production Build:**
    ```bash
    npm run build
    ```
@@ -345,11 +443,11 @@ stateDiagram-v2
 | **Chunk 1** | Monorepo skeleton, local dev env, FastAPI & Vite React | `frontend/`, `backend/`, `datasets/` | **COMPLETE (`25574a0`)** |
 | **Chunk 2** | Database & All Seven Datasets (Supabase + Postgres) | `backend/supabase_schema.sql`, `app/db/` | **COMPLETE (`5acd2af`, `6a5f17e`)** |
 | **Chunk 3** | Backend API Foundation, Core Route Stubs & CORS | `backend/main.py`, `backend/test_api_endpoints.py` | **COMPLETE (`e6620ed`)** |
-| **Chunk 4** | ML Material Classifier (MobileNetV2 / TFLite) | `backend/ml/`, `POST /classify`, `test_classifier.py` | **COMPLETE** |
-| **Chunk 5** | Pricing & Valuation Engine Finalization | `backend/pricing/`, `POST /estimate-price` | **NEXT UP** |
-| **Chunk 6** | Recycler Matching Engine (MCDA Ranking) | `backend/matching/`, `GET /match-recyclers` | Queued |
-| **Chunk 7** | Anomaly & Fraud Detection Engine | `backend/anomaly/`, `GET /anomaly-check` | Queued |
-| **Chunk 8** | Offline Storage (Dexie.js IndexedDB) & PWA Shell | `frontend/src/db/`, `frontend/src/i18n/` | Queued |
+| **Chunk 4** | ML Material Classifier (MobileNetV2 / TFLite) | `backend/ml/`, `POST /classify`, `test_classifier.py` | **COMPLETE (`234917f`)** |
+| **Chunk 5** | Pricing & Valuation Engine Finalization | `backend/pricing/`, `POST /estimate-price`, `test_pricing.py`| **COMPLETE** |
+| **Chunk 6** | Recycler Matching Engine (MCDA Ranking) | `backend/matching/`, `GET /match-recyclers`, `test_matching.py` | **COMPLETE** |
+| **Chunk 7** | Anomaly & Fraud Detection Engine | `backend/anomaly/`, `GET /anomaly-check`, `test_anomaly.py` | **COMPLETE** |
+| **Chunk 8** | Offline Storage (Dexie.js IndexedDB) & PWA Shell | `frontend/src/db/`, `frontend/src/i18n/` | **NEXT UP** |
 | **Chunk 9** | Collector Mobile App UI (Stitch screens integration) | `frontend/src/components/collector/` | Queued |
 | **Chunk 10**| Digital Handover & QR Traceability Settlement | `backend/`, `POST /handover` | Queued |
 | **Chunk 11**| Recycler Web Dashboard & Earnings Ledger | `frontend/`, `GET /earnings/{id}` | Queued |
