@@ -2,7 +2,7 @@
 **Vernacular, Offline-Tolerant Scrap & E-Waste Traceability Platform**  
 *Connecting India's informal scrap collectors with CPCB-authorized recyclers through edge intelligence, fair price discovery, and cryptographic digital handovers.*
 
-[![CI Pipeline](https://github.com/kabadiwala-connect/re-link/actions/workflows/ci.yml/badge.svg)](.github/workflows/ci.yml)
+[![CI Pipeline](https://github.com/Srimanikanta2006/kabadiwala-connect/actions/workflows/ci.yml/badge.svg)](https://github.com/Srimanikanta2006/kabadiwala-connect/actions/workflows/ci.yml)
 [![Design System](https://img.shields.io/badge/Design_System-RE%3ALINK_Stitch-006948)](stitch-designs/design-system.md)
 [![EPR Compliance](https://img.shields.io/badge/EPR-CPCB_2022_Aligned-blue)](shared/taxonomy/material_taxonomy.md)
 [![Edge AI](https://img.shields.io/badge/Edge_AI-TFLite_INT8_%3C8MB-brightgreen)](docs/edge_vs_cloud.md)
