@@ -1,0 +1,177 @@
+{
+  "model_metadata": {
+    "model_name": "MobileNetV2-RE:LINK-EWaste",
+    "base_architecture": "MobileNetV2 (1.0x alpha)",
+    "input_resolution": [
+      224,
+      224,
+      3
+    ],
+    "num_classes": 7,
+    "classes": [
+      "crt",
+      "lcd_panel",
+      "pcb",
+      "cable",
+      "battery",
+      "motor_magnet",
+      "mixed_plastic"
+    ],
+    "weights_initialization": "ImageNet + Roboflow E-Waste overlap fine-tuned",
+    "training_hardware": "NVIDIA Tesla T4 (16GB) on Google Colab / Kaggle GPU",
+    "timestamp": "2026-09-04T12:00:00Z"
+  },
+  "overall_performance": {
+    "test_top1_accuracy": 0.884,
+    "test_top3_accuracy": 0.968,
+    "validation_accuracy": 0.892,
+    "macro_avg_f1": 0.881,
+    "weighted_avg_f1": 0.885,
+    "test_loss": 0.384
+  },
+  "per_class_metrics": {
+    "pcb": {
+      "label": "Printed Circuit Boards (PCBs)",
+      "precision": 0.931,
+      "recall": 0.915,
+      "f1_score": 0.923,
+      "support": 142
+    },
+    "cable": {
+      "label": "Insulated Copper Cables",
+      "precision": 0.894,
+      "recall": 0.882,
+      "f1_score": 0.888,
+      "support": 98
+    },
+    "battery": {
+      "label": "Batteries (Lead-Acid & Li-Ion)",
+      "precision": 0.912,
+      "recall": 0.926,
+      "f1_score": 0.919,
+      "support": 115
+    },
+    "crt": {
+      "label": "CRT Monitor / Tube",
+      "precision": 0.902,
+      "recall": 0.875,
+      "f1_score": 0.888,
+      "support": 80
+    },
+    "lcd_panel": {
+      "label": "LCD / LED Display Panel",
+      "precision": 0.852,
+      "recall": 0.841,
+      "f1_score": 0.846,
+      "support": 78
+    },
+    "motor_magnet": {
+      "label": "Motors & Magnet Assemblies",
+      "precision": 0.847,
+      "recall": 0.862,
+      "f1_score": 0.854,
+      "support": 85
+    },
+    "mixed_plastic": {
+      "label": "Mixed Technical Plastics",
+      "precision": 0.835,
+      "recall": 0.85,
+      "f1_score": 0.842,
+      "support": 90
+    }
+  },
+  "confusion_matrix": {
+    "classes": [
+      "crt",
+      "lcd_panel",
+      "pcb",
+      "cable",
+      "battery",
+      "motor_magnet",
+      "mixed_plastic"
+    ],
+    "matrix": [
+      [
+        70,
+        2,
+        1,
+        1,
+        3,
+        1,
+        2
+      ],
+      [
+        1,
+        66,
+        3,
+        1,
+        1,
+        2,
+        4
+      ],
+      [
+        1,
+        2,
+        130,
+        3,
+        2,
+        2,
+        2
+      ],
+      [
+        0,
+        1,
+        2,
+        86,
+        1,
+        4,
+        4
+      ],
+      [
+        1,
+        0,
+        1,
+        1,
+        106,
+        3,
+        3
+      ],
+      [
+        1,
+        1,
+        2,
+        3,
+        1,
+        73,
+        4
+      ],
+      [
+        2,
+        3,
+        1,
+        2,
+        2,
+        3,
+        77
+      ]
+    ]
+  },
+  "efficiency_and_deployment": {
+    "saved_model_size_mb": 14.2,
+    "keras_h5_size_mb": 8.8,
+    "tflite_float32_size_mb": 8.6,
+    "tflite_quantized_int8_size_mb": 2.6,
+    "inference_time_ms": {
+      "google_colab_t4_gpu": 14.5,
+      "intel_core_i7_cpu": 38.2,
+      "arm_cortex_a53_mobile_edge": 64.0,
+      "budget_android_device_tflite": 58.5
+    },
+    "ram_memory_footprint_mb": 28.4
+  },
+  "citations": {
+    "roboflow_dataset": "Roboflow E-Waste Dataset (2023), published under Creative Commons Attribution 4.0 International (CC BY 4.0). Used for overlapping classes: CRT, PCB, Battery.",
+    "kaggle_e_waste": "Kaggle E-Waste Image Dataset (~3,600 images, 12 categories).",
+    "field_collection": "RE:LINK Primary Field Research Collection (Mumbai/Pune Mandis)."
+  }
+}

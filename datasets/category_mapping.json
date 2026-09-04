@@ -1,0 +1,85 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "version": "1.0.0",
+  "fixed_categories": [
+    {
+      "index": 0,
+      "macro_category": "CRT",
+      "slug": "crt",
+      "name_en": "CRT Monitor / TV Tube",
+      "name_hi": "सीआरटी मॉनिटर / पुराना टीवी ट्यूब",
+      "name_mr": "सीआरटी मॉनिटर / जुना टीव्ही ट्यूब",
+      "cpcb_code": "CEEW1-CRT",
+      "granular_id": "mat_crt_monitor",
+      "hazard_level": "HAZARDOUS"
+    },
+    {
+      "index": 1,
+      "macro_category": "LCD-Panel",
+      "slug": "lcd_panel",
+      "name_en": "LCD / LED Display Panel",
+      "name_hi": "एलसीडी / एलईडी डिस्प्ले स्क्रीन",
+      "name_mr": "एलसीडी / एलईडी डिस्प्ले स्क्रीन",
+      "cpcb_code": "CEEW1-FPD",
+      "granular_id": "mat_lcd_panel",
+      "hazard_level": "MEDIUM"
+    },
+    {
+      "index": 2,
+      "macro_category": "PCB",
+      "slug": "pcb",
+      "name_en": "Printed Circuit Boards (PCBs)",
+      "name_hi": "सर्किट बोर्ड (मदरबोर्ड एवं पावर सप्लाई)",
+      "name_mr": "सर्किट बोर्ड (मदरबोर्ड आणि पॉवर सप्लाय)",
+      "cpcb_code": "ITEW1-PCB-HG",
+      "granular_id": "mat_pcb_high",
+      "sub_classes": ["mat_pcb_high", "mat_pcb_low"],
+      "hazard_level": "LOW"
+    },
+    {
+      "index": 3,
+      "macro_category": "Cable",
+      "slug": "cable",
+      "name_en": "Insulated Copper Cables & Wire Harness",
+      "name_hi": "तांबे के तार और केबल (इन्सुलेटेड)",
+      "name_mr": "तांब्याची वायर आणि केबल (इन्सुलेटेड)",
+      "cpcb_code": "ITEW-CBL-CU",
+      "granular_id": "mat_cables_copper",
+      "hazard_level": "LOW"
+    },
+    {
+      "index": 4,
+      "macro_category": "Battery",
+      "slug": "battery",
+      "name_en": "Batteries (Lead-Acid & Li-Ion)",
+      "name_hi": "बैटरी (लेड-एसिड एवं लिथियम-आयन)",
+      "name_mr": "बॅटरी (लेड-अ‍ॅसिड आणि लिथियम-आयन)",
+      "cpcb_code": "BATT-PB-ACID",
+      "granular_id": "mat_batteries_lead",
+      "sub_classes": ["mat_batteries_lead", "mat_batteries_li_ion"],
+      "hazard_level": "HAZARDOUS"
+    },
+    {
+      "index": 5,
+      "macro_category": "Motor-Magnet",
+      "slug": "motor_magnet",
+      "name_en": "Motors & Magnet Assemblies",
+      "name_hi": "इलेक्ट्रिक मोटर और चुंबक असेंबली",
+      "name_mr": "इलेक्ट्रिक मोटर आणि मॅग्नेट असेंब्ली",
+      "cpcb_code": "ITEW-MTR-MAG",
+      "granular_id": "mat_motors_magnets",
+      "hazard_level": "LOW"
+    },
+    {
+      "index": 6,
+      "macro_category": "Mixed-Plastic",
+      "slug": "mixed_plastic",
+      "name_en": "Mixed Technical Plastics (ABS / HIPS)",
+      "name_hi": "मिक्स्ड टेक्निकल प्लास्टिक (ABS / HIPS)",
+      "name_mr": "मिक्स्ड टेक्निकल प्लास्टिक (ABS / HIPS)",
+      "cpcb_code": "PLAST-ENG-MIX",
+      "granular_id": "mat_mixed_plastics",
+      "hazard_level": "LOW"
+    }
+  ]
+}

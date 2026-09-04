@@ -108,8 +108,9 @@ def test_4_confidence_tiers_human_in_the_loop():
     assert res_low["confidence_tier"] == "LOW"
     assert res_low["auto_select"] is False
     assert res_low["recommended_action"] == "MANUAL_GRID_SELECT"
+    assert res_low["logged_for_retraining"] is True
     assert len(res_low["grid_categories"]) == 9
-    print("  ✓ Tier LOW (0.42) -> Action: MANUAL_GRID_SELECT, auto_select=False, 9 fallback grid tiles")
+    print("  ✓ Tier LOW (0.42) -> Action: MANUAL_GRID_SELECT, auto_select=False, logged_for_retraining=True")
 
 
 def test_5_fastapi_multipart_upload():

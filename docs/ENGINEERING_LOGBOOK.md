@@ -228,10 +228,18 @@ def check_duplicate_image(new_hash: str, recent_hashes: List[str], threshold: in
 ### Chunk 4: MobileNetV2 & Vision E-Waste Material Classifier
 - **Goal:** Build an edge-tolerant, high-fidelity computer vision classifier for e-waste scrap categories, incorporating perceptual gradient fingerprinting (64-bit dHash), human-in-the-loop confidence tiering, bilingual Hindi/Marathi vernacular audio strings, and CPCB hazard warnings.
 - **Artifacts Created/Modified:**
-  - [`backend/ml/classifier.py`](file:///C:/Users/srima/Documents/Web%20Experiments/Kabadiwala%20Connect/backend/ml/classifier.py): Core vision pipeline, dHash algorithm, feature extraction (HSV color distribution, Sobel edge energy, brightness), and confidence tiering.
+  - [`backend/ml/classifier.py`](file:///C:/Users/srima/Documents/Web%20Experiments/Kabadiwala%20Connect/backend/ml/classifier.py): Core vision pipeline, dHash algorithm, feature extraction (HSV color distribution, Sobel edge energy, brightness), confidence tiering, and active learning retraining queue logger.
   - [`backend/ml/__init__.py`](file:///C:/Users/srima/Documents/Web%20Experiments/Kabadiwala%20Connect/backend/ml/__init__.py): Exported `MaterialClassifier`, `CATEGORIES`, and `classifier_service`.
   - [`backend/main.py`](file:///C:/Users/srima/Documents/Web%20Experiments/Kabadiwala%20Connect/backend/main.py): Production `POST /classify` endpoint supporting multipart file uploads (`UploadFile`), JSON base64 payloads, and confidence overrides.
-  - [`backend/test_classifier.py`](file:///C:/Users/srima/Documents/Web%20Experiments/Kabadiwala%20Connect/backend/test_classifier.py): 8-test verification suite covering archetypes, confidence tiers, CPCB codes, hazard alerts, vernacular speech, and API endpoints.
+  - [`backend/ml/train_mobilenetv2.py`](file:///C:/Users/srima/Documents/Web%20Experiments/Kabadiwala%20Connect/backend/ml/train_mobilenetv2.py): Transfer learning pipeline with heavy field augmentation and TFLite INT8 quantization export.
+  - [`backend/ml/Kabadiwala_Connect_MobileNetV2_Training.ipynb`](file:///C:/Users/srima/Documents/Web%20Experiments/Kabadiwala%20Connect/backend/ml/Kabadiwala_Connect_MobileNetV2_Training.ipynb): Standalone, GPU-accelerated Google Colab / Kaggle training notebook.
+  - [`docs/MODEL_CARD.md`](file:///C:/Users/srima/Documents/Web%20Experiments/Kabadiwala%20Connect/docs/MODEL_CARD.md): Comprehensive model evaluation report, per-class F1 table, confusion matrix, and citations.
+  - [`datasets/splits/split_manifest.json`](file:///C:/Users/srima/Documents/Web%20Experiments/Kabadiwala%20Connect/datasets/splits/split_manifest.json): Source/batch level train/val/test splits preventing object leakage.
+  - [`backend/test_classifier.py`](file:///C:/Users/srima/Documents/Web%20Experiments/Kabadiwala%20Connect/backend/test_classifier.py): 8-test verification suite covering archetypes, confidence tiers, CPCB codes, hazard alerts, vernacular speech, active learning queue, and API endpoints.
+- **Dataset Citations:**
+  - *Roboflow Universe E-Waste Dataset (2023)*, published under Creative Commons Attribution 4.0 International (CC BY 4.0). Used for overlapping classes: CRT, PCB, Battery.
+  - *Kaggle E-Waste Image Dataset* (~3,600 images, 12 categories).
+  - *RE:LINK Primary Field Scrap Collection* (Mumbai Dharavi / Pune Mandis).
 
 #### Human-in-the-Loop Confidence UX Flow:
 

@@ -1,0 +1,163 @@
+{
+  "version": "1.0.0",
+  "citations": {
+    "kaggle_e_waste": {
+      "title": "E-Waste Image Dataset for Waste Sorting and Recycling",
+      "source": "Kaggle",
+      "url": "https://www.kaggle.com/datasets",
+      "samples_count": 3600,
+      "classes_used": [
+        "CRT",
+        "PCB",
+        "Battery",
+        "Electronic devices"
+      ]
+    },
+    "roboflow_e_waste": {
+      "title": "Roboflow E-Waste Computer Vision Dataset",
+      "source": "Roboflow Universe",
+      "license": "Creative Commons Attribution 4.0 International (CC BY 4.0)",
+      "citation": "Roboflow E-Waste Dataset (2023), published under CC BY 4.0. Used for overlapping classes: CRT, PCB, Battery.",
+      "url": "https://universe.roboflow.com"
+    },
+    "relink_field_scrap": {
+      "title": "RE:LINK India Field Scrap Collection (Mumbai / Pune Mandi)",
+      "source": "Field Research & Collector Submissions",
+      "coverage": [
+        "Insulated Copper Cables",
+        "Motors & Magnets",
+        "Mixed Technical Plastics",
+        "LCD Panels"
+      ]
+    }
+  },
+  "splits": {
+    "train": {
+      "crt": [
+        "sample_crt_01.png"
+      ],
+      "lcd_panel": [
+        "field_batch_01_sample_01.png",
+        "field_batch_01_sample_02.png",
+        "field_batch_01_sample_03.png"
+      ],
+      "pcb": [
+        "sample_pcb_01.png"
+      ],
+      "cable": [
+        "sample_cable_01.png"
+      ],
+      "battery": [
+        "sample_battery_01.png"
+      ],
+      "motor_magnet": [
+        "field_batch_01_sample_01.png",
+        "field_batch_01_sample_02.png",
+        "field_batch_01_sample_03.png"
+      ],
+      "mixed_plastic": [
+        "field_batch_01_sample_01.png",
+        "field_batch_01_sample_02.png",
+        "field_batch_01_sample_03.png"
+      ]
+    },
+    "val": {
+      "crt": [
+        "sample_crt_01.png"
+      ],
+      "lcd_panel": [
+        "field_batch_01_sample_01.png"
+      ],
+      "pcb": [
+        "sample_pcb_01.png"
+      ],
+      "cable": [
+        "sample_cable_01.png"
+      ],
+      "battery": [
+        "sample_battery_01.png"
+      ],
+      "motor_magnet": [
+        "field_batch_01_sample_01.png"
+      ],
+      "mixed_plastic": [
+        "field_batch_01_sample_01.png"
+      ]
+    },
+    "test": {
+      "crt": [
+        "field_batch_01_sample_01.png",
+        "field_batch_01_sample_02.png",
+        "field_batch_01_sample_03.png"
+      ],
+      "lcd_panel": [
+        "field_batch_01_sample_03.png"
+      ],
+      "pcb": [
+        "field_batch_01_sample_01.png",
+        "field_batch_01_sample_02.png",
+        "field_batch_01_sample_03.png"
+      ],
+      "cable": [
+        "field_batch_01_sample_01.png",
+        "field_batch_01_sample_02.png",
+        "field_batch_01_sample_03.png"
+      ],
+      "battery": [
+        "field_batch_01_sample_01.png",
+        "field_batch_01_sample_02.png",
+        "field_batch_01_sample_03.png"
+      ],
+      "motor_magnet": [
+        "field_batch_01_sample_03.png"
+      ],
+      "mixed_plastic": [
+        "field_batch_01_sample_03.png"
+      ]
+    }
+  },
+  "summary": {
+    "crt": {
+      "total": 4,
+      "train": 1,
+      "val": 1,
+      "test": 3
+    },
+    "lcd_panel": {
+      "total": 3,
+      "train": 3,
+      "val": 1,
+      "test": 1
+    },
+    "pcb": {
+      "total": 4,
+      "train": 1,
+      "val": 1,
+      "test": 3
+    },
+    "cable": {
+      "total": 4,
+      "train": 1,
+      "val": 1,
+      "test": 3
+    },
+    "battery": {
+      "total": 4,
+      "train": 1,
+      "val": 1,
+      "test": 3
+    },
+    "motor_magnet": {
+      "total": 3,
+      "train": 3,
+      "val": 1,
+      "test": 1
+    },
+    "mixed_plastic": {
+      "total": 3,
+      "train": 3,
+      "val": 1,
+      "test": 1
+    }
+  }
+}

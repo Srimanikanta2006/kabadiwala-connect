@@ -411,6 +411,29 @@ class MaterialClassifier:
                 "confidence": round(s_conf, 2)
             })
 
+        # Log low-confidence images to retraining queue for active learning
+        logged_for_retraining = False
+        if confidence_tier == "LOW":
+            try:
+                queue_dir = Path(__file__).resolve().parent.parent.parent / "datasets" / "retraining_queue"
+                queue_dir.mkdir(parents=True, exist_ok=True)
+                sample_path = queue_dir / f"{dhash}.png"
+                if not sample_path.exists():
+                    img.save(sample_path, format="PNG")
+                
+                manifest_line = {
+                    "dhash": dhash,
+                    "top_category_guess": top_cid,
+                    "confidence": conf,
+                    "status": "QUEUED_FOR_ANNOTATION"
+                }
+                manifest_file = queue_dir / "queue_manifest.jsonl"
+                with open(manifest_file, "a", encoding="utf-8") as mf:
+                    mf.write(json.dumps(manifest_line) + "\n")
+                logged_for_retraining = True
+            except Exception as e:
+                logger.warning(f"Could not log low-confidence sample to retraining queue: {e}")
+
         # Return full response
         return {
             "top_category": top_cid,
@@ -424,6 +447,7 @@ class MaterialClassifier:
             "confidence_tier": confidence_tier,
             "auto_select": auto_select,
             "recommended_action": recommended_action,
+            "logged_for_retraining": logged_for_retraining,
             "image_dhash": dhash,
             "spoken_announcements": {
                 "hi": spoken_hi,
@@ -446,3 +470,11 @@ class MaterialClassifier:
 
 # Global singleton instance for high-throughput reuse
 classifier_service = MaterialClassifier()
+
+
+def predict(image_bytes: bytes) -> Dict[str, Any]:
+    """
+    Top-level convenience prediction function.
+    Loads and runs inference over raw image bytes, returning category, confidence, and top-3 suggestions.
+    """
+    return classifier_service.classify(image_bytes)
