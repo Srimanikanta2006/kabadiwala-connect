@@ -21,6 +21,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.db.supabase_client import get_supabase, get_materials, get_recyclers, get_prices, insert_lot
 from app.services.pricing_engine import calculate_valuation, REGIONAL_MANDI_CACHE
 from app.services.recycler_matcher import match_and_rank_recyclers
+from pricing.price_board import get_price_board_data
+from app.services.bhashini_tts import synthesize_speech_bhashini
 from anomaly.detector import (
     evaluate_lot_anomaly,
     check_weight_bounds,
@@ -259,6 +261,47 @@ def get_daily_prices_endpoint(location: str = Query("IN-MH-MUM", description="Re
         "prices": [{"material_id": k, "base_rate_per_kg": v, "unit": "kg"} for k, v in rates.items()],
         "timestamp": datetime.utcnow().isoformat()
     }
+
+
+@app.get("/prices/board", tags=["Pricing"])
+def get_price_board_endpoint(
+    location: str = Query("IN-MH-MUM", description="Regional mandi location code"),
+    language: str = Query("hi", description="Collector preferred vernacular language (hi, mr, en)")
+):
+    """
+    GET /prices/board -> Real-time Mandi Price Board with Trends & Spoken Audio Scripts.
+    Returns current rates, previous day rates, up/down trend arrows, sparkline history, and voice text.
+    """
+    try:
+        board = get_price_board_data(location=location, preferred_lang=language)
+        return board
+    except Exception as e:
+        logger.error(f"Price board error: {e}", exc_info=True)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail={"success": False, "error": str(e)}
+        )
+
+
+@app.post("/tts/synthesize", tags=["Voice"])
+async def synthesize_speech_endpoint(payload: Dict[str, Any] = Body(...)):
+    """
+    POST /tts/synthesize -> Bhashini Indic TTS speech synthesis endpoint.
+    Accepts { text: "...", language: "hi"|"mr"|"en", gender: "female"|"male" }
+    Returns base64 audio content from Bhashini, or fallback instructions for Web Speech API.
+    """
+    text = payload.get("text", "")
+    language = payload.get("language", "hi")
+    gender = payload.get("gender", "female")
+
+    if not text:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail={"success": False, "error": "Text parameter is required for speech synthesis."}
+        )
+
+    res = await synthesize_speech_bhashini(text=text, language=language, gender=gender)
+    return res
 
 
 @app.get("/match-recyclers", tags=["Matching"])

@@ -420,19 +420,28 @@ stateDiagram-v2
    ```bash
    $env:PYTHONIOENCODING="utf-8"; .venv\Scripts\python.exe test_anomaly.py
    ```
-   **Result:** All 7 verification tests passed:
-   - Test 1: Clean lot produces LOW risk score (0) and ALLOW decision.
-   - Test 2: Physical weight density checks catch under-weight, over-weight, and negative values.
-   - Test 3: Perceptual dHash detects exact duplicate (dist=0) and near-duplicate (dist=1 <= 4).
-   - Test 4: Pricing outlier checks detect market rate spikes (+150%) and depressed pricing (-92%).
-   - Test 5: Multi-factor risk scoring caps at 100 and maps to BLOCK (95 pts) and WEIGHBRIDGE (40 pts).
-   - Test 6: Vernacular Hindi and Marathi spoken feedback correctly synthesized.
-   - Test 7: FastAPI `GET /anomaly-check` and `POST /anomaly-check` verified with HTTP 200.
-9. **Frontend Production Build:**
+   **Result:** All 6 verification tests passed:
+   - Test 1: Known-good legitimate scrap lots across all categories produce ZERO false positives (`ALLOW`, Risk 0).
+   - Test 2: Deliberately inflated test price (₹550/kg vs ₹240/kg) flagged by Z-score (19.87 > 2.0) and IQR fence.
+   - Test 3: Perceptual dHash detects exact duplicate (dist=0) and near-duplicate (dist=1 <= 4) from same collector.
+   - Test 4: Repeated rejected transactions per collector (>= 2 in 7 days) correctly flagged.
+   - Test 5: Physical weight density checks catch impossible weights (negative, under-min, over-max).
+   - Test 6: FastAPI `GET /anomaly-check` and `POST /anomaly-check/run-background-job` verified.
+9. **Price Board, Trends & Voice Test Suite (`test_price_board.py`):**
+   ```bash
+   $env:PYTHONIOENCODING="utf-8"; .venv\Scripts\python.exe test_price_board.py
+   ```
+   **Result:** All 5 verification tests passed:
+   - Test 1: Real database data loaded from Supabase `prices` table (live rates and multi-point sparklines).
+   - Test 2: Spoken voice readouts in Hindi and Marathi generated with correct colloquial grammar.
+   - Test 3: Trend direction arithmetic verified (▲ UP for ₹230->₹240, ▼ DOWN for ₹240->₹220, ― STABLE for equal).
+   - Test 4: Live Supabase price edit proved that changing test rate in database changes the trend arrow direction on the board.
+   - Test 5: FastAPI `GET /prices/board` and `POST /tts/synthesize` verified with HTTP 200.
+10. **Frontend Production Build:**
    ```bash
    npm run build
    ```
-   **Result:** `✓ built in 478ms`, verified 20 modules compiled cleanly into `dist/`.
+   **Result:** `✓ built in 575ms`, verified 18 modules compiled cleanly into `dist/`.
 
 ---
 
@@ -444,9 +453,10 @@ stateDiagram-v2
 | **Chunk 2** | Database & All Seven Datasets (Supabase + Postgres) | `backend/supabase_schema.sql`, `app/db/` | **COMPLETE (`5acd2af`, `6a5f17e`)** |
 | **Chunk 3** | Backend API Foundation, Core Route Stubs & CORS | `backend/main.py`, `backend/test_api_endpoints.py` | **COMPLETE (`e6620ed`)** |
 | **Chunk 4** | ML Material Classifier (MobileNetV2 / TFLite) | `backend/ml/`, `POST /classify`, `test_classifier.py` | **COMPLETE (`234917f`)** |
-| **Chunk 5** | Pricing & Valuation Engine Finalization | `backend/pricing/`, `POST /estimate-price`, `test_pricing.py`| **COMPLETE** |
-| **Chunk 6** | Recycler Matching Engine (MCDA Ranking) | `backend/matching/`, `GET /match-recyclers`, `test_matching.py` | **COMPLETE** |
-| **Chunk 7** | Anomaly & Fraud Detection Engine | `backend/anomaly/`, `GET /anomaly-check`, `test_anomaly.py` | **COMPLETE** |
+| **Chunk 5** | Pricing & Valuation Engine Finalization | `backend/pricing/`, `POST /estimate-price`, `test_pricing.py`| **COMPLETE (`ebafa00`)** |
+| **Chunk 6** | Recycler Matching Engine (MCDA Ranking) | `backend/matching/`, `GET /match-recyclers`, `test_matching.py` | **COMPLETE (`ebafa00`)** |
+| **Chunk 7** | Anomaly & Fraud Detection Engine | `backend/anomaly/`, `GET /anomaly-check`, `test_anomaly.py` | **COMPLETE (`42632fc`)** |
+| **Feature** | **Price Board, Trends & Voice (Bhashini TTS)** | `backend/pricing/price_board.py`, `frontend/src/components/PriceBoard.jsx` | **COMPLETE** |
 | **Chunk 8** | Offline Storage (Dexie.js IndexedDB) & PWA Shell | `frontend/src/db/`, `frontend/src/i18n/` | **NEXT UP** |
 | **Chunk 9** | Collector Mobile App UI (Stitch screens integration) | `frontend/src/components/collector/` | Queued |
 | **Chunk 10**| Digital Handover & QR Traceability Settlement | `backend/`, `POST /handover` | Queued |
