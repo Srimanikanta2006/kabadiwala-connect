@@ -39,7 +39,21 @@ from app.services.handover_service import (
     list_recent_handovers,
     generate_qr_code
 )
-from app.schemas.pydantic_models import HandoverInitiateRequest, HandoverConfirmRequest
+from app.services.ledger_service import (
+    get_collector_ledger,
+    record_transaction,
+    settle_cash_payment
+)
+from app.services.safety_service import (
+    get_all_safety_cards,
+    get_contextual_safety_cards,
+    get_card_audio
+)
+from app.schemas.pydantic_models import (
+    HandoverInitiateRequest,
+    HandoverConfirmRequest,
+    CashSettlementRequest
+)
 
 logger = logging.getLogger("kabadiwala.api")
 
@@ -685,42 +699,104 @@ def get_traceability_list(limit: int = Query(15, ge=1, le=100)):
     }
 
 
+# ------------------------------------------------------------------------------
+# Earnings Ledger (Chunk 11)
+# ------------------------------------------------------------------------------
 @app.get("/earnings/{collector_id}", tags=["Earnings"])
 def get_collector_earnings(collector_id: str):
     """
     GET /earnings/{collector_id} -> Chunk 11
-    Fetches collector transaction ledger from Supabase.
+    Fetches collector transaction ledger with completed vs. pending dues calculated separately.
     """
-    client = get_supabase()
-    if client:
-        try:
-            res = client.table("transactions").select("*").eq("collector_id", collector_id).execute()
-            total_earned = sum(float(t.get("final_price", 0)) for t in res.data)
-            return {
-                "success": True,
-                "collector_id": collector_id,
-                "total_earnings_inr": total_earned,
-                "transaction_count": len(res.data),
-                "transactions": res.data
-            }
-        except Exception as e:
-            pass
+    try:
+        ledger = get_collector_ledger(collector_id)
+        return ledger
+    except Exception as e:
+        logger.error(f"Error fetching earnings ledger for {collector_id}: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
 
+
+@app.post("/earnings/record-cash", tags=["Earnings"])
+def record_cash_transaction(req: CashSettlementRequest):
+    """
+    POST /earnings/record-cash -> Chunk 11
+    Allows instant cash settlement with NO digital payment requirement or blockers.
+    """
+    try:
+        res = record_transaction(
+            collector_id=req.collector_id,
+            material_category=req.material_category,
+            weight=req.weight,
+            quoted_price=req.quoted_price,
+            final_price=req.final_price,
+            recycler_id=req.recycler_id,
+            lot_id=req.lot_id,
+            payment_mode=req.payment_mode or "CASH",
+            payment_status=req.payment_status or "PAID_CASH_CONFIRMED",
+            status=req.status or "COMPLETED"
+        )
+        return res
+    except Exception as e:
+        logger.error(f"Error recording cash transaction: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/earnings/settle-cash/{transaction_id}", tags=["Earnings"])
+def settle_pending_dues_in_cash(transaction_id: str, payload: Optional[Dict[str, Any]] = Body(default={})):
+    """
+    POST /earnings/settle-cash/{transaction_id} -> Chunk 11
+    Settles a pending dues transaction in cash upon collector pickup/receipt.
+    """
+    try:
+        final_amount = payload.get("final_amount") if payload else None
+        res = settle_cash_payment(transaction_id=transaction_id, final_amount=final_amount)
+        return res
+    except ValueError as ve:
+        raise HTTPException(status_code=404, detail=str(ve))
+    except Exception as e:
+        logger.error(f"Error settling cash payment for {transaction_id}: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# ------------------------------------------------------------------------------
+# Safety Guidance (Chunk 11)
+# ------------------------------------------------------------------------------
+@app.get("/safety/cards", tags=["Safety"])
+def get_safety_cards(
+    category: Optional[str] = Query(None, description="Contextual filter: BATTERIES, CABLES, DISPLAYS, PCB, or GENERAL"),
+    language: str = Query("hi", description="Vernacular language code: hi, mr, en")
+):
+    """
+    GET /safety/cards -> Chunk 11
+    Returns icon-based safety cards. If category is specified, returns contextually relevant cards first.
+    """
+    cards = get_contextual_safety_cards(category=category, language=language)
     return {
-        "status": "STUB_CHUNK_11",
-        "collector_id": collector_id,
-        "total_earnings_inr": 3697.50,
-        "transaction_count": 1,
-        "transactions": [
-            {
-                "id": "b1eebc99-9c0b-4ef8-bb6d-6bb9bd380b22",
-                "material_category": "PCB",
-                "final_price": 3697.50,
-                "payment_mode": "CASH",
-                "status": "COMPLETED"
-            }
-        ]
+        "success": True,
+        "count": len(cards),
+        "context_category": category,
+        "language": language,
+        "cards": cards
     }
+
+
+@app.get("/safety/cards/{card_id}/audio", tags=["Safety"])
+async def get_safety_card_audio(
+    card_id: str,
+    language: str = Query("hi", description="Language code: hi or mr")
+):
+    """
+    GET /safety/cards/{card_id}/audio -> Chunk 11
+    Generates or returns Bhashini Indic TTS audio clip for the given safety card.
+    """
+    try:
+        res = await get_card_audio(card_id=card_id, language=language)
+        return res
+    except ValueError as ve:
+        raise HTTPException(status_code=404, detail=str(ve))
+    except Exception as e:
+        logger.error(f"Error generating card audio for {card_id}: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 if __name__ == "__main__":

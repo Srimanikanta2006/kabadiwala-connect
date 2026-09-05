@@ -7,6 +7,9 @@ when running offline or before Supabase credentials are configured.
 import os
 import json
 from typing import Optional, List, Dict, Any
+from dotenv import load_dotenv
+
+load_dotenv()
 
 try:
     from supabase import create_client, Client

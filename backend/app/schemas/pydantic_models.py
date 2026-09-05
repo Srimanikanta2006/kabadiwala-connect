@@ -96,6 +96,19 @@ class HandoverConfirmRequest(BaseModel):
     notes: Optional[str] = None
 
 
+class CashSettlementRequest(BaseModel):
+    collector_id: str
+    material_category: str
+    weight: float
+    quoted_price: float
+    final_price: float
+    recycler_id: str
+    lot_id: Optional[str] = None
+    payment_mode: str = "CASH"
+    payment_status: str = "PAID_CASH_CONFIRMED"
+    status: str = "COMPLETED"
+
+
 class HandoverVerificationRequest(BaseModel):
     lot_id: str
     qr_payload_token: str

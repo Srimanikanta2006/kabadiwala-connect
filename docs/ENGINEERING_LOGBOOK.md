@@ -460,6 +460,22 @@ stateDiagram-v2
    npm run build
    ```
    **Result:** `✓ built in 279ms`, 21 modules transformed cleanly into `dist/`.
+13. **Earnings Ledger & Safety Guidance Test Suite (`test_earnings_safety.py`):**
+   ```bash
+   $env:PYTHONIOENCODING="utf-8"; .venv\Scripts\python.exe -m pytest backend/test_earnings_safety.py -v
+   ```
+   **Result:** All 6 verification tests passed:
+   - Test 1: Completed earnings vs. pending dues correctly segregated and totaled for collectors with multiple transactions.
+   - Test 2: Cash-only usage genuinely works end-to-end with zero digital payment prompts or UPI blocks.
+   - Test 3: All 7 pictorial safety guidance cards verified with custom icons, hazard tiers, vernacular titles, and practical tips.
+   - Test 4: Every safety card verified to have a working Bhashini Indic TTS / speech synthesis audio clip in Hindi & Marathi.
+   - Test 5: Contextual safety guidance surfaces appropriately for high-risk materials (Batteries, Cables, CRTs) rather than wall of text.
+   - Test 6: FastAPI endpoints verified: `GET /earnings/{id}`, `POST /earnings/record-cash`, `POST /earnings/settle-cash/{id}`, `GET /safety/cards`, `GET /safety/cards/{id}/audio`.
+14. **Frontend Production Build (with Earnings Ledger & Safety Guidance):**
+   ```bash
+   npm run build
+   ```
+   **Result:** `✓ built in 210ms`, 25 modules transformed cleanly into `dist/`.
 
 ---
 
@@ -475,8 +491,8 @@ stateDiagram-v2
 | **Chunk 6** | Recycler Matching Engine (MCDA Ranking) | `backend/matching/`, `GET /match-recyclers`, `test_matching.py` | **COMPLETE (`ebafa00`)** |
 | **Chunk 7** | Anomaly & Fraud Detection Engine | `backend/anomaly/`, `GET /anomaly-check`, `test_anomaly.py` | **COMPLETE (`42632fc`)** |
 | **Feature** | **Price Board, Trends & Voice (Bhashini TTS)** | `backend/pricing/price_board.py`, `frontend/src/components/PriceBoard.jsx` | **COMPLETE (`5a83e45`)** |
-| **Chunk 10**| **Handover, Traceability & QR Confirmation** | `backend/app/services/handover_service.py`, `frontend/src/components/HandoverTraceability.jsx` | **COMPLETE** |
+| **Chunk 10**| **Handover, Traceability & QR Confirmation** | `backend/app/services/handover_service.py`, `frontend/src/components/HandoverTraceability.jsx` | **COMPLETE (`387365a`)** |
+| **Chunk 11**| **Earnings Ledger & Safety Guidance** | `backend/app/services/ledger_service.py`, `safety_service.py`, `EarningsLedger.jsx`, `SafetyGuidance.jsx` | **COMPLETE** |
 | **Chunk 8** | Offline Storage (Dexie.js IndexedDB) & PWA Shell | `frontend/src/db/`, `frontend/src/i18n/` | Queued |
 | **Chunk 9** | Collector Mobile App UI (Stitch screens integration) | `frontend/src/components/collector/` | Queued |
-| **Chunk 11**| Recycler Web Dashboard & Earnings Ledger | `frontend/`, `GET /earnings/{id}` | Queued |
 | **Chunk 12**| Field Research Documentation & Unit Economics Model | `docs/field_research.md`, Unit Economics | Queued |
