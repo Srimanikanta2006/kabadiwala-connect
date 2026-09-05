@@ -30,13 +30,24 @@ export default function Screen06EarningsHistory({ onNavigate, syncStatus = { isO
         const res = await fetch('http://localhost:8000/earnings/col_test_001');
         if (res.ok) {
           const data = await res.json();
-          if (data.success && data.transactions) {
-            const completed = data.total_completed_earnings || 18450;
-            const pending = data.total_pending_dues || 5250;
+          if (data && data.success) {
+            const metrics = data.metrics || {};
+            const completed = metrics.total_completed_earnings_inr ?? data.total_completed_earnings ?? 18450;
+            const pending = metrics.total_pending_dues_inr ?? data.total_pending_dues ?? 5250;
+            const txs = (data.completed_transactions || []).concat(data.pending_dues || []);
             setEarnings((prev) => ({
               ...prev,
               totalCompleted: completed,
-              pendingDues: pending
+              pendingDues: pending,
+              transactions: txs.length > 0 ? txs.map((t, idx) => ({
+                id: t.id || `tx_${idx}`,
+                desc: `${t.weight || 12}kg ${t.material_category || 'Scrap'}`,
+                amount: t.final_price || 0,
+                recycler: t.recycler_name ? `${t.recycler_name} • Recent` : 'Authorized Recycler',
+                status: t.payment_status === 'COMPLETED' ? 'Paid' : 'Pending',
+                icon: (t.material_category || '').toLowerCase().includes('cable') ? 'cable' : 'memory',
+                isPaid: t.payment_status === 'COMPLETED'
+              })) : prev.transactions
             }));
           }
         }

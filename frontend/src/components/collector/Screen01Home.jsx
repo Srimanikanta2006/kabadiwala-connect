@@ -220,6 +220,23 @@ export default function Screen01Home({
               <span className="material-symbols-outlined text-xs">auto_awesome</span> AI Camera Detection • तुरंत पहचानें
             </span>
           </button>
+          <div className="flex items-center justify-center gap-3 pt-2.5">
+            <button
+              onClick={() => onNavigate('ai_scan')}
+              className="text-xs font-bold text-primary hover:underline flex items-center gap-1 cursor-pointer"
+            >
+              <span className="material-symbols-outlined text-[15px]">view_in_ar</span>
+              <span>Open AI Viewfinder</span>
+            </button>
+            <span className="text-outline-variant text-xs">•</span>
+            <button
+              onClick={() => onNavigate('category_select')}
+              className="text-xs font-semibold text-on-surface-variant hover:text-on-surface hover:underline flex items-center gap-1 cursor-pointer"
+            >
+              <span className="material-symbols-outlined text-[15px]">grid_view</span>
+              <span>Manual 7-Category Grid</span>
+            </button>
+          </div>
         </section>
 
         {/* Current Market Rates (Bento/Card Grid) */}
