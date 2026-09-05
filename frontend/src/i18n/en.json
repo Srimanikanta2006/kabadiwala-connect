@@ -11,7 +11,6 @@
   "lang_mr": "मराठी",
   "lang_en": "English",
   "badge_chunk": "Chunk 8-11 • Vernacular & Low-Literacy Pass",
-
   "priceboard_badge": "Daily Mandi Rates",
   "priceboard_title": "Today's Mandi Scrap Rates",
   "priceboard_subtitle": "Live benchmark scrap & e-waste buying prices in Dharavi & Kurla Mandi",
@@ -25,7 +24,6 @@
   "priceboard_trend_up": "Rate Increasing",
   "priceboard_trend_down": "Rate Decreasing",
   "priceboard_trend_stable": "Rate Steady",
-
   "handover_badge": "CPCB Digital Traceability",
   "handover_title": "Handover, Traceability & QR Confirmation",
   "handover_subtitle": "Digital handover, cryptographic QR token, and authorized recycler EPR verification",
@@ -69,7 +67,6 @@
   "final_amount_label": "Final Settlement Amount:",
   "payment_status_label": "Payment Status:",
   "audit_disclaimer": "This digital record is legally logged and traceable on CPCB's EPR portal.",
-
   "ledger_badge": "Collector Cash-First Ledger",
   "ledger_title": "Collector Account & Earnings Ledger",
   "ledger_subtitle": "Transparent accounting for cash & digital payments • Separate pending dues and completed earnings",
@@ -91,7 +88,6 @@
   "btn_receive_cash": "💵 Receive Cash",
   "cash_paid": "✅ Cash Paid",
   "no_tx_found": "No transactions found in this category.",
-
   "safety_badge": "Pictorial & Audio Safety Guidance",
   "safety_title": "Scrap Sorting & Safety Guidance",
   "safety_subtitle": "Health & safety for informal waste collectors and dismantlers • Pictorial cards & Bhashini Voice",
@@ -108,7 +104,6 @@
   "gear_label": "Protective Gear:",
   "btn_listen_rules": "🔊 Listen Rules",
   "rules_speaking": "🔊 Audio Playing...",
-
   "guided_title": "🎯 Quick Lot Creation (Icon-First)",
   "guided_subtitle": "Operate the entire lot creation flow with pictures and numbers alone",
   "step_1_material": "1. Pick Material",
@@ -119,5 +114,14 @@
   "photo_captured": "📷 Photo Captured & Analyzed",
   "btn_snap_photo": "📷 Snap Scrap Photo",
   "weight_tap_hint": "Tap preset bag weight or use stepper",
-  "ready_to_sell": "✅ Ready to Sell • Show QR to Recycler"
+  "ready_to_sell": "✅ Ready to Sell • Show QR to Recycler",
+  "offline_airplane_mode": "✈️ Offline (Airplane Mode)",
+  "online_connected": "🟢 Online & Connected",
+  "syncing_data": "🔄 Syncing to Cloud...",
+  "waiting_to_sync": "lot(s) waiting to sync",
+  "all_synced": "All data synced with cloud",
+  "sync_now": "⚡ Sync Now",
+  "simulate_airplane_mode": "Simulate Airplane Mode",
+  "local_offline_records": "Local Storage (IndexedDB)",
+  "saved_locally_msg": "Saved locally in device storage. Will sync automatically once online."
 }

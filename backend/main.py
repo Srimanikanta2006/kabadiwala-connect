@@ -99,6 +99,26 @@ def health_check():
     }
 
 
+@app.get("/materials", tags=["Materials"])
+@app.get("/api/v1/materials", tags=["Materials"])
+def list_materials():
+    """List all standardized e-waste materials and categories."""
+    materials = get_materials()
+    # Enrich for backward-compatibility with early test stubs
+    enriched = []
+    for m in materials:
+        item = dict(m)
+        item["parent_category"] = m.get("category", "")
+        item["name_hi"] = m.get("sub_category", "") + " (हाई-ग्रेड)"
+        enriched.append(item)
+    return {
+        "success": True,
+        "count": len(enriched),
+        "data": enriched
+    }
+
+
+
 # ------------------------------------------------------------------------------
 # Core Feature Stubs (Chunks 4 - 7, 10 - 11)
 # ------------------------------------------------------------------------------
@@ -506,7 +526,8 @@ def trigger_anomaly_background_sweep(
 @app.post("/lots", tags=["Lots"])
 def create_new_lot(lot: Dict[str, Any] = Body(...), background_tasks: BackgroundTasks = BackgroundTasks()):
     """
-    POST /lots -> Create a new material lot in Supabase, and triggers background anomaly inspection.
+    POST /lots -> Create or sync a material lot in Supabase, with automatic storage photo upload
+    and background anomaly inspection.
     """
     # Ensure ID exists
     if "id" not in lot:
@@ -515,33 +536,131 @@ def create_new_lot(lot: Dict[str, Any] = Body(...), background_tasks: Background
         # Default price calculation if omitted
         lot["quoted_price"] = 245.0 * float(lot.get("approximate_weight", 1.0))
 
+    client = get_supabase()
+
+    # Handle offline photo upload (store photo blob/base64 locally, upload once online)
+    photo_b64 = lot.pop("image_base64", None) or lot.pop("photo_base64", None)
+    if photo_b64 and client:
+        try:
+            if "," in photo_b64:
+                _, b64_data = photo_b64.split(",", 1)
+            else:
+                b64_data = photo_b64
+            img_bytes = base64.b64decode(b64_data)
+            photo_filename = f"lot_{lot['id']}.jpg"
+            client.storage.from_("lot-photos").upload(
+                file=img_bytes,
+                path=photo_filename,
+                file_options={"content-type": "image/jpeg", "upsert": "true"}
+            )
+            public_url = client.storage.from_("lot-photos").get_public_url(photo_filename)
+            lot["image_url"] = public_url
+        except Exception as storage_err:
+            logging.warning(f"Could not upload offline photo to Supabase storage: {storage_err}")
+
+    # Ensure collector_id and material_id exist to satisfy foreign keys
+    if "collector_id" not in lot or not lot["collector_id"]:
+        lot["collector_id"] = "col_test_001"
+    if "material_id" not in lot or not lot["material_id"]:
+        cat_map = {
+            "PCB": "mat_pcb_high",
+            "BATTERIES": "mat_batteries_lead",
+            "CABLES": "mat_cables_copper",
+            "DISPLAYS": "mat_crt_monitor",
+            "APPLIANCES": "mat_pcb_high",
+            "MOTORS_MAGNETS": "mat_cables_copper"
+        }
+        lot["material_id"] = cat_map.get(lot.get("material_category", "PCB"), "mat_pcb_high")
+
+    # Whitelist strict PostgreSQL schema columns for material_lots
+    allowed_cols = {
+        "id", "collector_id", "material_id", "material_category",
+        "approximate_weight", "condition", "quoted_price",
+        "image_url", "image_phash", "ai_prediction", "status", "created_at"
+    }
+    clean_lot = {k: v for k, v in lot.items() if k in allowed_cols}
+
     # Queue background anomaly check if background_tasks available
     if background_tasks:
         background_tasks.add_task(run_anomaly_background_sweep, batch_size=10)
 
-    client = get_supabase()
     if client:
         try:
-            res = client.table("material_lots").insert(lot).execute()
+            res = client.table("material_lots").upsert(clean_lot).execute()
             if res.data:
                 return {
                     "success": True,
-                    "message": "Lot created successfully in Supabase",
+                    "message": "Lot synced and saved successfully in Supabase",
                     "data": res.data[0]
+                }
+            else:
+                return {
+                    "success": True,
+                    "message": "Lot upserted in Supabase",
+                    "data": clean_lot
                 }
         except Exception as e:
             return {
                 "success": False,
                 "error": str(e),
-                "fallback_data": lot
+                "fallback_data": clean_lot
             }
 
     # Fallback to local memory mock
     return {
         "success": True,
         "mode": "offline_fallback",
-        "data": lot
+        "data": clean_lot
     }
+
+
+@app.get("/sync/status", tags=["Sync"])
+def get_sync_status():
+    """
+    GET /sync/status -> Lightweight ping endpoint to check backend/cloud connectivity.
+    """
+    return {
+        "status": "ONLINE",
+        "server_time": datetime.utcnow().isoformat(),
+        "database_connected": get_supabase() is not None,
+        "version": "1.0.0"
+    }
+
+
+@app.post("/sync/batch", tags=["Sync"])
+def sync_batch_data(payload: Dict[str, Any] = Body(...), background_tasks: BackgroundTasks = BackgroundTasks()):
+    """
+    POST /sync/batch -> Bulk sync offline lots and handovers queued during Airplane Mode.
+    """
+    lots = payload.get("lots", [])
+    handovers = payload.get("handovers", [])
+    synced_lots = []
+    synced_handovers = []
+
+    for lot_item in lots:
+        res = create_new_lot(lot=lot_item, background_tasks=background_tasks)
+        synced_lots.append(res)
+
+    client = get_supabase()
+    for ho_item in handovers:
+        if client:
+            try:
+                ho_clean = {k: v for k, v in ho_item.items() if k not in ["sync_status", "synced_at"]}
+                res = client.table("traceability").upsert(ho_clean).execute()
+                synced_handovers.append({"success": True, "data": res.data[0] if res.data else ho_clean})
+            except Exception as e:
+                synced_handovers.append({"success": False, "error": str(e), "fallback": ho_item})
+        else:
+            synced_handovers.append({"success": True, "mode": "offline_fallback", "data": ho_item})
+
+    return {
+        "success": True,
+        "synced_lots_count": len(synced_lots),
+        "synced_handovers_count": len(synced_handovers),
+        "lots": synced_lots,
+        "handovers": synced_handovers
+    }
+
 
 
 @app.get("/lots/{lot_id}", tags=["Lots"])

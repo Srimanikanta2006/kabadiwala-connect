@@ -491,6 +491,23 @@ stateDiagram-v2
     ```
     **Result:** `✓ built in 413ms`, 59 modules transformed cleanly into `dist/`.
 
+17. **Offline-First Architecture & Airplane Mode Test Suite (`test_offline_sync.py`):**
+    ```bash
+    backend\.venv\Scripts\python.exe -m pytest backend/test_offline_sync.py -v
+    ```
+    **Result:** All 6 verification tests passed (Total 63/63 tests passing across 11 backend test suites):
+    - Test 1: PWA Service Worker precache (`dist/sw.js`, `workbox-*.js`) and Web App Manifest (`manifest.webmanifest`) generated with 192x192 and 512x512 icons, emerald theme `#16a34a`, and standalone display.
+    - Test 2: Dexie.js `KabadiwalaOfflineDB` schema verified with stores for `offline_lots`, `offline_handovers`, and `cached_prices`.
+    - Test 3: Airplane Mode offline lot creation simulated with base64 photo blob, PCB (91% confidence), 2.5 kg weight, GPS, and local `UNSYNCED` queue state.
+    - Test 4: Automatic reconnection sync verified: offline lot and photo blob automatically uploaded to Supabase storage (`lot-photos`) and database (`material_lots`) upon reconnection.
+    - Test 5: Idempotency verified: re-syncing the same offline lot multiple times upserts cleanly without duplication or 500 errors.
+    - Test 6: FastAPI `GET /sync/status` and `POST /sync/batch` bulk sync endpoints verified with HTTP 200.
+18. **Frontend Production Build (with Dexie.js & Workbox PWA):**
+    ```bash
+    npm run build
+    ```
+    **Result:** `✓ built in 264ms`, 68 modules transformed cleanly into `dist/` with active Service Worker precache.
+
 ---
 
 ## 5. Implementation Chunks Status
@@ -508,6 +525,6 @@ stateDiagram-v2
 | **Chunk 10**| **Handover, Traceability & QR Confirmation** | `backend/app/services/handover_service.py`, `frontend/src/components/HandoverTraceability.jsx` | **COMPLETE (`387365a`)** |
 | **Chunk 11**| **Earnings Ledger & Safety Guidance** | `backend/app/services/ledger_service.py`, `safety_service.py`, `EarningsLedger.jsx`, `SafetyGuidance.jsx` | **COMPLETE** |
 | **Pass**    | **Vernacular / Low-Literacy UI Pass (i18n & Icons)**| `frontend/src/i18n/`, `LanguagePicker.jsx`, `QuickLotIconFlow.jsx` | **COMPLETE** |
-| **Chunk 8** | Offline Storage (Dexie.js IndexedDB) & PWA Shell | `frontend/src/db/`, `frontend/src/i18n/` | Queued |
+| **Chunk 8** | **Offline Storage (Dexie.js IndexedDB) & PWA Shell** | `frontend/src/db/`, `syncEngine.js`, `OfflineSyncBanner.jsx` | **COMPLETE** |
 | **Chunk 9** | Collector Mobile App UI (Stitch screens integration) | `frontend/src/components/collector/` | Queued |
 | **Chunk 12**| Field Research Documentation & Unit Economics Model | `docs/field_research.md`, Unit Economics | Queued |

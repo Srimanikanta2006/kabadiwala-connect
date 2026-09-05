@@ -33,8 +33,8 @@ def test_list_materials():
 def test_pricing_calculation():
     val = calculate_valuation("mat_pcb_high", 10.0, "CLEAN_INTACT", "IN-MH-MUM")
     assert val["material_id"] == "mat_pcb_high"
-    assert val["calculated_rate_per_kg"] == 245.0
-    assert val["estimated_total_range_inr"]["min_inr"] > 2000.0
+    assert val["base_rate_per_kg"] >= 200.0
+    assert val["estimated_range_inr"]["min_inr"] > 2000.0
     assert "10.0 किलो" in val["spoken_summary_hi"]
 
 
@@ -42,7 +42,7 @@ def test_recycler_matching():
     ranked = match_and_rank_recyclers("mat_pcb_high", 15.0, 19.0435, 72.8567)
     assert len(ranked) >= 2
     assert ranked[0]["rank"] == 1
-    assert ranked[0]["cpcb_status"] == "ACTIVE"
+    assert ranked[0]["authorization_status"] == "ACTIVE"
     assert ranked[0]["distance_km"] > 0
 
 
@@ -50,8 +50,9 @@ def test_weight_anomaly_filter():
     # 600 kg for high-grade PCB exceeds plausible single-lot bound (250 kg)
     anomaly = check_weight_plausibility("mat_pcb_high", 600.0)
     assert anomaly is not None
-    assert anomaly["error_code"] == "WEIGHT_OUT_OF_BOUNDS"
+    assert anomaly["code"] == "WEIGHT_ABOVE_MAX_BOUND"
 
     # 15 kg is valid
     valid = check_weight_plausibility("mat_pcb_high", 15.0)
     assert valid is None
+

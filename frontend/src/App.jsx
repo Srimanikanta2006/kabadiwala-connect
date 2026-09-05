@@ -6,6 +6,7 @@ import EarningsLedger from './components/EarningsLedger';
 import SafetyGuidance from './components/SafetyGuidance';
 import QuickLotIconFlow from './components/QuickLotIconFlow';
 import LanguagePicker from './components/LanguagePicker';
+import OfflineSyncBanner from './components/OfflineSyncBanner';
 
 function App() {
   const { t } = useTranslation();
@@ -127,7 +128,8 @@ function App() {
       </nav>
 
       {/* Main Content View */}
-      <main style={{ minHeight: 'calc(100vh - 65px)', background: '#f8fafc' }}>
+      <main style={{ minHeight: 'calc(100vh - 65px)', background: '#f8fafc', padding: '0.75rem 1rem' }}>
+        <OfflineSyncBanner />
         {activeTab === 'icon_flow' && <QuickLotIconFlow />}
         {activeTab === 'ledger' && <EarningsLedger />}
         {activeTab === 'safety' && <SafetyGuidance />}

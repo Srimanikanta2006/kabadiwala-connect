@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { QRCodeSVG } from 'qrcode.react';
+import { saveOfflineLot, saveOfflineHandover, getCachedPrice } from '../db/offlineDb';
+import { syncEngine } from '../services/syncEngine';
 import './QuickLotIconFlow.css';
-
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
 const MATERIALS = [
   { id: 'mat_pcb_high', category: 'PCB', icon: '🟩', color: '#16a34a', rate: 240, labelKey: 'PCB' },
@@ -14,18 +14,32 @@ const MATERIALS = [
 
 export default function QuickLotIconFlow() {
   const { t, i18n } = useTranslation();
+  const fileInputRef = useRef(null);
   
   const [selectedMat, setSelectedMat] = useState(MATERIALS[0]);
   const [hasPhoto, setHasPhoto] = useState(false);
-  const [weight, setWeight] = useState(5.0);
+  const [photoDataUrl, setPhotoDataUrl] = useState('');
+  const [weight, setWeight] = useState(2.5);
   const [qrToken, setQrToken] = useState(null);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [isCashSettled, setIsCashSettled] = useState(false);
+  const [savedOfflineLotId, setSavedOfflineLotId] = useState(null);
+  const [offlineSavedBanner, setOfflineSavedBanner] = useState(false);
+  const [currentRate, setCurrentRate] = useState(240);
 
-  const estimatedInr = Math.round(selectedMat.rate * weight);
+  // Load cached rate on selection
+  useEffect(() => {
+    async function loadRate() {
+      const rate = await getCachedPrice(selectedMat.category);
+      setCurrentRate(rate || selectedMat.rate);
+    }
+    loadRate();
+  }, [selectedMat]);
+
+  const estimatedInr = Math.round(currentRate * weight);
 
   const speakAudio = (text) => {
-    if ('speechSynthesis' in window) {
+    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
       window.speechSynthesis.cancel();
       setIsSpeaking(true);
       const utterance = new SpeechSynthesisUtterance(text);
@@ -37,10 +51,52 @@ export default function QuickLotIconFlow() {
     }
   };
 
-  const handleSnapPhoto = () => {
+  const handleCameraClick = () => {
+    // Open system camera / file picker
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
+    }
+  };
+
+  const handleFileChange = (e) => {
+    const file = e.target.files && e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const dataUrl = event.target.result;
+        setPhotoDataUrl(dataUrl);
+        setHasPhoto(true);
+        playPhotoCapturedAudio();
+      };
+      reader.readAsDataURL(file);
+    } else {
+      // Fallback synthetic photo if cancelled or simulated
+      generateFallbackPhoto();
+    }
+  };
+
+  const generateFallbackPhoto = () => {
+    // Generate a lightweight green PCB / battery thumbnail data URL
+    const canvas = document.createElement('canvas');
+    canvas.width = 160;
+    canvas.height = 160;
+    const ctx = canvas.getContext('2d');
+    ctx.fillStyle = selectedMat.color;
+    ctx.fillRect(0, 0, 160, 160);
+    ctx.fillStyle = '#ffffff';
+    ctx.font = '24px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText(selectedMat.category, 80, 75);
+    ctx.fillText(`${weight} kg`, 80, 105);
+    const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
+    setPhotoDataUrl(dataUrl);
     setHasPhoto(true);
+    playPhotoCapturedAudio();
+  };
+
+  const playPhotoCapturedAudio = () => {
     const audioMsg = i18n.language === 'mr'
-      ? 'फोटो घेतली. वजन निवडा.'
+      ? 'फोटो घेतली. आता वजन निवडा.'
       : (i18n.language === 'hi' ? 'फोटो खींच ली गई है। अब वजन चुनें।' : 'Photo captured. Choose weight.');
     speakAudio(audioMsg);
   };
@@ -49,6 +105,7 @@ export default function QuickLotIconFlow() {
     setSelectedMat(m);
     setQrToken(null);
     setIsCashSettled(false);
+    setOfflineSavedBanner(false);
     const audioMsg = i18n.language === 'mr'
       ? `${m.category} निवडले. दर ₹${m.rate} प्रति किलो.`
       : (i18n.language === 'hi' ? `${m.category} चुना गया। दर ₹${m.rate} प्रति किलो।` : `${m.category} selected. Rate ₹${m.rate} per kg.`);
@@ -59,37 +116,89 @@ export default function QuickLotIconFlow() {
     const newW = Math.max(0.5, Math.round((weight + increment) * 10) / 10);
     setWeight(newW);
     setQrToken(null);
+    setOfflineSavedBanner(false);
   };
 
+  /**
+   * STEP 4: OFFLINE-FIRST LOT & HANDOVER CREATION
+   * 1. Writes record to Dexie.js local IndexedDB with sync_status = 'UNSYNCED'
+   * 2. Generates local unique handover reference and renders QR code offline
+   * 3. Triggers background sync to backend/Supabase if online
+   */
   const handleGenerateQR = async () => {
-    try {
-      const payload = {
-        weight,
-        material_category: selectedMat.category,
-        material_id: selectedMat.id,
-        quoted_price: estimatedInr,
-        collector_id: 'col_test_001'
-      };
-      const res = await fetch(`${API_BASE}/handover/initiate`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
-      if (res.ok) {
-        const data = await res.json();
-        setQrToken(data.handover_ref);
-      } else {
-        setQrToken(`KC-TRACE-${Date.now().toString().slice(-6)}`);
-      }
-    } catch {
-      setQrToken(`KC-TRACE-${Date.now().toString().slice(-6)}`);
+    const lotId = crypto.randomUUID();
+    const dateStr = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+    const randHex = Math.random().toString(36).substring(2, 8).toUpperCase();
+    const handoverRef = `KC-TRACE-${dateStr}-MH-${randHex}`;
+
+    // Auto-generate photo if none snapped yet
+    let finalPhoto = photoDataUrl;
+    if (!finalPhoto) {
+      const canvas = document.createElement('canvas');
+      canvas.width = 160;
+      canvas.height = 160;
+      const ctx = canvas.getContext('2d');
+      ctx.fillStyle = selectedMat.color;
+      ctx.fillRect(0, 0, 160, 160);
+      ctx.fillStyle = '#ffffff';
+      ctx.font = '24px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText(selectedMat.category, 80, 85);
+      finalPhoto = canvas.toDataURL('image/jpeg', 0.7);
+      setPhotoDataUrl(finalPhoto);
+      setHasPhoto(true);
     }
 
+    try {
+      // 1. Write to Dexie.js Local Database (Mirrors Supabase shape)
+      const savedLot = await saveOfflineLot({
+        id: lotId,
+        collector_id: 'col_8832a',
+        material_category: selectedMat.category,
+        material_id: selectedMat.id,
+        approximate_weight: weight,
+        condition: 'CLEAN_INTACT',
+        quoted_price: estimatedInr,
+        photo_base64: finalPhoto,
+        gps_lat: 19.0435,
+        gps_lng: 72.8566,
+        ai_prediction: { detected_id: selectedMat.id, confidence: 0.91 }
+      });
+
+      // 2. Save Offline Handover record
+      await saveOfflineHandover({
+        lot_id: lotId,
+        handover_ref: handoverRef,
+        collector_id: 'col_8832a',
+        recycler_id: 'rec_ecorecycle_01',
+        weight: weight,
+        material_category: selectedMat.category,
+        gps_lat: 19.0435,
+        gps_lng: 72.8566
+      });
+
+      setSavedOfflineLotId(lotId);
+      setQrToken(handoverRef);
+      setOfflineSavedBanner(true);
+
+      // 3. Trigger automatic sync if online
+      if (syncEngine.isEffectivelyOnline()) {
+        syncEngine.syncNow();
+      } else {
+        syncEngine.refreshCounts();
+      }
+
+    } catch (err) {
+      console.error('Error saving offline lot to IndexedDB:', err);
+      setQrToken(handoverRef);
+    }
+
+    const isOffline = !syncEngine.isEffectivelyOnline();
     const audioMsg = i18n.language === 'mr'
-      ? `एकूण अंदाजे मूल्य ₹${estimatedInr}. क्यूआर कोड तयार आहे. रीसायकलरला दाखवा.`
+      ? `एकूण मूल्य ₹${estimatedInr}. क्यूआर कोड तयार आहे. ${isOffline ? 'डिव्हाइसवर सेव्ह केले.' : ''}`
       : (i18n.language === 'hi'
-          ? `कुल अनुमानित मूल्य ₹${estimatedInr} है। क्यूआर कोड तैयार है। रीसायकलर को दिखाएं।`
-          : `Total estimated value ₹${estimatedInr}. QR pass ready.`);
+          ? `कुल मूल्य ₹${estimatedInr} है। क्यूआर कोड तैयार है। ${isOffline ? 'लोकल सेव किया गया।' : ''}`
+          : `Total value ₹${estimatedInr}. QR pass generated. ${isOffline ? 'Saved offline.' : ''}`);
     speakAudio(audioMsg);
   };
 
@@ -105,6 +214,16 @@ export default function QuickLotIconFlow() {
 
   return (
     <div className="icon-flow-container">
+      {/* Hidden file input for native camera access */}
+      <input
+        type="file"
+        ref={fileInputRef}
+        accept="image/*"
+        capture="environment"
+        style={{ display: 'none' }}
+        onChange={handleFileChange}
+      />
+
       {/* Header with Visual Indicators */}
       <div className="flow-header">
         <h1 className="flow-title">{t('guided_title')}</h1>
@@ -169,15 +288,22 @@ export default function QuickLotIconFlow() {
           <span>2️⃣</span> {t('step_2_photo')}
         </h2>
         <div className="camera-touch-box">
-          <button
-            className={`big-camera-btn ${hasPhoto ? 'snapped' : ''}`}
-            onClick={handleSnapPhoto}
-          >
-            <span className="cam-icon">{hasPhoto ? '✅' : '📷'}</span>
-            <span className="cam-text">
-              {hasPhoto ? t('photo_captured') : t('btn_snap_photo')}
-            </span>
-          </button>
+          {photoDataUrl ? (
+            <div className="camera-preview-container" onClick={handleCameraClick}>
+              <img src={photoDataUrl} alt="Captured scrap" className="camera-preview-img" />
+              <div className="camera-retake-badge">🔄 {t('btn_snap_photo')}</div>
+            </div>
+          ) : (
+            <button
+              className={`big-camera-btn ${hasPhoto ? 'snapped' : ''}`}
+              onClick={handleCameraClick}
+            >
+              <span className="cam-icon">{hasPhoto ? '✅' : '📷'}</span>
+              <span className="cam-text">
+                {hasPhoto ? t('photo_captured') : t('btn_snap_photo')}
+              </span>
+            </button>
+          )}
         </div>
       </section>
 
@@ -201,13 +327,14 @@ export default function QuickLotIconFlow() {
 
         {/* Quick Presets */}
         <div className="quick-weight-presets">
-          {[1, 2, 5, 10, 20].map((inc) => (
+          {[1, 2, 2.5, 5, 10, 20].map((inc) => (
             <button
               key={inc}
               className={`preset-btn ${weight === inc ? 'active-preset' : ''}`}
               onClick={() => {
                 setWeight(inc);
                 setQrToken(null);
+                setOfflineSavedBanner(false);
               }}
             >
               +{inc} kg
@@ -239,6 +366,29 @@ export default function QuickLotIconFlow() {
             {isSpeaking ? '🔊...' : '🔊 भाव सुनें (Hear)'}
           </button>
         </div>
+
+        {offlineSavedBanner && (
+          <div style={{
+            background: '#fef3c7',
+            border: '2px solid #f59e0b',
+            borderRadius: '8px',
+            padding: '0.6rem 1rem',
+            margin: '0.75rem 0',
+            fontSize: '0.85rem',
+            color: '#92400e',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.5rem',
+            fontWeight: 700
+          }}>
+            <span>💾</span>
+            <span>
+              {syncEngine.isEffectivelyOnline()
+                ? '✅ Saved locally & synced to cloud'
+                : '✈️ Saved in Offline DB (IndexedDB). Will sync to Supabase automatically when online.'}
+            </span>
+          </div>
+        )}
 
         {!qrToken ? (
           <button className="generate-touch-btn" onClick={handleGenerateQR}>
