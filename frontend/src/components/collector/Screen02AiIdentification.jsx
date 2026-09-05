@@ -157,16 +157,27 @@ export default function Screen02AiIdentification({
           <div className="mt-3 pt-3 border-t border-outline-variant/60">
             <div className="flex justify-between items-center text-xs font-semibold mb-1">
               <span className="text-on-surface">Match Confidence</span>
-              <span className="text-primary font-bold">{confidence}% High</span>
+              <span className={`font-bold ${
+                confidence >= 80 ? 'text-primary' : (confidence >= 60 ? 'text-amber-600' : 'text-error')
+              }`}>
+                {confidence}% {confidence >= 80 ? 'High' : (confidence >= 60 ? 'Moderate' : 'Low (Unclear/Dim)')}
+              </span>
             </div>
             <div className="w-full h-2 rounded-full bg-surface-container overflow-hidden">
-              <div className="h-full bg-primary rounded-full transition-all duration-500" style={{ width: `${confidence}%` }}></div>
+              <div
+                className={`h-full rounded-full transition-all duration-500 ${
+                  confidence >= 80 ? 'bg-primary' : (confidence >= 60 ? 'bg-amber-500' : 'bg-error')
+                }`}
+                style={{ width: `${confidence}%` }}
+              ></div>
             </div>
           </div>
 
           <div className="mt-3 flex items-center gap-2 bg-surface-container-low rounded-lg p-2 text-xs text-on-surface-variant">
             <span className="material-symbols-outlined text-tertiary text-[18px]">record_voice_over</span>
-            <span><strong>Audio:</strong> इसकी पहचान: {materialTitle} ({confidence}% निश्चित)</span>
+            <span><strong>Audio:</strong> {currentLang === 'mr'
+              ? `याची ओळख: ${materialTitle} (${confidence}% निश्चित).`
+              : `इसकी पहचान: ${materialTitle} (${confidence}% निश्चित)।`}</span>
           </div>
 
           <div className="mt-3">
@@ -192,6 +203,38 @@ export default function Screen02AiIdentification({
           </div>
         </div>
 
+        {/* Low Confidence Fallback Banner */}
+        {confidence < 60 && (
+          <div className="bg-amber-500/10 border-2 border-amber-500/50 rounded-xl p-3.5 flex flex-col gap-2 shadow-sm">
+            <div className="flex items-center gap-2 text-amber-700 dark:text-amber-400 font-bold text-sm">
+              <span className="material-symbols-outlined text-[20px] text-amber-600">warning</span>
+              <span>
+                {currentLang === 'mr'
+                  ? 'कमी प्रकाश / अस्पष्ट फोटो - श्रेणी खात्री करा'
+                  : (currentLang === 'hi'
+                      ? 'कम रोशनी / अस्पष्ट फोटो - श्रेणी की पुष्टि करें'
+                      : 'Low Light / Unclear Photo - Please Verify')}
+              </span>
+            </div>
+            <p className="text-xs text-on-surface-variant leading-relaxed">
+              {currentLang === 'mr'
+                ? 'फोटो अस्पष्ट असल्याने अचूकता कमी आहे. अचूक भाव मिळवण्यासाठी कृपया 6-श्रेणी ग्रिडमधून योग्य श्रेणी निवडा.'
+                : (currentLang === 'hi'
+                    ? 'फोटो अस्पष्ट होने के कारण सटीकता कम है। सही दाम पाने के लिए कृपया 6-श्रेणी ग्रिड से सही विकल्प चुनें।'
+                    : 'AI confidence is low due to lighting or clutter. Select manually from the 6-category grid to ensure fair market price.')}
+            </p>
+            <button
+              onClick={() => onNavigate('category_select')}
+              className="mt-1 bg-amber-600 hover:bg-amber-700 active:scale-98 text-white font-bold py-2.5 px-3 rounded-lg text-xs flex items-center justify-center gap-2 shadow cursor-pointer transition-transform"
+            >
+              <span className="material-symbols-outlined text-[18px]">grid_view</span>
+              <span>
+                {currentLang === 'mr' ? '6-श्रेणी ग्रिडमधून निवडा' : (currentLang === 'hi' ? '6-श्रेणी ग्रिड से चुनें' : 'Select from 6-Category Grid')}
+              </span>
+            </button>
+          </div>
+        )}
+
         {/* Confirmation Card */}
         <div className="bg-surface border border-outline-variant rounded-xl p-md shadow-sm">
           <h3 className="font-label-lg text-label-lg text-on-surface font-semibold mb-3 text-center">
@@ -209,7 +252,11 @@ export default function Screen02AiIdentification({
             </button>
             <button
               onClick={() => onNavigate('category_select')}
-              className="h-touch-target-min bg-surface hover:bg-surface-container text-secondary font-semibold border border-outline-variant rounded-xl flex items-center justify-center gap-2 transition-colors active:scale-[0.98] cursor-pointer"
+              className={`h-touch-target-min font-semibold border rounded-xl flex items-center justify-center gap-2 transition-colors active:scale-[0.98] cursor-pointer ${
+                confidence < 60
+                  ? 'bg-amber-50 dark:bg-amber-950/30 text-amber-800 dark:text-amber-300 border-amber-300 font-bold'
+                  : 'bg-surface hover:bg-surface-container text-secondary border-outline-variant'
+              }`}
             >
               <span className="material-symbols-outlined text-[18px]">edit</span>
               <span>Change Category</span>
