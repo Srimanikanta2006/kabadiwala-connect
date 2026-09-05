@@ -17,10 +17,19 @@ from typing import Dict, Any, List, Optional, Tuple
 import numpy as np
 from PIL import Image
 
+try:
+    import torch
+    from torchvision import transforms as T, models
+    TORCH_AVAILABLE = True
+except Exception:
+    TORCH_AVAILABLE = False
+
 logger = logging.getLogger("kabadiwala.ml.classifier")
 
-# Path to shared taxonomy
+# Path to shared taxonomy and real trained model
 TAXONOMY_PATH = Path(__file__).resolve().parent.parent.parent / "shared" / "taxonomy" / "material_taxonomy.json"
+REAL_MODEL_PATH = Path(__file__).resolve().parent / "mobilenetv2_real_ewaste.pt"
+REAL_MAPPING_PATH = Path(__file__).resolve().parent.parent.parent / "datasets" / "real_ewaste_category_mapping.json"
 
 DEFAULT_CATEGORIES = [
     {
@@ -174,6 +183,37 @@ class MaterialClassifier:
         self.categories = load_taxonomy_categories()
         self.category_map = {c["id"]: c for c in self.categories}
         self.is_loaded = True
+        self.pytorch_model = None
+        self.pytorch_classes = []
+        self.eval_transform = None
+
+        if TORCH_AVAILABLE and REAL_MODEL_PATH.exists():
+            try:
+                checkpoint = torch.load(REAL_MODEL_PATH, map_location="cpu")
+                model = models.mobilenet_v2(weights=None)
+                in_features = model.classifier[1].in_features
+                model.classifier = torch.nn.Sequential(
+                    torch.nn.Dropout(p=0.3),
+                    torch.nn.Linear(in_features, 256),
+                    torch.nn.ReLU(),
+                    torch.nn.Dropout(p=0.2),
+                    torch.nn.Linear(256, 10)
+                )
+                model.load_state_dict(checkpoint["model_state_dict"])
+                model.eval()
+                self.pytorch_model = model
+                self.pytorch_classes = checkpoint.get("class_names", [
+                    'Battery', 'Keyboard', 'Microwave', 'Mobile', 'Mouse',
+                    'PCB', 'Player', 'Printer', 'Television', 'Washing Machine'
+                ])
+                self.eval_transform = T.Compose([
+                    T.Resize((224, 224)),
+                    T.ToTensor(),
+                    T.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+                ])
+                logger.info(f"Loaded real MobileNetV2 e-waste model from {REAL_MODEL_PATH}")
+            except Exception as e:
+                logger.warning(f"Could not load real PyTorch model: {e}")
 
     @staticmethod
     def compute_dhash(img: Image.Image) -> str:
@@ -346,6 +386,39 @@ class MaterialClassifier:
         features = self._extract_visual_features(img)
         prob_dict, matched_arch, arch_conf = self._score_categories(features, dhash)
 
+        # Real PyTorch MobileNetV2 Deep Model Inference
+        real_pred_class = None
+        real_pred_conf = 0.0
+        if self.pytorch_model is not None and self.eval_transform is not None:
+            try:
+                t_img = self.eval_transform(img).unsqueeze(0)
+                with torch.no_grad():
+                    logits = self.pytorch_model(t_img)
+                    pt_probs = torch.softmax(logits, dim=1)[0].numpy()
+                best_idx = int(np.argmax(pt_probs))
+                real_pred_class = self.pytorch_classes[best_idx]
+                real_pred_conf = float(pt_probs[best_idx])
+
+                real_to_app = {
+                    "Battery": "mat_batteries_lead",
+                    "PCB": "mat_pcb_high",
+                    "Television": "mat_crt_monitor",
+                    "Keyboard": "mat_mixed_plastics",
+                    "Mouse": "mat_mixed_plastics",
+                    "Mobile": "mat_pcb_low",
+                    "Printer": "mat_mixed_plastics",
+                    "Microwave": "mat_motors_magnets",
+                    "Player": "mat_pcb_low",
+                    "Washing Machine": "mat_motors_magnets"
+                }
+                app_cid = real_to_app.get(real_pred_class)
+                if app_cid and not matched_arch:
+                    prob_dict[app_cid] = max(prob_dict.get(app_cid, 0.1), real_pred_conf * 4.0)
+                    total = sum(prob_dict.values())
+                    prob_dict = {k: v / total for k, v in prob_dict.items()}
+            except Exception as e:
+                logger.warning(f"Real PyTorch model prediction error: {e}")
+
         # Allow testing override if provided
         if category_hint and category_hint in self.category_map:
             prob_dict[category_hint] = max(prob_dict.values()) + 1.0
@@ -394,21 +467,32 @@ class MaterialClassifier:
             spoken_hi += " चेतावनी: यह खतरनाक सामग्री है। सावधानी से संभालें।"
             spoken_mr += " सावधान: हे धोकादायक साहित्य आहे. काळजीपूर्वक हाताळा."
 
-        # Build top-3 suggestions list
-        suggestions = []
+        # Build top-3 predictions list
+        top_3_predictions = []
         for cid, p in sorted_probs[:3]:
             meta = self.category_map.get(cid, {})
-            # Scale suggestions so they are well-behaved
             s_conf = conf if cid == top_cid else round(float(p) * (1.0 - conf) / (1.0 - sorted_probs[0][1] + 1e-6), 2)
-            suggestions.append({
-                "id": cid,
-                "name_en": meta.get("name_en", cid),
-                "name_hi": meta.get("name_hi", cid),
-                "name_mr": meta.get("name_mr", cid),
+            top_3_predictions.append({
+                "category": cid,
+                "category_name": meta.get("name_en", cid),
+                "category_name_hi": meta.get("name_hi", cid),
+                "category_name_mr": meta.get("name_mr", cid),
+                "confidence": round(s_conf, 2),
                 "cpcb_e_waste_code": meta.get("cpcb_e_waste_code", "N/A"),
-                "hazard_level": meta.get("hazard_level", "LOW"),
-                "pictorial_icon": meta.get("pictorial_icon", ""),
-                "confidence": round(s_conf, 2)
+                "hazard_level": meta.get("hazard_level", "LOW")
+            })
+
+        suggestions = []
+        for s in top_3_predictions:
+            suggestions.append({
+                "id": s["category"],
+                "name_en": s["category_name"],
+                "name_hi": s["category_name_hi"],
+                "name_mr": s["category_name_mr"],
+                "cpcb_e_waste_code": s["cpcb_e_waste_code"],
+                "hazard_level": s["hazard_level"],
+                "pictorial_icon": self.category_map.get(s["category"], {}).get("pictorial_icon", ""),
+                "confidence": s["confidence"]
             })
 
         # Log low-confidence images to retraining queue for active learning
@@ -436,6 +520,7 @@ class MaterialClassifier:
 
         # Return full response
         return {
+            "category": top_cid,
             "top_category": top_cid,
             "category_name": top_meta.get("name_en", top_cid),
             "category_name_hi": top_meta.get("name_hi", ""),
@@ -453,7 +538,10 @@ class MaterialClassifier:
                 "hi": spoken_hi,
                 "mr": spoken_mr
             },
+            "top_3_predictions": top_3_predictions,
             "suggestions": suggestions,
+            "real_dataset_class": real_pred_class,
+            "real_model_active": bool(self.pytorch_model is not None),
             "grid_categories": [
                 {
                     "id": c["id"],

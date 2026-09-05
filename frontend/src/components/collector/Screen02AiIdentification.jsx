@@ -15,9 +15,18 @@ export default function Screen02AiIdentification({
   const [condition, setCondition] = useState(lotDraft.condition || 'Used / Mixed');
   const [isConfirmed, setIsConfirmed] = useState(lotDraft.isConfirmed || false);
   const [confidence, setConfidence] = useState(lotDraft.confidence || 92);
+  const [confidenceThreshold, setConfidenceThreshold] = useState(70);
   const [materialTitle, setMaterialTitle] = useState(lotDraft.materialTitle || 'Printed Circuit Board (PCB)');
   const [materialSub, setMaterialSub] = useState(lotDraft.materialSub || 'Motherboard / Component Grade 1');
   const [materialId, setMaterialId] = useState(lotDraft.materialId || 'mat_pcb_high');
+
+  // Dynamic top-3 alternatives from model predictions
+  const alternativeMatches = (lotDraft.top3Predictions && lotDraft.top3Predictions.length > 0)
+    ? lotDraft.top3Predictions.filter(p => (p.category || p.id) !== materialId).slice(0, 2)
+    : [
+        { category: 'mat_cables_copper', category_name: 'Insulated Copper Cable', confidence: 0.08 },
+        { category: 'mat_motors_magnets', category_name: 'Electric Motors & Magnets', confidence: 0.05 }
+      ];
 
   // Rate lookup for estimate range
   const ratePerKg = materialId === 'mat_pcb_high' ? 740 : (materialId === 'mat_cables_copper' ? 410 : 105);
@@ -186,56 +195,93 @@ export default function Screen02AiIdentification({
 
           <div className="mt-3">
             <div className="text-[11px] font-semibold text-on-surface-variant mb-1.5 uppercase tracking-wide">
-              Other Potential Matches:
+              Other Potential Matches (Top Predictions):
             </div>
             <div className="flex flex-wrap gap-2">
-              <button
-                onClick={() => handleSelectAlternative('Copper Cables', 'Insulated Wiring Harness', 'mat_cables_copper', 88)}
-                className="text-xs px-2.5 py-1 rounded-full border border-outline-variant bg-surface hover:bg-surface-container text-on-surface flex items-center gap-1.5 transition-colors cursor-pointer"
-              >
-                <span>Insulated Copper Cable</span>
-                <span className="text-on-surface-variant text-[11px] font-bold">5%</span>
-              </button>
-              <button
-                onClick={() => handleSelectAlternative('Electric Motors', 'Copper Core & Magnets', 'mat_motors_magnets', 85)}
-                className="text-xs px-2.5 py-1 rounded-full border border-outline-variant bg-surface hover:bg-surface-container text-on-surface flex items-center gap-1.5 transition-colors cursor-pointer"
-              >
-                <span>Mixed Electronic Scrap</span>
-                <span className="text-on-surface-variant text-[11px] font-bold">3%</span>
-              </button>
+              {alternativeMatches.map((alt, idx) => {
+                const altTitle = alt.category_name || alt.name_en || alt.category || 'Alternative Scrap';
+                const altId = alt.category || alt.id || 'mat_cables_copper';
+                const altPct = Math.round((alt.confidence || 0.1) * 100);
+                return (
+                  <button
+                    key={altId + idx}
+                    onClick={() => handleSelectAlternative(altTitle, 'Alternative Candidate', altId, altPct)}
+                    className="text-xs px-2.5 py-1 rounded-full border border-outline-variant bg-surface hover:bg-surface-container text-on-surface flex items-center gap-1.5 transition-colors cursor-pointer"
+                  >
+                    <span>{altTitle}</span>
+                    <span className="text-on-surface-variant text-[11px] font-bold">{altPct}%</span>
+                  </button>
+                );
+              })}
             </div>
           </div>
         </div>
 
+        {/* Configurable Confidence Threshold Selector Bar */}
+        <div className="flex items-center justify-between bg-surface-container-low px-3.5 py-2 rounded-xl border border-outline-variant/40 text-xs">
+          <span className="font-semibold text-on-surface flex items-center gap-1.5">
+            <span className="material-symbols-outlined text-[16px] text-primary">tune</span>
+            Confidence Gate Threshold:
+          </span>
+          <div className="flex items-center gap-1 bg-surface rounded-lg p-0.5 border border-outline-variant/60">
+            {[60, 70, 85].map(th => (
+              <button
+                key={th}
+                type="button"
+                onClick={() => setConfidenceThreshold(th)}
+                className={`px-2 py-0.5 rounded text-[11px] font-bold transition-all cursor-pointer ${
+                  confidenceThreshold === th
+                    ? 'bg-primary text-on-primary shadow-xs'
+                    : 'text-on-surface-variant hover:text-on-surface'
+                }`}
+              >
+                {th}%
+              </button>
+            ))}
+          </div>
+        </div>
+
         {/* Low Confidence Fallback Banner */}
-        {confidence < 60 && (
-          <div className="bg-amber-500/10 border-2 border-amber-500/50 rounded-xl p-3.5 flex flex-col gap-2 shadow-sm">
-            <div className="flex items-center gap-2 text-amber-700 dark:text-amber-400 font-bold text-sm">
-              <span className="material-symbols-outlined text-[20px] text-amber-600">warning</span>
-              <span>
-                {currentLang === 'mr'
-                  ? 'कमी प्रकाश / अस्पष्ट फोटो - श्रेणी खात्री करा'
-                  : (currentLang === 'hi'
-                      ? 'कम रोशनी / अस्पष्ट फोटो - श्रेणी की पुष्टि करें'
-                      : 'Low Light / Unclear Photo - Please Verify')}
+        {confidence < confidenceThreshold && (
+          <div className="bg-amber-500/10 border-2 border-amber-500/50 rounded-xl p-3.5 flex flex-col gap-2 shadow-sm animate-in fade-in">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2 text-amber-700 dark:text-amber-400 font-bold text-sm">
+                <span className="material-symbols-outlined text-[20px] text-amber-600">warning</span>
+                <span>
+                  {currentLang === 'mr'
+                    ? `${confidence}% अचूकता (${confidenceThreshold}% मर्यादेपेक्षा कमी)`
+                    : (currentLang === 'hi'
+                        ? `${confidence}% सटीकता (${confidenceThreshold}% सीमा से कम)`
+                        : `${confidence}% Confidence is Below ${confidenceThreshold}% Gate`)}
+                </span>
+              </div>
+              <span className="text-[10px] font-bold bg-amber-500/20 text-amber-800 dark:text-amber-300 px-2 py-0.5 rounded-full uppercase">
+                Review Required
               </span>
             </div>
             <p className="text-xs text-on-surface-variant leading-relaxed">
               {currentLang === 'mr'
-                ? 'फोटो अस्पष्ट असल्याने अचूकता कमी आहे. अचूक भाव मिळवण्यासाठी कृपया 6-श्रेणी ग्रिडमधून योग्य श्रेणी निवडा.'
+                ? `अचूकता ${confidence}% आहे. कृपया अचूक दरासाठी श्रेणी ग्रिडमधून खात्री करा किंवा बदला.`
                 : (currentLang === 'hi'
-                    ? 'फोटो अस्पष्ट होने के कारण सटीकता कम है। सही दाम पाने के लिए कृपया 6-श्रेणी ग्रिड से सही विकल्प चुनें।'
-                    : 'AI confidence is low due to lighting or clutter. Select manually from the 6-category grid to ensure fair market price.')}
+                    ? `सटीकता ${confidence}% है। सही मूल्य पाने के लिए कृपया श्रेणी ग्रिड से पुष्टि करें या बदलें।`
+                    : `AI confidence (${confidence}%) is below the configured gate (${confidenceThreshold}%). You can manually confirm this category or select from the 7-category grid.`)}
             </p>
-            <button
-              onClick={() => onNavigate('category_select')}
-              className="mt-1 bg-amber-600 hover:bg-amber-700 active:scale-98 text-white font-bold py-2.5 px-3 rounded-lg text-xs flex items-center justify-center gap-2 shadow cursor-pointer transition-transform"
-            >
-              <span className="material-symbols-outlined text-[18px]">grid_view</span>
-              <span>
-                {currentLang === 'mr' ? '6-श्रेणी ग्रिडमधून निवडा' : (currentLang === 'hi' ? '6-श्रेणी ग्रिड से चुनें' : 'Select from 6-Category Grid')}
-              </span>
-            </button>
+            <div className="grid grid-cols-2 gap-2 mt-1">
+              <button
+                onClick={() => onNavigate('category_select')}
+                className="bg-amber-600 hover:bg-amber-700 active:scale-98 text-white font-bold py-2.5 px-3 rounded-lg text-xs flex items-center justify-center gap-1.5 shadow cursor-pointer transition-transform"
+              >
+                <span className="material-symbols-outlined text-[18px]">grid_view</span>
+                <span>{currentLang === 'mr' ? 'श्रेणी ग्रिडमधून बदला' : (currentLang === 'hi' ? 'श्रेणी ग्रिड से बदलें' : 'Change Category')}</span>
+              </button>
+              <button
+                onClick={handleConfirm}
+                className="bg-surface hover:bg-surface-container border border-amber-500/50 text-amber-900 dark:text-amber-200 font-bold py-2.5 px-3 rounded-lg text-xs flex items-center justify-center gap-1 cursor-pointer"
+              >
+                <span className="material-symbols-outlined text-[16px]">check</span>
+                <span>Confirm Anyway</span>
+              </button>
+            </div>
           </div>
         )}
 

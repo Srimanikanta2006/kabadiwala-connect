@@ -35,6 +35,7 @@ ENV/
 
 # ML Weights / Cache
 *.pt
+!backend/ml/mobilenetv2_real_ewaste.pt
 *.onnx
 *.tflite
 weights/

@@ -215,6 +215,9 @@ async def classify_material(request: Request):
         return {
             "success": True,
             "status": "COMPLETED",
+            "category": result.get("category", result.get("top_category")),
+            "confidence": result.get("confidence", 0.0),
+            "top_3_predictions": result.get("top_3_predictions", []),
             "data": result,
             "timestamp": datetime.utcnow().isoformat()
         }

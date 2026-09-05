@@ -105,12 +105,18 @@ export default function CollectorApp({ onSwitchRole }) {
         if (res.ok) {
           const aiData = await res.json();
           const info = aiData.data || aiData;
+          const topCategory = info.category || info.top_category || 'mat_pcb_high';
+          const topTitle = info.category_name || info.top_category_name || info.label || 'Printed Circuit Board (PCB)';
+          const confScore = Math.round((info.confidence || 0.92) * 100);
+          const top3 = info.top_3_predictions || info.suggestions || [];
+
           setLotDraft((prev) => ({
             ...prev,
             photoUrl: dataUrl,
-            materialId: info.top_category || info.category || 'mat_pcb_high',
-            materialTitle: info.category_name || info.top_category_name || info.label || 'Printed Circuit Board (PCB)',
-            confidence: Math.round((info.confidence || 0.92) * 100)
+            materialId: topCategory,
+            materialTitle: topTitle,
+            confidence: confScore,
+            top3Predictions: top3
           }));
         } else {
           setLotDraft((prev) => ({ ...prev, photoUrl: dataUrl }));

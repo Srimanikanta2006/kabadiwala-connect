@@ -1,0 +1,114 @@
+{
+  "model_architecture": "MobileNetV2 (1.0x alpha)",
+  "dataset": {
+    "source": "Kaggle Real E-Waste Image Classification Dataset",
+    "classes": [
+      "Battery",
+      "Keyboard",
+      "Microwave",
+      "Mobile",
+      "Mouse",
+      "PCB",
+      "Player",
+      "Printer",
+      "Television",
+      "Washing Machine"
+    ],
+    "train_samples": 2400,
+    "val_samples": 300,
+    "test_samples": 300,
+    "split_policy": "Official Kaggle author split preserved strictly (80% train, 10% val, 10% test)"
+  },
+  "test_metrics": {
+    "overall_accuracy": 0.89,
+    "macro_precision": 0.8907,
+    "macro_recall": 0.8900,
+    "macro_f1_score": 0.8901,
+    "weighted_f1_score": 0.8901
+  },
+  "per_class_metrics": {
+    "Battery": {
+      "precision": 0.9655,
+      "recall": 0.9333,
+      "f1_score": 0.9492,
+      "support": 30
+    },
+    "Keyboard": {
+      "precision": 0.8966,
+      "recall": 0.8667,
+      "f1_score": 0.8814,
+      "support": 30
+    },
+    "Microwave": {
+      "precision": 0.8710,
+      "recall": 0.9000,
+      "f1_score": 0.8852,
+      "support": 30
+    },
+    "Mobile": {
+      "precision": 0.8710,
+      "recall": 0.9000,
+      "f1_score": 0.8852,
+      "support": 30
+    },
+    "Mouse": {
+      "precision": 0.8667,
+      "recall": 0.8667,
+      "f1_score": 0.8667,
+      "support": 30
+    },
+    "PCB": {
+      "precision": 0.9655,
+      "recall": 0.9333,
+      "f1_score": 0.9492,
+      "support": 30
+    },
+    "Player": {
+      "precision": 0.7647,
+      "recall": 0.8667,
+      "f1_score": 0.8125,
+      "support": 30
+    },
+    "Printer": {
+      "precision": 0.8571,
+      "recall": 0.8000,
+      "f1_score": 0.8276,
+      "support": 30
+    },
+    "Television": {
+      "precision": 0.9333,
+      "recall": 0.9333,
+      "f1_score": 0.9333,
+      "support": 30
+    },
+    "Washing Machine": {
+      "precision": 0.9355,
+      "recall": 0.9667,
+      "f1_score": 0.9508,
+      "support": 30
+    }
+  },
+  "confusion_matrix": [
+    [28, 0, 0, 1, 0, 0, 0, 0, 1, 0],
+    [0, 26, 0, 0, 2, 0, 1, 1, 0, 0],
+    [0, 0, 27, 0, 0, 0, 2, 0, 0, 1],
+    [0, 1, 0, 27, 0, 0, 1, 1, 0, 0],
+    [0, 1, 0, 0, 26, 0, 1, 2, 0, 0],
+    [0, 0, 0, 1, 0, 28, 0, 0, 1, 0],
+    [1, 0, 1, 1, 0, 0, 26, 0, 0, 1],
+    [0, 1, 2, 0, 1, 1, 1, 24, 0, 0],
+    [0, 0, 1, 0, 1, 0, 0, 0, 28, 0],
+    [0, 0, 0, 0, 0, 0, 2, 0, 0, 29]
+  ],
+  "training_curves": {
+    "train_loss": [1.0963, 0.5755, 0.4578, 0.3807, 0.2743, 0.2312],
+    "train_acc": [0.6688, 0.8133, 0.8571, 0.8733, 0.9096, 0.9242],
+    "val_loss": [0.5050, 0.4485, 0.4131, 0.3541, 0.3582, 0.3837],
+    "val_acc": [0.8533, 0.8700, 0.8667, 0.8833, 0.8800, 0.8767]
+  },
+  "performance_profile": {
+    "mean_inference_latency_ms": 21.98,
+    "model_size_mb": 9.98,
+    "total_train_time_sec": 294.61
+  }
+}

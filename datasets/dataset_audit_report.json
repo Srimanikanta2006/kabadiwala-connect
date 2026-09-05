@@ -1,0 +1,88 @@
+{
+  "dataset_root": "C:\\Users\\srima\\Documents\\Web Experiments\\Kabadiwala Connect\\datasets\\real_ewaste\\modified-dataset",
+  "total_images": 3000,
+  "splits": {
+    "train": {
+      "Battery": 240,
+      "Keyboard": 240,
+      "Microwave": 240,
+      "Mobile": 240,
+      "Mouse": 240,
+      "PCB": 240,
+      "Player": 240,
+      "Printer": 240,
+      "Television": 240,
+      "Washing Machine": 240
+    },
+    "val": {
+      "Battery": 30,
+      "Keyboard": 30,
+      "Microwave": 30,
+      "Mobile": 30,
+      "Mouse": 30,
+      "PCB": 30,
+      "Player": 30,
+      "Printer": 30,
+      "Television": 30,
+      "Washing Machine": 30
+    },
+    "test": {
+      "Battery": 30,
+      "Keyboard": 30,
+      "Microwave": 30,
+      "Mobile": 30,
+      "Mouse": 30,
+      "PCB": 30,
+      "Player": 30,
+      "Printer": 30,
+      "Television": 30,
+      "Washing Machine": 30
+    }
+  },
+  "corrupted_images_count": 0,
+  "corrupted_images": [],
+  "duplicate_images_count": 36,
+  "duplicates_sample": [
+    {
+      "original": "train\\Mobile\\Mobile_56.jpg",
+      "duplicate": "train\\Mobile\\Mobile_6.jpg"
+    },
+    {
+      "original": "train\\Mouse\\Mouse_153.jpg",
+      "duplicate": "train\\Mouse\\Mouse_180.jpg"
+    },
+    {
+      "original": "train\\Mouse\\Mouse_155.jpg",
+      "duplicate": "train\\Mouse\\Mouse_185.jpg"
+    },
+    {
+      "original": "train\\Mouse\\Mouse_179.jpg",
+      "duplicate": "train\\Mouse\\Mouse_186.jpg"
+    },
+    {
+      "original": "train\\Mouse\\Mouse_171.jpg",
+      "duplicate": "train\\Mouse\\Mouse_201.jpg"
+    },
+    {
+      "original": "train\\Mouse\\Mouse_154.jpg",
+      "duplicate": "train\\Mouse\\Mouse_209.jpg"
+    },
+    {
+      "original": "train\\Mouse\\Mouse_162.jpg",
+      "duplicate": "train\\Mouse\\Mouse_210.jpg"
+    },
+    {
+      "original": "train\\Mouse\\Mouse_176.jpg",
+      "duplicate": "train\\Mouse\\Mouse_212.jpg"
+    },
+    {
+      "original": "train\\PCB\\pcb_110.jpg",
+      "duplicate": "train\\PCB\\pcb_155.jpg"
+    },
+    {
+      "original": "train\\PCB\\pcb_156.jpg",
+      "duplicate": "train\\PCB\\pcb_161.jpg"
+    }
+  ],
+  "license_or_metadata_files": []
+}
