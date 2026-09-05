@@ -74,6 +74,28 @@ class RecyclerMatchItem(BaseModel):
     payment_modes_supported: List[str]
 
 
+class HandoverInitiateRequest(BaseModel):
+    lot_id: Optional[str] = None
+    weight: Optional[float] = None
+    gps_lat: Optional[float] = None
+    gps_lng: Optional[float] = None
+    photo_url: Optional[str] = None
+    collector_id: Optional[str] = None
+    material_id: Optional[str] = None
+    material_category: Optional[str] = None
+    quoted_price: Optional[float] = None
+    state: str = "MH"
+
+
+class HandoverConfirmRequest(BaseModel):
+    handover_ref: str
+    recycler_id: str
+    verified_weight: Optional[float] = None
+    weighbridge_photo_url: Optional[str] = None
+    payment_mode: str = "CASH"
+    notes: Optional[str] = None
+
+
 class HandoverVerificationRequest(BaseModel):
     lot_id: str
     qr_payload_token: str

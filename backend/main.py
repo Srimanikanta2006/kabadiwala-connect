@@ -15,7 +15,7 @@ from typing import Dict, Any, List, Optional
 from dotenv import load_dotenv
 load_dotenv()
 
-from fastapi import FastAPI, HTTPException, status, Body, Query, Request, UploadFile, File, Form, BackgroundTasks
+from fastapi import FastAPI, HTTPException, status, Body, Query, Request, UploadFile, File, Form, BackgroundTasks, Response
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.db.supabase_client import get_supabase, get_materials, get_recyclers, get_prices, insert_lot
@@ -32,6 +32,14 @@ from anomaly.detector import (
     run_anomaly_background_sweep
 )
 from ml.classifier import classifier_service
+from app.services.handover_service import (
+    create_handover_record,
+    get_handover_details,
+    confirm_handover_receipt,
+    list_recent_handovers,
+    generate_qr_code
+)
+from app.schemas.pydantic_models import HandoverInitiateRequest, HandoverConfirmRequest
 
 logger = logging.getLogger("kabadiwala.api")
 
@@ -550,23 +558,130 @@ def get_lot_by_id(lot_id: str):
 
 
 # ------------------------------------------------------------------------------
-# Handover & Earnings Stubs (Chunks 10 & 11)
+# Handover, Traceability & QR Confirmation (Chunk 10)
 # ------------------------------------------------------------------------------
+@app.post("/handover/initiate", tags=["Handover"])
+def initiate_handover(req: HandoverInitiateRequest):
+    """
+    POST /handover/initiate -> Chunk 10 Steps 1-4
+    On lot confirmation:
+    1. Generates unique handover reference (UUID-backed human-readable token).
+    2. Automatically captures GPS coordinates and timestamp.
+    3. Generates QR code encoding the handover reference and verifiable payload.
+    4. Saves full traceability record with status = 'PENDING_CONFIRMATION'.
+    """
+    try:
+        res = create_handover_record(
+            lot_id=req.lot_id,
+            weight=req.weight,
+            gps_lat=req.gps_lat,
+            gps_lng=req.gps_lng,
+            photo_url=req.photo_url,
+            collector_id=req.collector_id,
+            material_id=req.material_id,
+            material_category=req.material_category,
+            quoted_price=req.quoted_price,
+            state=req.state
+        )
+        return res
+    except Exception as e:
+        logger.error(f"Error initiating handover: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 @app.post("/handover", tags=["Handover"])
 def process_handover(payload: Optional[Dict[str, Any]] = Body(default={})):
     """
-    POST /handover -> Chunk 10
-    Stub for QR token scanning and physical handover verification.
+    POST /handover -> Chunk 10 Production Endpoint.
+    Initiates digital handover record and QR token encoding.
     """
-    handover_ref = f"KC-TRACE-{datetime.utcnow().strftime('%Y%m%d')}-MH-{uuid.uuid4().hex[:6].upper()}"
+    try:
+        p = payload or {}
+        res = create_handover_record(
+            lot_id=p.get("lot_id"),
+            weight=p.get("weight"),
+            gps_lat=p.get("gps_lat"),
+            gps_lng=p.get("gps_lng"),
+            photo_url=p.get("photo_url"),
+            collector_id=p.get("collector_id"),
+            material_id=p.get("material_id"),
+            material_category=p.get("material_category"),
+            quoted_price=p.get("quoted_price"),
+            state=p.get("state", "MH")
+        )
+        return res
+    except Exception as e:
+        logger.error(f"Error in process_handover: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/handover/{handover_ref}", tags=["Handover"])
+def get_handover(handover_ref: str):
+    """
+    GET /handover/{handover_ref} -> Chunk 10
+    Fetches full verifiable traceability record and QR code by reference token or UUID.
+    """
+    details = get_handover_details(handover_ref)
+    if not details:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Traceability record not found for reference: {handover_ref}"
+        )
+    return details
+
+
+@app.post("/handover/confirm", tags=["Handover"])
+def confirm_handover(req: HandoverConfirmRequest):
+    """
+    POST /handover/confirm -> Chunk 10 Step 5 Recycler Confirmation Action
+    Recycler scans or enters handover reference, verifies weight:
+    1. Updates status genuinely from 'PENDING_CONFIRMATION' to 'CONFIRMED'.
+    2. Updates recycler_confirmation = True.
+    3. Issues official CPCB EPR audit certificate ID.
+    4. Updates lot status to 'HANDED_OVER'.
+    5. Creates settled record in transactions ledger.
+    """
+    try:
+        res = confirm_handover_receipt(
+            handover_ref_or_id=req.handover_ref,
+            recycler_id=req.recycler_id,
+            verified_weight=req.verified_weight,
+            weighbridge_photo_url=req.weighbridge_photo_url,
+            payment_mode=req.payment_mode
+        )
+        return res
+    except ValueError as ve:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(ve))
+    except Exception as e:
+        logger.error(f"Error confirming handover: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/handover/qr/{handover_ref}", tags=["Handover"])
+def get_handover_qr_image(handover_ref: str):
+    """
+    GET /handover/qr/{handover_ref}
+    Returns raw PNG image of the QR code for printing or direct image display.
+    """
+    details = get_handover_details(handover_ref)
+    if not details:
+        raise HTTPException(status_code=404, detail="Handover record not found")
+
+    payload_json = json.dumps(details["qr_payload"])
+    _, png_bytes = generate_qr_code(payload_json)
+    return Response(content=png_bytes, media_type="image/png")
+
+
+@app.get("/traceability", tags=["Handover"])
+def get_traceability_list(limit: int = Query(15, ge=1, le=100)):
+    """
+    GET /traceability -> Fetches recent digital handover records for audit trails.
+    """
+    records = list_recent_handovers(limit=limit)
     return {
-        "status": "STUB_CHUNK_10",
-        "message": "Handover processing stub ready. Will be implemented in Chunk 10.",
-        "placeholder": {
-            "handover_ref": handover_ref,
-            "verified": True,
-            "timestamp": datetime.utcnow().isoformat()
-        }
+        "success": True,
+        "count": len(records),
+        "records": records
     }
 
 

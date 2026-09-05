@@ -442,6 +442,24 @@ stateDiagram-v2
    npm run build
    ```
    **Result:** `✓ built in 575ms`, verified 18 modules compiled cleanly into `dist/`.
+11. **Handover, Traceability & QR Confirmation Test Suite (`test_handover.py`):**
+   ```bash
+   $env:PYTHONIOENCODING="utf-8"; .venv\Scripts\python.exe -m pytest backend/test_handover.py -v
+   ```
+   **Result:** All 8 verification tests passed:
+   - Test 1: Unique human-verifiable reference format (`KC-TRACE-YYYYMMDD-STATE-XXXXXX`) verified.
+   - Test 2: Official CPCB EPR audit certificate format (`CPCB-EPR-YYYY-STATE-XXXXXXXX`) verified.
+   - Test 3: QR code generation produces high-contrast PNG with valid `\x89PNG\r\n\x1a\n` magic header.
+   - Test 4: Every completed lot has a full traceability record with all required fields populated (not just some): `id`, `lot_id`, `photo_url`, `weight`, `timestamp`, `gps_lat`, `gps_lng`, `handover_ref`, `recycler_confirmation=False`, `status='PENDING_CONFIRMATION'`, `created_at`.
+   - Test 5: QR code actually encodes a working, unique reference resolvable via lookup.
+   - Test 6: Recycler-side confirmation action genuinely changes status from `PENDING_CONFIRMATION` to `CONFIRMED`, updates `recycler_confirmation=True`, issues official CPCB EPR certificate ID, creates settled transaction record in `transactions` table, and updates lot status to `HANDED_OVER`.
+   - Test 7: Full REST API lifecycle verified across `POST /handover/initiate`, `GET /handover/{ref}`, `GET /handover/qr/{ref}`, `POST /handover/confirm`, and `GET /traceability`.
+   - Test 8: Backward-compatible `POST /handover` verified.
+12. **Frontend Production Build (with `qrcode.react` & Handover Component):**
+   ```bash
+   npm run build
+   ```
+   **Result:** `✓ built in 279ms`, 21 modules transformed cleanly into `dist/`.
 
 ---
 
@@ -456,9 +474,9 @@ stateDiagram-v2
 | **Chunk 5** | Pricing & Valuation Engine Finalization | `backend/pricing/`, `POST /estimate-price`, `test_pricing.py`| **COMPLETE (`ebafa00`)** |
 | **Chunk 6** | Recycler Matching Engine (MCDA Ranking) | `backend/matching/`, `GET /match-recyclers`, `test_matching.py` | **COMPLETE (`ebafa00`)** |
 | **Chunk 7** | Anomaly & Fraud Detection Engine | `backend/anomaly/`, `GET /anomaly-check`, `test_anomaly.py` | **COMPLETE (`42632fc`)** |
-| **Feature** | **Price Board, Trends & Voice (Bhashini TTS)** | `backend/pricing/price_board.py`, `frontend/src/components/PriceBoard.jsx` | **COMPLETE** |
-| **Chunk 8** | Offline Storage (Dexie.js IndexedDB) & PWA Shell | `frontend/src/db/`, `frontend/src/i18n/` | **NEXT UP** |
+| **Feature** | **Price Board, Trends & Voice (Bhashini TTS)** | `backend/pricing/price_board.py`, `frontend/src/components/PriceBoard.jsx` | **COMPLETE (`5a83e45`)** |
+| **Chunk 10**| **Handover, Traceability & QR Confirmation** | `backend/app/services/handover_service.py`, `frontend/src/components/HandoverTraceability.jsx` | **COMPLETE** |
+| **Chunk 8** | Offline Storage (Dexie.js IndexedDB) & PWA Shell | `frontend/src/db/`, `frontend/src/i18n/` | Queued |
 | **Chunk 9** | Collector Mobile App UI (Stitch screens integration) | `frontend/src/components/collector/` | Queued |
-| **Chunk 10**| Digital Handover & QR Traceability Settlement | `backend/`, `POST /handover` | Queued |
 | **Chunk 11**| Recycler Web Dashboard & Earnings Ledger | `frontend/`, `GET /earnings/{id}` | Queued |
 | **Chunk 12**| Field Research Documentation & Unit Economics Model | `docs/field_research.md`, Unit Economics | Queued |
