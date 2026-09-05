@@ -19,26 +19,38 @@ export default function Screen00WelcomeRole({ onSelectRole }) {
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-background font-body-md text-on-surface antialiased">
-      <main className="w-full flex-1 px-4 sm:px-6 py-8 sm:py-12 flex justify-center items-center">
-        <div className="flex flex-col w-full max-w-md mx-auto space-y-5">
-          {/* Top Bar: Brand & Language Switcher */}
-          <div className="flex items-center justify-between py-1">
-            <div className="flex items-center gap-2.5">
-              <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center shadow-sm text-on-primary">
-                <span className="material-symbols-outlined text-[24px]">recycling</span>
-              </div>
-              <div className="flex flex-col leading-tight">
+    <div className="flex flex-col min-h-screen bg-background font-body-md text-on-surface antialiased w-full">
+      {/* Top Header Bar */}
+      <header className="w-full bg-surface/90 backdrop-blur-md border-b border-outline-variant/30 sticky top-0 z-30 px-4 sm:px-8 py-3.5">
+        <div className="max-w-6xl mx-auto flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center shadow-sm text-on-primary">
+              <span className="material-symbols-outlined text-[24px]">recycling</span>
+            </div>
+            <div className="flex flex-col leading-tight">
+              <div className="flex items-center gap-2">
                 <span className="font-headline-md text-xl tracking-tight text-on-surface font-bold">RE:LINK</span>
-                <span className="font-label-md text-[10px] text-primary font-bold tracking-wider uppercase">Smart E-Waste Mandi</span>
+                <span className="hidden sm:inline-block bg-primary/10 text-primary text-[10px] font-bold px-2 py-0.5 rounded-full border border-primary/20">
+                  CPCB RECOGNISED
+                </span>
               </div>
+              <span className="font-label-md text-[11px] text-primary font-bold tracking-wider uppercase">
+                Smart E-Waste Mandi • डिजिटल कबाड़ीबाज़ार
+              </span>
+            </div>
+          </div>
+
+          {/* Right Controls: Live Mandi Indicator & Language Switcher */}
+          <div className="flex items-center gap-3">
+            <div className="hidden md:flex items-center gap-1.5 px-3 py-1 bg-surface-container-low rounded-full text-xs font-semibold text-primary border border-outline-variant/30">
+              <span className="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+              <span>Live Mandi Index 2026</span>
             </div>
 
-            {/* Language Switcher */}
-            <div className="flex items-center bg-surface-container rounded-full p-0.5 shadow-sm border border-outline-variant/30">
+            <div className="flex items-center bg-surface-container rounded-full p-1 shadow-sm border border-outline-variant/30">
               <button
                 onClick={() => handleLangChange('hi')}
-                className={`px-2.5 py-1 text-xs font-bold rounded-full transition-all cursor-pointer ${
+                className={`px-3 py-1 text-xs font-bold rounded-full transition-all cursor-pointer ${
                   currentLang === 'hi' ? 'bg-primary text-on-primary shadow-sm' : 'text-on-surface-variant hover:text-on-surface'
                 }`}
                 type="button"
@@ -47,7 +59,7 @@ export default function Screen00WelcomeRole({ onSelectRole }) {
               </button>
               <button
                 onClick={() => handleLangChange('mr')}
-                className={`px-2.5 py-1 text-xs font-bold rounded-full transition-all cursor-pointer ${
+                className={`px-3 py-1 text-xs font-bold rounded-full transition-all cursor-pointer ${
                   currentLang === 'mr' ? 'bg-primary text-on-primary shadow-sm' : 'text-on-surface-variant hover:text-on-surface'
                 }`}
                 type="button"
@@ -56,7 +68,7 @@ export default function Screen00WelcomeRole({ onSelectRole }) {
               </button>
               <button
                 onClick={() => handleLangChange('en')}
-                className={`px-2.5 py-1 text-xs font-bold rounded-full transition-all cursor-pointer ${
+                className={`px-3 py-1 text-xs font-bold rounded-full transition-all cursor-pointer ${
                   currentLang === 'en' ? 'bg-primary text-on-primary shadow-sm' : 'text-on-surface-variant hover:text-on-surface'
                 }`}
                 type="button"
@@ -65,123 +77,203 @@ export default function Screen00WelcomeRole({ onSelectRole }) {
               </button>
             </div>
           </div>
+        </div>
+      </header>
 
+      {/* Main Hero & Portals Container */}
+      <main className="w-full flex-1 px-4 sm:px-6 lg:px-8 py-8 sm:py-12 flex flex-col justify-center items-center">
+        <div className="w-full max-w-5xl mx-auto space-y-8">
           {/* Hero Greeting & Tagline */}
-          <div className="text-center py-2">
-            <h1 className="font-headline-lg-mobile text-2xl sm:text-3xl text-on-surface font-bold tracking-tight">
+          <div className="text-center max-w-2xl mx-auto space-y-2">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-bold tracking-wide mb-1">
+              <span className="material-symbols-outlined text-[16px]">verified_user</span>
+              <span>National E-Waste Circular Economy Gateway</span>
+            </div>
+            <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-on-surface tracking-tight leading-tight">
               Choose Your Portal
             </h1>
-            <p className="font-body-md text-xs sm:text-sm text-on-surface-variant mt-1">
-              Fair prices • Direct verification • Instant payout
+            <p className="font-body-md text-sm sm:text-base text-on-surface-variant">
+              Fair Mandi Prices • Direct Physical Scale Verification • Instant Cash &amp; Bank Settlement
             </p>
           </div>
 
-          {/* Card 1: Collector / कबाड़ीवाला */}
-          <section className="bg-surface-container-lowest rounded-2xl p-5 shadow-sm border border-primary/20 space-y-4 hover:shadow-md transition-all">
-            <div className="flex items-start gap-3.5">
-              <div className="w-12 h-12 rounded-xl bg-primary-fixed flex items-center justify-center shrink-0 text-primary">
-                <span className="material-symbols-outlined text-[28px]">handshake</span>
+          {/* Role Selection Cards: Responsive 2-Column Grid on Desktop */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8 items-stretch">
+            {/* Card 1: Collector / Kabadiwala */}
+            <section className="bg-surface-container-lowest rounded-2xl p-6 lg:p-7 shadow-sm border-2 border-primary/30 flex flex-col justify-between hover:shadow-md hover:border-primary transition-all relative overflow-hidden group">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-bl-full pointer-events-none group-hover:scale-110 transition-transform"></div>
+              
+              <div className="space-y-4">
+                <div className="flex items-start justify-between">
+                  <div className="w-14 h-14 rounded-2xl bg-primary-fixed flex items-center justify-center shrink-0 text-primary shadow-sm">
+                    <span className="material-symbols-outlined text-[32px]">handshake</span>
+                  </div>
+                  <div className="flex flex-col items-end gap-1">
+                    <span className="bg-primary text-on-primary text-[11px] font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider">
+                      FIELD COLLECTION
+                    </span>
+                    <span className="text-[11px] text-primary font-semibold flex items-center gap-1">
+                      <span className="material-symbols-outlined text-[14px]">auto_awesome</span> Instant AI Valuation
+                    </span>
+                  </div>
+                </div>
+
+                <div>
+                  <h2 className="text-2xl font-bold text-on-surface">
+                    Collector / कबाड़ीवाला
+                  </h2>
+                  <p className="text-xs sm:text-sm text-on-surface-variant mt-1 leading-relaxed">
+                    Designed for doorstep collectors and informal aggregators. Scan scrap, check live mandi rates, and receive verified payment.
+                  </p>
+                </div>
+
+                {/* Key Features List */}
+                <div className="space-y-2 py-2 border-t border-b border-surface-container-high text-xs text-on-surface-variant">
+                  <div className="flex items-center gap-2">
+                    <span className="material-symbols-outlined text-primary text-[18px]">photo_camera</span>
+                    <span><strong>AI Scrap Recognition:</strong> Instant categorization &amp; weight guidance</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="material-symbols-outlined text-primary text-[18px]">record_voice_over</span>
+                    <span><strong>Spoken Mandi Rates:</strong> Real-time audio voice in Hindi &amp; Marathi</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="material-symbols-outlined text-primary text-[18px]">payments</span>
+                    <span><strong>Guaranteed Payout:</strong> 100% verified cash/UPI at weighbridge scale</span>
+                  </div>
+                </div>
               </div>
-              <div className="flex flex-col flex-1 min-w-0">
-                <div className="flex items-center justify-between">
-                  <span className="font-label-md text-[10px] font-bold uppercase tracking-wider text-primary">
-                    FIELD COLLECTION
-                  </span>
-                  <span className="bg-primary-fixed text-on-primary-fixed-variant text-[10px] font-bold px-2 py-0.5 rounded-full">
-                    AI PRICING
+
+              {/* Login Action Area */}
+              <div className="mt-5 space-y-3 bg-surface-container-low p-4 rounded-xl">
+                <label className="block font-label-md text-xs text-on-surface font-semibold" htmlFor="collectorPhoneClean">
+                  Mobile Login / फ़ोन नंबर से जुड़ें
+                </label>
+                <div className="flex items-center bg-surface-container-lowest rounded-lg px-3 py-2.5 shadow-sm border border-outline-variant/40 focus-within:border-primary">
+                  <span className="font-label-md text-sm text-on-surface-variant font-bold pr-2">+91</span>
+                  <input
+                    id="collectorPhoneClean"
+                    type="tel"
+                    maxLength={10}
+                    value={phoneNumber}
+                    onChange={(e) => setPhoneNumber(e.target.value.replace(/\D/g, ''))}
+                    placeholder="Enter 10 digit mobile number"
+                    className="w-full bg-transparent font-label-md text-sm text-on-surface outline-none placeholder:text-on-surface-variant/40"
+                  />
+                  <span className="material-symbols-outlined text-primary text-[20px]">phone_android</span>
+                </div>
+                <button
+                  onClick={handleCollectorLogin}
+                  className="w-full h-12 rounded-xl bg-primary text-on-primary font-action-xl text-sm sm:text-base font-bold flex items-center justify-center gap-2 shadow-md hover:bg-primary-container transition-all active:scale-[0.99] cursor-pointer"
+                  type="button"
+                >
+                  <span>Launch Collector App</span>
+                  <span className="material-symbols-outlined text-[20px]">arrow_forward</span>
+                </button>
+              </div>
+            </section>
+
+            {/* Card 2: Recycler */}
+            <section className="bg-surface-container-lowest rounded-2xl p-6 lg:p-7 shadow-sm border-2 border-outline-variant/40 flex flex-col justify-between hover:shadow-md hover:border-secondary transition-all relative overflow-hidden group">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-secondary-container/20 rounded-bl-full pointer-events-none group-hover:scale-110 transition-transform"></div>
+
+              <div className="space-y-4">
+                <div className="flex items-start justify-between">
+                  <div className="w-14 h-14 rounded-2xl bg-secondary-container flex items-center justify-center shrink-0 text-on-secondary-container shadow-sm">
+                    <span className="material-symbols-outlined text-[32px]">factory</span>
+                  </div>
+                  <div className="flex flex-col items-end gap-1">
+                    <span className="bg-secondary text-on-secondary text-[11px] font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider">
+                      REGISTERED FACILITY
+                    </span>
+                    <span className="bg-secondary-fixed text-on-secondary-fixed-variant text-[11px] font-bold px-2 py-0.5 rounded-full">
+                      CPCB TIER-1 / TIER-2
+                    </span>
+                  </div>
+                </div>
+
+                <div>
+                  <h2 className="text-2xl font-bold text-on-surface">
+                    Authorized Recycler
+                  </h2>
+                  <p className="text-xs sm:text-sm text-on-surface-variant mt-1 leading-relaxed">
+                    Designed for CPCB-registered formal recyclers, dismantling facilities, and PROs. Source aggregated scrap lots with automated EPR audit trails.
+                  </p>
+                </div>
+
+                {/* Key Features List */}
+                <div className="space-y-2 py-2 border-t border-b border-surface-container-high text-xs text-on-surface-variant">
+                  <div className="flex items-center gap-2">
+                    <span className="material-symbols-outlined text-secondary text-[18px]">inbox</span>
+                    <span><strong>Live Lot Stream:</strong> Inspect verified scrap lots within your radius</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="material-symbols-outlined text-secondary text-[18px]">scale</span>
+                    <span><strong>Weighbridge Integration:</strong> Scan lot QR &amp; record calibrated scale weights</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="material-symbols-outlined text-secondary text-[18px]">description</span>
+                    <span><strong>Form-6 &amp; EPR Credits:</strong> Auto-generate statutory transfer manifests</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Recycler Launch Button */}
+              <div className="mt-5 space-y-3 bg-surface-container-low p-4 rounded-xl">
+                <div className="flex items-center justify-between text-xs text-on-surface-variant">
+                  <span className="font-semibold">Facility Authentication:</span>
+                  <span className="text-emerald-700 font-bold flex items-center gap-1">
+                    <span className="w-2 h-2 rounded-full bg-emerald-600"></span> 5 Facilities Active
                   </span>
                 </div>
-                <h2 className="font-headline-md text-lg text-on-surface font-bold mt-0.5">
-                  Collector / कबाड़ीवाला
-                </h2>
-                <p className="font-body-md text-xs text-on-surface-variant mt-0.5 leading-relaxed">
-                  Scan scrap &amp; get highest verified live mandi rates
-                </p>
+                <button
+                  onClick={handleRecyclerLogin}
+                  className="w-full h-12 rounded-xl bg-on-surface text-surface hover:bg-black font-action-xl text-sm sm:text-base font-bold flex items-center justify-between px-5 shadow-md transition-all active:scale-[0.99] cursor-pointer"
+                  type="button"
+                >
+                  <div className="flex items-center gap-2.5">
+                    <span className="material-symbols-outlined text-[20px]">domain</span>
+                    <span>Access Recycler Portal</span>
+                  </div>
+                  <span className="material-symbols-outlined text-[22px]">chevron_right</span>
+                </button>
               </div>
+            </section>
+          </div>
+
+          {/* Underneath Stats Strip */}
+          <div className="grid grid-cols-3 gap-4 bg-surface-container-low rounded-2xl p-4 sm:p-5 border border-outline-variant/30 text-center">
+            <div>
+              <p className="text-lg sm:text-2xl font-extrabold text-primary">1,420+</p>
+              <p className="text-[11px] sm:text-xs text-on-surface-variant font-medium">Informal Collectors</p>
             </div>
-
-            <div className="space-y-2.5 bg-surface-container-low p-3 rounded-xl">
-              <label className="block font-label-md text-xs text-on-surface font-semibold" htmlFor="collectorPhoneClean">
-                Quick Mobile Login / फ़ोन नंबर
-              </label>
-              <div className="flex items-center bg-surface-container-lowest rounded-lg px-3 py-2 shadow-sm border border-outline-variant/40">
-                <span className="font-label-md text-sm text-on-surface-variant font-bold pr-2">+91</span>
-                <input
-                  id="collectorPhoneClean"
-                  type="tel"
-                  maxLength={10}
-                  value={phoneNumber}
-                  onChange={(e) => setPhoneNumber(e.target.value.replace(/\D/g, ''))}
-                  placeholder="Enter 10 digit number"
-                  className="w-full bg-transparent font-label-md text-sm text-on-surface outline-none placeholder:text-on-surface-variant/40"
-                />
-                <span className="material-symbols-outlined text-primary text-[20px]">phone_android</span>
-              </div>
-              <button
-                onClick={handleCollectorLogin}
-                className="w-full h-11 rounded-xl bg-primary text-on-primary font-action-xl text-sm font-bold flex items-center justify-center gap-1.5 shadow-sm hover:bg-primary-container transition-all active:scale-[0.99] cursor-pointer"
-                type="button"
-              >
-                <span>Continue as Collector</span>
-                <span className="material-symbols-outlined text-[18px]">arrow_forward</span>
-              </button>
+            <div className="border-x border-outline-variant/40">
+              <p className="text-lg sm:text-2xl font-extrabold text-on-surface">42.8 MT</p>
+              <p className="text-[11px] sm:text-xs text-on-surface-variant font-medium">Formalized This Month</p>
             </div>
-          </section>
-
-          {/* Card 2: Recycler */}
-          <section className="bg-surface-container-lowest rounded-2xl p-5 shadow-sm border border-outline-variant/30 space-y-4 hover:shadow-md transition-all">
-            <div className="flex items-start gap-3.5">
-              <div className="w-12 h-12 rounded-xl bg-secondary-container flex items-center justify-center shrink-0 text-on-secondary-container">
-                <span className="material-symbols-outlined text-[28px]">factory</span>
-              </div>
-              <div className="flex flex-col flex-1 min-w-0">
-                <div className="flex items-center justify-between">
-                  <span className="font-label-md text-[10px] font-bold uppercase tracking-wider text-secondary">
-                    REGISTERED FACILITY
-                  </span>
-                  <span className="bg-secondary-fixed text-on-secondary-fixed-variant text-[10px] font-bold px-2 py-0.5 rounded-full">
-                    CPCB TIER-1
-                  </span>
-                </div>
-                <h2 className="font-headline-md text-lg text-on-surface font-bold mt-0.5">
-                  Authorized Recycler
-                </h2>
-                <p className="font-body-md text-xs text-on-surface-variant mt-0.5 leading-relaxed">
-                  Source verified bulk e-waste lots &amp; auto-generate CPCB Form-6
-                </p>
-              </div>
+            <div>
+              <p className="text-lg sm:text-2xl font-extrabold text-secondary">100%</p>
+              <p className="text-[11px] sm:text-xs text-on-surface-variant font-medium">CPCB Form-6 Traceable</p>
             </div>
+          </div>
 
-            <button
-              onClick={handleRecyclerLogin}
-              className="w-full h-11 rounded-xl bg-surface-container-high text-on-surface hover:bg-surface-container-highest font-action-xl text-sm font-bold flex items-center justify-between px-4 shadow-sm transition-all active:scale-[0.99] cursor-pointer"
-              type="button"
-            >
-              <div className="flex items-center gap-2">
-                <span className="material-symbols-outlined text-primary text-[18px]">domain</span>
-                <span>Recycler Portal Login</span>
-              </div>
-              <span className="material-symbols-outlined text-[20px]">chevron_right</span>
-            </button>
-          </section>
-
-          {/* Clean Trust Footer */}
-          <footer className="pt-2 text-center space-y-1.5">
-            <div className="flex items-center justify-center gap-3 text-on-surface-variant text-[11px] font-medium flex-wrap">
-              <span className="flex items-center gap-1">
-                <span className="material-symbols-outlined text-primary text-[15px]">verified</span> CPCB Verified
+          {/* Clean Trust & Compliance Footer */}
+          <footer className="pt-2 text-center space-y-2">
+            <div className="flex items-center justify-center gap-4 text-on-surface-variant text-xs font-medium flex-wrap">
+              <span className="flex items-center gap-1.5">
+                <span className="material-symbols-outlined text-primary text-[16px]">verified</span> CPCB Authorized Network
               </span>
               <span className="text-on-surface-variant/40">•</span>
-              <span className="flex items-center gap-1">
-                <span className="material-symbols-outlined text-primary text-[15px]">cloud_off</span> Offline Ready
+              <span className="flex items-center gap-1.5">
+                <span className="material-symbols-outlined text-primary text-[16px]">cloud_sync</span> Offline-Ready PWA
               </span>
               <span className="text-on-surface-variant/40">•</span>
-              <span className="flex items-center gap-1">
-                <span className="material-symbols-outlined text-primary text-[15px]">lock</span> 256-Bit Encrypted
+              <span className="flex items-center gap-1.5">
+                <span className="material-symbols-outlined text-primary text-[16px]">security</span> Form-6 Statutory Audit Trail
               </span>
             </div>
-            <p className="font-body-md text-[11px] text-on-surface-variant/70">
-              Need help? Toll-free 1800-EW-RELINK
+            <p className="font-body-md text-xs text-on-surface-variant/70">
+              National Toll-Free Assistance: <strong>1800-EW-RELINK</strong> (8 AM – 8 PM)
             </p>
           </footer>
         </div>

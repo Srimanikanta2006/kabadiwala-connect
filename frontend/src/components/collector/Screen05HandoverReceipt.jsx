@@ -93,183 +93,192 @@ export default function Screen05HandoverReceipt({
       </header>
 
       {/* Main Content Canvas */}
-      <main className="flex-grow px-margin-mobile py-lg max-w-2xl mx-auto w-full flex flex-col gap-lg">
-        {/* Status Banner */}
-        <div className="bg-primary-container text-on-primary-container rounded-xl p-md shadow-md border border-outline-variant relative overflow-hidden flex flex-col items-center text-center gap-2 py-5">
-          <div className="w-12 h-12 rounded-full bg-surface-container-lowest text-primary flex items-center justify-center shadow-sm">
-            <span className="material-symbols-outlined text-[32px] filled text-primary">check_circle</span>
-          </div>
-          <div>
-            <span className="bg-primary-fixed text-on-primary-fixed font-label-md text-[12px] font-bold px-3 py-0.5 rounded-full uppercase tracking-wide">
-              {isConfirmed ? 'Verified Handover' : 'Pending Confirmation'}
-            </span>
-            <h2 className="font-headline-md text-headline-md text-on-primary-container font-bold mt-1 text-xl">
-              Handover &amp; Payment Verified
-            </h2>
-            <p className="font-body-md text-[14px] opacity-90">
-              Lot successfully transferred to Authorized Recycler
-            </p>
-          </div>
-          <button
-            onClick={handleSpeakReceipt}
-            aria-label="Play Hindi Audio Guidance"
-            className="w-full mt-2 flex items-center justify-center gap-2 bg-tertiary-fixed text-on-tertiary-fixed py-2 px-3 rounded-lg border border-tertiary-fixed-dim hover:bg-tertiary-fixed-dim transition-colors shadow-sm text-left cursor-pointer"
-          >
-            <span className="material-symbols-outlined text-[20px] text-tertiary filled">volume_up</span>
-            <span className="font-label-md text-[13px] font-medium leading-tight">
-              सुनें: 'हैंडओवर और भुगतान सफल: ₹{totalPaid.toLocaleString('en-IN')} नकद प्राप्त'
-            </span>
-          </button>
-        </div>
-
-        {/* Live Scannable QR Code */}
-        <div className="bg-surface rounded-xl border-2 border-primary/40 shadow-md p-md flex flex-col items-center justify-center text-center">
-          <p className="text-xs font-bold uppercase tracking-wider text-secondary mb-2">Weighbridge Scanner Token</p>
-          <div className="p-3 bg-white rounded-xl shadow-inner border border-outline-variant inline-block">
-            <QRCodeSVG value={qrPayload} size={180} level="M" includeMargin={true} />
-          </div>
-          <p className="font-mono text-xs font-bold text-primary mt-2">{handoverRef}</p>
-          <span className="text-[11px] text-secondary mt-0.5">Show this QR to the Recycler Weighbridge Scale Operator</span>
-        </div>
-
-        {/* Receipt Details Card */}
-        <div className="bg-surface rounded-xl border border-outline-variant shadow-sm p-md flex flex-col gap-md">
-          <div className="flex justify-between items-start border-b border-surface-variant pb-sm">
-            <div className="flex flex-col">
-              <span className="font-label-md text-[12px] text-secondary">Lot Reference</span>
-              <span className="font-headline-md text-[15px] font-bold text-on-surface">{lotRef}</span>
-            </div>
-            <div className="text-right">
-              <span className="font-label-md text-[12px] text-secondary">Handover ID</span>
-              <p className="font-label-md text-[13px] font-semibold text-primary">{handoverRef.split('-').slice(-2).join('-')}</p>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-md">
-            <div className="bg-surface-container-low p-sm rounded-lg border border-surface-variant p-2.5">
-              <p className="font-label-md text-[11px] text-secondary">Material &amp; Quantity</p>
-              <p className="font-headline-md text-[14px] font-semibold text-on-surface mt-0.5">{materialTitle}</p>
-              <p className="font-body-md text-[12px] text-on-surface-variant font-medium">{weight} kg Net Weight</p>
-            </div>
-            <div className="bg-surface-container-low p-sm rounded-lg border border-surface-variant p-2.5">
-              <p className="font-label-md text-[11px] text-secondary">Agreed Rate</p>
-              <p className="font-headline-md text-[14px] font-semibold text-primary mt-0.5">
-                ₹{agreedRate} <span className="font-normal text-[11px] text-secondary">/ kg</span>
-              </p>
-              <p className="font-label-md text-[11px] text-secondary">Market: ₹700-₹780</p>
-            </div>
-          </div>
-
-          <div className="bg-surface-container p-sm rounded-lg border border-outline-variant flex items-center justify-between p-3">
-            <div>
-              <p className="font-label-md text-[11px] text-secondary">Authorized Buyer</p>
-              <div className="flex items-center gap-1">
-                <p className="font-headline-md text-[14px] font-bold text-on-surface">{recycler.name}</p>
-                <span className="material-symbols-outlined text-primary text-[16px] filled">verified</span>
+      <main className="flex-grow w-full max-w-5xl mx-auto px-4 sm:px-6 py-6 space-y-6">
+        {/* Responsive 2-Column Grid on Desktop/Tablet */}
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-6 lg:gap-8 items-start">
+          {/* Left Column: Status, QR Code & Traceability (md:col-span-6) */}
+          <div className="md:col-span-6 space-y-4">
+            {/* Status Banner */}
+            <div className="bg-primary-container text-on-primary-container rounded-2xl p-5 shadow-md border border-outline-variant relative overflow-hidden flex flex-col items-center text-center gap-2 py-6">
+              <div className="w-14 h-14 rounded-full bg-surface-container-lowest text-primary flex items-center justify-center shadow-sm">
+                <span className="material-symbols-outlined text-[36px] filled text-primary">check_circle</span>
               </div>
-              <p className="font-body-md text-[11px] text-secondary">{recycler.cpcbNo}</p>
-            </div>
-            <div className="text-right">
-              <span className="font-label-md text-[11px] text-secondary">Total Paid</span>
-              <p className="font-action-xl text-[20px] font-extrabold text-primary">₹{totalPaid.toLocaleString('en-IN')}</p>
-            </div>
-          </div>
-
-          <div className="flex items-center justify-between bg-primary-container/10 p-sm rounded-lg border border-primary/20 p-2.5">
-            <div className="flex items-center gap-2">
-              <span className="material-symbols-outlined text-primary filled">payments</span>
               <div>
-                <p className="font-label-md text-[13px] font-bold text-on-surface">✓ Paid in Full via Cash</p>
-                <p className="font-body-md text-[11px] text-secondary">Physical cash verified &amp; acknowledged by collector</p>
-              </div>
-            </div>
-            <span className="material-symbols-outlined text-primary text-[20px] filled">check</span>
-          </div>
-        </div>
-
-        {/* 4 Pillars of Traceability */}
-        <div className="bg-surface rounded-xl border border-outline-variant shadow-sm p-md flex flex-col gap-sm">
-          <div className="flex items-center justify-between mb-1">
-            <h3 className="font-headline-md text-[15px] font-bold text-on-surface flex items-center gap-1.5">
-              <span className="material-symbols-outlined text-primary text-[20px] filled">verified_user</span>
-              4 Pillars of Traceability
-            </h3>
-            <span className="font-label-md text-[11px] text-primary bg-secondary-container px-2 py-0.5 rounded-full font-semibold">
-              Audit Verified
-            </span>
-          </div>
-          <div className="space-y-2">
-            <div className="flex items-start gap-3 p-2 rounded-lg bg-surface-container-low border border-surface-variant">
-              <span className="material-symbols-outlined text-primary text-[20px] mt-0.5 filled">location_on</span>
-              <div className="flex-grow">
-                <p className="font-label-md text-[12px] font-semibold text-on-surface">GPS Geofenced Location</p>
-                <p className="font-body-md text-[11px] text-on-surface-variant">Dharavi Transit Hub • Lat 19.0434, Long 72.8576</p>
-              </div>
-              <span className="material-symbols-outlined text-primary text-[18px] filled">check_circle</span>
-            </div>
-
-            <div className="flex items-start gap-3 p-2 rounded-lg bg-surface-container-low border border-surface-variant">
-              <span className="material-symbols-outlined text-primary text-[20px] mt-0.5 filled">photo_camera</span>
-              <div className="flex-grow">
-                <p className="font-label-md text-[12px] font-semibold text-on-surface">Handover Photo Proof</p>
-                <p className="font-body-md text-[11px] text-on-surface-variant">Timestamped lot inspection &amp; scale capture verified</p>
-              </div>
-              <span className="material-symbols-outlined text-primary text-[18px] filled">check_circle</span>
-            </div>
-
-            <div className="flex items-start gap-3 p-2 rounded-lg bg-surface-container-low border border-surface-variant">
-              <span className="material-symbols-outlined text-primary text-[20px] mt-0.5 filled">scale</span>
-              <div className="flex-grow">
-                <p className="font-label-md text-[12px] font-semibold text-on-surface">Certified Weight Scale</p>
-                <p className="font-body-md text-[11px] text-on-surface-variant">
-                  Gross: {(weight + 0.4).toFixed(2)} kg | Tare: 0.40 kg | Net: {weight.toFixed(2)} kg
+                <span className="bg-primary-fixed text-on-primary-fixed font-label-md text-xs font-extrabold px-3.5 py-1 rounded-full uppercase tracking-wider">
+                  {isConfirmed ? 'Verified Handover' : 'Pending Confirmation'}
+                </span>
+                <h2 className="font-headline-md text-xl sm:text-2xl text-on-primary-container font-extrabold mt-1.5">
+                  Handover &amp; Payment Verified
+                </h2>
+                <p className="text-xs sm:text-sm opacity-90 mt-0.5">
+                  Lot successfully transferred to Authorized Recycler
                 </p>
               </div>
-              <span className="material-symbols-outlined text-primary text-[18px] filled">check_circle</span>
+              <button
+                onClick={handleSpeakReceipt}
+                aria-label="Play Hindi Audio Guidance"
+                className="w-full mt-3 flex items-center justify-center gap-2 bg-tertiary-fixed text-on-tertiary-fixed py-2.5 px-3.5 rounded-xl border border-tertiary-fixed-dim hover:bg-tertiary-fixed-dim transition-colors shadow-sm text-left cursor-pointer"
+              >
+                <span className="material-symbols-outlined text-[20px] text-tertiary filled">volume_up</span>
+                <span className="text-xs font-semibold leading-tight">
+                  सुनें: 'हैंडओवर और भुगतान सफल: ₹{totalPaid.toLocaleString('en-IN')} नकद प्राप्त'
+                </span>
+              </button>
             </div>
 
-            <div className="flex items-start gap-3 p-2 rounded-lg bg-surface-container-low border border-surface-variant">
-              <span className="material-symbols-outlined text-primary text-[20px] mt-0.5 filled">draw</span>
-              <div className="flex-grow">
-                <p className="font-label-md text-[12px] font-semibold text-on-surface">Recycler Digital Sign-off</p>
-                <p className="font-body-md text-[11px] text-on-surface-variant font-mono">{certId}</p>
+            {/* Live Scannable QR Code */}
+            <div className="bg-surface rounded-2xl border-2 border-primary/40 shadow-md p-5 flex flex-col items-center justify-center text-center">
+              <p className="text-xs font-bold uppercase tracking-wider text-secondary mb-2">Weighbridge Scanner Token</p>
+              <div className="p-3.5 bg-white rounded-2xl shadow-inner border border-outline-variant inline-block">
+                <QRCodeSVG value={qrPayload} size={180} level="M" includeMargin={true} />
               </div>
-              <span className="material-symbols-outlined text-primary text-[18px] filled">check_circle</span>
+              <p className="font-mono text-xs font-bold text-primary mt-2.5">{handoverRef}</p>
+              <span className="text-[11px] text-secondary mt-0.5">Show this QR to the Recycler Weighbridge Scale Operator</span>
+            </div>
+
+            {/* 4 Pillars of Traceability */}
+            <div className="bg-surface rounded-2xl border border-outline-variant shadow-sm p-4 sm:p-5 space-y-3">
+              <div className="flex items-center justify-between">
+                <h3 className="text-sm font-bold text-on-surface flex items-center gap-1.5">
+                  <span className="material-symbols-outlined text-primary text-[20px] filled">verified_user</span>
+                  <span>4 Pillars of Traceability</span>
+                </h3>
+                <span className="text-[10px] text-primary bg-primary/10 px-2.5 py-0.5 rounded-full font-bold border border-primary/20">
+                  Audit Verified
+                </span>
+              </div>
+              <div className="space-y-2 text-xs">
+                <div className="flex items-start gap-2.5 p-2 rounded-xl bg-surface-container-low border border-outline-variant/30">
+                  <span className="material-symbols-outlined text-primary text-[18px] filled mt-0.5">location_on</span>
+                  <div className="flex-grow">
+                    <p className="font-semibold text-on-surface">GPS Geofenced Location</p>
+                    <p className="text-secondary text-[11px]">Dharavi Transit Hub • Lat 19.0434, Long 72.8576</p>
+                  </div>
+                  <span className="material-symbols-outlined text-emerald-600 text-[16px] filled">check_circle</span>
+                </div>
+
+                <div className="flex items-start gap-2.5 p-2 rounded-xl bg-surface-container-low border border-outline-variant/30">
+                  <span className="material-symbols-outlined text-primary text-[18px] filled mt-0.5">photo_camera</span>
+                  <div className="flex-grow">
+                    <p className="font-semibold text-on-surface">Handover Photo Proof</p>
+                    <p className="text-secondary text-[11px]">Timestamped lot inspection &amp; scale capture verified</p>
+                  </div>
+                  <span className="material-symbols-outlined text-emerald-600 text-[16px] filled">check_circle</span>
+                </div>
+
+                <div className="flex items-start gap-2.5 p-2 rounded-xl bg-surface-container-low border border-outline-variant/30">
+                  <span className="material-symbols-outlined text-primary text-[18px] filled mt-0.5">scale</span>
+                  <div className="flex-grow">
+                    <p className="font-semibold text-on-surface">Certified Weight Scale</p>
+                    <p className="text-secondary text-[11px]">
+                      Gross: {(weight + 0.4).toFixed(2)} kg | Tare: 0.40 kg | Net: {weight.toFixed(2)} kg
+                    </p>
+                  </div>
+                  <span className="material-symbols-outlined text-emerald-600 text-[16px] filled">check_circle</span>
+                </div>
+
+                <div className="flex items-start gap-2.5 p-2 rounded-xl bg-surface-container-low border border-outline-variant/30">
+                  <span className="material-symbols-outlined text-primary text-[18px] filled mt-0.5">draw</span>
+                  <div className="flex-grow">
+                    <p className="font-semibold text-on-surface">Recycler Digital Sign-off</p>
+                    <p className="text-secondary text-[11px] font-mono">{certId}</p>
+                  </div>
+                  <span className="material-symbols-outlined text-emerald-600 text-[16px] filled">check_circle</span>
+                </div>
+              </div>
             </div>
           </div>
-        </div>
 
-        {/* Action Buttons */}
-        <div className="flex flex-col gap-sm">
-          <button
-            onClick={handleShare}
-            className="w-full h-touch-target-min bg-primary text-on-primary font-action-xl text-[15px] rounded-lg shadow-md hover:bg-primary-container transition-colors flex items-center justify-center gap-2 font-bold cursor-pointer"
-          >
-            <span className="material-symbols-outlined text-[20px]">share</span>
-            <span>Download / Share Receipt (PDF/SMS)</span>
-          </button>
+          {/* Right Column: Receipt Breakdown & Payout (md:col-span-6) */}
+          <div className="md:col-span-6 space-y-4">
+            {/* Receipt Details Card */}
+            <div className="bg-surface rounded-2xl border border-outline-variant shadow-sm p-5 space-y-4">
+              <div className="flex justify-between items-start border-b border-surface-variant pb-3">
+                <div className="flex flex-col">
+                  <span className="text-xs text-secondary font-semibold">Lot Reference</span>
+                  <span className="text-base font-bold text-on-surface font-mono">{lotRef}</span>
+                </div>
+                <div className="text-right">
+                  <span className="text-xs text-secondary font-semibold">Handover Token</span>
+                  <p className="text-xs font-bold text-primary font-mono">{handoverRef.split('-').slice(-2).join('-')}</p>
+                </div>
+              </div>
 
-          <div className="grid grid-cols-2 gap-sm">
-            <button
-              onClick={() => onNavigate('earnings')}
-              className="h-touch-target-min bg-surface-container border border-outline text-on-surface font-label-lg text-[13px] rounded-lg hover:bg-surface-container-high transition-colors flex items-center justify-center gap-1 font-semibold cursor-pointer"
-            >
-              <span className="material-symbols-outlined text-[18px]">payments</span>
-              <span>View in Earnings</span>
-            </button>
-            <button
-              onClick={onResetLot}
-              className="h-touch-target-min bg-surface-container border border-outline text-on-surface font-label-lg text-[13px] rounded-lg hover:bg-surface-container-high transition-colors flex items-center justify-center gap-1 font-semibold cursor-pointer"
-            >
-              <span className="material-symbols-outlined text-[18px]">add_circle</span>
-              <span>Create New Lot</span>
-            </button>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="bg-surface-container-low p-3 rounded-xl border border-surface-variant">
+                  <p className="text-xs text-secondary font-semibold">Material &amp; Quantity</p>
+                  <p className="text-sm font-bold text-on-surface mt-0.5">{materialTitle}</p>
+                  <p className="text-xs text-secondary font-medium">{weight} kg Net Weight</p>
+                </div>
+                <div className="bg-surface-container-low p-3 rounded-xl border border-surface-variant">
+                  <p className="text-xs text-secondary font-semibold">Agreed Rate</p>
+                  <p className="text-sm font-bold text-primary mt-0.5 font-mono">
+                    ₹{agreedRate} <span className="font-normal text-xs text-secondary">/ kg</span>
+                  </p>
+                  <p className="text-[11px] text-secondary">Market: ₹700-₹780</p>
+                </div>
+              </div>
+
+              <div className="bg-surface-container p-3.5 rounded-xl border border-outline-variant flex items-center justify-between">
+                <div>
+                  <p className="text-xs text-secondary font-semibold">Authorized Buyer</p>
+                  <div className="flex items-center gap-1 mt-0.5">
+                    <p className="text-sm font-bold text-on-surface">{recycler.name}</p>
+                    <span className="material-symbols-outlined text-primary text-[18px] filled">verified</span>
+                  </div>
+                  <p className="text-[11px] text-secondary font-mono">{recycler.cpcbNo}</p>
+                </div>
+                <div className="text-right">
+                  <span className="text-xs text-secondary font-semibold">Total Paid</span>
+                  <p className="text-2xl font-extrabold text-primary font-mono">₹{totalPaid.toLocaleString('en-IN')}</p>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between bg-primary-container/10 p-3 rounded-xl border border-primary/20">
+                <div className="flex items-center gap-2.5">
+                  <span className="material-symbols-outlined text-primary filled text-[24px]">payments</span>
+                  <div>
+                    <p className="text-xs font-bold text-on-surface">✓ Paid in Full via Cash</p>
+                    <p className="text-[11px] text-secondary">Physical cash verified &amp; acknowledged by collector</p>
+                  </div>
+                </div>
+                <span className="material-symbols-outlined text-primary text-[20px] filled">check</span>
+              </div>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex flex-col gap-3">
+              <button
+                onClick={handleShare}
+                className="w-full h-12 bg-primary text-on-primary rounded-xl shadow-md hover:bg-primary-container transition-all flex items-center justify-center gap-2 font-bold text-sm cursor-pointer active:scale-[0.99]"
+              >
+                <span className="material-symbols-outlined text-[20px]">share</span>
+                <span>Download / Share Receipt (PDF/SMS)</span>
+              </button>
+
+              <div className="grid grid-cols-2 gap-3">
+                <button
+                  onClick={() => onNavigate('earnings')}
+                  className="h-11 bg-surface-container border border-outline-variant text-on-surface rounded-xl hover:bg-surface-container-high transition-colors flex items-center justify-center gap-1.5 font-bold text-xs sm:text-sm cursor-pointer"
+                >
+                  <span className="material-symbols-outlined text-[18px]">payments</span>
+                  <span>View in Earnings</span>
+                </button>
+                <button
+                  onClick={onResetLot}
+                  className="h-11 bg-surface-container border border-outline-variant text-on-surface rounded-xl hover:bg-surface-container-high transition-colors flex items-center justify-center gap-1.5 font-bold text-xs sm:text-sm cursor-pointer"
+                >
+                  <span className="material-symbols-outlined text-[18px]">add_circle</span>
+                  <span>Create New Lot</span>
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </main>
 
-      {/* BottomNavBar */}
-      <nav className="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-2 py-2 bg-surface border-t border-outline-variant shadow-md rounded-t-xl">
+      {/* BottomNavBar (Mobile Only) */}
+      <nav className="fixed bottom-0 left-0 w-full z-50 flex md:hidden justify-around items-center px-2 py-2 bg-surface border-t border-outline-variant shadow-md rounded-t-xl">
         <button onClick={() => onNavigate('home')} className="flex flex-col items-center justify-center p-2 text-on-surface-variant cursor-pointer">
           <span className="material-symbols-outlined">home</span>
           <span className="font-label-md text-xs mt-1">Home</span>

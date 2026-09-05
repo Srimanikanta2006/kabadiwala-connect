@@ -117,135 +117,156 @@ export default function Screen04PriceOffers({
       </header>
 
       {/* Main Content Canvas */}
-      <main className="flex-grow px-margin-mobile py-lg max-w-2xl mx-auto w-full flex flex-col gap-lg">
+      <main className="flex-grow w-full max-w-5xl mx-auto px-4 sm:px-6 py-6 space-y-6">
         {/* Context Header */}
-        <div className="flex items-center justify-between mb-sm">
+        <div className="flex items-center justify-between">
           <div>
-            <p className="font-label-md text-label-md text-secondary uppercase tracking-wider mb-xs text-xs font-semibold">Lot Details</p>
-            <h2 className="font-headline-lg-mobile text-headline-lg-mobile md:font-headline-lg md:text-headline-lg text-on-background font-bold text-xl">
+            <p className="font-label-md text-secondary uppercase tracking-wider text-xs font-bold">Competitive Recycler Bids</p>
+            <h2 className="text-xl sm:text-2xl text-on-background font-extrabold">
               {weight}kg • {materialTitle}
             </h2>
           </div>
           <button
             onClick={handleSpeakOffers}
             aria-label="Play Audio Guidance"
-            className="flex items-center justify-center w-10 h-10 rounded-full bg-tertiary-fixed text-on-tertiary-fixed hover:bg-tertiary-fixed-dim transition-colors shadow-sm border border-tertiary-fixed-dim cursor-pointer"
+            className="flex items-center justify-center w-11 h-11 rounded-full bg-tertiary-fixed text-on-tertiary-fixed hover:bg-tertiary-fixed-dim transition-colors shadow-sm border border-tertiary-fixed-dim cursor-pointer"
           >
-            <span className="material-symbols-outlined filled">volume_up</span>
+            <span className="material-symbols-outlined filled text-[22px]">volume_up</span>
           </button>
         </div>
 
-        {/* Valuation Card */}
-        <div className="bg-primary-container text-on-primary-container rounded-xl p-lg shadow-md border border-outline-variant relative overflow-hidden flex flex-col items-center justify-center text-center py-6">
-          <p className="font-body-lg text-body-lg mb-2 z-10 font-medium">Estimated Lot Value</p>
-          <p className="font-headline-lg-mobile text-headline-lg-mobile md:font-headline-lg md:text-headline-lg text-on-primary-container font-extrabold z-10 tracking-tight text-3xl md:text-4xl">
-            ₹{Math.round(weight * 700).toLocaleString('en-IN')} - ₹{Math.round(weight * 780).toLocaleString('en-IN')}
-          </p>
-          <p className="font-label-md text-label-md mt-sm z-10 opacity-90 flex items-center gap-1 text-xs">
-            <span className="material-symbols-outlined text-[16px]">info</span>
-            Based on current market rates (₹700-₹780/kg)
-          </p>
-        </div>
-
-        {/* Recycler Matches Section */}
-        <div className="flex flex-col gap-md mt-md">
-          <div className="flex items-center justify-between">
-            <h3 className="font-headline-md text-headline-md text-on-surface font-bold text-lg">Nearby Recycler Offers</h3>
-            <span className="bg-secondary-container text-on-secondary-container font-label-md text-xs px-3 py-1 rounded-full font-bold">
-              {offers.length} Found
-            </span>
-          </div>
-
-          {/* Recycler Option A (Top Choice) */}
-          <div className="bg-surface rounded-xl border border-outline-variant shadow-md p-md relative overflow-hidden ring-2 ring-primary">
-            <div className="absolute top-0 right-0 bg-primary text-on-primary font-label-md text-[11px] font-bold px-3 py-1 rounded-bl-lg shadow-sm">
-              TOP MATCH
-            </div>
-            <div className="flex justify-between items-start mb-md pr-16">
-              <div>
-                <div className="flex items-center gap-2 mb-1">
-                  <h4 className="font-headline-md text-headline-md text-on-surface font-bold text-base">{offers[0].name}</h4>
-                  <span className="material-symbols-outlined text-primary text-[20px] filled" title="Authorized Recycler">verified</span>
-                </div>
-                <p className="font-body-md text-body-md text-on-surface-variant flex items-center gap-1 text-xs">
-                  <span className="material-symbols-outlined text-[16px]">location_on</span>
-                  {offers[0].distance}km away • Authorized E-Waste Handler
-                </p>
-              </div>
+        {/* 2-Column Responsive Layout */}
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-6 lg:gap-8 items-start">
+          {/* Left Column: Recycler Offers (md:col-span-7) */}
+          <div className="md:col-span-7 space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="font-headline-md text-on-surface font-bold text-base sm:text-lg">Authorized Buyer Quotes</h3>
+              <span className="bg-primary/10 text-primary font-bold text-xs px-3 py-1 rounded-full border border-primary/20">
+                {offers.length} Bids Active
+              </span>
             </div>
 
-            <div className="flex items-center justify-between mb-lg bg-surface-container-low p-sm rounded-lg border border-surface-variant p-3 my-2">
-              <div>
-                <p className="font-label-md text-label-md text-secondary text-xs">Offer Price</p>
-                <p className="font-action-xl text-action-xl text-primary font-bold text-xl">
-                  ₹{offers[0].rate} <span className="font-body-md text-xs font-normal text-on-surface-variant">/kg</span>
-                </p>
+            {/* Recycler Option A (Top Choice) */}
+            <div className="bg-surface rounded-2xl border-2 border-primary shadow-md p-5 relative overflow-hidden">
+              <div className="absolute top-0 right-0 bg-primary text-on-primary font-label-md text-[11px] font-bold px-3 py-1 rounded-bl-xl shadow-sm">
+                HIGHEST BIDDER
               </div>
-              <div className="text-right">
-                <p className="font-label-md text-label-md text-secondary text-xs">Total Est.</p>
-                <p className="font-headline-md text-headline-md text-on-surface font-extrabold text-xl">
-                  ₹{Math.round(weight * offers[0].rate).toLocaleString('en-IN')}
-                </p>
-              </div>
-            </div>
-
-            <button
-              onClick={() => handleAccept(offers[0])}
-              className="w-full h-touch-target-min bg-primary text-on-primary font-action-xl text-action-xl rounded-lg shadow-md hover:bg-primary-container transition-colors flex items-center justify-center gap-2 font-bold cursor-pointer"
-            >
-              <span>Accept Offer</span>
-              <span className="material-symbols-outlined text-[20px]">check_circle</span>
-            </button>
-          </div>
-
-          {/* Recycler Option B (Alternative) */}
-          {offers[1] && (
-            <div className="bg-surface rounded-xl border border-outline-variant shadow-sm p-md">
-              <div className="flex justify-between items-start mb-md">
+              <div className="flex justify-between items-start mb-3 pr-20">
                 <div>
                   <div className="flex items-center gap-2 mb-1">
-                    <h4 className="font-headline-md text-headline-md text-on-surface font-bold text-base">{offers[1].name}</h4>
+                    <h4 className="font-bold text-on-surface text-base sm:text-lg">{offers[0].name}</h4>
                     <span className="material-symbols-outlined text-primary text-[20px] filled" title="Authorized Recycler">verified</span>
                   </div>
-                  <p className="font-body-md text-body-md text-on-surface-variant flex items-center gap-1 mb-1 text-xs">
+                  <p className="text-on-surface-variant flex items-center gap-1 text-xs">
                     <span className="material-symbols-outlined text-[16px]">location_on</span>
-                    {offers[1].distance}km away
+                    {offers[0].distance}km away • CPCB Tier-1 Ecoreco Facility
                   </p>
-                  <span className="inline-flex items-center gap-1 bg-tertiary-container text-on-tertiary-container font-label-md text-[11px] px-2 py-0.5 rounded-full mt-1 font-semibold">
-                    <span className="material-symbols-outlined text-[14px] filled">local_shipping</span>
-                    Pickup Available
-                  </span>
                 </div>
               </div>
 
-              <div className="flex items-center justify-between mb-md bg-surface-container-low p-sm rounded-lg border border-surface-variant p-3 my-2">
+              <div className="flex items-center justify-between mb-4 bg-surface-container-low p-3.5 rounded-xl border border-outline-variant/40">
                 <div>
-                  <p className="font-label-md text-label-md text-secondary text-xs">Offer Price</p>
-                  <p className="font-action-xl text-action-xl text-on-surface font-bold text-xl">
-                    ₹{offers[1].rate} <span className="font-body-md text-xs font-normal text-on-surface-variant">/kg</span>
+                  <p className="text-secondary text-xs font-semibold">Offer Unit Rate</p>
+                  <p className="text-primary font-extrabold text-2xl font-mono">
+                    ₹{offers[0].rate} <span className="text-xs font-normal text-on-surface-variant">/kg</span>
                   </p>
                 </div>
                 <div className="text-right">
-                  <p className="font-label-md text-label-md text-secondary text-xs">Total Est.</p>
-                  <p className="font-headline-md text-headline-md text-on-surface font-extrabold text-xl">
-                    ₹{Math.round(weight * offers[1].rate).toLocaleString('en-IN')}
+                  <p className="text-secondary text-xs font-semibold">Total Handover Payout</p>
+                  <p className="text-on-surface font-extrabold text-2xl font-mono">
+                    ₹{Math.round(weight * offers[0].rate).toLocaleString('en-IN')}
                   </p>
                 </div>
               </div>
 
               <button
-                onClick={() => handleAccept(offers[1])}
-                className="w-full h-touch-target-min bg-surface-container border border-outline text-on-surface font-label-lg rounded-lg hover:bg-surface-container-high transition-colors flex items-center justify-center font-bold cursor-pointer"
+                onClick={() => handleAccept(offers[0])}
+                className="w-full h-12 bg-primary text-on-primary rounded-xl shadow-md hover:bg-primary-container transition-all flex items-center justify-center gap-2 font-bold text-sm sm:text-base cursor-pointer active:scale-[0.99]"
               >
-                Accept Offer
+                <span>Accept &amp; Generate QR Pass</span>
+                <span className="material-symbols-outlined text-[20px]">check_circle</span>
               </button>
             </div>
-          )}
+
+            {/* Recycler Option B (Alternative) */}
+            {offers[1] && (
+              <div className="bg-surface rounded-2xl border border-outline-variant shadow-sm p-5 space-y-3">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <div className="flex items-center gap-2 mb-1">
+                      <h4 className="font-bold text-on-surface text-base">{offers[1].name}</h4>
+                      <span className="material-symbols-outlined text-primary text-[18px] filled" title="Authorized Recycler">verified</span>
+                    </div>
+                    <p className="text-on-surface-variant flex items-center gap-1 text-xs">
+                      <span className="material-symbols-outlined text-[16px]">location_on</span>
+                      {offers[1].distance}km away • Doorstep Van Available
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between bg-surface-container-low p-3 rounded-xl border border-outline-variant/40">
+                  <div>
+                    <p className="text-secondary text-xs">Offer Rate</p>
+                    <p className="text-on-surface font-bold text-xl font-mono">
+                      ₹{offers[1].rate} <span className="text-xs font-normal text-on-surface-variant">/kg</span>
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-secondary text-xs">Total Est.</p>
+                    <p className="text-on-surface font-bold text-xl font-mono">
+                      ₹{Math.round(weight * offers[1].rate).toLocaleString('en-IN')}
+                    </p>
+                  </div>
+                </div>
+
+                <button
+                  onClick={() => handleAccept(offers[1])}
+                  className="w-full h-11 bg-surface-container-high hover:bg-surface-container-highest text-on-surface rounded-xl font-semibold text-xs sm:text-sm flex items-center justify-center transition-colors cursor-pointer border border-outline-variant/40"
+                >
+                  Accept Alternative Bid
+                </button>
+              </div>
+            )}
+          </div>
+
+          {/* Right Column: Mandi Valuation & Buyer Trust (md:col-span-5) */}
+          <div className="md:col-span-5 space-y-4">
+            {/* Valuation Card */}
+            <div className="bg-primary-container text-on-primary-container rounded-2xl p-5 sm:p-6 shadow-md border border-outline-variant relative overflow-hidden flex flex-col items-center justify-center text-center space-y-2">
+              <p className="text-xs font-bold uppercase tracking-wider text-on-primary-container/80">Fair Mandi Valuation Band</p>
+              <p className="text-3xl sm:text-4xl font-extrabold font-mono tracking-tight">
+                ₹{Math.round(weight * 700).toLocaleString('en-IN')} – ₹{Math.round(weight * 780).toLocaleString('en-IN')}
+              </p>
+              <p className="text-xs opacity-90 flex items-center gap-1">
+                <span className="material-symbols-outlined text-[16px]">info</span>
+                Calculated for {weight}kg at ₹700 – ₹780/kg
+              </p>
+            </div>
+
+            {/* Recycler Guarantee Card */}
+            <div className="bg-surface rounded-2xl p-5 border border-outline-variant shadow-sm space-y-3 text-xs">
+              <span className="font-bold uppercase tracking-wider text-on-surface block">Settlement Guarantees</span>
+              <div className="space-y-2 text-on-surface-variant">
+                <div className="flex items-start gap-2">
+                  <span className="material-symbols-outlined text-emerald-600 text-[18px]">verified</span>
+                  <span><strong>Scale Weighbridge:</strong> Calibrated electronic scale with printed slip.</span>
+                </div>
+                <div className="flex items-start gap-2">
+                  <span className="material-symbols-outlined text-emerald-600 text-[18px]">payments</span>
+                  <span><strong>Instant Payment:</strong> 100% Cash in hand or immediate UPI bank transfer.</span>
+                </div>
+                <div className="flex items-start gap-2">
+                  <span className="material-symbols-outlined text-primary text-[18px]">policy</span>
+                  <span><strong>Statutory Form-6:</strong> Complete CPCB regulatory protection from illegal dumping liabilities.</span>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </main>
 
-      {/* BottomNavBar */}
-      <nav className="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-2 py-2 bg-surface border-t border-outline-variant shadow-md rounded-t-xl">
+      {/* BottomNavBar (Mobile Only) */}
+      <nav className="fixed bottom-0 left-0 w-full z-50 flex md:hidden justify-around items-center px-2 py-2 bg-surface border-t border-outline-variant shadow-md rounded-t-xl">
         <button onClick={() => onNavigate('home')} className="flex flex-col items-center justify-center p-2 text-on-surface-variant cursor-pointer">
           <span className="material-symbols-outlined">home</span>
           <span className="font-label-md text-xs mt-1">Home</span>

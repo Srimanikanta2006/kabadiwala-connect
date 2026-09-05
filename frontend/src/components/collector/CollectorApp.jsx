@@ -304,11 +304,11 @@ export default function CollectorApp({ onSwitchRole }) {
               👷‍♂️
             </div>
           </header>
-          <div className="max-w-xl mx-auto p-4">
+          <div className="w-full max-w-5xl mx-auto p-4 sm:p-6 space-y-6">
             <SafetyGuidance />
           </div>
-          {/* Bottom Nav */}
-          <nav className="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-2 py-2 bg-surface border-t border-outline-variant shadow-md rounded-t-xl">
+          {/* Bottom Nav (Mobile Only) */}
+          <nav className="fixed bottom-0 left-0 w-full z-50 flex md:hidden justify-around items-center px-2 py-2 bg-surface border-t border-outline-variant shadow-md rounded-t-xl">
             <button onClick={() => setActiveScreen('home')} className="flex flex-col items-center justify-center p-2 text-on-surface-variant cursor-pointer">
               <span className="material-symbols-outlined">home</span>
               <span className="font-label-md text-xs mt-1">Home</span>

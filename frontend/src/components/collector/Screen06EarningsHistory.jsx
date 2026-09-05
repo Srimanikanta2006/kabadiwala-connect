@@ -83,7 +83,7 @@ export default function Screen06EarningsHistory({ onNavigate, syncStatus = { isO
       </header>
 
       {/* Main Content */}
-      <main className="max-w-4xl mx-auto p-margin-mobile md:p-lg space-y-lg flex-grow w-full">
+      <main className="max-w-5xl mx-auto px-4 sm:px-6 py-6 space-y-6 flex-grow w-full">
         {/* Page Title */}
         <div className="flex items-center justify-between">
           <h1 className="font-headline-lg-mobile text-headline-lg-mobile md:font-headline-lg md:text-headline-lg font-bold text-2xl">
@@ -200,8 +200,8 @@ export default function Screen06EarningsHistory({ onNavigate, syncStatus = { isO
         </div>
       </main>
 
-      {/* BottomNavBar */}
-      <nav className="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-2 py-2 bg-surface border-t border-outline-variant shadow-md rounded-t-xl">
+      {/* BottomNavBar (Mobile Only) */}
+      <nav className="fixed bottom-0 left-0 w-full z-50 flex md:hidden justify-around items-center px-2 py-2 bg-surface border-t border-outline-variant shadow-md rounded-t-xl">
         <button onClick={() => onNavigate('home')} className="flex flex-col items-center justify-center p-2 text-on-surface-variant cursor-pointer">
           <span className="material-symbols-outlined">home</span>
           <span className="font-label-md text-xs mt-1">Home</span>

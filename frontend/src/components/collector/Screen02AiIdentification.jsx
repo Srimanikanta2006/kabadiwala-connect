@@ -96,7 +96,7 @@ export default function Screen02AiIdentification({
       </header>
 
       {/* Main Content */}
-      <main className="px-margin-mobile py-lg max-w-xl mx-auto flex flex-col gap-md">
+      <main className="w-full max-w-5xl mx-auto px-4 sm:px-6 py-6 space-y-6">
         {/* Header Indicator */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -108,35 +108,39 @@ export default function Screen02AiIdentification({
           </div>
         </div>
 
-        {/* Viewfinder Image */}
-        <div className="relative rounded-xl overflow-hidden border border-outline-variant bg-inverse-surface shadow-md aspect-[4/3] flex items-center justify-center">
-          <img
-            alt="Scanned E-Waste Scrap"
-            className="w-full h-full object-cover opacity-90"
-            src={lotDraft.photoUrl || '/assets/icons/pcb_high.svg'}
-          />
-          {/* Dashed Bounding Box */}
-          <div className="absolute inset-6 border-2 border-primary-fixed border-dashed rounded-lg pointer-events-none flex flex-col justify-between p-2">
-            <div className="self-start bg-primary text-on-primary text-[11px] font-bold px-2 py-0.5 rounded shadow-sm flex items-center gap-1">
-              <span className="material-symbols-outlined text-[14px]">document_scanner</span>
-              <span>{materialTitle.split(' ')[0]} detected • {confidence}%</span>
+        {/* 2-Column Responsive Layout on Desktop/Tablet */}
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-6 lg:gap-8 items-start">
+          {/* Left Column: Viewfinder & AI Detection (md:col-span-7) */}
+          <div className="md:col-span-7 space-y-4">
+            {/* Viewfinder Image */}
+            <div className="relative rounded-2xl overflow-hidden border border-outline-variant bg-inverse-surface shadow-md aspect-[4/3] flex items-center justify-center">
+              <img
+                alt="Scanned E-Waste Scrap"
+                className="w-full h-full object-cover opacity-90"
+                src={lotDraft.photoUrl || '/assets/icons/pcb_high.svg'}
+              />
+              {/* Dashed Bounding Box */}
+              <div className="absolute inset-6 border-2 border-primary-fixed border-dashed rounded-xl pointer-events-none flex flex-col justify-between p-3">
+                <div className="self-start bg-primary text-on-primary text-xs font-bold px-2.5 py-1 rounded-md shadow-sm flex items-center gap-1.5">
+                  <span className="material-symbols-outlined text-[16px]">document_scanner</span>
+                  <span>{materialTitle.split(' ')[0]} detected • {confidence}% Match</span>
+                </div>
+                <div className="self-end bg-inverse-surface/85 backdrop-blur-sm text-white text-[11px] px-2.5 py-1 rounded-md border border-white/20">
+                  High Value E-Scrap Grade 1
+                </div>
+              </div>
+              {/* Retake Button */}
+              <button
+                onClick={onRetakePhoto}
+                className="absolute bottom-3 right-3 bg-surface/90 backdrop-blur text-on-surface hover:bg-surface text-xs font-semibold px-3 py-1.5 rounded-full shadow border border-outline-variant flex items-center gap-1.5 active:scale-95 transition-all cursor-pointer"
+              >
+                <span className="material-symbols-outlined text-[16px]">photo_camera</span>
+                <span>Retake Photo</span>
+              </button>
             </div>
-            <div className="self-end bg-inverse-surface/85 backdrop-blur-sm text-white text-[10px] px-2 py-0.5 rounded border border-white/20">
-              High Value E-Scrap
-            </div>
-          </div>
-          {/* Retake Button */}
-          <button
-            onClick={onRetakePhoto}
-            className="absolute bottom-3 right-3 bg-surface/90 backdrop-blur text-on-surface hover:bg-surface text-xs font-medium px-3 py-1.5 rounded-full shadow border border-outline-variant flex items-center gap-1.5 active:scale-95 transition-all cursor-pointer"
-          >
-            <span className="material-symbols-outlined text-[16px]">photo_camera</span>
-            <span>Retake Photo</span>
-          </button>
-        </div>
 
-        {/* AI Detection Card */}
-        <div className="bg-surface border border-outline-variant rounded-xl p-md shadow-sm">
+            {/* AI Detection Card */}
+            <div className="bg-surface border border-outline-variant rounded-2xl p-4 sm:p-5 shadow-sm space-y-3">
           <div className="flex items-start justify-between gap-3">
             <div className="flex-1">
               <div className="flex items-center gap-2">
@@ -263,18 +267,21 @@ export default function Screen02AiIdentification({
             </button>
           </div>
         </div>
+      </div>
 
+      {/* Right Column: Weight, Condition & Valuation Workbench (md:col-span-5) */}
+      <div className="md:col-span-5 space-y-4">
         {/* Quick Lot Details Card */}
-        <div className="bg-surface border border-outline-variant rounded-xl p-md shadow-sm flex flex-col gap-4">
+        <div className="bg-surface border border-outline-variant rounded-2xl p-4 sm:p-5 shadow-sm flex flex-col gap-4">
           <div className="flex items-center justify-between border-b border-outline-variant/60 pb-2">
-            <span className="font-label-lg text-label-lg font-semibold text-on-surface">Quick Lot Details</span>
+            <span className="font-label-lg text-label-lg font-semibold text-on-surface">Lot Specifications</span>
             <span className="text-xs text-primary font-medium flex items-center gap-1">
-              <span className="material-symbols-outlined text-[14px]">auto_awesome</span> Auto-estimated
+              <span className="material-symbols-outlined text-[14px]">auto_awesome</span> AI Verified
             </span>
           </div>
 
           <div>
-            <label className="text-xs font-semibold text-on-surface-variant block mb-1.5">Approximate Weight</label>
+            <label className="text-xs font-semibold text-on-surface-variant block mb-1.5">Estimated Batch Weight</label>
             <div className="flex items-center gap-2">
               <div className="relative flex-1">
                 <input
@@ -309,7 +316,7 @@ export default function Screen02AiIdentification({
           </div>
 
           <div>
-            <label className="text-xs font-semibold text-on-surface-variant block mb-1.5">Batch Condition</label>
+            <label className="text-xs font-semibold text-on-surface-variant block mb-1.5">Batch Physical Condition</label>
             <div className="grid grid-cols-3 gap-2">
               {['Good / Intact', 'Used / Mixed', 'Damaged'].map((cond) => (
                 <button
@@ -327,10 +334,22 @@ export default function Screen02AiIdentification({
             </div>
           </div>
 
+          {/* Regional Benchmark Card */}
+          <div className="bg-primary/5 border border-primary/20 rounded-xl p-3 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <span className="material-symbols-outlined text-primary text-[20px]">currency_rupee</span>
+              <div>
+                <p className="text-xs font-bold text-on-surface">Mandi Benchmark Rate</p>
+                <p className="text-[11px] text-secondary">Verified MMR CPCB Index</p>
+              </div>
+            </div>
+            <span className="text-sm font-extrabold text-primary">₹700 – ₹780/kg</span>
+          </div>
+
           <div className="bg-surface-container-low border border-outline-variant/60 rounded-lg p-2.5 flex items-center gap-2">
-            <span className="material-symbols-outlined text-primary text-[20px]">cloud_sync</span>
-            <div className="text-xs text-on-surface-variant">
-              <span className="font-semibold text-on-surface">Saved to local storage</span> — ready to match buyers offline or online.
+            <span className="material-symbols-outlined text-primary text-[18px]">cloud_sync</span>
+            <div className="text-[11px] text-on-surface-variant">
+              <span className="font-semibold text-on-surface">Local draft ready</span> — offline persistence active.
             </div>
           </div>
         </div>
@@ -339,13 +358,13 @@ export default function Screen02AiIdentification({
         <div className="pt-1">
           <button
             onClick={handleProceed}
-            className="w-full py-3.5 px-4 bg-primary hover:bg-primary-container text-on-primary rounded-xl font-headline-md text-headline-md font-bold shadow-md flex items-center justify-between transition-all active:scale-[0.99] cursor-pointer"
+            className="w-full py-4 px-4 bg-primary hover:bg-primary-container text-on-primary rounded-2xl font-headline-md font-bold shadow-md flex items-center justify-between transition-all active:scale-[0.99] cursor-pointer"
           >
             <div className="flex items-center gap-2">
               <span className="material-symbols-outlined">receipt_long</span>
-              <span>Create Lot &amp; View Summary</span>
+              <span className="text-base">Create Lot &amp; View Summary</span>
             </div>
-            <span className="text-sm font-semibold bg-white/20 px-2.5 py-1 rounded-md">
+            <span className="text-sm font-extrabold bg-white/20 px-3 py-1 rounded-lg">
               ₹{lowEst.toLocaleString('en-IN')} - ₹{highEst.toLocaleString('en-IN')}
             </span>
           </button>
@@ -353,10 +372,12 @@ export default function Screen02AiIdentification({
             Estimated based on {weight} kg {materialTitle} scrap in your region
           </p>
         </div>
-      </main>
+      </div>
+    </div>
+  </main>
 
-      {/* BottomNavBar */}
-      <nav className="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-2 py-2 bg-surface border-t border-outline-variant shadow-md rounded-t-xl">
+  {/* BottomNavBar (Mobile Only) */}
+  <nav className="fixed bottom-0 left-0 w-full z-50 flex md:hidden justify-around items-center px-2 py-2 bg-surface border-t border-outline-variant shadow-md rounded-t-xl">
         <button onClick={() => onNavigate('home')} className="flex flex-col items-center justify-center p-2 text-on-surface-variant cursor-pointer">
           <span className="material-symbols-outlined">home</span>
           <span className="font-label-md text-xs mt-1">Home</span>

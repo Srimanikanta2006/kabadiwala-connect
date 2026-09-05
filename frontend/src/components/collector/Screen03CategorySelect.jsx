@@ -98,7 +98,7 @@ export default function Screen03CategorySelect({ onSelectCategory, onNavigate })
       </header>
 
       {/* Main Content */}
-      <main className="px-margin-mobile py-lg max-w-4xl mx-auto">
+      <main className="w-full max-w-5xl mx-auto px-4 sm:px-6 py-6 space-y-6">
         {/* Header with Audio */}
         <div className="mb-lg flex flex-col gap-2">
           <div className="flex items-center gap-2">
@@ -163,8 +163,8 @@ export default function Screen03CategorySelect({ onSelectCategory, onNavigate })
         </div>
       </main>
 
-      {/* BottomNavBar */}
-      <nav className="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-2 py-2 bg-surface border-t border-outline-variant shadow-md rounded-t-xl">
+      {/* BottomNavBar (Mobile Only) */}
+      <nav className="fixed bottom-0 left-0 w-full z-50 flex md:hidden justify-around items-center px-2 py-2 bg-surface border-t border-outline-variant shadow-md rounded-t-xl">
         <button onClick={() => onNavigate('home')} className="flex flex-col items-center justify-center p-2 text-on-surface-variant cursor-pointer">
           <span className="material-symbols-outlined">home</span>
           <span className="font-label-md text-xs mt-1">Home</span>

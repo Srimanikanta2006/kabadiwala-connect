@@ -61,27 +61,70 @@ export default function Screen01Home({
   return (
     <div className="collector-shell bg-background text-on-background min-h-screen pb-24 relative overflow-x-hidden">
       {/* TopAppBar */}
-      <header className="bg-surface dark:bg-on-background w-full sticky top-0 z-40">
-        <div className="flex justify-between items-center w-full px-margin-mobile h-touch-target-min border-b border-outline-variant dark:border-outline">
-          <div className="flex items-center gap-sm cursor-pointer hover:bg-surface-container rounded-full p-1 transition-colors">
-            <div className="w-8 h-8 rounded-full bg-primary/15 flex items-center justify-center border border-outline-variant text-primary font-bold text-sm">
-              👷‍♂️
+      <header className="bg-surface dark:bg-on-background w-full sticky top-0 z-40 border-b border-outline-variant dark:border-outline">
+        <div className="max-w-6xl mx-auto flex justify-between items-center w-full px-4 sm:px-6 h-16">
+          {/* Brand */}
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center text-on-primary font-bold shadow-sm">
+              <span className="material-symbols-outlined text-[22px]">recycling</span>
             </div>
-            <div>
-              <h1 className="font-headline-md text-headline-md font-bold text-primary dark:text-primary-fixed-dim leading-none">RE:LINK</h1>
+            <div className="flex flex-col leading-tight">
+              <span className="font-headline-md text-lg sm:text-xl font-bold text-primary dark:text-primary-fixed-dim">RE:LINK</span>
+              <span className="text-[10px] text-primary/80 font-bold uppercase tracking-wider hidden sm:inline">Collector Mandi</span>
             </div>
           </div>
+
+          {/* Desktop Navigation Links */}
+          <nav className="hidden md:flex items-center gap-1 bg-surface-container-low px-2 py-1 rounded-full border border-outline-variant/40 text-xs font-semibold">
+            <button
+              onClick={() => onNavigate('home')}
+              className="px-3 py-1.5 rounded-full bg-primary text-on-primary shadow-sm font-bold flex items-center gap-1.5 cursor-pointer"
+            >
+              <span className="material-symbols-outlined text-[16px] filled">home</span>
+              <span>Home</span>
+            </button>
+            <button
+              onClick={onScanClick}
+              className="px-3 py-1.5 rounded-full text-on-surface hover:bg-surface-container transition-colors flex items-center gap-1.5 cursor-pointer"
+            >
+              <span className="material-symbols-outlined text-[16px]">photo_camera</span>
+              <span>AI Scan</span>
+            </button>
+            <button
+              onClick={() => onNavigate('category_select')}
+              className="px-3 py-1.5 rounded-full text-on-surface hover:bg-surface-container transition-colors flex items-center gap-1.5 cursor-pointer"
+            >
+              <span className="material-symbols-outlined text-[16px]">grid_view</span>
+              <span>Categories</span>
+            </button>
+            <button
+              onClick={() => onNavigate('earnings')}
+              className="px-3 py-1.5 rounded-full text-on-surface hover:bg-surface-container transition-colors flex items-center gap-1.5 cursor-pointer"
+            >
+              <span className="material-symbols-outlined text-[16px]">payments</span>
+              <span>Earnings</span>
+            </button>
+            <button
+              onClick={() => onNavigate('safety')}
+              className="px-3 py-1.5 rounded-full text-on-surface hover:bg-surface-container transition-colors flex items-center gap-1.5 cursor-pointer"
+            >
+              <span className="material-symbols-outlined text-[16px]">health_and_safety</span>
+              <span>Safety</span>
+            </button>
+          </nav>
+
+          {/* Right Header Controls */}
           <div className="flex items-center gap-2">
             {/* Role / Portal Switcher */}
             {onSwitchRole && (
               <button
                 onClick={onSwitchRole}
                 aria-label="Switch Portal"
-                className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-primary-fixed/40 text-on-primary-fixed-variant border border-primary/30 hover:bg-primary-fixed transition-colors text-xs font-semibold cursor-pointer"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-surface-container-high text-on-surface hover:bg-surface-container-highest border border-outline-variant transition-colors text-xs font-semibold cursor-pointer"
                 title="Switch Portal or Role"
               >
-                <span className="material-symbols-outlined text-[16px]">domain</span>
-                <span className="hidden sm:inline">Recycler</span>
+                <span className="material-symbols-outlined text-[16px] text-primary">domain</span>
+                <span className="hidden sm:inline">Recycler Portal</span>
               </button>
             )}
 
@@ -89,32 +132,36 @@ export default function Screen01Home({
             <button
               onClick={onLanguageChange}
               aria-label="Switch Language"
-              className="flex items-center gap-xs px-2.5 py-1 rounded-full bg-surface-container border border-outline-variant text-on-surface hover:bg-surface-container-high transition-colors text-xs font-label-md cursor-pointer"
+              className="flex items-center gap-1 px-3 py-1.5 rounded-full bg-surface-container border border-outline-variant text-on-surface hover:bg-surface-container-high transition-colors text-xs font-semibold cursor-pointer"
             >
-              <span className="material-symbols-outlined text-base text-primary">language</span>
-              <span className="font-semibold">{currentLang === 'hi' ? 'हिन्दी' : (currentLang === 'mr' ? 'मराठी' : 'English')}</span>
+              <span className="material-symbols-outlined text-sm text-primary">language</span>
+              <span>{currentLang === 'hi' ? 'हिन्दी' : (currentLang === 'mr' ? 'मराठी' : 'EN')}</span>
             </button>
+
             {/* Cloud Sync Status */}
             <div
-              className={`flex items-center gap-xs px-2.5 py-1 rounded-full border text-xs font-label-md ${
+              className={`flex items-center gap-1 px-2.5 py-1.5 rounded-full border text-xs font-semibold ${
                 syncStatus.isOnline
-                  ? 'bg-surface-container-low border-outline-variant text-primary'
+                  ? 'bg-primary/10 border-primary/20 text-primary'
                   : 'bg-amber-100 border-amber-300 text-amber-900'
               }`}
               title="Cloud Sync Status"
             >
-              <span className="material-symbols-outlined text-base filled">
+              <span className="material-symbols-outlined text-[16px] filled">
                 {syncStatus.isOnline ? 'cloud_done' : 'cloud_off'}
               </span>
-              <span className="font-bold">
-                {syncStatus.isOnline ? 'Synced' : `${syncStatus.unsyncedCount || 1} offline`}
+              <span className="hidden sm:inline">
+                {syncStatus.isOnline ? 'Live' : `${syncStatus.unsyncedCount || 1} offline`}
               </span>
             </div>
           </div>
         </div>
       </header>
 
-      <main className="px-margin-mobile pt-lg pb-xl max-w-3xl mx-auto space-y-xl">
+      <main className="w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-24 space-y-8">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+          {/* Left / Primary Column (col-span-7) */}
+          <div className="lg:col-span-7 space-y-6">
         {/* Primary CTA */}
         <section>
           <button
@@ -199,50 +246,131 @@ export default function Screen01Home({
               </p>
             </div>
           </div>
+
+          {/* Category Fast Shortcuts */}
+          <div className="bg-surface-container-low rounded-xl p-4 border border-outline-variant/40 space-y-2.5">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-bold uppercase tracking-wider text-secondary">Fast Category Picker</span>
+              <button
+                onClick={() => onNavigate('category_select')}
+                className="text-xs font-bold text-primary hover:underline flex items-center gap-0.5 cursor-pointer"
+              >
+                <span>View All 6 Categories</span>
+                <span className="material-symbols-outlined text-[14px]">arrow_forward</span>
+              </button>
+            </div>
+            <div className="grid grid-cols-3 gap-2">
+              <button
+                onClick={() => onNavigate('category_select')}
+                className="flex items-center gap-2 p-2 bg-surface rounded-lg border border-outline-variant/50 hover:border-primary text-left transition-colors cursor-pointer"
+              >
+                <span className="material-symbols-outlined text-primary text-[18px]">memory</span>
+                <span className="text-xs font-medium truncate">PCBs</span>
+              </button>
+              <button
+                onClick={() => onNavigate('category_select')}
+                className="flex items-center gap-2 p-2 bg-surface rounded-lg border border-outline-variant/50 hover:border-primary text-left transition-colors cursor-pointer"
+              >
+                <span className="material-symbols-outlined text-primary text-[18px]">cable</span>
+                <span className="text-xs font-medium truncate">Cables</span>
+              </button>
+              <button
+                onClick={() => onNavigate('category_select')}
+                className="flex items-center gap-2 p-2 bg-surface rounded-lg border border-outline-variant/50 hover:border-primary text-left transition-colors cursor-pointer"
+              >
+                <span className="material-symbols-outlined text-primary text-[18px]">battery_charging_full</span>
+                <span className="text-xs font-medium truncate">Batteries</span>
+              </button>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      {/* Right / Companion Column (col-span-5) on Desktop / Tablet */}
+      <div className="lg:col-span-5 space-y-6">
+        {/* Live Mandi Intelligence & Trend Card */}
+        <section className="bg-gradient-to-br from-primary/10 via-surface-container-low to-surface rounded-2xl p-5 border border-primary/20 shadow-sm space-y-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <span className="material-symbols-outlined text-primary text-[20px]">insights</span>
+              <h3 className="font-bold text-sm text-on-surface">Mandi Market Insights</h3>
+            </div>
+            <span className="bg-primary text-on-primary text-[10px] font-bold px-2 py-0.5 rounded-full uppercase">
+              TODAY'S TRENDS
+            </span>
+          </div>
+
+          <div className="space-y-2 text-xs">
+            <div className="flex items-center justify-between p-2 bg-surface rounded-lg border border-outline-variant/30">
+              <div className="flex items-center gap-2">
+                <span className="material-symbols-outlined text-emerald-600 text-[16px]">trending_up</span>
+                <span className="font-medium">Copper Wires &amp; Cables</span>
+              </div>
+              <span className="font-bold text-emerald-700">+8.4% this week</span>
+            </div>
+            <div className="flex items-center justify-between p-2 bg-surface rounded-lg border border-outline-variant/30">
+              <div className="flex items-center gap-2">
+                <span className="material-symbols-outlined text-primary text-[16px]">verified</span>
+                <span className="font-medium">A-Grade Server PCBs</span>
+              </div>
+              <span className="font-bold text-primary">₹780/kg Peak</span>
+            </div>
+            <div className="flex items-center justify-between p-2 bg-surface rounded-lg border border-outline-variant/30">
+              <div className="flex items-center gap-2">
+                <span className="material-symbols-outlined text-amber-600 text-[16px]">warning</span>
+                <span className="font-medium">Swollen Li-ion Warning</span>
+              </div>
+              <span className="font-semibold text-amber-800">Must isolate</span>
+            </div>
+          </div>
         </section>
 
-        {/* Recent Lots */}
-        <section className="space-y-md">
-          <div className="flex items-center gap-xs">
-            <h2 className="font-headline-md text-headline-md text-on-background font-bold text-lg">Recent Lots</h2>
-            <button
-              onClick={() => speakText('हाल ही के लॉट्स: लॉट 8402, 42 किलो सर्किट बोर्ड, अनुमानित मूल्य 9450 रुपये')}
-              aria-label="Play audio instruction for recent lots"
-              className="w-8 h-8 rounded-full flex items-center justify-center text-tertiary hover:bg-surface-container transition-colors cursor-pointer"
-            >
-              <span className="material-symbols-outlined text-tertiary">volume_up</span>
-            </button>
+        {/* Recent Scrap Lots */}
+        <section className="space-y-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-xs">
+              <h2 className="font-headline-md text-headline-md text-on-background font-bold text-base">Recent Field Lots</h2>
+              <button
+                onClick={() => speakText('हाल ही के लॉट्स: लॉट 8402, 42 किलो सर्किट बोर्ड, अनुमानित मूल्य 9450 रुपये')}
+                aria-label="Play audio instruction for recent lots"
+                className="w-7 h-7 rounded-full flex items-center justify-center text-tertiary hover:bg-surface-container transition-colors cursor-pointer"
+              >
+                <span className="material-symbols-outlined text-[18px] text-tertiary">volume_up</span>
+              </button>
+            </div>
+            <span className="text-xs text-secondary font-semibold">Offline Cached</span>
           </div>
+
           <div className="space-y-sm">
             {recentLots.length > 0 ? (
               recentLots.map((lot, idx) => (
                 <div
                   key={lot.id || idx}
                   onClick={() => onSelectLot && onSelectLot(lot)}
-                  className="bg-surface rounded-lg p-md border border-outline-variant shadow-sm flex flex-col sm:flex-row justify-between gap-sm active:bg-surface-container-low transition-colors cursor-pointer hover:border-primary"
+                  className="bg-surface rounded-xl p-3 sm:p-4 border border-outline-variant shadow-sm flex flex-col sm:flex-row justify-between gap-sm active:bg-surface-container-low transition-colors cursor-pointer hover:border-primary"
                 >
-                  <div className="flex gap-md items-start">
-                    <div className="w-12 h-12 rounded bg-surface-container flex items-center justify-center flex-shrink-0">
-                      <span className="material-symbols-outlined text-secondary">inventory_2</span>
+                  <div className="flex gap-3 items-start">
+                    <div className="w-10 h-10 rounded-lg bg-surface-container flex items-center justify-center flex-shrink-0 text-secondary">
+                      <span className="material-symbols-outlined text-[20px]">inventory_2</span>
                     </div>
                     <div>
-                      <h3 className="font-label-lg text-label-lg text-on-background font-bold">
+                      <h3 className="font-label-lg text-sm text-on-background font-bold">
                         Lot #{String(lot.id || idx + 8400).slice(-4)}
                       </h3>
-                      <p className="font-body-md text-body-md text-secondary text-xs">
+                      <p className="font-body-md text-secondary text-xs">
                         {lot.material_category || 'Mixed Scrap'} • {lot.approximate_weight || 12}kg
                       </p>
-                      <div className="inline-flex items-center px-2 py-0.5 mt-1 rounded-full bg-tertiary-container/20 border border-tertiary-container/30">
-                        <span className="w-2 h-2 rounded-full bg-tertiary mr-1.5"></span>
-                        <span className="font-label-md text-label-md text-on-tertiary-container text-xs font-semibold">
+                      <div className="inline-flex items-center px-2 py-0.5 mt-1 rounded-full bg-tertiary-container/15 border border-tertiary-container/30">
+                        <span className="w-1.5 h-1.5 rounded-full bg-tertiary mr-1.5"></span>
+                        <span className="text-[11px] font-semibold text-on-tertiary-container">
                           {lot.status === 'CONFIRMED' || lot.status === 'HANDED_OVER' ? 'Handover Confirmed' : 'Offer Received'}
                         </span>
                       </div>
                     </div>
                   </div>
-                  <div className="flex flex-row sm:flex-col justify-between sm:justify-start items-center sm:items-end w-full sm:w-auto border-t sm:border-t-0 border-outline-variant pt-2 sm:pt-0 mt-2 sm:mt-0">
-                    <span className="font-body-md text-body-md text-secondary sm:hidden text-xs">Est. Value</span>
-                    <span className="font-headline-md text-headline-md text-primary font-bold">
+                  <div className="flex flex-row sm:flex-col justify-between sm:justify-start items-center sm:items-end w-full sm:w-auto border-t sm:border-t-0 border-outline-variant pt-2 sm:pt-0 mt-1 sm:mt-0">
+                    <span className="text-xs text-secondary sm:hidden">Est. Value</span>
+                    <span className="text-base text-primary font-bold">
                       ~₹{Math.round(lot.quoted_price || (lot.approximate_weight || 12) * 240)}
                     </span>
                   </div>
@@ -253,58 +381,80 @@ export default function Screen01Home({
                 {/* Seed Lot 1 */}
                 <div
                   onClick={() => onNavigate('receipt')}
-                  className="bg-surface rounded-lg p-md border border-outline-variant shadow-sm flex flex-col sm:flex-row justify-between gap-sm active:bg-surface-container-low transition-colors cursor-pointer hover:border-primary"
+                  className="bg-surface rounded-xl p-3 sm:p-4 border border-outline-variant shadow-sm flex flex-col sm:flex-row justify-between gap-sm active:bg-surface-container-low transition-colors cursor-pointer hover:border-primary"
                 >
-                  <div className="flex gap-md items-start">
-                    <div className="w-12 h-12 rounded bg-surface-container flex items-center justify-center flex-shrink-0">
-                      <span className="material-symbols-outlined text-secondary">inventory_2</span>
+                  <div className="flex gap-3 items-start">
+                    <div className="w-10 h-10 rounded-lg bg-surface-container flex items-center justify-center flex-shrink-0 text-secondary">
+                      <span className="material-symbols-outlined text-[20px]">inventory_2</span>
                     </div>
                     <div>
-                      <h3 className="font-label-lg text-label-lg text-on-background font-bold">Lot #8402</h3>
-                      <p className="font-body-md text-body-md text-secondary text-xs">Mixed PCB &amp; Cables • 42kg</p>
-                      <div className="inline-flex items-center px-2 py-0.5 mt-1 rounded-full bg-tertiary-container/20 border border-tertiary-container/30">
-                        <span className="w-2 h-2 rounded-full bg-tertiary mr-1.5"></span>
-                        <span className="font-label-md text-label-md text-on-tertiary-container text-xs font-semibold">Offer Received</span>
+                      <h3 className="text-sm font-bold text-on-background">Lot #8402</h3>
+                      <p className="text-xs text-secondary">Mixed PCB &amp; Cables • 42kg</p>
+                      <div className="inline-flex items-center px-2 py-0.5 mt-1 rounded-full bg-primary/10 border border-primary/20">
+                        <span className="w-1.5 h-1.5 rounded-full bg-primary mr-1.5"></span>
+                        <span className="text-[11px] font-semibold text-primary">Offer Received</span>
                       </div>
                     </div>
                   </div>
-                  <div className="flex flex-row sm:flex-col justify-between sm:justify-start items-center sm:items-end w-full sm:w-auto border-t sm:border-t-0 border-outline-variant pt-2 sm:pt-0 mt-2 sm:mt-0">
-                    <span className="font-body-md text-body-md text-secondary sm:hidden text-xs">Est. Value</span>
-                    <span className="font-headline-md text-headline-md text-primary font-bold">~₹9,450</span>
+                  <div className="flex flex-row sm:flex-col justify-between sm:justify-start items-center sm:items-end w-full sm:w-auto border-t sm:border-t-0 border-outline-variant pt-2 sm:pt-0 mt-1 sm:mt-0">
+                    <span className="text-xs text-secondary sm:hidden">Est. Value</span>
+                    <span className="text-base text-primary font-bold">~₹9,450</span>
                   </div>
                 </div>
 
                 {/* Seed Lot 2 */}
                 <div
                   onClick={() => onNavigate('receipt')}
-                  className="bg-surface rounded-lg p-md border border-outline-variant shadow-sm flex flex-col sm:flex-row justify-between gap-sm active:bg-surface-container-low transition-colors cursor-pointer opacity-85 hover:border-primary"
+                  className="bg-surface rounded-xl p-3 sm:p-4 border border-outline-variant shadow-sm flex flex-col sm:flex-row justify-between gap-sm active:bg-surface-container-low transition-colors cursor-pointer opacity-85 hover:border-primary"
                 >
-                  <div className="flex gap-md items-start">
-                    <div className="w-12 h-12 rounded bg-surface-container flex items-center justify-center flex-shrink-0">
-                      <span className="material-symbols-outlined text-secondary">inventory_2</span>
+                  <div className="flex gap-3 items-start">
+                    <div className="w-10 h-10 rounded-lg bg-surface-container flex items-center justify-center flex-shrink-0 text-secondary">
+                      <span className="material-symbols-outlined text-[20px]">inventory_2</span>
                     </div>
                     <div>
-                      <h3 className="font-label-lg text-label-lg text-on-background font-bold">Lot #8399</h3>
-                      <p className="font-body-md text-body-md text-secondary text-xs">CRT Monitors • 115kg</p>
+                      <h3 className="text-sm font-bold text-on-background">Lot #8399</h3>
+                      <p className="text-xs text-secondary">CRT Monitors • 115kg</p>
                       <div className="inline-flex items-center px-2 py-0.5 mt-1 rounded-full bg-surface-container-high border border-outline-variant">
-                        <span className="w-2 h-2 rounded-full bg-secondary mr-1.5"></span>
-                        <span className="font-label-md text-label-md text-secondary text-xs font-semibold">Pending Verification</span>
+                        <span className="w-1.5 h-1.5 rounded-full bg-secondary mr-1.5"></span>
+                        <span className="text-[11px] font-semibold text-secondary">Pending Verification</span>
                       </div>
                     </div>
                   </div>
-                  <div className="flex flex-row sm:flex-col justify-between sm:justify-start items-center sm:items-end w-full sm:w-auto border-t sm:border-t-0 border-outline-variant pt-2 sm:pt-0 mt-2 sm:mt-0">
-                    <span className="font-body-md text-body-md text-secondary sm:hidden text-xs">Est. Value</span>
-                    <span className="font-headline-md text-headline-md text-on-background font-bold">~₹3,200</span>
+                  <div className="flex flex-row sm:flex-col justify-between sm:justify-start items-center sm:items-end w-full sm:w-auto border-t sm:border-t-0 border-outline-variant pt-2 sm:pt-0 mt-1 sm:mt-0">
+                    <span className="text-xs text-secondary sm:hidden">Est. Value</span>
+                    <span className="text-base text-on-background font-bold">~₹3,200</span>
                   </div>
                 </div>
               </>
             )}
           </div>
         </section>
-      </main>
 
-      {/* BottomNavBar */}
-      <nav className="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-2 py-2 bg-surface border-t border-outline-variant shadow-md rounded-t-xl">
+        {/* Nearby CPCB Recycler Network Status */}
+        <section className="bg-surface rounded-2xl p-4 border border-outline-variant shadow-sm space-y-2.5">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold uppercase tracking-wider text-on-surface">Verified Facilities in Area</span>
+            <span className="text-xs text-emerald-700 font-bold">14 Active in 10km</span>
+          </div>
+          <p className="text-xs text-on-surface-variant">
+            EcoRecycle MMR (3.2 km), GreenCircle Dharavi (1.8 km), and Cerebra MIDC (7.4 km) are actively quoting for high-grade PCBs and insulated copper cables today.
+          </p>
+          <div className="pt-1 flex items-center gap-2">
+            <button
+              onClick={() => onNavigate('offers')}
+              className="text-xs font-bold text-primary hover:underline flex items-center gap-1 cursor-pointer"
+            >
+              <span>Explore Live Recycler Bids</span>
+              <span className="material-symbols-outlined text-[14px]">arrow_forward</span>
+            </button>
+          </div>
+        </section>
+      </div>
+    </div>
+  </main>
+
+  {/* BottomNavBar (Mobile Viewport Only - Hidden on Desktop) */}
+  <nav className="fixed bottom-0 left-0 w-full z-50 flex md:hidden justify-around items-center px-2 py-2 bg-surface border-t border-outline-variant shadow-md rounded-t-xl">
         <button
           onClick={() => onNavigate('home')}
           aria-label="Home"
