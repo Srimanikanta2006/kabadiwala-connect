@@ -82,12 +82,17 @@ def build_qr_payload(
     gps_lat: float,
     gps_lng: float,
     timestamp: str,
-    status: str = "PENDING_CONFIRMATION"
+    status: str = "PENDING_CONFIRMATION",
+    recycler_id: Optional[str] = None,
+    statutory_reference: Optional[str] = None,
+    facility_name: Optional[str] = None,
+    facility_type: Optional[str] = None,
+    quoted_price: Optional[float] = None
 ) -> Dict[str, Any]:
     """
     Builds the standardized verifiable handover payload.
     """
-    return {
+    payload = {
         "protocol": "RE:LINK-TRACE-V1",
         "handover_ref": handover_ref,
         "lot_id": str(lot_id),
@@ -102,6 +107,18 @@ def build_qr_payload(
         "status": status,
         "verify_url": f"https://relink.cpcb.gov.in/verify/{handover_ref}"
     }
+    if recycler_id:
+        payload["recycler_id"] = recycler_id
+    if statutory_reference:
+        payload["statutory_reference"] = statutory_reference
+        payload["cpcb_registration_no"] = statutory_reference
+    if facility_name:
+        payload["facility_name"] = facility_name
+    if facility_type:
+        payload["facility_type"] = facility_type
+    if quoted_price is not None:
+        payload["quoted_price"] = round(float(quoted_price), 2)
+    return payload
 
 
 def create_handover_record(
@@ -114,15 +131,41 @@ def create_handover_record(
     material_id: Optional[str] = None,
     material_category: Optional[str] = None,
     quoted_price: Optional[float] = None,
-    state: str = "MH"
+    state: str = "MH",
+    recycler_id: Optional[str] = None,
+    cpcb_registration_no: Optional[str] = None,
+    statutory_reference: Optional[str] = None,
+    facility_name: Optional[str] = None,
+    facility_type: Optional[str] = None
 ) -> Dict[str, Any]:
     """
     Step 1-4: On lot confirmation, generate unique handover reference, capture GPS coordinates
     and timestamp, generate QR code, and save full traceability record with status = 'PENDING_CONFIRMATION'.
+    Stores selected recycler ID and statutory authorization reference info.
     """
     client = get_supabase()
     now_iso = datetime.now(timezone.utc).isoformat()
     record_id = str(uuid.uuid4())
+
+    # Resolve recycler details if provided
+    r_id = recycler_id
+    r_name = facility_name
+    r_statutory = statutory_reference or cpcb_registration_no
+    r_type = facility_type
+    r_agency = None
+    r_doc = None
+    r_date = None
+
+    if r_id:
+        all_recs = get_recyclers()
+        matched = next((r for r in all_recs if r.get("id") == r_id), None)
+        if matched:
+            r_name = r_name or matched.get("facility_name") or matched.get("name")
+            r_statutory = r_statutory or matched.get("statutory_reference") or matched.get("cpcb_registration_no")
+            r_type = r_type or matched.get("facility_type")
+            r_agency = matched.get("authorizing_agency")
+            r_doc = matched.get("source_document")
+            r_date = matched.get("source_date")
 
     # Auto-capture GPS coordinates with fallback
     lat = float(gps_lat) if gps_lat is not None else DEFAULT_MUMBAI_GPS["lat"]
@@ -198,12 +241,24 @@ def create_handover_record(
                     gps_lat=rec["gps_lat"],
                     gps_lng=rec["gps_lng"],
                     timestamp=rec["timestamp"],
-                    status=rec["status"]
+                    status=rec["status"],
+                    recycler_id=r_id or rec.get("recycler_id"),
+                    statutory_reference=r_statutory or rec.get("statutory_reference"),
+                    facility_name=r_name or rec.get("facility_name"),
+                    facility_type=r_type or rec.get("facility_type"),
+                    quoted_price=q_price
                 )
                 qr_data_uri, _ = generate_qr_code(json.dumps(payload_dict))
                 return {
                     "success": True,
-                    "traceability": rec,
+                    "traceability": {
+                        **rec,
+                        "recycler_id": r_id or rec.get("recycler_id"),
+                        "statutory_reference": r_statutory or rec.get("statutory_reference"),
+                        "facility_name": r_name or rec.get("facility_name"),
+                        "facility_type": r_type or rec.get("facility_type"),
+                        "quoted_price": q_price
+                    },
                     "qr_data_uri": qr_data_uri,
                     "qr_payload": payload_dict,
                     "is_existing": True
@@ -214,7 +269,7 @@ def create_handover_record(
     # Step 1: Generate unique handover reference
     handover_ref = generate_handover_reference(state=state)
 
-    # Step 2: Payload construction with captured GPS & timestamp
+    # Step 2: Payload construction with captured GPS & timestamp & CPCB recycler info
     payload_dict = build_qr_payload(
         handover_ref=handover_ref,
         lot_id=actual_lot_id,
@@ -224,14 +279,19 @@ def create_handover_record(
         gps_lat=lat,
         gps_lng=lng,
         timestamp=now_iso,
-        status="PENDING_CONFIRMATION"
+        status="PENDING_CONFIRMATION",
+        recycler_id=r_id,
+        statutory_reference=r_statutory,
+        facility_name=r_name,
+        facility_type=r_type,
+        quoted_price=q_price
     )
 
     # Step 3: Generate QR Code
     qr_data_uri, _ = generate_qr_code(json.dumps(payload_dict))
 
     # Step 4: Save full traceability record
-    # Every completed lot has a full traceability record with all required fields populated, not just some
+    # Every completed lot has a full traceability record with all required fields populated
     traceability_row = {
         "id": record_id,
         "lot_id": actual_lot_id,
@@ -259,21 +319,34 @@ def create_handover_record(
         except Exception as e:
             logger.error(f"Failed to persist traceability to Supabase: {e}")
 
-    # Always persist to in-memory fallback cache
-    _LOCAL_TRACEABILITY_CACHE[handover_ref] = {
+    # Create full enriched traceability object with CPCB statutory metadata
+    enriched_traceability = {
         **traceability_row,
+        "recycler_id": r_id,
+        "facility_name": r_name,
+        "recycler_name": r_name,
+        "statutory_reference": r_statutory,
+        "cpcb_registration_no": r_statutory,
+        "authorizing_agency": r_agency,
+        "facility_type": r_type,
+        "source_document": r_doc,
+        "source_date": r_date,
         "collector_id": c_id,
         "material_id": m_id,
         "material_category": m_cat,
         "quoted_price": q_price,
+        "payment_status": "PENDING_HANDOVER",
         "saved_to_db": saved_to_db
     }
-    _LOCAL_TRACEABILITY_CACHE[record_id] = _LOCAL_TRACEABILITY_CACHE[handover_ref]
+
+    # Always persist to in-memory fallback cache
+    _LOCAL_TRACEABILITY_CACHE[handover_ref] = enriched_traceability
+    _LOCAL_TRACEABILITY_CACHE[record_id] = enriched_traceability
 
     return {
         "success": True,
         "handover_ref": handover_ref,
-        "traceability": traceability_row,
+        "traceability": enriched_traceability,
         "qr_data_uri": qr_data_uri,
         "qr_payload": payload_dict,
         "saved_to_db": saved_to_db
@@ -302,8 +375,14 @@ def get_handover_details(handover_ref_or_id: str) -> Optional[Dict[str, Any]]:
         except Exception as e:
             logger.warning(f"Error querying Supabase for handover {handover_ref_or_id}: {e}")
 
-    if not rec and handover_ref_or_id in _LOCAL_TRACEABILITY_CACHE:
-        rec = _LOCAL_TRACEABILITY_CACHE[handover_ref_or_id]
+    cached = _LOCAL_TRACEABILITY_CACHE.get(handover_ref_or_id)
+    if not cached and rec and rec.get("id"):
+        cached = _LOCAL_TRACEABILITY_CACHE.get(rec["id"])
+    if not cached and rec and rec.get("handover_ref"):
+        cached = _LOCAL_TRACEABILITY_CACHE.get(rec["handover_ref"])
+
+    if cached:
+        rec = {**cached, **(rec or {})}
 
     if not rec:
         return None
@@ -320,6 +399,24 @@ def get_handover_details(handover_ref_or_id: str) -> Optional[Dict[str, Any]]:
 
     collector_id = lot_info.get("collector_id") or rec.get("collector_id", "col_test_001")
     material_id = lot_info.get("material_id") or rec.get("material_id", "mat_pcb_high")
+    quoted_price = rec.get("quoted_price") or float(lot_info.get("quoted_price", 0.0))
+
+    # Resolve recycler details if present
+    r_id = rec.get("recycler_id")
+    r_name = rec.get("facility_name") or rec.get("recycler_name")
+    r_statutory = rec.get("statutory_reference") or rec.get("cpcb_registration_no")
+    r_type = rec.get("facility_type")
+    if r_id and not (r_name and r_statutory):
+        all_recs = get_recyclers()
+        matched = next((r for r in all_recs if r.get("id") == r_id), None)
+        if matched:
+            r_name = r_name or matched.get("facility_name") or matched.get("name")
+            r_statutory = r_statutory or matched.get("statutory_reference") or matched.get("cpcb_registration_no")
+            r_type = r_type or matched.get("facility_type")
+            rec["facility_name"] = r_name
+            rec["statutory_reference"] = r_statutory
+            rec["cpcb_registration_no"] = r_statutory
+            rec["facility_type"] = r_type
 
     payload_dict = build_qr_payload(
         handover_ref=rec["handover_ref"],
@@ -330,7 +427,12 @@ def get_handover_details(handover_ref_or_id: str) -> Optional[Dict[str, Any]]:
         gps_lat=float(rec["gps_lat"]),
         gps_lng=float(rec["gps_lng"]),
         timestamp=rec["timestamp"],
-        status=rec["status"]
+        status=rec["status"],
+        recycler_id=r_id,
+        statutory_reference=r_statutory,
+        facility_name=r_name,
+        facility_type=r_type,
+        quoted_price=quoted_price
     )
     qr_data_uri, _ = generate_qr_code(json.dumps(payload_dict))
 
@@ -406,13 +508,40 @@ def confirm_handover_receipt(
     else:
         final_price = round(final_weight * 240.0, 2)  # Benchmark fallback rate
 
+    # Look up recycler information
+    r_id = recycler_id or rec.get("recycler_id")
+    r_name = rec.get("facility_name")
+    r_statutory = rec.get("statutory_reference") or rec.get("cpcb_registration_no")
+    r_type = rec.get("facility_type")
+    r_doc = rec.get("source_document")
+    r_date = rec.get("source_date")
+    if r_id and not (r_name and r_statutory):
+        all_recs = get_recyclers()
+        matched = next((r for r in all_recs if r.get("id") == r_id), None)
+        if matched:
+            r_name = r_name or matched.get("facility_name") or matched.get("name")
+            r_statutory = r_statutory or matched.get("statutory_reference") or matched.get("cpcb_registration_no")
+            r_type = r_type or matched.get("facility_type")
+            r_doc = r_doc or matched.get("source_document")
+            r_date = r_date or matched.get("source_date")
+
     # Update traceability record in Supabase
     updated_traceability = {
         **rec,
         "weight": final_weight,
+        "recycler_id": r_id,
+        "facility_name": r_name,
+        "recycler_name": r_name,
+        "statutory_reference": r_statutory,
+        "cpcb_registration_no": r_statutory,
+        "facility_type": r_type,
+        "source_document": r_doc,
+        "source_date": r_date,
         "recycler_confirmation": True,
         "status": "CONFIRMED",
         "cpcb_certificate_id": cpcb_cert_id,
+        "final_price": final_price,
+        "payment_status": f"PAID_{payment_mode}_CONFIRMED" if payment_mode == "CASH" else "PAID_UPI_SUCCESS"
     }
     if weighbridge_photo_url:
         updated_traceability["photo_url"] = weighbridge_photo_url
@@ -431,7 +560,8 @@ def confirm_handover_receipt(
 
             ures = client.table("traceability").update(update_payload).eq("id", record_id).execute()
             if ures.data:
-                updated_traceability = ures.data[0]
+                # Merge DB response while keeping enriched CPCB fields
+                updated_traceability = {**updated_traceability, **ures.data[0]}
                 traceability_db_updated = True
 
             # Update lot status to HANDED_OVER
@@ -449,7 +579,7 @@ def confirm_handover_receipt(
         "weight": final_weight,
         "quoted_price": quoted_price,
         "final_price": final_price,
-        "recycler_id": recycler_id,
+        "recycler_id": r_id or recycler_id,
         "status": "COMPLETED",
         "payment_status": f"PAID_{payment_mode}_CONFIRMED" if payment_mode == "CASH" else "PAID_UPI_SUCCESS",
         "payment_mode": payment_mode,
@@ -469,7 +599,11 @@ def confirm_handover_receipt(
     # Update in-memory caches
     _LOCAL_TRACEABILITY_CACHE[handover_ref] = updated_traceability
     _LOCAL_TRACEABILITY_CACHE[record_id] = updated_traceability
-    _LOCAL_TRANSACTIONS_CACHE[transaction_id] = transaction_row
+    _LOCAL_TRANSACTIONS_CACHE[transaction_id] = {
+        **transaction_row,
+        "facility_name": r_name,
+        "statutory_reference": r_statutory
+    }
 
     # Regenerate confirmed QR payload
     confirmed_payload = build_qr_payload(
@@ -481,7 +615,12 @@ def confirm_handover_receipt(
         gps_lat=float(updated_traceability["gps_lat"]),
         gps_lng=float(updated_traceability["gps_lng"]),
         timestamp=updated_traceability["timestamp"],
-        status="CONFIRMED"
+        status="CONFIRMED",
+        recycler_id=r_id,
+        statutory_reference=r_statutory,
+        facility_name=r_name,
+        facility_type=r_type,
+        quoted_price=final_price
     )
     confirmed_payload["cpcb_certificate_id"] = cpcb_cert_id
     qr_data_uri, _ = generate_qr_code(json.dumps(confirmed_payload))

@@ -16,51 +16,67 @@ export default function Screen04PriceOffers({
 
   const [offers, setOffers] = useState([
     {
-      id: 'rec_ecorecycle_01',
-      name: 'EcoRecycle India Pvt Ltd',
-      cpcbNo: 'CPCB/E-WASTE/REG/MH/2023/1042',
-      distance: 1.97,
-      rate: 780,
+      id: 'cpcb_mh_032',
+      name: 'CBS EWaste Recycling Industries',
+      statutoryRef: 'Maharashtra Pollution Control Board (MPCB) - Reg #MH/E-WASTE/032',
+      cpcbNo: 'Maharashtra Pollution Control Board (MPCB) - Reg #MH/E-WASTE/032',
+      facilityType: 'Recycler',
+      capacityMta: 2500,
+      state: 'Maharashtra',
+      distance: 4.23,
+      rate: 275,
       pickup: true,
-      topMatch: true
+      topMatch: true,
+      sourceDoc: 'CPCB Directory 2023'
     },
     {
-      id: 'rec_greencircle_02',
-      name: 'GreenCircle Urban Recyclers',
-      cpcbNo: 'CPCB/E-WASTE/REG/MH/2022/0891',
-      distance: 3.42,
-      rate: 750,
-      pickup: true,
-      topMatch: false
+      id: 'cpcb_mh_069',
+      name: 'Navkar Recycling Unit',
+      statutoryRef: 'Maharashtra Pollution Control Board (MPCB) - Reg #MH/E-WASTE/069',
+      cpcbNo: 'Maharashtra Pollution Control Board (MPCB) - Reg #MH/E-WASTE/069',
+      facilityType: 'Recycler',
+      capacityMta: 1000,
+      state: 'Maharashtra',
+      distance: 4.23,
+      rate: 264,
+      pickup: false,
+      topMatch: false,
+      sourceDoc: 'CPCB Directory 2023'
     }
   ]);
 
-  // Query backend recycler matching endpoint if available
+  // Query backend recycler matching endpoint for genuine CPCB facilities
   useEffect(() => {
     async function fetchMatches() {
       try {
-        const res = await fetch(`http://localhost:8000/match-recyclers?material_id=${materialId}&lat=19.0434&lng=72.8576`);
+        const res = await fetch(`http://localhost:8000/match-recyclers?material_id=${materialId}&weight=${weight}&lat=19.0434&lng=72.8576`);
         if (res.ok) {
           const data = await res.json();
           const matches = data.ranked_recyclers || data.matches || data.recommendations;
-          if (matches && matches.length >= 2) {
-            setOffers(matches.slice(0, 2).map((rec, idx) => ({
+          if (matches && matches.length > 0) {
+            setOffers(matches.slice(0, 4).map((rec, idx) => ({
               id: rec.recycler_id,
               name: rec.facility_name,
-              cpcbNo: rec.cpcb_reg_no || 'CPCB/E-WASTE/REG/MH/2023/1042',
-              distance: rec.distance_km != null ? Number(rec.distance_km.toFixed(2)) : (idx === 0 ? 1.97 : 3.42),
-              rate: rec.offered_rate_per_kg || (idx === 0 ? 780 : 750),
+              statutoryRef: rec.statutory_reference || rec.cpcb_reg_no,
+              cpcbNo: rec.statutory_reference || rec.cpcb_reg_no,
+              facilityType: rec.facility_type || 'Authorised Facility',
+              capacityMta: rec.installed_capacity_mta || 300,
+              state: rec.state_or_ut || 'Maharashtra',
+              address: rec.address || '',
+              distance: rec.distance_km != null ? Number(rec.distance_km.toFixed(2)) : (idx === 0 ? 4.23 : 5.8),
+              rate: Math.round(rec.offered_rate_per_kg || 264),
               pickup: rec.pickup_available ?? true,
-              topMatch: idx === 0
+              topMatch: idx === 0,
+              sourceDoc: rec.source_document ? 'CPCB Directory 2023' : 'Government Authorized'
             })));
           }
         }
       } catch (err) {
-        console.log('Using local recycler offers');
+        console.log('Using local CPCB authorized recycler offers', err);
       }
     }
     fetchMatches();
-  }, [materialId]);
+  }, [materialId, weight]);
 
   const speakText = (text) => {
     if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
@@ -75,8 +91,8 @@ export default function Screen04PriceOffers({
   const handleSpeakOffers = () => {
     const topOffer = offers[0];
     const speech = currentLang === 'mr'
-      ? `${weight} किलो ${materialTitle}. सर्वोत्तम ऑफर: ${topOffer.name}, दर ${topOffer.rate} रुपये प्रति किलो, एकूण ₹${Math.round(weight * topOffer.rate)}.`
-      : `${weight} किलो ${materialTitle}। सर्वश्रेष्ठ ऑफर: ${topOffer.name}, भाव ₹${topOffer.rate} प्रति किलो, कुल ₹${Math.round(weight * topOffer.rate)}।`;
+      ? `${weight} किलो ${materialTitle}. सर्वोत्तम अधिकृत केंद्र: ${topOffer.name}, प्रकार: ${topOffer.facilityType}, दर ${topOffer.rate} रुपये प्रति किलो, एकूण ₹${Math.round(weight * topOffer.rate)}.`
+      : `${weight} किलो ${materialTitle}। सर्वश्रेष्ठ अधिकृत केंद्र: ${topOffer.name}, प्रकार: ${topOffer.facilityType}, भाव ₹${topOffer.rate} प्रति किलो, कुल ₹${Math.round(weight * topOffer.rate)}।`;
     speakText(speech);
   };
 
@@ -84,7 +100,21 @@ export default function Screen04PriceOffers({
     const totalEst = Math.round(weight * offer.rate);
     onAcceptOffer({
       ...lotDraft,
-      acceptedRecycler: offer,
+      acceptedRecycler: {
+        id: offer.id,
+        name: offer.name,
+        statutoryRef: offer.statutoryRef,
+        cpcbNo: offer.cpcbNo,
+        facilityType: offer.facilityType,
+        capacityMta: offer.capacityMta,
+        state: offer.state,
+        distance: offer.distance,
+        sourceDoc: offer.sourceDoc
+      },
+      recyclerId: offer.id,
+      statutoryReference: offer.statutoryRef,
+      cpcbRegistrationNo: offer.cpcbNo,
+      facilityType: offer.facilityType,
       agreedRate: offer.rate,
       totalEst,
       weight,
@@ -121,7 +151,7 @@ export default function Screen04PriceOffers({
         {/* Context Header */}
         <div className="flex items-center justify-between">
           <div>
-            <p className="font-label-md text-secondary uppercase tracking-wider text-xs font-bold">Competitive Recycler Bids</p>
+            <p className="font-label-md text-secondary uppercase tracking-wider text-xs font-bold">Government-Authorised Buyer Quotes</p>
             <h2 className="text-xl sm:text-2xl text-on-background font-extrabold">
               {weight}kg • {materialTitle}
             </h2>
@@ -140,93 +170,85 @@ export default function Screen04PriceOffers({
           {/* Left Column: Recycler Offers (md:col-span-7) */}
           <div className="md:col-span-7 space-y-4">
             <div className="flex items-center justify-between">
-              <h3 className="font-headline-md text-on-surface font-bold text-base sm:text-lg">Authorized Buyer Quotes</h3>
+              <h3 className="font-headline-md text-on-surface font-bold text-base sm:text-lg">Authorised Facility Bids</h3>
               <span className="bg-primary/10 text-primary font-bold text-xs px-3 py-1 rounded-full border border-primary/20">
-                {offers.length} Bids Active
+                {offers.length} Authorised Facilities Matched
               </span>
             </div>
 
-            {/* Recycler Option A (Top Choice) */}
-            <div className="bg-surface rounded-2xl border-2 border-primary shadow-md p-5 relative overflow-hidden">
-              <div className="absolute top-0 right-0 bg-primary text-on-primary font-label-md text-[11px] font-bold px-3 py-1 rounded-bl-xl shadow-sm">
-                HIGHEST BIDDER
-              </div>
-              <div className="flex justify-between items-start mb-3 pr-20">
-                <div>
-                  <div className="flex items-center gap-2 mb-1">
-                    <h4 className="font-bold text-on-surface text-base sm:text-lg">{offers[0].name}</h4>
-                    <span className="material-symbols-outlined text-primary text-[20px] filled" title="Authorized Recycler">verified</span>
-                  </div>
-                  <p className="text-on-surface-variant flex items-center gap-1 text-xs">
-                    <span className="material-symbols-outlined text-[16px]">location_on</span>
-                    {offers[0].distance}km away • CPCB Tier-1 Ecoreco Facility
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex items-center justify-between mb-4 bg-surface-container-low p-3.5 rounded-xl border border-outline-variant/40">
-                <div>
-                  <p className="text-secondary text-xs font-semibold">Offer Unit Rate</p>
-                  <p className="text-primary font-extrabold text-2xl font-mono">
-                    ₹{offers[0].rate} <span className="text-xs font-normal text-on-surface-variant">/kg</span>
-                  </p>
-                </div>
-                <div className="text-right">
-                  <p className="text-secondary text-xs font-semibold">Total Handover Payout</p>
-                  <p className="text-on-surface font-extrabold text-2xl font-mono">
-                    ₹{Math.round(weight * offers[0].rate).toLocaleString('en-IN')}
-                  </p>
-                </div>
-              </div>
-
-              <button
-                onClick={() => handleAccept(offers[0])}
-                className="w-full h-12 bg-primary text-on-primary rounded-xl shadow-md hover:bg-primary-container transition-all flex items-center justify-center gap-2 font-bold text-sm sm:text-base cursor-pointer active:scale-[0.99]"
-              >
-                <span>Accept &amp; Generate QR Pass</span>
-                <span className="material-symbols-outlined text-[20px]">check_circle</span>
-              </button>
-            </div>
-
-            {/* Recycler Option B (Alternative) */}
-            {offers[1] && (
-              <div className="bg-surface rounded-2xl border border-outline-variant shadow-sm p-5 space-y-3">
-                <div className="flex justify-between items-start">
-                  <div>
-                    <div className="flex items-center gap-2 mb-1">
-                      <h4 className="font-bold text-on-surface text-base">{offers[1].name}</h4>
-                      <span className="material-symbols-outlined text-primary text-[18px] filled" title="Authorized Recycler">verified</span>
-                    </div>
-                    <p className="text-on-surface-variant flex items-center gap-1 text-xs">
-                      <span className="material-symbols-outlined text-[16px]">location_on</span>
-                      {offers[1].distance}km away • Doorstep Van Available
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex items-center justify-between bg-surface-container-low p-3 rounded-xl border border-outline-variant/40">
-                  <div>
-                    <p className="text-secondary text-xs">Offer Rate</p>
-                    <p className="text-on-surface font-bold text-xl font-mono">
-                      ₹{offers[1].rate} <span className="text-xs font-normal text-on-surface-variant">/kg</span>
-                    </p>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-secondary text-xs">Total Est.</p>
-                    <p className="text-on-surface font-bold text-xl font-mono">
-                      ₹{Math.round(weight * offers[1].rate).toLocaleString('en-IN')}
-                    </p>
-                  </div>
-                </div>
-
-                <button
-                  onClick={() => handleAccept(offers[1])}
-                  className="w-full h-11 bg-surface-container-high hover:bg-surface-container-highest text-on-surface rounded-xl font-semibold text-xs sm:text-sm flex items-center justify-center transition-colors cursor-pointer border border-outline-variant/40"
+            {/* Recycler Cards List */}
+            {offers.map((offer, idx) => {
+              const isTop = idx === 0;
+              return (
+                <div
+                  key={offer.id || idx}
+                  className={`bg-surface rounded-2xl p-5 relative overflow-hidden transition-all ${
+                    isTop ? 'border-2 border-primary shadow-md' : 'border border-outline-variant shadow-sm'
+                  }`}
                 >
-                  Accept Alternative Bid
-                </button>
-              </div>
-            )}
+                  {isTop && (
+                    <div className="absolute top-0 right-0 bg-primary text-on-primary font-label-md text-[11px] font-bold px-3 py-1 rounded-bl-xl shadow-sm">
+                      TOP MCDA MATCH
+                    </div>
+                  )}
+
+                  <div className="flex justify-between items-start mb-2 pr-16">
+                    <div>
+                      <div className="flex items-center gap-2 mb-1 flex-wrap">
+                        <h4 className="font-bold text-on-surface text-base sm:text-lg">{offer.name}</h4>
+                        <span className="bg-emerald-100 text-emerald-800 text-[10px] font-extrabold px-2 py-0.5 rounded-full border border-emerald-300 flex items-center gap-1">
+                          <span className="material-symbols-outlined text-[13px] filled">verified</span>
+                          Authorised Facility (Source: CPCB Directory 2023)
+                        </span>
+                      </div>
+                      <p className="text-on-surface-variant flex items-center gap-1 text-xs">
+                        <span className="material-symbols-outlined text-[15px]">location_on</span>
+                        <span>{offer.distance} km away • {offer.state}</span>
+                        {offer.pickup && <span className="ml-1 text-primary font-semibold">• Vehicle Pickup Available</span>}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Statutory Credentials Banner */}
+                  <div className="mb-3 p-2 rounded-lg bg-surface-container-lowest border border-outline-variant/50 text-[11px] space-y-1">
+                    <div className="flex items-center justify-between text-secondary">
+                      <span><strong>Facility Type:</strong> <span className="text-on-surface font-semibold">{offer.facilityType}</span></span>
+                      <span><strong>Capacity:</strong> <span className="text-on-surface font-semibold">{offer.capacityMta?.toLocaleString('en-IN')} MTA</span></span>
+                    </div>
+                    <div className="text-secondary font-mono text-[10px] truncate" title={offer.statutoryRef}>
+                      <strong>Ref:</strong> {offer.statutoryRef}
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between mb-4 bg-surface-container-low p-3.5 rounded-xl border border-outline-variant/40">
+                    <div>
+                      <p className="text-secondary text-xs font-semibold">Offer Unit Rate</p>
+                      <p className="text-primary font-extrabold text-2xl font-mono">
+                        ₹{offer.rate} <span className="text-xs font-normal text-on-surface-variant">/kg</span>
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-secondary text-xs font-semibold">Total Handover Payout</p>
+                      <p className="text-on-surface font-extrabold text-2xl font-mono">
+                        ₹{Math.round(weight * offer.rate).toLocaleString('en-IN')}
+                      </p>
+                    </div>
+                  </div>
+
+                  <button
+                    onClick={() => handleAccept(offer)}
+                    className={`w-full h-12 rounded-xl transition-all flex items-center justify-center gap-2 font-bold text-sm sm:text-base cursor-pointer active:scale-[0.99] ${
+                      isTop
+                        ? 'bg-primary text-on-primary shadow-md hover:bg-primary-container'
+                        : 'bg-surface-container-high hover:bg-surface-container-highest text-on-surface border border-outline-variant/40'
+                    }`}
+                  >
+                    <span>Accept &amp; Generate QR Pass</span>
+                    <span className="material-symbols-outlined text-[20px]">check_circle</span>
+                  </button>
+                </div>
+              );
+            })}
           </div>
 
           {/* Right Column: Mandi Valuation & Buyer Trust (md:col-span-5) */}

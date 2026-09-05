@@ -85,6 +85,11 @@ class HandoverInitiateRequest(BaseModel):
     material_category: Optional[str] = None
     quoted_price: Optional[float] = None
     state: str = "MH"
+    recycler_id: Optional[str] = None
+    cpcb_registration_no: Optional[str] = None
+    statutory_reference: Optional[str] = None
+    facility_name: Optional[str] = None
+    facility_type: Optional[str] = None
 
 
 class HandoverConfirmRequest(BaseModel):

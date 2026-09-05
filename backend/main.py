@@ -820,7 +820,12 @@ def initiate_handover(req: HandoverInitiateRequest):
             material_id=req.material_id,
             material_category=req.material_category,
             quoted_price=req.quoted_price,
-            state=req.state
+            state=req.state,
+            recycler_id=req.recycler_id,
+            cpcb_registration_no=req.cpcb_registration_no,
+            statutory_reference=req.statutory_reference,
+            facility_name=req.facility_name,
+            facility_type=req.facility_type
         )
         return res
     except Exception as e:
@@ -846,7 +851,12 @@ def process_handover(payload: Optional[Dict[str, Any]] = Body(default={})):
             material_id=p.get("material_id"),
             material_category=p.get("material_category"),
             quoted_price=p.get("quoted_price"),
-            state=p.get("state", "MH")
+            state=p.get("state", "MH"),
+            recycler_id=p.get("recycler_id"),
+            cpcb_registration_no=p.get("cpcb_registration_no"),
+            statutory_reference=p.get("statutory_reference"),
+            facility_name=p.get("facility_name"),
+            facility_type=p.get("facility_type")
         )
         return res
     except Exception as e:

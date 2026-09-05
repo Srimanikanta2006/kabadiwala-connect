@@ -12,30 +12,81 @@ export default function Screen05HandoverReceipt({
   const currentLang = i18n.language || 'hi';
 
   const weight = lotDraft.weight || 12.0;
-  const materialTitle = lotDraft.materialTitle || 'PCB (A-Grade)';
-  const agreedRate = lotDraft.agreedRate || 780;
+  const materialTitle = lotDraft.materialTitle || 'Printed Circuit Boards (PCB)';
+  const agreedRate = lotDraft.agreedRate || 275;
   const totalPaid = Math.round(weight * agreedRate);
   const recycler = lotDraft.acceptedRecycler || {
-    name: 'EcoRecycle India Pvt Ltd',
-    cpcbNo: 'CPCB/E-WASTE/REG/MH/2023/1042'
+    id: 'cpcb_mh_032',
+    name: 'CBS EWaste Recycling Industries',
+    statutoryRef: 'Maharashtra Pollution Control Board (MPCB) - Reg #MH/E-WASTE/032',
+    cpcbNo: 'Maharashtra Pollution Control Board (MPCB) - Reg #MH/E-WASTE/032',
+    facilityType: 'Recycler',
+    capacityMta: 2500,
+    state: 'Maharashtra',
+    sourceDoc: 'CPCB Directory 2023'
   };
 
-  const handoverRef = lotDraft.handoverRef || `KC-TRACE-20260905-MH-${(lotDraft.id || '8F2A1C').slice(-6).toUpperCase()}`;
+  const [backendHandoverRef, setBackendHandoverRef] = useState(null);
+  const handoverRef = backendHandoverRef || lotDraft.handoverRef || `KC-TRACE-20260905-MH-${(lotDraft.id || '8F2A1C').slice(-6).toUpperCase()}`;
   const lotRef = `RL-MH-2026-${(lotDraft.id || '00482').slice(-5)}`;
   const certId = lotDraft.cpcbCertificateId || `CPCB-EPR-2026-MH-${(lotDraft.id || '9921ABCD').slice(-8).toUpperCase()}`;
   const isConfirmed = lotDraft.status === 'CONFIRMED' || lotDraft.status === 'HANDED_OVER' || true;
 
+  // Sync to backend digital handover service if online
+  useEffect(() => {
+    async function syncHandover() {
+      try {
+        const payload = {
+          lot_id: lotDraft.id || `lot_${Date.now()}`,
+          weight: Number(weight),
+          gps_lat: 19.0434,
+          gps_lng: 72.8576,
+          collector_id: 'col_dharavi_01',
+          material_id: lotDraft.materialId || 'mat_pcb_high',
+          material_category: materialTitle,
+          quoted_price: totalPaid,
+          state: 'MH',
+          recycler_id: recycler.id,
+          cpcb_registration_no: recycler.statutoryRef || recycler.cpcbNo,
+          statutory_reference: recycler.statutoryRef || recycler.cpcbNo,
+          facility_name: recycler.name,
+          facility_type: recycler.facilityType || 'Recycler'
+        };
+        const res = await fetch('http://localhost:8000/handover/initiate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        if (res.ok) {
+          const data = await res.json();
+          if (data.handover_ref) {
+            setBackendHandoverRef(data.handover_ref);
+          }
+        }
+      } catch (e) {
+        console.log('Offline / local handover fallback', e);
+      }
+    }
+    syncHandover();
+  }, []);
+
   const qrPayload = JSON.stringify({
+    protocol: 'RE:LINK-TRACE-V1',
     handover_ref: handoverRef,
     lot_id: lotRef,
     material: materialTitle,
     weight_kg: weight,
     rate_inr: agreedRate,
     total_inr: totalPaid,
-    recycler: recycler.name,
-    cpcb_reg: recycler.cpcbNo,
+    recycler_id: recycler.id,
+    recycler_name: recycler.name,
+    statutory_reference: recycler.statutoryRef || recycler.cpcbNo,
+    facility_type: recycler.facilityType || 'Recycler',
+    source: 'CPCB Directory 2023',
     gps: { lat: 19.0434, lng: 72.8576 },
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
+    payment_status: 'PAID_CASH_CONFIRMED',
+    status: 'CONFIRMED'
   });
 
   const speakText = (text) => {
@@ -219,18 +270,32 @@ export default function Screen05HandoverReceipt({
                 </div>
               </div>
 
-              <div className="bg-surface-container p-3.5 rounded-xl border border-outline-variant flex items-center justify-between">
-                <div>
-                  <p className="text-xs text-secondary font-semibold">Authorized Buyer</p>
-                  <div className="flex items-center gap-1 mt-0.5">
-                    <p className="text-sm font-bold text-on-surface">{recycler.name}</p>
-                    <span className="material-symbols-outlined text-primary text-[18px] filled">verified</span>
+              <div className="bg-surface-container p-3.5 rounded-xl border border-outline-variant space-y-2">
+                <div className="flex items-start justify-between">
+                  <div>
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      <span className="bg-emerald-100 text-emerald-800 text-[10px] font-extrabold px-2 py-0.5 rounded-full border border-emerald-300 flex items-center gap-1">
+                        <span className="material-symbols-outlined text-[12px] filled">verified</span>
+                        Authorised Facility (Source: CPCB Directory 2023)
+                      </span>
+                      {recycler.facilityType && (
+                        <span className="bg-primary/10 text-primary text-[10px] font-bold px-2 py-0.5 rounded-full border border-primary/20">
+                          {recycler.facilityType}
+                        </span>
+                      )}
+                    </div>
+                    <h4 className="text-sm font-bold text-on-surface mt-1">{recycler.name}</h4>
+                    <p className="text-[11px] text-secondary">
+                      {recycler.state || 'Maharashtra'} • {recycler.capacityMta ? `${recycler.capacityMta.toLocaleString('en-IN')} MTA Capacity` : 'Authorised E-Waste Unit'}
+                    </p>
                   </div>
-                  <p className="text-[11px] text-secondary font-mono">{recycler.cpcbNo}</p>
+                  <div className="text-right">
+                    <span className="text-xs text-secondary font-semibold">Total Paid</span>
+                    <p className="text-2xl font-extrabold text-primary font-mono">₹{totalPaid.toLocaleString('en-IN')}</p>
+                  </div>
                 </div>
-                <div className="text-right">
-                  <span className="text-xs text-secondary font-semibold">Total Paid</span>
-                  <p className="text-2xl font-extrabold text-primary font-mono">₹{totalPaid.toLocaleString('en-IN')}</p>
+                <div className="pt-1.5 border-t border-outline-variant/40 text-[10px] text-secondary font-mono truncate" title={recycler.statutoryRef || recycler.cpcbNo}>
+                  <strong>SPCB Ref:</strong> {recycler.statutoryRef || recycler.cpcbNo}
                 </div>
               </div>
 

@@ -47,9 +47,10 @@ def get_collector_ledger(collector_id: str) -> Dict[str, Any]:
             seen_ids.add(tx_id)
             combined_transactions.append(tx)
 
-    # Lookup recycler names map
+    # Lookup recycler names and statutory references map
     recyclers = get_recyclers()
-    rec_name_map = {r["id"]: r.get("name", r["id"]) for r in recyclers if "id" in r}
+    rec_name_map = {r["id"]: (r.get("facility_name") or r.get("name", r["id"])) for r in recyclers if "id" in r}
+    rec_ref_map = {r["id"]: (r.get("statutory_reference") or r.get("cpcb_registration_no", "")) for r in recyclers if "id" in r}
 
     completed_txs: List[Dict[str, Any]] = []
     pending_txs: List[Dict[str, Any]] = []
@@ -58,9 +59,10 @@ def get_collector_ledger(collector_id: str) -> Dict[str, Any]:
         status = (tx.get("status") or "").upper()
         p_status = (tx.get("payment_status") or "").upper()
         
-        # Enrich recycler display name
+        # Enrich recycler display name and statutory reference
         r_id = tx.get("recycler_id", "")
         tx["recycler_name"] = rec_name_map.get(r_id, r_id or "Authorized Recycler Hub")
+        tx["statutory_reference"] = tx.get("statutory_reference") or rec_ref_map.get(r_id, "")
 
         # Segregate into completed vs pending dues
         if status == "COMPLETED" or p_status.startswith("PAID_"):

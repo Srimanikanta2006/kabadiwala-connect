@@ -59,7 +59,17 @@ def get_materials() -> List[Dict[str, Any]]:
 
 
 def get_recyclers() -> List[Dict[str, Any]]:
-    """Fetches authorized recyclers from Supabase, or local seed file if offline."""
+    """Fetches authorized CPCB recyclers from local seed file (569 facilities) or Supabase."""
+    seed_path = os.path.join(os.path.dirname(__file__), "..", "..", "..", "datasets", "seed_recyclers.json")
+    if os.path.exists(seed_path):
+        try:
+            with open(seed_path, "r", encoding="utf-8") as f:
+                seed_data = json.load(f)
+                if seed_data and len(seed_data) >= 500:
+                    return seed_data
+        except Exception as e:
+            print(f"[Seed] Error reading seed_recyclers.json: {e}")
+
     client = get_supabase()
     if client:
         try:
@@ -69,11 +79,12 @@ def get_recyclers() -> List[Dict[str, Any]]:
         except Exception as e:
             print(f"[Supabase] Error fetching recyclers: {e}")
 
-    # Local fallback
-    seed_path = os.path.join(os.path.dirname(__file__), "..", "..", "..", "datasets", "seed_recyclers.json")
     if os.path.exists(seed_path):
-        with open(seed_path, "r", encoding="utf-8") as f:
-            return json.load(f)
+        try:
+            with open(seed_path, "r", encoding="utf-8") as f:
+                return json.load(f)
+        except Exception:
+            pass
     return []
 
 
