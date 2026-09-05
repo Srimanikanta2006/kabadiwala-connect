@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import PriceBoardModal from './PriceBoardModal';
+import EconomicsImpactModal from '../common/EconomicsImpactModal';
 
 export default function Screen01Home({
   onScanClick,
@@ -12,6 +14,9 @@ export default function Screen01Home({
 }) {
   const { t, i18n } = useTranslation();
   const currentLang = i18n.language || 'hi';
+
+  const [showPriceBoardModal, setShowPriceBoardModal] = useState(false);
+  const [showEconomicsModal, setShowEconomicsModal] = useState(false);
 
   const [marketRates, setMarketRates] = useState([
     { id: 'mat_pcb_high', name: 'Circuit Boards', sub: 'A-Grade PCB', rate: 780, unit: 'kg', icon: 'memory', spoken: 'सर्किट बोर्ड का भाव 780 रुपये प्रति किलो है।' },
@@ -118,10 +123,28 @@ export default function Screen01Home({
               <span className="material-symbols-outlined text-[16px]">health_and_safety</span>
               <span>Safety</span>
             </button>
+            <button
+              onClick={() => setShowEconomicsModal(true)}
+              className="px-3 py-1.5 rounded-full text-emerald-800 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-300/60 hover:bg-emerald-100 transition-colors flex items-center gap-1.5 cursor-pointer font-bold"
+            >
+              <span className="material-symbols-outlined text-[16px] text-emerald-600">bar_chart</span>
+              <span>Economics</span>
+            </button>
           </nav>
 
           {/* Right Header Controls */}
           <div className="flex items-center gap-2">
+            {/* Field Economics Quick Button for Mobile */}
+            <button
+              onClick={() => setShowEconomicsModal(true)}
+              aria-label="Economics & Impact"
+              className="flex md:hidden items-center gap-1 px-2.5 py-1.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-300 text-xs font-semibold cursor-pointer hover:bg-emerald-100"
+              title="Field Research & Unit Economics Impact"
+            >
+              <span className="material-symbols-outlined text-sm text-emerald-600">bar_chart</span>
+              <span className="text-[11px] font-bold">Impact</span>
+            </button>
+
             {/* Role / Portal Switcher */}
             {onSwitchRole && (
               <button
@@ -254,6 +277,16 @@ export default function Screen01Home({
             </div>
           </div>
 
+          {/* View Full 9-Category Regional Mandi Board Button */}
+          <button
+            onClick={() => setShowPriceBoardModal(true)}
+            className="w-full py-2.5 px-4 bg-primary/10 hover:bg-primary/15 border border-primary/30 rounded-xl text-primary font-bold text-xs flex items-center justify-center gap-2 transition-all cursor-pointer shadow-xs active:scale-[0.99]"
+          >
+            <span className="material-symbols-outlined text-sm">table_chart</span>
+            <span>View Full Regional Mandi Board (9 Categories &amp; Trends)</span>
+            <span className="material-symbols-outlined text-sm">arrow_forward</span>
+          </button>
+
           {/* Category Fast Shortcuts */}
           <div className="bg-surface-container-low rounded-xl p-4 border border-outline-variant/40 space-y-2.5">
             <div className="flex items-center justify-between">
@@ -262,7 +295,7 @@ export default function Screen01Home({
                 onClick={() => onNavigate('category_select')}
                 className="text-xs font-bold text-primary hover:underline flex items-center gap-0.5 cursor-pointer"
               >
-                <span>View All 6 Categories</span>
+                <span>View All 7 Categories</span>
                 <span className="material-symbols-outlined text-[14px]">arrow_forward</span>
               </button>
             </div>
@@ -500,6 +533,19 @@ export default function Screen01Home({
           <span className="font-label-md text-label-md mt-1 text-xs">Safety</span>
         </button>
       </nav>
+
+      {/* Full Regional Mandi Price Board Modal */}
+      <PriceBoardModal
+        isOpen={showPriceBoardModal}
+        onClose={() => setShowPriceBoardModal(false)}
+        currentLang={currentLang}
+      />
+
+      {/* Field Research & Unit Economics Impact Modal */}
+      <EconomicsImpactModal
+        isOpen={showEconomicsModal}
+        onClose={() => setShowEconomicsModal(false)}
+      />
     </div>
   );
 }

@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import EconomicsImpactModal from '../common/EconomicsImpactModal';
 
 export default function Screen00WelcomeRole({ onSelectRole }) {
   const { i18n } = useTranslation();
   const [phoneNumber, setPhoneNumber] = useState('');
+  const [showEconomicsModal, setShowEconomicsModal] = useState(false);
   const currentLang = i18n.language || 'hi';
 
   const handleLangChange = (lang) => {
@@ -40,8 +42,19 @@ export default function Screen00WelcomeRole({ onSelectRole }) {
             </div>
           </div>
 
-          {/* Right Controls: Live Mandi Indicator & Language Switcher */}
-          <div className="flex items-center gap-3">
+          {/* Right Controls: Economics, Live Mandi Indicator & Language Switcher */}
+          <div className="flex items-center gap-2 sm:gap-3">
+            <button
+              onClick={() => setShowEconomicsModal(true)}
+              className="flex items-center gap-1.5 px-3 py-1 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 border border-emerald-300/60 rounded-full text-xs font-bold hover:bg-emerald-100 transition-colors cursor-pointer shadow-xs"
+              title="View Field Research & Unit Economics Model"
+              type="button"
+            >
+              <span className="material-symbols-outlined text-sm text-emerald-600">bar_chart</span>
+              <span className="hidden sm:inline">Economics &amp; Impact</span>
+              <span className="sm:hidden">Impact</span>
+            </button>
+
             <div className="hidden md:flex items-center gap-1.5 px-3 py-1 bg-surface-container-low rounded-full text-xs font-semibold text-primary border border-outline-variant/30">
               <span className="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
               <span>Live Mandi Index 2026</span>
@@ -298,6 +311,12 @@ export default function Screen00WelcomeRole({ onSelectRole }) {
           </footer>
         </div>
       </main>
+
+      {/* Field Research & Unit Economics Impact Modal */}
+      <EconomicsImpactModal
+        isOpen={showEconomicsModal}
+        onClose={() => setShowEconomicsModal(false)}
+      />
     </div>
   );
 }

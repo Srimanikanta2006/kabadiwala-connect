@@ -43,6 +43,13 @@ const CATEGORIES = [
     hindi: 'मोटर / तांबा कोर',
     photo: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAtvdmbxQII78S5QBPq-vnuvZsisgOAHpw5ZD39_drLoPC-Kel4c17WXqBPjSqs6LlWw8aHNJTQ_oI4ky57UobXk-UhLgOix26_3jymR7S_FKjc9-uKk5em_6Sm-_HEsbhBIKMypXH9hj9tAjOxO6eFv5s-LUJFR_eNx7DsUPQ37-tbl7z9KKBe-Y63eeiMf4cmiXX3O3fHWSKYdfsiS07g6FnZQYp7jzvQljtmQSuoRGEQdqUJO1Kx',
     spoken: 'इलेक्ट्रिक मोटर या चुंबक'
+  },
+  {
+    id: 'mat_mixed_plastics',
+    title: 'Mixed Engineering Plastics',
+    hindi: 'टेक्निकल प्लास्टिक (ABS/HIPS)',
+    photo: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDT-wPZ_m35b2v9c_4h_3',
+    spoken: 'मिक्स्ड इंजीनियरिंग प्लास्टिक'
   }
 ];
 
@@ -169,9 +176,9 @@ export default function Screen03CategorySelect({ onSelectCategory, onNavigate })
           <span className="material-symbols-outlined">home</span>
           <span className="font-label-md text-xs mt-1">Home</span>
         </button>
-        <button onClick={() => onNavigate('ai_scan')} className="flex flex-col items-center justify-center bg-primary-container text-on-primary-container rounded-full px-4 py-1 scale-90 cursor-pointer">
-          <span className="material-symbols-outlined filled">inventory_2</span>
-          <span className="font-label-md text-xs font-bold mt-1">Sell / Lots</span>
+        <button onClick={() => onNavigate('my_lots')} className="flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-container rounded-lg p-1 cursor-pointer">
+          <span className="material-symbols-outlined">inventory_2</span>
+          <span className="font-label-md text-xs mt-1">My Lots</span>
         </button>
         <button onClick={() => onNavigate('earnings')} className="flex flex-col items-center justify-center p-2 text-on-surface-variant cursor-pointer">
           <span className="material-symbols-outlined">payments</span>

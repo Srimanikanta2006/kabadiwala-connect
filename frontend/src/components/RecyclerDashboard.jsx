@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { getRecentOfflineLots } from '../db/offlineDb';
+import Form6ManifestModal from './recycler/Form6ManifestModal';
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
@@ -74,6 +75,7 @@ export default function RecyclerDashboard({ onRoleSwitch }) {
   const [weighbridgeInput, setWeighbridgeInput] = useState('');
   const [isSubmittingConfirm, setIsSubmittingConfirm] = useState(false);
   const [confirmationNotice, setConfirmationNotice] = useState(null);
+  const [selectedManifestData, setSelectedManifestData] = useState(null);
 
   useEffect(() => {
     loadFacilityData(selectedFacility.id);
@@ -680,12 +682,21 @@ export default function RecyclerDashboard({ onRoleSwitch }) {
                   </p>
                 </div>
               </div>
-              <button
-                onClick={() => setConfirmationNotice(null)}
-                className="px-3 py-1.5 bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold rounded-lg shadow-sm cursor-pointer shrink-0"
-              >
-                Dismiss Notice
-              </button>
+              <div className="flex items-center gap-2 shrink-0">
+                <button
+                  onClick={() => setSelectedManifestData(confirmationNotice)}
+                  className="px-3 py-1.5 bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold rounded-lg shadow-sm cursor-pointer flex items-center gap-1.5 transition-colors"
+                >
+                  <span className="material-symbols-outlined text-[16px]">description</span>
+                  <span>View Form-6 Manifest</span>
+                </button>
+                <button
+                  onClick={() => setConfirmationNotice(null)}
+                  className="px-3 py-1.5 bg-surface-container hover:bg-surface-container-high text-on-surface text-xs font-bold rounded-lg shadow-sm cursor-pointer transition-colors"
+                >
+                  Dismiss
+                </button>
+              </div>
             </div>
           )}
 
@@ -1397,10 +1408,11 @@ export default function RecyclerDashboard({ onRoleSwitch }) {
                       </div>
                     </div>
                     <button
-                      onClick={() => alert(`Viewing Official CPCB Certificate ${item.cert}`)}
-                      className="px-3 py-1.5 bg-surface-container-high hover:bg-surface-container-highest text-on-surface text-xs font-semibold rounded-lg shrink-0 cursor-pointer"
+                      onClick={() => setSelectedManifestData(item)}
+                      className="px-3 py-1.5 bg-primary/10 hover:bg-primary/20 text-primary text-xs font-bold rounded-lg shrink-0 cursor-pointer flex items-center gap-1 transition-colors border border-primary/20"
                     >
-                      View Certificate
+                      <span className="material-symbols-outlined text-[16px]">description</span>
+                      <span>View Form-6 Manifest</span>
                     </button>
                   </div>
                 ))}
@@ -1515,6 +1527,28 @@ export default function RecyclerDashboard({ onRoleSwitch }) {
                 Stated Collector Weight: {inspectLot.net_weight_kg} kg | Scale Variance: ±
                 {Math.abs((parseFloat(weighbridgeInput) || 0) - inspectLot.net_weight_kg).toFixed(1)} kg
               </span>
+
+              {/* Anomaly Detection Banner for Variance > 15% */}
+              {(() => {
+                const enteredW = parseFloat(weighbridgeInput) || 0;
+                const statedW = inspectLot.net_weight_kg || 1;
+                const diffKg = Math.abs(enteredW - statedW);
+                const variancePct = statedW > 0 ? (diffKg / statedW) * 100 : 0;
+                if (variancePct > 15) {
+                  return (
+                    <div className="mt-2 p-3 bg-red-500/10 border border-red-500/40 rounded-xl flex items-start gap-2.5 text-xs text-red-700 dark:text-red-400">
+                      <span className="material-symbols-outlined text-[20px] text-red-600 shrink-0">error</span>
+                      <div className="space-y-0.5">
+                        <p className="font-bold">🚨 CPCB Weight Variance Anomaly ({variancePct.toFixed(1)}% deviation)</p>
+                        <p className="text-[11px] opacity-90 leading-tight">
+                          Scale weight deviates by more than the statutory ±15% threshold from collector self-claim ({statedW} kg vs {enteredW} kg). Supervisor review and metrology recalibration required before final EPR credit sign-off.
+                        </p>
+                      </div>
+                    </div>
+                  );
+                }
+                return null;
+              })()}
             </div>
 
             <div className="bg-surface-container-lowest p-3 rounded-xl border border-outline-variant/40 flex items-center justify-between">
@@ -1558,6 +1592,13 @@ export default function RecyclerDashboard({ onRoleSwitch }) {
           </div>
         </div>
       )}
+
+      {/* Statutory CPCB Form-6 Manifest Modal */}
+      <Form6ManifestModal
+        isOpen={Boolean(selectedManifestData)}
+        onClose={() => setSelectedManifestData(null)}
+        certData={selectedManifestData}
+      />
     </div>
   );
 }
