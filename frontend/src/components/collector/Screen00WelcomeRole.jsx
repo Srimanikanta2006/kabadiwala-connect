@@ -1,11 +1,16 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import EconomicsImpactModal from '../common/EconomicsImpactModal';
+import { SignupModal, ForgotPasswordModal } from '../common/AuthModals';
+import AdminToolsModal from '../common/AdminToolsModal';
 
 export default function Screen00WelcomeRole({ onSelectRole }) {
   const { i18n } = useTranslation();
   const [phoneNumber, setPhoneNumber] = useState('');
   const [showEconomicsModal, setShowEconomicsModal] = useState(false);
+  const [showSignupModal, setShowSignupModal] = useState(false);
+  const [showForgotModal, setShowForgotModal] = useState(false);
+  const [showAdminModal, setShowAdminModal] = useState(false);
   const currentLang = i18n.language || 'hi';
 
   const handleLangChange = (lang) => {
@@ -175,6 +180,22 @@ export default function Screen00WelcomeRole({ onSelectRole }) {
                   />
                   <span className="material-symbols-outlined text-primary text-[20px]">phone_android</span>
                 </div>
+                <div className="flex items-center justify-between text-[11px] text-on-surface-variant pt-0.5 px-1">
+                  <button
+                    type="button"
+                    onClick={() => setShowForgotModal(true)}
+                    className="hover:text-primary transition-colors cursor-pointer"
+                  >
+                    Forgot PIN?
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setShowSignupModal(true)}
+                    className="text-primary font-bold hover:underline transition-colors cursor-pointer"
+                  >
+                    New Collector? Register
+                  </button>
+                </div>
                   <button
                     onClick={handleCollectorLogin}
                     className="w-full h-12 rounded-xl bg-primary text-on-primary font-action-xl text-sm sm:text-base font-bold flex items-center justify-center gap-2 shadow-md hover:bg-primary-container transition-all active:scale-[0.99] cursor-pointer"
@@ -249,6 +270,22 @@ export default function Screen00WelcomeRole({ onSelectRole }) {
                     <span className="w-2 h-2 rounded-full bg-emerald-600"></span> 5 Facilities Active
                   </span>
                 </div>
+                <div className="flex items-center justify-between text-[11px] text-on-surface-variant pt-0.5 px-1">
+                  <button
+                    type="button"
+                    onClick={() => setShowForgotModal(true)}
+                    className="hover:text-secondary transition-colors cursor-pointer"
+                  >
+                    Facility Password Help
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setShowSignupModal(true)}
+                    className="text-secondary font-bold hover:underline transition-colors cursor-pointer"
+                  >
+                    Register New Plant
+                  </button>
+                </div>
                 <button
                   onClick={handleRecyclerLogin}
                   className="w-full h-12 rounded-xl bg-on-surface text-surface hover:bg-black font-action-xl text-sm sm:text-base font-bold flex items-center justify-between px-5 shadow-md transition-all active:scale-[0.99] cursor-pointer"
@@ -304,6 +341,16 @@ export default function Screen00WelcomeRole({ onSelectRole }) {
               <span className="flex items-center gap-1.5">
                 <span className="material-symbols-outlined text-primary text-[16px]">security</span> Form-6 Statutory Audit Trail
               </span>
+              <span className="text-on-surface-variant/40">•</span>
+              <button
+                type="button"
+                onClick={() => setShowAdminModal(true)}
+                className="flex items-center gap-1.5 text-primary hover:underline font-bold cursor-pointer transition-colors"
+                title="Access Master Admin Tools & AI Feedback Queue"
+              >
+                <span className="material-symbols-outlined text-[16px]">admin_panel_settings</span>
+                <span>Admin Console</span>
+              </button>
             </div>
             <p className="font-body-md text-xs text-on-surface-variant/70">
               National Toll-Free Assistance: <strong>1800-EW-RELINK</strong> (8 AM – 8 PM)
@@ -316,6 +363,26 @@ export default function Screen00WelcomeRole({ onSelectRole }) {
       <EconomicsImpactModal
         isOpen={showEconomicsModal}
         onClose={() => setShowEconomicsModal(false)}
+      />
+
+      {/* Sign Up Registration Modal */}
+      <SignupModal
+        isOpen={showSignupModal}
+        onClose={() => setShowSignupModal(false)}
+        onCompleteSignup={(role, phone) => onSelectRole(role, phone)}
+      />
+
+      {/* Forgot PIN / Password Modal */}
+      <ForgotPasswordModal
+        isOpen={showForgotModal}
+        onClose={() => setShowForgotModal(false)}
+        onResetComplete={(phone) => onSelectRole('collector', phone)}
+      />
+
+      {/* Master Admin Tools Modal */}
+      <AdminToolsModal
+        isOpen={showAdminModal}
+        onClose={() => setShowAdminModal(false)}
       />
     </div>
   );

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import PriceBoardModal from './PriceBoardModal';
 import EconomicsImpactModal from '../common/EconomicsImpactModal';
+import NotificationsModal from '../common/NotificationsModal';
 
 export default function Screen01Home({
   onScanClick,
@@ -17,6 +18,7 @@ export default function Screen01Home({
 
   const [showPriceBoardModal, setShowPriceBoardModal] = useState(false);
   const [showEconomicsModal, setShowEconomicsModal] = useState(false);
+  const [showNotifications, setShowNotifications] = useState(false);
 
   const [marketRates, setMarketRates] = useState([
     { id: 'mat_pcb_high', name: 'Circuit Boards', sub: 'A-Grade PCB', rate: 780, unit: 'kg', icon: 'memory', spoken: 'सर्किट बोर्ड का भाव 780 रुपये प्रति किलो है।' },
@@ -157,6 +159,18 @@ export default function Screen01Home({
                 <span className="hidden sm:inline">Recycler Portal</span>
               </button>
             )}
+
+            {/* Notifications Bell */}
+            <button
+              onClick={() => setShowNotifications(true)}
+              aria-label="Notifications"
+              className="w-8 h-8 rounded-full bg-surface-container hover:bg-surface-container-high border border-outline-variant flex items-center justify-center text-on-surface relative cursor-pointer transition-colors"
+              title="Live Offers, Pickups & Payment Notifications"
+            >
+              <span className="material-symbols-outlined text-[18px]">notifications</span>
+              <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-error animate-ping"></span>
+              <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-error"></span>
+            </button>
 
             {/* Language Picker */}
             <button
@@ -545,6 +559,13 @@ export default function Screen01Home({
       <EconomicsImpactModal
         isOpen={showEconomicsModal}
         onClose={() => setShowEconomicsModal(false)}
+      />
+
+      {/* Notifications & Live Activity Modal */}
+      <NotificationsModal
+        isOpen={showNotifications}
+        onClose={() => setShowNotifications(false)}
+        onSelectNotification={(screen) => onNavigate(screen)}
       />
     </div>
   );

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { getRecentOfflineLots } from '../db/offlineDb';
 import Form6ManifestModal from './recycler/Form6ManifestModal';
+import AdminToolsModal from './common/AdminToolsModal';
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
@@ -76,6 +77,7 @@ export default function RecyclerDashboard({ onRoleSwitch }) {
   const [isSubmittingConfirm, setIsSubmittingConfirm] = useState(false);
   const [confirmationNotice, setConfirmationNotice] = useState(null);
   const [selectedManifestData, setSelectedManifestData] = useState(null);
+  const [showAdminModal, setShowAdminModal] = useState(false);
 
   useEffect(() => {
     loadFacilityData(selectedFacility.id);
@@ -534,6 +536,16 @@ export default function RecyclerDashboard({ onRoleSwitch }) {
           </div>
 
           <div className="flex items-center gap-2 sm:gap-3">
+            {/* Admin Tools Modal Button */}
+            <button
+              onClick={() => setShowAdminModal(true)}
+              className="bg-surface-container hover:bg-surface-container-high text-on-surface text-xs font-bold px-3 py-1.5 rounded-full flex items-center gap-1.5 border border-outline-variant transition-all cursor-pointer shadow-sm"
+              title="Access CPCB Master Admin Tools & Mandi Controls"
+            >
+              <span className="material-symbols-outlined text-[16px] text-primary">admin_panel_settings</span>
+              <span className="hidden sm:inline">Admin Tools</span>
+            </button>
+
             {/* Role Switcher to Collector Mobile App */}
             <button
               onClick={onRoleSwitch}
@@ -1598,6 +1610,12 @@ export default function RecyclerDashboard({ onRoleSwitch }) {
         isOpen={Boolean(selectedManifestData)}
         onClose={() => setSelectedManifestData(null)}
         certData={selectedManifestData}
+      />
+
+      {/* Admin Master Tools Portal Modal */}
+      <AdminToolsModal
+        isOpen={showAdminModal}
+        onClose={() => setShowAdminModal(false)}
       />
     </div>
   );
