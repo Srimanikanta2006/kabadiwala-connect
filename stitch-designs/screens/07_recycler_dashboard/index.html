@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+
+<html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet"/><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script><script id="tailwind-config">tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        "colors": {
+          "on-secondary-fixed": "#121c28",
+          "error-container": "#ffdad6",
+          "on-primary-fixed": "#002114",
+          "primary": "#006948",
+          "surface-tint": "#006c4a",
+          "on-tertiary-fixed-variant": "#004e61",
+          "on-tertiary-fixed": "#001f28",
+          "surface-container": "#edeeef",
+          "on-primary-container": "#f5fff7",
+          "on-surface-variant": "#3d4a42",
+          "on-tertiary-container": "#fafdff",
+          "background": "#f8f9fa",
+          "primary-fixed-dim": "#68dba9",
+          "surface-container-high": "#e7e8e9",
+          "surface": "#f8f9fa",
+          "error": "#ba1a1a",
+          "surface-variant": "#e1e3e4",
+          "tertiary-fixed-dim": "#6cd3f7",
+          "on-secondary-container": "#596372",
+          "on-primary": "#ffffff",
+          "on-primary-fixed-variant": "#005137",
+          "inverse-surface": "#2e3132",
+          "surface-dim": "#d9dadb",
+          "on-error": "#ffffff",
+          "outline-variant": "#bccac0",
+          "on-secondary": "#ffffff",
+          "surface-container-lowest": "#ffffff",
+          "inverse-on-surface": "#f0f1f2",
+          "on-error-container": "#93000a",
+          "primary-container": "#00855d",
+          "secondary": "#555f6d",
+          "tertiary-fixed": "#b7eaff",
+          "primary-fixed": "#85f8c4",
+          "on-tertiary": "#ffffff",
+          "surface-container-low": "#f3f4f5",
+          "secondary-container": "#d6e0f1",
+          "tertiary-container": "#007f9d",
+          "secondary-fixed-dim": "#bdc7d8",
+          "inverse-primary": "#68dba9",
+          "tertiary": "#00647c",
+          "outline": "#6d7a72",
+          "on-surface": "#191c1d",
+          "surface-container-highest": "#e1e3e4",
+          "on-background": "#191c1d",
+          "on-secondary-fixed-variant": "#3e4755",
+          "secondary-fixed": "#d9e3f4",
+          "surface-bright": "#f8f9fa"
+        },
+        "borderRadius": {
+          "DEFAULT": "0.25rem",
+          "lg": "0.5rem",
+          "xl": "0.75rem",
+          "full": "9999px"
+        },
+        "spacing": {
+          "lg": "24px",
+          "xl": "32px",
+          "gutter-mobile": "12px",
+          "md": "16px",
+          "xs": "4px",
+          "unit": "4px",
+          "touch-target-min": "48px",
+          "margin-mobile": "16px",
+          "sm": "8px"
+        },
+        "fontFamily": {
+          "body-lg": [
+            "Inter"
+          ],
+          "headline-md": [
+            "Inter"
+          ],
+          "headline-lg": [
+            "Inter"
+          ],
+          "headline-lg-mobile": [
+            "Inter"
+          ],
+          "body-md": [
+            "Inter"
+          ],
+          "label-md": [
+            "Inter"
+          ],
+          "label-lg": [
+            "Inter"
+          ],
+          "action-xl": [
+            "Inter"
+          ]
+        },
+        "fontSize": {
+          "body-lg": [
+            "18px",
+            {
+              "lineHeight": "26px",
+              "fontWeight": "400"
+            }
+          ],
+          "headline-md": [
+            "20px",
+            {
+              "lineHeight": "28px",
+              "fontWeight": "600"
+            }
+          ],
+          "headline-lg": [
+            "32px",
+            {
+              "lineHeight": "40px",
+              "letterSpacing": "-0.02em",
+              "fontWeight": "700"
+            }
+          ],
+          "headline-lg-mobile": [
+            "26px",
+            {
+              "lineHeight": "32px",
+              "fontWeight": "700"
+            }
+          ],
+          "body-md": [
+            "16px",
+            {
+              "lineHeight": "24px",
+              "fontWeight": "400"
+            }
+          ],
+          "label-md": [
+            "14px",
+            {
+              "lineHeight": "18px",
+              "fontWeight": "500"
+            }
+          ],
+          "label-lg": [
+            "16px",
+            {
+              "lineHeight": "20px",
+              "letterSpacing": "0.01em",
+              "fontWeight": "600"
+            }
+          ],
+          "action-xl": [
+            "20px",
+            {
+              "lineHeight": "24px",
+              "fontWeight": "700"
+            }
+          ]
+        }
+      }
+    }
+  };</script></head><body class="bg-background font-body-md text-on-surface antialiased"><aside class="fixed left-0 top-0 h-full w-72 bg-surface-container-low z-50 flex flex-col justify-between py-md shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="flex flex-col"><div class="h-16 px-md flex items-center gap-sm"><div class="w-9 h-9 rounded-lg bg-primary flex items-center justify-center"><span class="material-symbols-outlined text-on-primary text-[20px]">recycling</span></div><div class="flex flex-col"><span class="font-headline-md text-headline-md tracking-tight text-primary font-bold leading-none">RE:LINK</span><span class="font-label-md text-[10px] text-on-surface-variant uppercase tracking-wider mt-xs">Recycler Enterprise</span></div></div><div class="px-md my-sm"><div class="bg-surface-container rounded-lg p-sm flex items-center justify-between"><div class="flex items-center gap-xs"><span class="material-symbols-outlined text-primary text-[18px]">verified</span><span class="font-label-md text-label-md text-on-surface font-semibold">Authorized Unit</span></div><span class="bg-primary-fixed text-on-primary-fixed-variant text-[11px] font-bold px-xs py-0.5 rounded-full uppercase">Tier-1</span></div></div><nav class="flex flex-col gap-xs px-md mt-xs" data-active-classes="bg-primary-container text-on-primary-container font-bold rounded-lg shadow-sm"><a aria-current="page" class="flex items-center gap-md px-md py-sm transition-all min-h-touch-target-min bg-primary-container text-on-primary-container font-bold rounded-lg shadow-sm" data-path="incoming-lots" href="#"><span class="material-symbols-outlined text-[20px]">inbox</span><span class="font-label-lg text-label-lg">Incoming Lots</span></a><a class="flex items-center gap-md px-md py-sm rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all min-h-touch-target-min" data-path="active-pickups" href="#"><span class="material-symbols-outlined text-[20px]">local_shipping</span><span class="font-label-lg text-label-lg">Active Pickups</span></a><a class="flex items-center gap-md px-md py-sm rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all min-h-touch-target-min" data-path="material-inventory" href="#"><span class="material-symbols-outlined text-[20px]">inventory_2</span><span class="font-label-lg text-label-lg">Material Inventory</span></a><a class="flex items-center gap-md px-md py-sm rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all min-h-touch-target-min" data-path="price-engine-and-quotes" href="#"><span class="material-symbols-outlined text-[20px]">currency_rupee</span><span class="font-label-lg text-label-lg">Price &amp; Quotes</span></a><a class="flex items-center gap-md px-md py-sm rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all min-h-touch-target-min" data-path="traceability-and-epr-reports" href="#"><span class="material-symbols-outlined text-[20px]">policy</span><span class="font-label-lg text-label-lg">Traceability &amp; EPR</span></a><a class="flex items-center gap-md px-md py-sm rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all min-h-touch-target-min" data-path="facility-settings" href="#"><span class="material-symbols-outlined text-[20px]">tune</span><span class="font-label-lg text-label-lg">Facility Settings</span></a></nav></div><div class="px-md"><div class="bg-surface-container-highest rounded-xl p-md flex flex-col gap-xs"><div class="flex items-center justify-between"><span class="font-label-md text-[11px] uppercase tracking-wider text-on-surface-variant font-bold">Facility Quota</span><span class="font-label-md text-label-md text-primary font-bold">85.6%</span></div><div class="w-full bg-surface-variant h-2 rounded-full overflow-hidden"><div class="bg-primary h-full rounded-full w-[85.6%]"></div></div><span class="font-body-md text-[12px] text-on-surface-variant leading-tight">Monthly Target: 42.8 / 50 MT</span></div></div></aside><div class="pl-72 flex flex-col min-h-screen"><header class="fixed top-0 left-72 right-0 h-16 bg-surface/85 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)] z-40 flex items-center justify-between px-lg"><div class="flex items-center gap-md"><div class="flex items-center gap-xs px-sm py-xs bg-surface-container rounded-full"><span class="material-symbols-outlined text-primary text-[18px]">verified_user</span><span class="font-label-md text-[12px] text-on-surface font-semibold">RE:LINK Authorized Recycler A (Bengaluru) • CPCB Reg: #CPCB-EW-2024-8812</span></div><div class="flex items-center gap-xs px-sm py-xs bg-primary-fixed/50 text-on-primary-fixed-variant rounded-full text-[12px] font-medium"><span class="w-2 h-2 rounded-full bg-primary"></span><span>System Online • Database Synced</span></div></div><div class="flex items-center gap-md"><button aria-label="Notifications" class="w-9 h-9 rounded-full bg-surface-container hover:bg-surface-container-high flex items-center justify-center text-on-surface-variant transition-colors relative" type="button"><span class="material-symbols-outlined text-[20px]">notifications</span><span class="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-error"></span></button><div class="flex items-center gap-sm pl-sm"><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div><div class="hidden xl:flex flex-col text-left"><span class="font-label-md text-label-md text-on-surface font-semibold leading-none">Bengaluru Ops</span><span class="font-body-md text-[11px] text-on-surface-variant">Admin</span></div></div></div></header><main class="w-full pt-16 bg-background flex-1 px-lg py-md"><div class="flex flex-col w-full gap-lg">
+<!-- Top Overview Metrics Strip -->
+<section class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-md">
+<!-- Metric 1: Incoming Lots -->
+<div class="bg-surface-container-lowest rounded-xl p-md shadow-sm flex flex-col justify-between relative overflow-hidden group hover:shadow-md transition-shadow">
+<div class="flex items-start justify-between">
+<div>
+<span class="font-label-md text-label-md text-on-surface-variant font-medium">Incoming Available Lots</span>
+<div class="flex items-baseline gap-xs mt-xs">
+<span class="font-headline-lg text-headline-lg text-on-surface font-bold">14</span>
+<span class="font-label-md text-label-md text-primary font-semibold">New Active</span>
+</div>
+</div>
+<div class="w-11 h-11 rounded-lg bg-primary-fixed flex items-center justify-center text-on-primary-fixed-variant">
+<span class="material-symbols-outlined text-[24px]">move_to_inbox</span>
+</div>
+</div>
+<div class="mt-md pt-sm flex items-center justify-between text-on-surface-variant">
+<span class="font-label-md text-label-md flex items-center gap-xs text-primary font-medium">
+<span class="w-2 h-2 rounded-full bg-primary"></span>
+          5 urgent &lt; 10 km
+        </span>
+<span class="font-label-md text-label-md text-on-surface-variant">Peenya &amp; Yeshwanthpur cluster</span>
+</div>
+</div>
+<!-- Metric 2: Pending Quotes -->
+<div class="bg-surface-container-lowest rounded-xl p-md shadow-sm flex flex-col justify-between relative overflow-hidden group hover:shadow-md transition-shadow">
+<div class="flex items-start justify-between">
+<div>
+<span class="font-label-md text-label-md text-on-surface-variant font-medium">Pending Quotes</span>
+<div class="flex items-baseline gap-xs mt-xs">
+<span class="font-headline-lg text-headline-lg text-on-surface font-bold">6</span>
+<span class="font-label-md text-label-md text-tertiary font-semibold">In Negotiation</span>
+</div>
+</div>
+<div class="w-11 h-11 rounded-lg bg-tertiary-fixed flex items-center justify-center text-on-tertiary-fixed-variant">
+<span class="material-symbols-outlined text-[24px]">currency_exchange</span>
+</div>
+</div>
+<div class="mt-md pt-sm flex items-center justify-between text-on-surface-variant">
+<span class="font-label-md text-label-md text-on-surface-variant font-medium">Avg response: 12 mins</span>
+<span class="font-label-md text-label-md text-primary font-medium">Active queue</span>
+</div>
+</div>
+<!-- Metric 3: Scheduled Pickups -->
+<div class="bg-surface-container-lowest rounded-xl p-md shadow-sm flex flex-col justify-between relative overflow-hidden group hover:shadow-md transition-shadow">
+<div class="flex items-start justify-between">
+<div>
+<span class="font-label-md text-label-md text-on-surface-variant font-medium">Scheduled Pickups Today</span>
+<div class="flex items-baseline gap-xs mt-xs">
+<span class="font-headline-lg text-headline-lg text-on-surface font-bold">8</span>
+<span class="font-label-md text-label-md text-secondary font-semibold">Scheduled</span>
+</div>
+</div>
+<div class="w-11 h-11 rounded-lg bg-secondary-fixed flex items-center justify-center text-on-secondary-fixed-variant">
+<span class="material-symbols-outlined text-[24px]">local_shipping</span>
+</div>
+</div>
+<div class="mt-md pt-sm flex items-center justify-between">
+<span class="font-label-md text-label-md text-on-surface-variant">5 Van dispatches, 3 Self-dropoffs</span>
+<span class="font-label-md text-label-md text-primary font-semibold">4 Pickups Completed</span>
+</div>
+</div>
+<!-- Metric 4: Monthly Sourced Material -->
+<div class="bg-surface-container-lowest rounded-xl p-md shadow-sm flex flex-col justify-between relative overflow-hidden group hover:shadow-md transition-shadow">
+<div class="flex items-start justify-between">
+<div>
+<span class="font-label-md text-label-md text-on-surface-variant font-medium">Monthly Sourced Material</span>
+<div class="flex items-baseline gap-xs mt-xs">
+<span class="font-headline-lg text-headline-lg text-on-surface font-bold">42.8</span>
+<span class="font-label-md text-label-md text-on-surface-variant">MT / 50 MT</span>
+</div>
+</div>
+<div class="w-11 h-11 rounded-lg bg-primary-container flex items-center justify-center text-on-primary">
+<span class="material-symbols-outlined text-[24px]">scale</span>
+</div>
+</div>
+<div class="mt-md pt-sm flex flex-col gap-xs">
+<div class="flex justify-between items-center text-on-surface-variant font-label-md text-[11px]">
+<span>Monthly Facility Quota</span>
+<span class="font-bold text-primary">85.6% (42.8 MT / 50 MT)</span>
+</div>
+<div class="w-full bg-surface-container-high h-1.5 rounded-full overflow-hidden">
+<div class="bg-primary h-full rounded-full" style="width: 85.6%;"></div>
+</div>
+</div>
+</div>
+</section>
+<!-- Interactive Search, Quick Filters & Category Toolbar -->
+<section class="bg-surface-container-lowest rounded-xl p-md shadow-sm flex flex-col lg:flex-row lg:items-center justify-between gap-md">
+<div class="flex flex-wrap items-center gap-sm">
+<span class="font-label-lg text-label-lg font-bold text-on-surface mr-xs flex items-center gap-xs">
+<span class="material-symbols-outlined text-primary text-[20px]">filter_list</span>
+        Lots Queue:
+      </span>
+<button class="px-md py-xs rounded-full bg-primary text-on-primary font-label-md text-label-md font-semibold shadow-sm transition-transform active:scale-95" type="button">
+        All Categories (14)
+      </button>
+<button class="px-md py-xs rounded-full bg-surface-container text-on-surface-variant hover:bg-surface-container-high font-label-md text-label-md transition-colors" type="button">
+        PCB / E-Waste (6)
+      </button>
+<button class="px-md py-xs rounded-full bg-surface-container text-on-surface-variant hover:bg-surface-container-high font-label-md text-label-md transition-colors" type="button">
+        Copper &amp; Wire Cables (4)
+      </button>
+<button class="px-md py-xs rounded-full bg-surface-container text-on-surface-variant hover:bg-surface-container-high font-label-md text-label-md transition-colors" type="button">
+        Li-ion Batteries (3)
+      </button>
+<button class="px-md py-xs rounded-full bg-surface-container text-on-surface-variant hover:bg-surface-container-high font-label-md text-label-md transition-colors" type="button">
+        CRT / Displays (1)
+      </button>
+</div>
+<div class="flex items-center gap-sm">
+<div class="flex items-center bg-surface-container-low rounded-lg px-sm py-xs">
+<span class="material-symbols-outlined text-on-surface-variant text-[18px] mr-xs">near_me</span>
+<select class="bg-transparent font-label-md text-label-md text-on-surface outline-none cursor-pointer">
+<option>Within 10 km Radius</option>
+<option>Within 5 km Radius</option>
+<option>Within 25 km Radius</option>
+<option>All Greater Bengaluru</option>
+</select>
+</div>
+</div>
+</section>
+<!-- Main Workdesk: Asymmetrical Two-Column Split -->
+<div class="grid grid-cols-1 xl:grid-cols-12 gap-lg items-start">
+<!-- Left / Primary Workspace: Incoming Scrap Lots Queue (8 Columns) -->
+<div class="xl:col-span-8 flex flex-col gap-md">
+<!-- FOCUSED LOT CARD 1: PCB Motherboards (High Priority) -->
+<article class="bg-surface-container-lowest rounded-xl shadow-md p-lg relative overflow-hidden transition-all duration-200">
+<!-- Accent Top Bar -->
+<div class="absolute top-0 left-0 right-0 h-1.5 bg-primary"></div>
+<!-- Header Row -->
+<div class="flex flex-wrap items-start justify-between gap-sm mb-md">
+<div class="flex items-center gap-sm">
+<span class="bg-primary-fixed text-on-primary-fixed-variant font-label-md text-[12px] font-bold px-sm py-0.5 rounded-full uppercase tracking-wider">
+              High Priority • Grade A
+            </span>
+<span class="font-headline-md text-headline-md font-bold text-on-surface">Lot #RL-2026-00482</span>
+</div>
+<div class="flex items-center gap-xs bg-surface-container-low px-sm py-xs rounded-lg">
+<span class="material-symbols-outlined text-primary text-[18px]">schedule</span>
+<span class="font-label-md text-label-md text-on-surface font-semibold">Posted 14:15 IST (42m ago)</span>
+</div>
+</div>
+<!-- Main Lot Content: Image + Breakdown -->
+<div class="grid grid-cols-1 md:grid-cols-12 gap-md items-stretch">
+<!-- Thumbnail & Inspection Evidence -->
+<div class="md:col-span-5 flex flex-col gap-xs">
+<div class="relative rounded-lg overflow-hidden bg-surface-container-high aspect-square">
+<img alt="Real electronic scrap Printed Circuit Boards (PCB) green motherboards with microchips, clear lighting, high contrast, clean white background" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida/AEtjO1Uibj7iPqmg9YKdnMYAfgjprFLErbb0FcOdAiLVCHgIpkj7gbP3YTmKP8zFMrg1kaOj63apJEhpOtxdLXe-93ri5nb5eVArP4y3X_auotJ1wePJz5s4YibZAvhuz-KAXyzC05MmFpsIy-yBUY4Mqu5yd0ohBBU3_J9_aC-nPfLKrNm8V66IvtxKehIH0e-8jnBWhBN-DbfYt6LisI-TlJcyw1QSl4R5LDqnipESfPn5rrrJ6LyUFidtmQ"/>
+<div class="absolute bottom-2 left-2 right-2 bg-inverse-surface/90 backdrop-blur-md rounded-md px-sm py-xs flex items-center justify-between text-inverse-on-surface">
+<span class="font-label-md text-[11px] font-medium flex items-center gap-xs">
+<span class="material-symbols-outlined text-primary-fixed text-[16px]">psychology</span>
+                  AI Vision Classified
+                </span>
+<span class="font-label-md text-[11px] font-bold text-primary-fixed">92% Confidence (Collector Confirmed)</span>
+</div>
+</div>
+<!-- Geotag bar -->
+<div class="bg-surface-container-low rounded-lg p-xs flex items-center justify-between text-on-surface-variant font-label-md text-[11px]">
+<span class="flex items-center gap-xs truncate">
+<span class="material-symbols-outlined text-primary text-[16px]">location_on</span>
+                Peenya Ind. Cluster (13.028°N, 77.518°E)
+              </span>
+<span class="font-bold text-on-surface shrink-0">4.8 km</span>
+</div>
+</div>
+<!-- Specifications, Collector & Payout Matrix -->
+<div class="md:col-span-7 flex flex-col justify-between">
+<div>
+<div class="flex items-start justify-between mb-sm">
+<div>
+<h3 class="font-headline-md text-headline-md font-bold text-on-surface leading-snug">
+                    Printed Circuit Board (Grade A Motherboards)
+                  </h3>
+<span class="font-body-md text-body-md text-on-surface-variant">Dual-Socket Server Boards, High-Gold Finger Connectors, ICs intact</span>
+</div>
+</div>
+<!-- Collector Reputation Pill -->
+<div class="bg-surface-container-low rounded-lg p-sm flex items-center justify-between mb-md">
+<div class="flex items-center gap-sm">
+<div class="w-8 h-8 rounded-full bg-surface-container-highest flex items-center justify-center text-on-surface-variant font-bold text-[13px]">
+                    RK
+                  </div>
+<div>
+<div class="flex items-center gap-xs">
+<span class="font-label-md text-label-md font-bold text-on-surface">Ramesh K. (Peenya Aggregator)</span>
+<span class="material-symbols-outlined text-primary text-[16px]">verified</span>
+</div>
+<span class="font-body-md text-[12px] text-on-surface-variant">CPCB Registered Aggregator • 42 Handover Batches • 4.8★ rating</span>
+</div>
+</div>
+<div class="flex items-center gap-0.5 bg-surface-container-lowest px-sm py-0.5 rounded-full shadow-sm">
+<span class="material-symbols-outlined text-primary text-[14px]">star</span>
+<span class="font-label-md text-label-md font-bold text-on-surface">4.8</span>
+</div>
+</div>
+<!-- Metrics Matrix: Net Weight & Market Spread -->
+<div class="grid grid-cols-3 gap-xs bg-surface-container rounded-lg p-sm mb-md text-center">
+<div>
+<span class="font-label-md text-[11px] text-on-surface-variant uppercase font-medium">Net Weight</span>
+<p class="font-action-xl text-action-xl font-bold text-on-surface">12.0 <span class="text-[14px] font-normal text-on-surface-variant">kg</span></p>
+<span class="font-body-md text-[10px] text-on-surface-variant">Gross: 12.4kg | Tare: 0.4kg</span>
+</div>
+<div>
+<span class="font-label-md text-[11px] text-on-surface-variant uppercase font-medium">Collector Asking</span>
+<p class="font-action-xl text-action-xl font-bold text-on-surface">₹740 <span class="text-[12px] font-normal text-on-surface-variant">/kg</span></p>
+<span class="font-body-md text-[10px] text-on-surface-variant">Target ₹8,880</span>
+</div>
+<div>
+<span class="font-label-md text-[11px] text-on-surface-variant uppercase font-medium">Market Benchmark</span>
+<p class="font-action-xl text-action-xl font-bold text-primary">₹700 – ₹766 <span class="text-[12px] font-normal text-on-surface-variant">/kg</span></p>
+<span class="font-body-md text-[10px] text-on-surface-variant">Spot Index Reference</span>
+</div>
+</div>
+</div>
+<!-- Recycler Decision & Offer Terminal -->
+<div class="bg-surface-container-low rounded-xl p-md flex flex-col gap-sm">
+<div class="flex flex-wrap items-center justify-between gap-sm">
+<label class="font-label-lg text-label-lg font-bold text-on-surface flex items-center gap-xs">
+<span class="material-symbols-outlined text-primary text-[18px]">calculate</span>
+                  Quote Procurement Rate:
+                </label>
+<div class="flex items-center gap-xs bg-surface-container-lowest p-0.5 rounded-lg border border-outline-variant/30">
+<button class="px-sm py-0.5 rounded text-[11px] font-bold bg-primary-fixed text-on-primary-fixed-variant" id="btn-van-dispatch" onclick="setFulfillment('van')" type="button">Recycler Van Dispatch</button>
+<button class="px-sm py-0.5 rounded text-[11px] font-medium text-on-surface-variant hover:text-on-surface" id="btn-self-dropoff" onclick="setFulfillment('dropoff')" type="button">Collector Self-Dropoff</button>
+</div>
+</div>
+<div class="flex flex-col sm:flex-row items-center gap-sm">
+<!-- Large Price Input -->
+<div class="relative w-full sm:w-1/2">
+<span class="absolute left-sm top-1/2 -translate-y-1/2 font-headline-md text-headline-md font-bold text-on-surface-variant">₹</span>
+<input class="w-full bg-surface-container-lowest text-on-surface font-headline-md text-headline-md font-bold pl-8 pr-16 py-xs rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-primary h-12" id="rateInput-00482" placeholder="0.00" type="number" value="780"/>
+<span class="absolute right-sm top-1/2 -translate-y-1/2 font-label-md text-label-md text-on-surface-variant font-semibold">/ kg</span>
+</div>
+<!-- Total Binding Value Display -->
+<div class="w-full sm:w-1/2 bg-surface-container-lowest rounded-lg h-12 px-md flex items-center justify-between shadow-sm">
+<span class="font-label-md text-label-md text-on-surface-variant">Total Binding Value:</span>
+<span class="font-action-xl text-action-xl font-bold text-primary" id="totalPayout-00482">₹9,360</span>
+</div>
+</div>
+<!-- Action CTAs -->
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-sm mt-xs">
+<button class="w-full h-12 bg-surface-container-highest hover:bg-surface-container-high text-on-surface font-label-lg text-label-lg font-semibold rounded-lg flex items-center justify-center gap-xs transition-colors" type="button">
+<span class="material-symbols-outlined text-[20px]">reply</span>
+                  Send Counter-Offer
+                </button>
+<button class="w-full h-12 bg-primary hover:bg-primary-container text-on-primary font-action-xl text-label-lg font-bold rounded-lg shadow-md flex items-center justify-center gap-xs transition-transform active:scale-[0.98]" type="button">
+<span class="material-symbols-outlined text-[20px]">check_circle</span>
+                  Accept Lot &amp; Schedule Pickup
+                </button>
+</div>
+</div>
+</div>
+</div>
+<!-- Operational Verification Indicator Bar -->
+<div class="mt-md pt-sm flex flex-wrap items-center justify-between gap-sm text-[12px] text-on-surface-variant font-label-md border-t border-outline-variant/30">
+<div class="flex items-center gap-md flex-wrap">
+<span class="flex items-center gap-xs text-primary font-semibold">
+<span class="material-symbols-outlined text-[16px]">fact_check</span>
+              ✓ Digital Handover Log Ready
+            </span>
+<span class="flex items-center gap-xs">
+<span class="material-symbols-outlined text-[16px]">tag</span>
+              ✓ Tamper Bag ID: #TB-8812-09 assigned
+            </span>
+<span class="flex items-center gap-xs">
+<span class="material-symbols-outlined text-[16px]">verified</span>
+              ✓ Hazardous Material Segregation Verified
+            </span>
+</div>
+<span class="text-on-surface-variant text-[11px] font-medium">Standard Operating Workflow</span>
+</div>
+</article>
+<!-- LOT CARD 2: Insulated Copper Wire & Heavy Cables -->
+<article class="bg-surface-container-lowest rounded-xl shadow-sm hover:shadow-md p-md relative overflow-hidden transition-all duration-200">
+<div class="flex flex-col md:flex-row gap-md items-stretch">
+<!-- Image -->
+<div class="w-full md:w-48 h-36 md:h-auto rounded-lg overflow-hidden shrink-0 relative bg-surface-container-high">
+<img alt="Heavy copper electrical cables and insulated wire scrap bundled together, realistic texture, clean neutral background" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida/AEtjO1WgXxj3PTs-7lfhFp-JK48EFoiQ6J122eiWOD5bFME_YW39QqWjSOtecSCCok96UgeiWft9i-8N-b4CLTLOt2TKYJpTgjDclW5fZ8pW2Ao12n1xdcxpIMTthmcakRwFYe5pJNiNHbEvQXiTZ6Dg62wI00Pp4LCfvkBxSm5ebeUHSLS26HhnhDK3yHfN-r9YHbPLIFxigyiHuXbRjgJuBMMKwgaWB7DxGJ8xsxedgkY1tTjZMRuMCZsxeAQ"/>
+<span class="absolute top-2 left-2 bg-inverse-surface/85 backdrop-blur-sm text-inverse-on-surface font-label-md text-[10px] font-bold px-xs py-0.5 rounded">
+              Verified Lot
+            </span>
+</div>
+<!-- Content -->
+<div class="flex-1 flex flex-col justify-between">
+<div>
+<div class="flex flex-wrap items-start justify-between gap-xs mb-xs">
+<div class="flex items-center gap-sm">
+<span class="font-headline-md text-headline-md font-bold text-on-surface">Lot #RL-2026-00483</span>
+<span class="bg-secondary-fixed text-on-secondary-fixed-variant font-label-md text-[11px] font-bold px-xs py-0.5 rounded uppercase">Heavy Metals</span>
+</div>
+<span class="font-label-md text-label-md text-on-surface-variant">7.2 km away • Yeshwanthpur Yard</span>
+</div>
+<h4 class="font-label-lg text-label-lg font-bold text-on-surface">
+                Insulated Copper Wire &amp; High-Tension Cables
+              </h4>
+<p class="font-body-md text-[13px] text-on-surface-variant line-clamp-1">
+                Stripped telecom grade pure copper strands. Moisture free, tied bundle, no PVC insulation degradation.
+              </p>
+</div>
+<!-- Stats & Quick Actions -->
+<div class="mt-sm pt-sm flex flex-wrap items-center justify-between gap-sm bg-surface-container-low rounded-lg p-sm">
+<div class="flex items-center gap-lg">
+<div>
+<span class="font-label-md text-[10px] uppercase text-on-surface-variant font-medium">Batch Weight</span>
+<p class="font-headline-md text-headline-md font-bold text-on-surface">35.0 kg</p>
+</div>
+<div>
+<span class="font-label-md text-[10px] uppercase text-on-surface-variant font-medium">Rate Range</span>
+<p class="font-headline-md text-headline-md font-bold text-primary">₹400 - 430 <span class="font-normal text-[12px] text-on-surface-variant">/kg</span></p>
+</div>
+<div class="hidden sm:block">
+<span class="font-label-md text-[10px] uppercase text-on-surface-variant font-medium">Est. Payout</span>
+<p class="font-headline-md text-headline-md font-bold text-on-surface">₹14,700</p>
+</div>
+</div>
+<div class="flex items-center gap-xs">
+<button class="h-10 px-md bg-primary-container text-on-primary font-label-md text-label-md font-bold rounded-lg hover:bg-primary transition-colors flex items-center gap-xs" type="button">
+<span class="material-symbols-outlined text-[18px]">currency_rupee</span>
+                  Offer ₹420/kg
+                </button>
+<button class="h-10 px-sm bg-surface-container-highest text-on-surface hover:bg-surface-container font-label-md text-label-md rounded-lg flex items-center gap-xs transition-colors" type="button">
+<span class="material-symbols-outlined text-[18px]">visibility</span>
+                  Review Details
+                </button>
+</div>
+</div>
+</div>
+</div>
+</article>
+<!-- LOT CARD 3: Li-ion Batteries (Pending Acceptance) -->
+<article class="bg-surface-container-lowest rounded-xl shadow-sm p-md relative overflow-hidden transition-all">
+<div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-sm">
+<div class="flex items-center gap-md">
+<div class="w-12 h-12 rounded-lg bg-surface-container-high flex items-center justify-center text-on-surface-variant shrink-0">
+<span class="material-symbols-outlined text-[24px]">battery_charging_full</span>
+</div>
+<div>
+<div class="flex items-center gap-xs">
+<span class="font-headline-md text-headline-md font-bold text-on-surface">Lot #RL-2026-00480</span>
+<span class="bg-tertiary-fixed text-on-tertiary-fixed-variant font-label-md text-[10px] font-bold px-xs py-0.5 rounded">Offer Sent</span>
+</div>
+<p class="font-body-md text-[13px] text-on-surface-variant mt-0.5">
+                Laptop &amp; Mobile Li-ion Cells (18.0 kg Net) • Quoted <strong class="text-on-surface font-semibold">₹110/kg</strong> (₹1,980 total)
+              </p>
+</div>
+</div>
+<div class="flex items-center gap-sm w-full sm:w-auto justify-between sm:justify-end">
+<span class="font-label-md text-[12px] text-on-surface-variant flex items-center gap-xs">
+<span class="material-symbols-outlined text-[16px] text-tertiary">schedule</span>
+              Awaiting Collector Sign-off
+            </span>
+<button class="px-sm py-xs text-on-surface-variant hover:text-on-surface text-label-md font-medium" type="button">
+              View Thread
+            </button>
+</div>
+</div>
+</article>
+<!-- Pagination & Queue Footer -->
+<div class="flex items-center justify-between p-sm text-on-surface-variant font-label-md text-label-md">
+<span>Showing 3 of 14 lots queued</span>
+<div class="flex gap-xs">
+<button class="px-sm py-xs rounded bg-surface-container hover:bg-surface-container-high text-on-surface disabled:opacity-50" disabled="" type="button">Previous</button>
+<button class="px-sm py-xs rounded bg-primary text-on-primary font-bold" type="button">1</button>
+<button class="px-sm py-xs rounded bg-surface-container hover:bg-surface-container-high text-on-surface" type="button">2</button>
+<button class="px-sm py-xs rounded bg-surface-container hover:bg-surface-container-high text-on-surface" type="button">Next</button>
+</div>
+</div>
+</div>
+<!-- Right Workspace Panel: Logistics Dispatch, Scheduling & Traceability (4 Columns) -->
+<div class="xl:col-span-4 flex flex-col gap-md">
+<!-- Dispatch & Logistics Manager Card -->
+<div class="bg-surface-container-lowest rounded-xl shadow-sm p-md flex flex-col gap-md">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-xs">
+<span class="material-symbols-outlined text-primary text-[22px]">route</span>
+<h3 class="font-headline-md text-headline-md font-bold text-on-surface">Today's Dispatch Line</h3>
+</div>
+<span class="bg-primary-fixed font-bold text-on-primary-fixed-variant text-[11px] px-sm py-0.5 rounded-full">
+            8 Scheduled
+          </span>
+</div>
+<!-- Schedule Item 1 (Scheduled for Lot 00482) -->
+<div class="bg-surface-container-low rounded-lg p-sm flex flex-col gap-xs relative overflow-hidden">
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-primary"></div>
+<div class="flex items-center justify-between pl-xs">
+<span class="font-label-md text-label-md font-bold text-on-surface flex items-center gap-xs">
+<span class="material-symbols-outlined text-primary text-[18px]">local_shipping</span>
+              Van #KA-04-E-2091
+            </span>
+<span class="font-label-md text-[12px] font-bold text-primary bg-primary-fixed/50 px-xs rounded">15:30 IST Target</span>
+</div>
+<div class="pl-xs text-on-surface-variant font-body-md text-[12px]">
+<p><strong class="text-on-surface">Driver:</strong> Suresh M. (+91 98450 12891)</p>
+<p><strong class="text-on-surface">Destination:</strong> Ramesh K. / Peenya Industrial</p>
+</div>
+<div class="mt-xs pt-xs flex items-center justify-between pl-xs font-label-md text-[11px] text-on-surface-variant border-t border-outline-variant/30">
+<span class="flex items-center gap-xs text-primary font-semibold">
+<span class="material-symbols-outlined text-[14px]">scale</span>
+              Calibrated Field Scale on-board
+            </span>
+<span>Est. 18 min transit</span>
+</div>
+</div>
+<!-- Schedule Item 2 -->
+<div class="bg-surface-container-low rounded-lg p-sm flex flex-col gap-xs relative overflow-hidden">
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-secondary"></div>
+<div class="flex items-center justify-between pl-xs">
+<span class="font-label-md text-label-md font-bold text-on-surface flex items-center gap-xs">
+<span class="material-symbols-outlined text-secondary text-[18px]">fire_truck</span>
+              Truck #KA-02-B-9912
+            </span>
+<span class="font-label-md text-[12px] font-semibold text-on-surface-variant">17:00 IST</span>
+</div>
+<div class="pl-xs text-on-surface-variant font-body-md text-[12px]">
+<p><strong class="text-on-surface">Driver:</strong> Anil Gowda (+91 94481 00214)</p>
+<p><strong class="text-on-surface">Mission:</strong> Yeshwanthpur Scrap Aggregators</p>
+</div>
+<div class="mt-xs pt-xs flex items-center justify-between pl-xs font-label-md text-[11px] text-on-surface-variant border-t border-outline-variant/30">
+<span>Payload Cap: 1,200 kg</span>
+<span class="text-secondary font-medium">Pre-routed via Outer Ring</span>
+</div>
+</div>
+<!-- Settlement Mode Recording -->
+<div class="bg-surface-container rounded-lg p-sm flex flex-col gap-xs">
+<span class="font-label-md text-[11px] uppercase tracking-wider text-on-surface-variant font-bold">Settlement &amp; Payment Method</span>
+<div class="grid grid-cols-3 gap-xs">
+<button class="py-xs px-xs rounded bg-surface-container-lowest shadow-sm font-label-md text-[12px] font-bold text-primary flex items-center justify-center gap-1" type="button">
+<span>💵 Cash</span>
+</button>
+<button class="py-xs px-xs rounded bg-surface-container hover:bg-surface-container-lowest font-label-md text-[12px] font-medium text-on-surface-variant flex items-center justify-center gap-1 transition-colors" type="button">
+<span>📱 UPI</span>
+</button>
+<button class="py-xs px-xs rounded bg-surface-container hover:bg-surface-container-lowest font-label-md text-[12px] font-medium text-on-surface-variant flex items-center justify-center gap-1 transition-colors" type="button">
+<span>🏦 Bank / NEFT</span>
+</button>
+</div>
+<span class="font-body-md text-[11px] text-on-surface-variant mt-1 text-center">Payment status recorded upon physical verification</span>
+</div>
+</div>
+<!-- Realistic Traceability & Audit Verification Card -->
+<div class="bg-surface-container-lowest rounded-xl shadow-sm p-md flex flex-col gap-md">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-xs">
+<span class="material-symbols-outlined text-primary text-[20px]">verified</span>
+<h4 class="font-headline-md text-headline-md font-bold text-on-surface">Traceability &amp; Verification</h4>
+</div>
+<span class="bg-primary text-on-primary text-[10px] font-bold px-xs py-0.5 rounded uppercase">Field Audit Ready</span>
+</div>
+<ul class="flex flex-col gap-sm">
+<li class="flex items-start gap-sm bg-surface-container-low p-sm rounded-lg">
+<span class="text-[18px] mt-0.5">📍</span>
+<div>
+<span class="font-label-md text-label-md font-bold text-on-surface">1. Verified Location Check</span>
+<p class="font-body-md text-[12px] text-on-surface-variant">Physical handover location and timestamp logged at collector site.</p>
+</div>
+</li>
+<li class="flex items-start gap-sm bg-surface-container-low p-sm rounded-lg">
+<span class="text-[18px] mt-0.5">⚖️</span>
+<div>
+<span class="font-label-md text-label-md font-bold text-on-surface">2. Physical Scale Calibration</span>
+<p class="font-body-md text-[12px] text-on-surface-variant">Gross, tare, and net weights recorded with scale inspection photo.</p>
+</div>
+</li>
+<li class="flex items-start gap-sm bg-surface-container-low p-sm rounded-lg">
+<span class="text-[18px] mt-0.5">📷</span>
+<div>
+<span class="font-label-md text-label-md font-bold text-on-surface">3. Handover Inspection Photo</span>
+<p class="font-body-md text-[12px] text-on-surface-variant">Visual proof of lot condition and tamper bag seal captured before payment.</p>
+</div>
+</li>
+<li class="flex items-start gap-sm bg-surface-container-low p-sm rounded-lg">
+<span class="text-[18px] mt-0.5">📄</span>
+<div>
+<span class="font-label-md text-label-md font-bold text-on-surface">4. Digital Handover Receipt</span>
+<p class="font-body-md text-[12px] text-on-surface-variant">Auto-generates formal transaction receipt (PDF exportable for EPR audit records).</p>
+</div>
+</li>
+</ul>
+<button class="w-full py-sm bg-surface-container-high hover:bg-surface-container-highest text-on-surface font-label-md text-label-md font-bold rounded-lg flex items-center justify-center gap-xs transition-colors" type="button">
+<span class="material-symbols-outlined text-[18px]">download</span>
+          Download Today's Transaction Ledger (CSV / PDF)
+        </button>
+</div>
+</div>
+</div>
+<script>
+    // Micro-interaction for dynamic quote recalculation
+    (function() {
+      const rateInput = document.getElementById('rateInput-00482');
+      const totalDisplay = document.getElementById('totalPayout-00482');
+      const netWeight = 12.0;
+
+      if (rateInput && totalDisplay) {
+        rateInput.addEventListener('input', function(e) {
+          const val = parseFloat(e.target.value) || 0;
+          const total = Math.round(val * netWeight);
+          totalDisplay.textContent = '₹' + total.toLocaleString('en-IN');
+        });
+      }
+    })();
+
+    // Fulfillment mode switch toggle
+    function setFulfillment(mode) {
+      const btnVan = document.getElementById('btn-van-dispatch');
+      const btnDrop = document.getElementById('btn-self-dropoff');
+      if (mode === 'van') {
+        btnVan.className = "px-sm py-0.5 rounded text-[11px] font-bold bg-primary-fixed text-on-primary-fixed-variant";
+        btnDrop.className = "px-sm py-0.5 rounded text-[11px] font-medium text-on-surface-variant hover:text-on-surface";
+      } else {
+        btnDrop.className = "px-sm py-0.5 rounded text-[11px] font-bold bg-primary-fixed text-on-primary-fixed-variant";
+        btnVan.className = "px-sm py-0.5 rounded text-[11px] font-medium text-on-surface-variant hover:text-on-surface";
+      }
+    }
+  </script>
+</div></main></div></body></html>

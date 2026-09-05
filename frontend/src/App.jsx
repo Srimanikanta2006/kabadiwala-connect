@@ -14,6 +14,10 @@ function App() {
     localStorage.setItem('kabadiwala_user_role', role);
   };
 
+  if (userRole === 'recycler') {
+    return <RecyclerDashboard onRoleSwitch={() => handleRoleChange('collector')} />;
+  }
+
   return (
     <div className="app-root" style={{ minHeight: '100vh', background: '#f8fafc' }}>
       {/* Top Application Navbar with Role Switcher & Language Picker */}
@@ -58,14 +62,14 @@ function App() {
                 color: '#ffffff',
                 border: 'none',
                 borderRadius: '6px',
-                padding: '0.35rem 0.75rem',
-                fontSize: '0.82rem',
+                padding: '0.4rem 0.85rem',
                 fontWeight: 700,
+                fontSize: '0.85rem',
                 cursor: 'pointer',
                 transition: 'background 0.2s'
               }}
             >
-              👷‍♂️ {t('role_collector')} (Stitch Mobile)
+              📱 {t('role_collector')} (Mobile App)
             </button>
             <button
               onClick={() => handleRoleChange('recycler')}
@@ -74,9 +78,9 @@ function App() {
                 color: '#ffffff',
                 border: 'none',
                 borderRadius: '6px',
-                padding: '0.35rem 0.75rem',
-                fontSize: '0.82rem',
+                padding: '0.4rem 0.85rem',
                 fontWeight: 700,
+                fontSize: '0.85rem',
                 cursor: 'pointer',
                 transition: 'background 0.2s'
               }}
@@ -96,13 +100,7 @@ function App() {
 
       {/* Main Viewport Container */}
       <main style={{ minHeight: 'calc(100vh - 120px)' }}>
-        {userRole === 'recycler' ? (
-          <div style={{ padding: '0.75rem 1rem' }}>
-            <RecyclerDashboard onRoleSwitch={() => handleRoleChange('collector')} />
-          </div>
-        ) : (
-          <CollectorApp />
-        )}
+        <CollectorApp />
       </main>
     </div>
   );

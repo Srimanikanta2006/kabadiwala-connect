@@ -578,6 +578,22 @@ stateDiagram-v2
       7. Recycler desktop weighbridge confirmation and CPCB EPR certificate issuance.
       8. Immediate cash settlement and collector earnings ledger (Screen 06).
 
+26. **Google Stitch Recycler Dashboard Import & Replacement (`07_recycler_dashboard`):**
+    - Imported the high-density desktop prototype `Recycler Dashboard - Incoming Lots & Logistics` directly from Google Stitch via StitchMCP (`projects/7567603403701135194/screens/a9559c0edb3b4d1ca3deb7c938b8ccb0`).
+    - Saved raw prototype HTML to `stitch-designs/screens/07_recycler_dashboard/index.html`.
+    - Completely replaced `frontend/src/components/RecyclerDashboard.jsx` with pixel-perfect Stitch components:
+      - Left Sidebar: RE:LINK Recycler Enterprise, Tier-1 Authorized Unit badge, navigation items, monthly facility quota progress (42.8 / 50 MT).
+      - Top Header: Authorized Recycler registration (`#CPCB/E-WASTE/REG/MH/2023/1042`), system online status, notifications, weighbridge operator profile, and role switcher back to Collector mobile app.
+      - 4 Overview Metric Cards: Incoming available lots, pending quotes in negotiation, scheduled pickups today, and monthly sourced tonnage.
+      - Category & Radius Filter Toolbar: PCB / E-Waste, Copper & Wire Cables, Li-ion Batteries, CRT / Displays, and radius filter (5km, 10km, 25km).
+      - Incoming Lots Queue: Real lot cards with AI vision 92% confidence badge, Peenya/Dharavi geotags, collector reputation ratings, net weight, asking rate, market benchmark spread, dynamic quote rate input recalculating total binding payout, fulfillment switch (`Recycler Van Dispatch` vs `Collector Self-Dropoff`), and action buttons.
+      - Logistics & Dispatch Line: Van #KA-04-E-2091 and Truck #KA-02-B-9912 schedules with on-board calibrated scales and driver contacts.
+      - Settlement Mode Selector: 💵 Cash (Default), 📱 UPI, 🏦 Bank/NEFT.
+      - Realistic Traceability & Audit Verification checklist (The 4 Pillars).
+      - Modal for Weighbridge Actual Weight Verification and statutory CPCB EPR certificate generation (`POST /handover/confirm`).
+      - Download Today's Transaction Ledger as CSV.
+    - Verified with `npm run build` (253ms) and pytest `test_recycler_portal.py` (6/6 passing, 80/80 total).
+
 ---
 
 ## 5. Implementation Chunks Status
@@ -596,7 +612,7 @@ stateDiagram-v2
 | **Chunk 11**| **Earnings Ledger & Safety Guidance** | `backend/app/services/ledger_service.py`, `safety_service.py`, `EarningsLedger.jsx`, `SafetyGuidance.jsx` | **COMPLETE** |
 | **Pass**    | **Vernacular / Low-Literacy UI Pass (i18n & Icons)**| `frontend/src/i18n/`, `LanguagePicker.jsx`, `QuickLotIconFlow.jsx` | **COMPLETE** |
 | **Chunk 8** | **Offline Storage (Dexie.js IndexedDB) & PWA Shell** | `frontend/src/db/`, `syncEngine.js`, `OfflineSyncBanner.jsx` | **COMPLETE** |
-| **Chunk 14**| **Recycler-Side Interface & CPCB Confirmation** | `RecyclerDashboard.jsx`, `GET /recyclers`, `POST /handover/confirm` | **COMPLETE** |
+| **Chunk 14**| **Recycler-Side Interface & CPCB Confirmation (Stitch)** | `RecyclerDashboard.jsx`, `07_recycler_dashboard/`, `POST /handover/confirm` | **COMPLETE** |
 | **Chunk 9** | **Collector Mobile App UI (Stitch screens integration)** | `frontend/src/components/collector/Screen01-06`, `CollectorApp.jsx` | **COMPLETE** |
 | **Chunk 12**| **Field Research & Unit Economics Model** | `docs/field_research.md`, `docs/live_demonstration_guide.md` | **COMPLETE** |
 
