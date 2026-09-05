@@ -918,6 +918,242 @@ async def get_safety_card_audio(
         raise HTTPException(status_code=500, detail=str(e))
 
 
+# ------------------------------------------------------------------------------
+# Recycler Portal & Dashboard API (Chunk 14 / Recycler-Side Interface)
+# ------------------------------------------------------------------------------
+@app.get("/recyclers", tags=["Recyclers"])
+def list_authorized_recyclers():
+    """List all authorized recyclers with their CPCB registrations."""
+    all_recs = get_recyclers()
+    authorized = [r for r in all_recs if r.get("authorization_status") == "ACTIVE"]
+    return {
+        "success": True,
+        "count": len(authorized),
+        "total_facilities": len(all_recs),
+        "data": authorized
+    }
+
+
+@app.get("/recyclers/{recycler_id}", tags=["Recyclers"])
+def get_recycler_profile(recycler_id: str):
+    """Fetch facility profile and accepted material taxonomy."""
+    all_recs = get_recyclers()
+    rec = next((r for r in all_recs if r["id"] == recycler_id), None)
+    if not rec:
+        raise HTTPException(status_code=404, detail="Recycler facility not found")
+    return {
+        "success": True,
+        "data": rec
+    }
+
+
+@app.get("/recyclers/{recycler_id}/lots", tags=["Recyclers"])
+def get_incoming_lots_for_recycler(
+    recycler_id: str,
+    status_filter: Optional[str] = Query(None, description="Optional status: ALL, PENDING, CONFIRMED"),
+    limit: int = Query(50, ge=1, le=100)
+):
+    """
+    Returns incoming lots matched to this recycler facility.
+    Each lot includes photo, category, weight, estimated value, and handover reference.
+    """
+    client = get_supabase()
+    all_recs = get_recyclers()
+    rec = next((r for r in all_recs if r["id"] == recycler_id), None)
+    if not rec:
+        raise HTTPException(status_code=404, detail="Recycler facility not found")
+
+    accepted_materials = set(rec.get("materials_accepted", []))
+    offered_rates = rec.get("offered_rates", {})
+
+    lots = []
+    traceability_map = {}
+
+    if client:
+        try:
+            # Query traceability
+            t_res = client.table("traceability").select("*").limit(100).execute()
+            if t_res.data:
+                for t in t_res.data:
+                    traceability_map[t["lot_id"]] = t
+
+            # Query material_lots
+            l_res = client.table("material_lots").select("*").order("created_at", desc=True).limit(limit).execute()
+            if l_res.data:
+                lots = l_res.data
+        except Exception as e:
+            logger.warning(f"Error fetching lots from Supabase: {e}")
+
+    # Fallback / In-memory trace lookup if empty
+    from app.services.handover_service import _LOCAL_TRACEABILITY_CACHE
+    if not lots and not _LOCAL_TRACEABILITY_CACHE:
+        demo_items = [
+            {
+                "id": "trace_demo_pcb_01",
+                "lot_id": "lot_demo_pcb_01",
+                "photo_url": "/assets/icons/pcb_high.svg",
+                "weight": 8.4,
+                "timestamp": "2026-09-05T08:30:00Z",
+                "gps_lat": 19.0434,
+                "gps_lng": 72.8576,
+                "handover_ref": "KC-TRACE-20260905-MH-PCB001",
+                "recycler_confirmation": False,
+                "status": "PENDING_CONFIRMATION",
+                "cpcb_certificate_id": None,
+                "created_at": "2026-09-05T08:30:00Z",
+                "collector_id": "col_ramesh_dharavi",
+                "material_id": "mat_pcb_high",
+                "material_category": "PCB",
+                "quoted_price": 2142.0
+            },
+            {
+                "id": "trace_demo_cables_02",
+                "lot_id": "lot_demo_cables_02",
+                "photo_url": "/assets/icons/cables_copper.svg",
+                "weight": 14.2,
+                "timestamp": "2026-09-05T09:15:00Z",
+                "gps_lat": 19.0550,
+                "gps_lng": 72.8710,
+                "handover_ref": "KC-TRACE-20260905-MH-CBL002",
+                "recycler_confirmation": False,
+                "status": "PENDING_CONFIRMATION",
+                "cpcb_certificate_id": None,
+                "created_at": "2026-09-05T09:15:00Z",
+                "collector_id": "col_suresh_kurla",
+                "material_id": "mat_cables_copper",
+                "material_category": "CABLES",
+                "quoted_price": 5609.0
+            },
+            {
+                "id": "trace_demo_batt_03",
+                "lot_id": "lot_demo_batt_03",
+                "photo_url": "/assets/icons/batt_lead.svg",
+                "weight": 22.0,
+                "timestamp": "2026-09-05T10:00:00Z",
+                "gps_lat": 19.0410,
+                "gps_lng": 72.8620,
+                "handover_ref": "KC-TRACE-20260905-MH-BAT003",
+                "recycler_confirmation": False,
+                "status": "PENDING_CONFIRMATION",
+                "cpcb_certificate_id": None,
+                "created_at": "2026-09-05T10:00:00Z",
+                "collector_id": "col_anita_bandra",
+                "material_id": "mat_batteries_lead",
+                "material_category": "BATTERIES",
+                "quoted_price": 2310.0
+            }
+        ]
+        for item in demo_items:
+            _LOCAL_TRACEABILITY_CACHE[item["handover_ref"]] = item
+
+    for ref, tr in _LOCAL_TRACEABILITY_CACHE.items():
+        if tr.get("lot_id") and tr["lot_id"] not in traceability_map:
+            traceability_map[tr["lot_id"]] = tr
+
+    if not lots:
+        for ref, tr in _LOCAL_TRACEABILITY_CACHE.items():
+            lots.append({
+                "id": tr.get("lot_id", f"lot_{ref}"),
+                "collector_id": tr.get("collector_id", "col_test_001"),
+                "material_id": tr.get("material_id", "mat_pcb_high"),
+                "material_category": tr.get("material_category", "PCB"),
+                "approximate_weight": float(tr.get("weight", 1.0)),
+                "condition": "CLEAN_INTACT",
+                "quoted_price": float(tr.get("quoted_price", 0.0)),
+                "image_url": tr.get("photo_url"),
+                "status": "HANDED_OVER" if (tr.get("status") == "CONFIRMED" or tr.get("recycler_confirmation")) else "PENDING_CONFIRMATION",
+                "created_at": tr.get("timestamp") or tr.get("created_at")
+            })
+
+    # Filter and format matched lots
+    matched_lots = []
+    for lot in lots:
+        mat_id = lot.get("material_id", "mat_pcb_high")
+        # Hard check: only include lots whose material is accepted by this recycler
+        if accepted_materials and mat_id not in accepted_materials:
+            continue
+
+        lot_id = lot["id"]
+        trace = traceability_map.get(lot_id) or {}
+        
+        weight = float(lot.get("approximate_weight", 1.0))
+        offered_rate = offered_rates.get(mat_id)
+        if offered_rate:
+            estimated_payout = round(offered_rate * weight, 2)
+        else:
+            estimated_payout = float(lot.get("quoted_price", 0.0))
+
+        handover_ref = trace.get("handover_ref") or f"KC-TRACE-{lot_id[:8].upper()}"
+        trace_status = trace.get("status") or ("CONFIRMED" if lot.get("status") == "HANDED_OVER" else "PENDING_CONFIRMATION")
+        is_confirmed = trace.get("recycler_confirmation", False) or (trace_status in ["CONFIRMED", "VERIFIED"])
+
+        # Status filter
+        if status_filter == "PENDING" and is_confirmed:
+            continue
+        if status_filter == "CONFIRMED" and not is_confirmed:
+            continue
+
+        matched_lots.append({
+            "lot_id": lot_id,
+            "handover_ref": handover_ref,
+            "collector_id": lot.get("collector_id", "col_test_001"),
+            "material_id": mat_id,
+            "material_category": lot.get("material_category", "PCB"),
+            "approximate_weight": weight,
+            "condition": lot.get("condition", "CLEAN_INTACT"),
+            "estimated_value": estimated_payout,
+            "offered_rate_per_kg": offered_rate,
+            "image_url": lot.get("image_url") or trace.get("photo_url") or "/assets/icons/pcb_high.svg",
+            "gps_lat": trace.get("gps_lat", 19.0435),
+            "gps_lng": trace.get("gps_lng", 72.8566),
+            "status": trace_status,
+            "recycler_confirmation": is_confirmed,
+            "cpcb_certificate_id": trace.get("cpcb_certificate_id"),
+            "created_at": lot.get("created_at")
+        })
+
+    return {
+        "success": True,
+        "recycler_id": recycler_id,
+        "facility_name": rec.get("name"),
+        "cpcb_reg_no": rec.get("cpcb_registration_no"),
+        "matched_lots_count": len(matched_lots),
+        "lots": matched_lots
+    }
+
+
+@app.get("/recyclers/{recycler_id}/metrics", tags=["Recyclers"])
+def get_recycler_metrics(recycler_id: str):
+    """Aggregate KPIs for recycler facility desktop portal."""
+    incoming_data = get_incoming_lots_for_recycler(recycler_id=recycler_id, limit=100)
+    lots = incoming_data.get("lots", [])
+
+    total_lots = len(lots)
+    pending_lots = [l for l in lots if not l["recycler_confirmation"]]
+    confirmed_lots = [l for l in lots if l["recycler_confirmation"]]
+
+    total_tonnage = sum(l["approximate_weight"] for l in confirmed_lots)
+    total_payout = sum(l["estimated_value"] for l in confirmed_lots)
+    certificates_count = len([l for l in confirmed_lots if l.get("cpcb_certificate_id")])
+
+    return {
+        "success": True,
+        "recycler_id": recycler_id,
+        "facility_name": incoming_data.get("facility_name"),
+        "cpcb_reg_no": incoming_data.get("cpcb_reg_no"),
+        "metrics": {
+            "total_incoming_lots": total_lots,
+            "pending_verification_count": len(pending_lots),
+            "confirmed_count": len(confirmed_lots),
+            "total_verified_weight_kg": round(total_tonnage, 2),
+            "total_verified_tonnage_mt": round(total_tonnage / 1000.0, 3),
+            "total_payout_settled_inr": round(total_payout, 2),
+            "cpcb_certificates_issued": certificates_count
+        }
+    }
+
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
+

@@ -508,6 +508,23 @@ stateDiagram-v2
     ```
     **Result:** `✓ built in 264ms`, 68 modules transformed cleanly into `dist/` with active Service Worker precache.
 
+19. **Recycler-Side Interface & Verification Test Suite (`test_recycler_portal.py`):**
+    ```bash
+    backend\.venv\Scripts\python.exe -m pytest backend/test_recycler_portal.py -v
+    ```
+    **Result:** All 6 verification tests passed (Total 69/69 tests passing across 12 backend test suites):
+    - Test 1: Authorized recyclers discovery (`GET /recyclers`) verified all 5 active facilities with valid CPCB registration numbers and material taxonomies.
+    - Test 2: Facility profile retrieval (`GET /recyclers/{id}`) and 404 error handling verified.
+    - Test 3: Material acceptance filtering strictly verified: Enviro-Care receives zero PCB scrap; Cerebra receives zero lead-acid batteries.
+    - Test 4: Status filtering (`status_filter=PENDING` vs `CONFIRMED`) verified on recycler incoming queue.
+    - Test 5: Recycler KPIs and metrics computation (`GET /recyclers/{id}/metrics`) verified with mathematical consistency (`total = pending + confirmed`).
+    - Test 6: End-to-end receipt confirmation (`POST /handover/confirm`) genuinely updates status on Collector side (`GET /handover/{ref}` -> `CONFIRMED`), stamps official `CPCB-EPR-2026-MH-XXXXXXXX` audit certificate, and updates recycler metrics.
+20. **Frontend Production Build (with Recycler Portal & Role Switcher):**
+    ```bash
+    npm run build
+    ```
+    **Result:** `✓ built in 354ms`, 70 modules transformed cleanly into `dist/` with active Service Worker precache.
+
 ---
 
 ## 5. Implementation Chunks Status
@@ -526,5 +543,7 @@ stateDiagram-v2
 | **Chunk 11**| **Earnings Ledger & Safety Guidance** | `backend/app/services/ledger_service.py`, `safety_service.py`, `EarningsLedger.jsx`, `SafetyGuidance.jsx` | **COMPLETE** |
 | **Pass**    | **Vernacular / Low-Literacy UI Pass (i18n & Icons)**| `frontend/src/i18n/`, `LanguagePicker.jsx`, `QuickLotIconFlow.jsx` | **COMPLETE** |
 | **Chunk 8** | **Offline Storage (Dexie.js IndexedDB) & PWA Shell** | `frontend/src/db/`, `syncEngine.js`, `OfflineSyncBanner.jsx` | **COMPLETE** |
+| **Chunk 14**| **Recycler-Side Interface & CPCB Confirmation** | `RecyclerDashboard.jsx`, `GET /recyclers`, `POST /handover/confirm` | **COMPLETE** |
 | **Chunk 9** | Collector Mobile App UI (Stitch screens integration) | `frontend/src/components/collector/` | Queued |
 | **Chunk 12**| Field Research Documentation & Unit Economics Model | `docs/field_research.md`, Unit Economics | Queued |
+

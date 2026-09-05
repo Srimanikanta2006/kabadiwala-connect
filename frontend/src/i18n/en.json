@@ -27,8 +27,8 @@
   "handover_badge": "CPCB Digital Traceability",
   "handover_title": "Handover, Traceability & QR Confirmation",
   "handover_subtitle": "Digital handover, cryptographic QR token, and authorized recycler EPR verification",
-  "role_collector": "📱 Collector Handover (QR)",
-  "role_recycler": "🏭 Recycler Weighbridge Confirmation",
+  "role_collector": "Collector App",
+  "role_recycler": "Recycler Portal",
   "lot_details": "📦 Lot Confirmation & Handover Details",
   "material_category": "Material Category",
   "weight_kg": "Weight (kg)",
@@ -123,5 +123,12 @@
   "sync_now": "⚡ Sync Now",
   "simulate_airplane_mode": "Simulate Airplane Mode",
   "local_offline_records": "Local Storage (IndexedDB)",
-  "saved_locally_msg": "Saved locally in device storage. Will sync automatically once online."
+  "saved_locally_msg": "Saved locally in device storage. Will sync automatically once online.",
+  "recycler_portal": "Authorized Recycler Portal",
+  "incoming_lots": "Incoming Matched Lots",
+  "verify_receipt": "Verify Receipt",
+  "weighbridge_weight": "Weighbridge Weight (kg)",
+  "cpcb_epr_issued": "CPCB EPR Certificate Issued",
+  "switch_facility": "Select Facility",
+  "tab_recycler_portal": "Recycler Dashboard"
 }
