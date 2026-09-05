@@ -109,6 +109,9 @@ export default function CollectorApp({ onSwitchRole }) {
           const topTitle = info.category_name || info.top_category_name || info.label || 'Printed Circuit Board (PCB)';
           const confScore = Math.round((info.confidence || 0.92) * 100);
           const top3 = info.top_3_predictions || info.suggestions || [];
+          const boundingBoxes = info.bounding_boxes || [];
+          const detectedObjectsCount = info.detected_objects_count || 0;
+          const roboflowMeta = info.roboflow || null;
 
           setLotDraft((prev) => ({
             ...prev,
@@ -116,7 +119,10 @@ export default function CollectorApp({ onSwitchRole }) {
             materialId: topCategory,
             materialTitle: topTitle,
             confidence: confScore,
-            top3Predictions: top3
+            top3Predictions: top3,
+            boundingBoxes: boundingBoxes,
+            detectedObjectsCount: detectedObjectsCount,
+            roboflowMeta: roboflowMeta
           }));
         } else {
           setLotDraft((prev) => ({ ...prev, photoUrl: dataUrl }));

@@ -193,6 +193,35 @@ export default function Screen02AiIdentification({
               : `इसकी पहचान: ${materialTitle} (${confidence}% निश्चित)।`}</span>
           </div>
 
+          {lotDraft.boundingBoxes && lotDraft.boundingBoxes.length > 0 && (
+            <div className="mt-3 pt-3 border-t border-outline-variant/60">
+              <div className="flex items-center justify-between text-[11px] font-semibold text-on-surface-variant mb-2">
+                <span className="flex items-center gap-1 text-primary font-bold">
+                  <span className="material-symbols-outlined text-[16px]">view_in_ar</span>
+                  Roboflow 19.6k Model ({lotDraft.boundingBoxes.length} Objects Detected)
+                </span>
+                <span className="bg-primary/10 text-primary px-2 py-0.5 rounded-full text-[10px] font-bold">
+                  v43 Cloud
+                </span>
+              </div>
+              <div className="flex flex-wrap gap-1.5">
+                {lotDraft.boundingBoxes.map((b, idx) => (
+                  <button
+                    key={b.detection_id || idx}
+                    type="button"
+                    onClick={() => handleSelectAlternative(b.name_en, b.cpcb_code, b.category_id, Math.round(b.confidence * 100))}
+                    className="text-xs px-2.5 py-1 rounded-lg border border-primary/30 bg-primary/5 hover:bg-primary/15 text-on-surface flex items-center gap-1.5 transition-colors cursor-pointer"
+                  >
+                    <span className="font-semibold text-primary">{b.raw_class}</span>
+                    <span className="text-[10px] bg-surface px-1.5 py-0.5 rounded border border-outline-variant/60 text-on-surface-variant font-bold">
+                      {Math.round(b.confidence * 100)}%
+                    </span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
           <div className="mt-3">
             <div className="text-[11px] font-semibold text-on-surface-variant mb-1.5 uppercase tracking-wide">
               Other Potential Matches (Top Predictions):

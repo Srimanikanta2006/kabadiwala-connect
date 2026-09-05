@@ -32,6 +32,7 @@ from anomaly.detector import (
     run_anomaly_background_sweep
 )
 from ml.classifier import classifier_service
+from ml.roboflow_service import roboflow_detector
 from app.services.handover_service import (
     create_handover_record,
     get_handover_details,
@@ -234,6 +235,86 @@ async def classify_material(request: Request):
                 "message_mr": "साहित्याची ओळख अयशस्वी झाली. कृपया पुन्हा प्रयत्न करा."
             }
         )
+
+
+@app.post("/detect/roboflow", tags=["AI Identification"])
+async def detect_roboflow(
+    request: Request,
+    file: Optional[UploadFile] = File(default=None),
+    confidence: Optional[float] = Query(default=0.15, ge=0.01, le=1.0),
+    overlap: Optional[float] = Query(default=0.50, ge=0.01, le=1.0)
+):
+    """
+    POST /detect/roboflow -> Serverless Object Detection via Roboflow Cloud API.
+    Model: e-waste-dataset-r0ojc/43 (19,613 images, 77 classes).
+    Returns real-time bounding boxes, detected object counts, and statutory CPCB category mappings.
+    """
+    if not roboflow_detector.is_configured():
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail={
+                "success": False,
+                "error_code": "ROBOFLOW_NOT_CONFIGURED",
+                "message_en": "Roboflow API key is not configured in backend environment."
+            }
+        )
+
+    image_bytes = None
+    if file is not None:
+        image_bytes = await file.read()
+    else:
+        try:
+            content_type = request.headers.get("content-type", "")
+            if "application/json" in content_type:
+                body = await request.json()
+                if "image_base64" in body and body["image_base64"]:
+                    b64_str = body["image_base64"]
+                    if "," in b64_str:
+                        b64_str = b64_str.split(",", 1)[1]
+                    b64_str = b64_str.strip()
+                    b64_str += "=" * ((4 - len(b64_str) % 4) % 4)
+                    image_bytes = base64.b64decode(b64_str)
+            else:
+                raw_body = await request.body()
+                if raw_body:
+                    try:
+                        body = json.loads(raw_body)
+                        if "image_base64" in body and body["image_base64"]:
+                            b64_str = body["image_base64"]
+                            if "," in b64_str:
+                                b64_str = b64_str.split(",", 1)[1]
+                            b64_str = b64_str.strip()
+                            b64_str += "=" * ((4 - len(b64_str) % 4) % 4)
+                            image_bytes = base64.b64decode(b64_str)
+                    except Exception:
+                        image_bytes = raw_body
+        except Exception as e:
+            logger.error(f"Roboflow detection payload decoding error: {e}")
+
+    if not image_bytes:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail={"success": False, "message_en": "No image data provided for object detection."}
+        )
+
+    res = roboflow_detector.detect_objects(
+        image_bytes,
+        confidence_threshold=confidence,
+        overlap_threshold=overlap
+    )
+
+    if not res:
+        raise HTTPException(
+            status_code=status.HTTP_502_BAD_GATEWAY,
+            detail={"success": False, "message_en": "Roboflow cloud inference failed or timed out."}
+        )
+
+    return {
+        "success": True,
+        "status": "COMPLETED",
+        "data": res,
+        "timestamp": datetime.utcnow().isoformat()
+    }
 
 
 @app.post("/estimate-price", tags=["Pricing"])

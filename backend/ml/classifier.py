@@ -24,6 +24,11 @@ try:
 except Exception:
     TORCH_AVAILABLE = False
 
+try:
+    from ml.roboflow_service import roboflow_detector
+except Exception:
+    roboflow_detector = None
+
 logger = logging.getLogger("kabadiwala.ml.classifier")
 
 # Path to shared taxonomy and real trained model
@@ -386,6 +391,23 @@ class MaterialClassifier:
         features = self._extract_visual_features(img)
         prob_dict, matched_arch, arch_conf = self._score_categories(features, dhash)
 
+        # Roboflow Serverless Cloud Object Detection (19.6k images, 77 classes, model e-waste-dataset-r0ojc/43)
+        roboflow_data = None
+        if roboflow_detector and roboflow_detector.is_configured():
+            try:
+                roboflow_data = roboflow_detector.detect_objects(image_bytes)
+                if roboflow_data and roboflow_data.get("detected_objects_count", 0) > 0:
+                    primary = roboflow_data.get("primary_detection")
+                    if primary:
+                        rf_target_cid = primary["category_id"]
+                        rf_conf = float(primary["confidence"])
+                        if not matched_arch:
+                            prob_dict[rf_target_cid] = max(prob_dict.get(rf_target_cid, 0.1), rf_conf * 6.0)
+                            total = sum(prob_dict.values())
+                            prob_dict = {k: v / total for k, v in prob_dict.items()}
+            except Exception as e:
+                logger.warning(f"Roboflow detection skipped: {e}")
+
         # Real PyTorch MobileNetV2 Deep Model Inference
         real_pred_class = None
         real_pred_conf = 0.0
@@ -542,6 +564,10 @@ class MaterialClassifier:
             "suggestions": suggestions,
             "real_dataset_class": real_pred_class,
             "real_model_active": bool(self.pytorch_model is not None),
+            "roboflow": roboflow_data,
+            "bounding_boxes": roboflow_data.get("bounding_boxes", []) if roboflow_data else [],
+            "detected_objects_count": roboflow_data.get("detected_objects_count", 0) if roboflow_data else 0,
+            "class_counts": roboflow_data.get("class_counts", {}) if roboflow_data else {},
             "grid_categories": [
                 {
                     "id": c["id"],
