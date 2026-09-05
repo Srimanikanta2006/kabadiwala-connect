@@ -477,6 +477,20 @@ stateDiagram-v2
    ```
    **Result:** `✓ built in 210ms`, 25 modules transformed cleanly into `dist/`.
 
+15. **Vernacular / Low-Literacy UI Pass Test Suite (`test_vernacular_usability.py`):**
+    ```bash
+    $env:PYTHONIOENCODING="utf-8"; .venv\Scripts\python.exe -m pytest backend/test_vernacular_usability.py -v
+    ```
+    **Result:** All 3 verification tests passed (Total 51/51 tests passing across 9 backend test suites):
+    - Test 1: Complete key parity across all 3 translation bundles (`en.json`, `hi.json`, `mr.json` -- 52 identical keys each, zero untranslated English leakages).
+    - Test 2: Unfamiliar low-literacy user simulation ("Babu Rao" persona) successfully executes 5-step icon-first lot creation (`QuickLotIconFlow.jsx`) without reading text.
+    - Test 3: Touch-target accessibility standard (>= 48px) and sunlight-glare high-contrast styling verified across all CSS rule declarations.
+16. **Frontend Production Build (with i18next & Vernacular Pass):**
+    ```bash
+    npm run build
+    ```
+    **Result:** `✓ built in 413ms`, 59 modules transformed cleanly into `dist/`.
+
 ---
 
 ## 5. Implementation Chunks Status
@@ -493,6 +507,7 @@ stateDiagram-v2
 | **Feature** | **Price Board, Trends & Voice (Bhashini TTS)** | `backend/pricing/price_board.py`, `frontend/src/components/PriceBoard.jsx` | **COMPLETE (`5a83e45`)** |
 | **Chunk 10**| **Handover, Traceability & QR Confirmation** | `backend/app/services/handover_service.py`, `frontend/src/components/HandoverTraceability.jsx` | **COMPLETE (`387365a`)** |
 | **Chunk 11**| **Earnings Ledger & Safety Guidance** | `backend/app/services/ledger_service.py`, `safety_service.py`, `EarningsLedger.jsx`, `SafetyGuidance.jsx` | **COMPLETE** |
+| **Pass**    | **Vernacular / Low-Literacy UI Pass (i18n & Icons)**| `frontend/src/i18n/`, `LanguagePicker.jsx`, `QuickLotIconFlow.jsx` | **COMPLETE** |
 | **Chunk 8** | Offline Storage (Dexie.js IndexedDB) & PWA Shell | `frontend/src/db/`, `frontend/src/i18n/` | Queued |
 | **Chunk 9** | Collector Mobile App UI (Stitch screens integration) | `frontend/src/components/collector/` | Queued |
 | **Chunk 12**| Field Research Documentation & Unit Economics Model | `docs/field_research.md`, Unit Economics | Queued |

@@ -1,10 +1,14 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { QRCodeSVG } from 'qrcode.react';
 import './HandoverTraceability.css';
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
 export default function HandoverTraceability() {
+  const { t, i18n } = useTranslation();
+  const currentLang = i18n.language || 'hi';
+
   const [activeRole, setActiveRole] = useState('collector'); // 'collector' | 'recycler'
   
   // Collector Form State
@@ -89,7 +93,7 @@ export default function HandoverTraceability() {
       const data = await res.json();
       setHandoverData(data);
       setSearchRef(data.handover_ref);
-      setMessage({ type: 'success', text: '✅ डिजिटल हैंडओवर व क्यूआर कोड सफलतापूर्वक जनरेट हो गया!' });
+      setMessage({ type: 'success', text: '✅ ' + t('status_confirmed') });
     } catch (err) {
       console.warn('API error, switching to resilient offline simulation:', err);
       const fallbackRef = `KC-TRACE-${new Date().toISOString().slice(0, 10).replace(/-/g, '')}-MH-${Math.random().toString(16).slice(2, 8).toUpperCase()}`;
@@ -120,7 +124,7 @@ export default function HandoverTraceability() {
       };
       setHandoverData(fallbackRecord);
       setSearchRef(fallbackRef);
-      setMessage({ type: 'info', text: '⚡ ऑफलाइन मोड: लोकल सिक्योर क्रिप्टोग्राफ़िक क्यूआर जनरेट किया गया।' });
+      setMessage({ type: 'info', text: '⚡ ' + t('status_pending') });
     } finally {
       setIsLoading(false);
     }
@@ -133,7 +137,7 @@ export default function HandoverTraceability() {
     setConfirmResult(null);
     try {
       const res = await fetch(`${API_BASE}/handover/${encodeURIComponent(searchRef.trim())}`);
-      if (!res.ok) throw new Error('हैंडओवर रिकॉर्ड नहीं मिला');
+      if (!res.ok) throw new Error('Record not found');
       const data = await res.json();
       setFetchedRecord(data);
       setVerifiedWeight(data.traceability?.weight || '');
@@ -142,7 +146,7 @@ export default function HandoverTraceability() {
         setFetchedRecord(handoverData);
         setVerifiedWeight(handoverData.traceability.weight);
       } else {
-        alert('हैंडओवर रिकॉर्ड नहीं मिला। कृपया सही टोकन दर्ज करें।');
+        alert(t('search_ref_placeholder'));
       }
     } finally {
       setIsLoading(false);
@@ -169,7 +173,6 @@ export default function HandoverTraceability() {
       if (!res.ok) throw new Error('Confirmation failed on server');
       const result = await res.json();
       setConfirmResult(result);
-      // Also update local record state if matching
       if (handoverData && handoverData.handover_ref === searchRef.trim()) {
         setHandoverData((prev) => ({
           ...prev,
@@ -221,7 +224,7 @@ export default function HandoverTraceability() {
     if ('speechSynthesis' in window) {
       window.speechSynthesis.cancel();
       const utterance = new SpeechSynthesisUtterance(text);
-      utterance.lang = 'hi-IN';
+      utterance.lang = currentLang === 'mr' ? 'mr-IN' : (currentLang === 'hi' ? 'hi-IN' : 'en-IN');
       utterance.rate = 0.95;
       window.speechSynthesis.speak(utterance);
     }
@@ -231,11 +234,9 @@ export default function HandoverTraceability() {
     <div className="handover-container">
       {/* Header */}
       <header className="handover-header">
-        <div className="badge-pill">🔒 Chunk 10 • CPCB Digital Traceability</div>
-        <h1 className="handover-title">Handover, Traceability & QR Confirmation</h1>
-        <p className="handover-subtitle">
-          डिजिटल हैंडओवर, क्रिप्टोग्राफ़िक क्यूआर कोड व अधिकृत रीसायकलर ईपीआर सत्यापन
-        </p>
+        <div className="badge-pill">🔒 {t('handover_badge')}</div>
+        <h1 className="handover-title">{t('handover_title')}</h1>
+        <p className="handover-subtitle">{t('handover_subtitle')}</p>
 
         {/* Role Selector Tabs */}
         <div className="role-nav">
@@ -243,13 +244,13 @@ export default function HandoverTraceability() {
             className={`role-btn ${activeRole === 'collector' ? 'active' : ''}`}
             onClick={() => setActiveRole('collector')}
           >
-            📱 कबाड़ीवाला हैंडओवर (Collector QR)
+            {t('role_collector')}
           </button>
           <button
             className={`role-btn ${activeRole === 'recycler' ? 'active' : ''}`}
             onClick={() => setActiveRole('recycler')}
           >
-            🏭 अधिकृत रीसायकलर सत्यापन (Recycler Weighbridge)
+            {t('role_recycler')}
           </button>
         </div>
       </header>
@@ -265,10 +266,10 @@ export default function HandoverTraceability() {
         <div className="collector-view-grid">
           {/* Left: Lot Confirmation Form */}
           <div className="card form-card">
-            <h2 className="card-title">📦 लॉट पुष्टि व हैंडओवर विवरण</h2>
+            <h2 className="card-title">{t('lot_details')}</h2>
 
             <div className="form-group">
-              <label>सामग्री श्रेणी (Material Category)</label>
+              <label>{t('material_category')}</label>
               <select
                 value={category}
                 onChange={(e) => {
@@ -277,16 +278,16 @@ export default function HandoverTraceability() {
                   setQuotedPrice(rate * weight);
                 }}
               >
-                <option value="PCB">उच्च श्रेणी पीसीबी (High-Grade PCB Motherboards)</option>
-                <option value="CABLES">इन्सुलेटेड तांबे के तार (Insulated Copper Cables)</option>
-                <option value="BATTERIES">लेड-एसिड बैटरी (Lead-Acid Batteries)</option>
-                <option value="DISPLAYS">एलसीडी/एलईडी डिस्प्ले (Flat LCD Panels)</option>
+                <option value="PCB">PCB (Circuit Boards / मदरबोर्ड)</option>
+                <option value="CABLES">CABLES (Copper Wire / तांबे के तार)</option>
+                <option value="BATTERIES">BATTERIES (Lead-Acid & Li-Ion / बैटरी)</option>
+                <option value="DISPLAYS">DISPLAYS (LCD & CRT Panels / स्क्रीन)</option>
               </select>
             </div>
 
             <div className="form-row">
               <div className="form-group">
-                <label>वजन / Weight (kg)</label>
+                <label>{t('weight_kg')}</label>
                 <input
                   type="number"
                   step="0.1"
@@ -301,7 +302,7 @@ export default function HandoverTraceability() {
                 />
               </div>
               <div className="form-group">
-                <label>अनुमानित मूल्य / Estimated ₹</label>
+                <label>{t('estimated_inr')}</label>
                 <input
                   type="number"
                   value={quotedPrice}
@@ -313,9 +314,9 @@ export default function HandoverTraceability() {
             {/* GPS Capture Display */}
             <div className="gps-box">
               <div className="gps-header">
-                <span>📍 हैंडओवर जीपीएस निर्देशांक (GPS Coordinate)</span>
+                <span>📍 {t('gps_coord')}</span>
                 <button className="refresh-gps-btn" onClick={captureLocation} disabled={isLocating}>
-                  {isLocating ? 'ट्रेसिंग...' : 'ताज़ा करें'}
+                  {isLocating ? t('tracing') : t('refresh_gps')}
                 </button>
               </div>
               <div className="gps-values">
@@ -330,13 +331,13 @@ export default function HandoverTraceability() {
               onClick={handleInitiateHandover}
               disabled={isLoading}
             >
-              {isLoading ? 'हैंडओवर जनरेट हो रहा है...' : '✨ हैंडओवर क्यूआर बनाएं (Generate QR)'}
+              {isLoading ? t('generating') : t('btn_generate_qr')}
             </button>
           </div>
 
           {/* Right: Verifiable QR Code & Traceability Card */}
           <div className="card qr-card">
-            <h2 className="card-title">🛡️ डिजिटल हैंडओवर पास (Digital Pass)</h2>
+            <h2 className="card-title">{t('digital_pass')}</h2>
 
             {handoverData ? (
               <div className="qr-preview-area">
@@ -354,7 +355,7 @@ export default function HandoverTraceability() {
                 </div>
 
                 <div className="token-display">
-                  <span className="token-label">हैंडओवर संदर्भ टोकन (Handover Ref):</span>
+                  <span className="token-label">{t('handover_ref')}:</span>
                   <strong className="token-code">{handoverData.handover_ref}</strong>
                 </div>
 
@@ -365,14 +366,14 @@ export default function HandoverTraceability() {
                     }`}
                   >
                     {handoverData.traceability?.status === 'CONFIRMED'
-                      ? '✅ CONFIRMED (रीसायकलर द्वारा सत्यापित)'
-                      : '⏳ PENDING CONFIRMATION (सत्यापन बाकी)'}
+                      ? t('status_confirmed')
+                      : t('status_pending')}
                   </span>
                 </div>
 
                 {handoverData.traceability?.cpcb_certificate_id && (
                   <div className="cert-box">
-                    <span className="cert-label">आधिकारिक CPCB ईपीआर प्रमाण पत्र:</span>
+                    <span className="cert-label">{t('cpcb_cert_label')}:</span>
                     <strong className="cert-id">
                       {handoverData.traceability.cpcb_certificate_id}
                     </strong>
@@ -381,23 +382,23 @@ export default function HandoverTraceability() {
 
                 <div className="meta-grid">
                   <div>
-                    <span>वजन:</span>
+                    <span>{t('weight_kg')}:</span>
                     <strong>{handoverData.traceability?.weight} kg</strong>
                   </div>
                   <div>
-                    <span>जीपीएस:</span>
+                    <span>GPS:</span>
                     <strong>
                       {handoverData.traceability?.gps_lat}, {handoverData.traceability?.gps_lng}
                     </strong>
                   </div>
                   <div>
-                    <span>संग्राहक:</span>
+                    <span>ID:</span>
                     <strong>{handoverData.qr_payload?.collector_id || 'col_test_001'}</strong>
                   </div>
                   <div>
-                    <span>समय:</span>
+                    <span>Time:</span>
                     <strong>
-                      {new Date(handoverData.traceability?.timestamp).toLocaleTimeString('hi-IN')}
+                      {new Date(handoverData.traceability?.timestamp).toLocaleTimeString()}
                     </strong>
                   </div>
                 </div>
@@ -406,18 +407,20 @@ export default function HandoverTraceability() {
                   className="voice-btn"
                   onClick={() =>
                     speakText(
-                      `हैंडओवर टोकन ${handoverData.handover_ref} जनरेट हो गया है। कुल वजन ${handoverData.traceability?.weight} किलो है। रीसायकलर को क्यूआर कोड स्कैन कराएं।`
+                      currentLang === 'mr'
+                        ? `हस्तांतरण टोकन ${handoverData.handover_ref}. वजन ${handoverData.traceability?.weight} किलो.`
+                        : `हैंडओवर टोकन ${handoverData.handover_ref}. कुल वजन ${handoverData.traceability?.weight} किलो.`
                     )
                   }
                 >
-                  🔊 टोकन विवरण सुनें (Listen Audio)
+                  {t('btn_listen_token')}
                 </button>
               </div>
             ) : (
               <div className="empty-qr-placeholder">
                 <div className="placeholder-icon">🔲</div>
-                <p>लॉट विवरण भरकर "हैंडओवर क्यूआर बनाएं" पर टैप करें।</p>
-                <small>क्रिप्टोग्राफिक सुरक्षित क्यूआर कोड व सीपीसीबी ट्रेसेबिलिटी रिकॉर्ड यहाँ दिखाई देगा।</small>
+                <p>{t('placeholder_qr')}</p>
+                <small>{t('placeholder_qr_sub')}</small>
               </div>
             )}
           </div>
@@ -428,16 +431,14 @@ export default function HandoverTraceability() {
       {activeRole === 'recycler' && (
         <div className="recycler-view">
           <div className="card recycler-card">
-            <h2 className="card-title">🏭 अधिकृत रीसायकलर वेब्रिज सत्यापन (Recycler Portal)</h2>
-            <p className="card-desc">
-              कबाड़ीवाले का क्यूआर कोड स्कैन करें अथवा हैंडओवर संदर्भ संख्या दर्ज करके वास्तविक वेब्रिज वजन सत्यापित करें।
-            </p>
+            <h2 className="card-title">{t('role_recycler')}</h2>
+            <p className="card-desc">{t('handover_subtitle')}</p>
 
             {/* Search Token Bar */}
             <div className="search-bar-row">
               <input
                 type="text"
-                placeholder="उदा. KC-TRACE-20260905-MH-XXXXXX"
+                placeholder={t('search_ref_placeholder')}
                 value={searchRef}
                 onChange={(e) => setSearchRef(e.target.value)}
               />
@@ -446,7 +447,7 @@ export default function HandoverTraceability() {
                 onClick={handleSearchRecord}
                 disabled={isLoading || !searchRef.trim()}
               >
-                {isLoading ? 'खोज रहे हैं...' : '🔍 रिकॉर्ड लोड करें'}
+                {isLoading ? t('loading') : t('btn_load_record')}
               </button>
             </div>
 
@@ -455,28 +456,28 @@ export default function HandoverTraceability() {
               <div className="confirmation-zone">
                 <div className="record-summary-banner">
                   <div className="summary-item">
-                    <span>संदर्भ टोकन:</span>
+                    <span>{t('ref_token')}:</span>
                     <strong>{fetchedRecord.traceability?.handover_ref || searchRef}</strong>
                   </div>
                   <div className="summary-item">
-                    <span>लॉट का दर्ज वजन:</span>
+                    <span>{t('recorded_weight')}:</span>
                     <strong>{fetchedRecord.traceability?.weight} kg</strong>
                   </div>
                   <div className="summary-item">
-                    <span>वर्तमान स्थिति:</span>
+                    <span>{t('current_status')}:</span>
                     <span
                       className={`status-chip ${
                         fetchedRecord.traceability?.status === 'CONFIRMED' ? 'confirmed' : 'pending'
                       }`}
                     >
-                      {fetchedRecord.traceability?.status || 'PENDING_CONFIRMATION'}
+                      {fetchedRecord.traceability?.status || t('status_pending')}
                     </span>
                   </div>
                 </div>
 
                 <div className="weighbridge-inputs">
                   <div className="form-group">
-                    <label>🏭 अधिकृत रीसायकलर (Authorized Recycler)</label>
+                    <label>{t('auth_recycler')}</label>
                     <select value={recyclerId} onChange={(e) => setRecyclerId(e.target.value)}>
                       <option value="rec_ecorecycle_01">
                         EcoRecycle India Pvt Ltd (Ecoreco) - CPCB/E-WASTE/REG/MH/2023/1042
@@ -484,15 +485,12 @@ export default function HandoverTraceability() {
                       <option value="rec_greencircle_02">
                         GreenCircle Urban Recyclers - CPCB/E-WASTE/REG/MH/2022/0891
                       </option>
-                      <option value="rec_mumbai_ewaste_03">
-                        Mumbai Central E-Waste Facility - CPCB/E-WASTE/REG/MH/2024/0119
-                      </option>
                     </select>
                   </div>
 
                   <div className="form-row">
                     <div className="form-group">
-                      <label>⚖️ वेब्रिज वास्तविक वजन / Verified Weight (kg)</label>
+                      <label>{t('verified_weight_label')}</label>
                       <input
                         type="number"
                         step="0.05"
@@ -502,10 +500,10 @@ export default function HandoverTraceability() {
                     </div>
 
                     <div className="form-group">
-                      <label>💳 भुगतान माध्यम (Payment Mode)</label>
+                      <label>{t('payment_mode')}</label>
                       <select value={paymentMode} onChange={(e) => setPaymentMode(e.target.value)}>
-                        <option value="CASH">💵 नकद भुगतान (Immediate Cash Handover)</option>
-                        <option value="UPI">📱 त्वरित यूपीआई (Instant Bank UPI)</option>
+                        <option value="CASH">{t('mode_cash')}</option>
+                        <option value="UPI">{t('mode_upi')}</option>
                       </select>
                     </div>
                   </div>
@@ -516,9 +514,7 @@ export default function HandoverTraceability() {
                   onClick={handleConfirmReceipt}
                   disabled={isConfirming}
                 >
-                  {isConfirming
-                    ? 'सत्यापन हो रहा है...'
-                    : '✅ रसीद स्वीकारें व CPCB EPR प्रमाण पत्र जारी करें (Confirm Receipt)'}
+                  {isConfirming ? t('confirming') : t('btn_confirm_receipt')}
                 </button>
               </div>
             )}
@@ -527,36 +523,34 @@ export default function HandoverTraceability() {
             {confirmResult && (
               <div className="audit-certificate-card">
                 <div className="cert-header-ribbon">
-                  <span>🏛️ CENTRAL POLLUTION CONTROL BOARD (CPCB)</span>
-                  <span>E-WASTE (MANAGEMENT) RULES 2022 COMPLIANT</span>
+                  <span>🏛️ {t('cpcb_header_title')}</span>
+                  <span>{t('cpcb_compliance_text')}</span>
                 </div>
                 <div className="cert-body">
-                  <h3 className="cert-success-title">✅ आधिकारिक हैंडओवर व ईपीआर ऑडिट सत्यापित!</h3>
+                  <h3 className="cert-success-title">{t('audit_success_title')}</h3>
                   <div className="cert-details-grid">
                     <div>
-                      <span>ईपीआर ऑडिट प्रमाणपत्र संख्या:</span>
+                      <span>{t('cert_num_label')}</span>
                       <strong className="cpcb-code">{confirmResult.cpcb_certificate_id}</strong>
                     </div>
                     <div>
-                      <span>सत्यापित वेब्रिज वजन:</span>
+                      <span>{t('verified_weight_display')}</span>
                       <strong>{confirmResult.verified_weight} kg</strong>
                     </div>
                     <div>
-                      <span>अंतिम भुगतान राशि:</span>
+                      <span>{t('final_amount_label')}</span>
                       <strong className="inr-highlight">
                         ₹{confirmResult.transaction?.final_price || confirmResult.verified_weight * 240}
                       </strong>
                     </div>
                     <div>
-                      <span>भुगतान स्थिति:</span>
+                      <span>{t('payment_status_label')}</span>
                       <strong>
-                        {confirmResult.transaction?.payment_status || 'PAID_CASH_CONFIRMED'}
+                        {confirmResult.transaction?.payment_status || t('cash_paid')}
                       </strong>
                     </div>
                   </div>
-                  <p className="audit-disclaimer">
-                    यह डिजिटल रिकॉर्ड केंद्रीय प्रदूषण नियंत्रण बोर्ड (CPCB) के EPR पोर्टल पर कानूनी रूप से दर्ज व ट्रैसेबल है।
-                  </p>
+                  <p className="audit-disclaimer">{t('audit_disclaimer')}</p>
                 </div>
               </div>
             )}

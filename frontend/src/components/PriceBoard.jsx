@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import './PriceBoard.css';
 
 // Fallback rates if backend is unreachable or offline
@@ -194,7 +195,6 @@ function Sparkline({ points = [], trend = "STABLE", width = 64, height = 26 }) {
         strokeLinecap="round"
         strokeLinejoin="round"
       />
-      {/* Circle highlight at latest point */}
       <circle
         cx={coords[coords.length - 1].split(",")[0]}
         cy={coords[coords.length - 1].split(",")[1]}
@@ -206,8 +206,10 @@ function Sparkline({ points = [], trend = "STABLE", width = 64, height = 26 }) {
 }
 
 export default function PriceBoard() {
+  const { t, i18n } = useTranslation();
+  const currentLanguage = i18n.language || 'hi';
+
   const [location, setLocation] = useState("IN-MH-MUM");
-  const [language, setLanguage] = useState("hi");
   const [categories, setCategories] = useState(FALLBACK_CATEGORIES);
   const [loading, setLoading] = useState(false);
   const [activeSpeakingId, setActiveSpeakingId] = useState(null);
@@ -216,7 +218,7 @@ export default function PriceBoard() {
   const currentAudioRef = useRef(null);
 
   // Fetch real-time price board from FastAPI backend
-  const fetchPriceBoard = async (loc = location, lang = language) => {
+  const fetchPriceBoard = async (loc = location, lang = currentLanguage) => {
     setLoading(true);
     try {
       const res = await fetch(`http://localhost:8000/prices/board?location=${loc}&language=${lang}`);
@@ -237,14 +239,13 @@ export default function PriceBoard() {
   };
 
   useEffect(() => {
-    fetchPriceBoard(location, language);
-  }, [location, language]);
+    fetchPriceBoard(location, currentLanguage);
+  }, [location, currentLanguage]);
 
   // Voice playback handler: calls Bhashini TTS with Web Speech API native fallback
   const speakPrice = async (category) => {
-    const textToSpeak = category.spoken_texts?.[language] || category.spoken_texts?.hi || `${category.name_hi} भाव ₹${category.current_rate}`;
+    const textToSpeak = category.spoken_texts?.[currentLanguage] || category.spoken_texts?.hi || `${category.name_hi} भाव ₹${category.current_rate}`;
 
-    // Stop any currently playing audio
     if (currentAudioRef.current) {
       currentAudioRef.current.pause();
       currentAudioRef.current = null;
@@ -256,11 +257,10 @@ export default function PriceBoard() {
     setActiveSpeakingId(category.material_id);
 
     try {
-      // 1. Try Bhashini Indic TTS endpoint
       const response = await fetch("http://localhost:8000/tts/synthesize", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text: textToSpeak, language: language })
+        body: JSON.stringify({ text: textToSpeak, language: currentLanguage })
       });
 
       if (response.ok) {
@@ -269,17 +269,16 @@ export default function PriceBoard() {
           const audio = new Audio(`data:audio/wav;base64,${data.audio_base64}`);
           currentAudioRef.current = audio;
           audio.onended = () => setActiveSpeakingId(null);
-          audio.onerror = () => fallbackWebSpeech(textToSpeak, language, category.material_id);
+          audio.onerror = () => fallbackWebSpeech(textToSpeak, currentLanguage, category.material_id);
           await audio.play();
           return;
         }
       }
     } catch (e) {
-      console.log("Using browser SpeechSynthesis fallback");
+      // Fallback
     }
 
-    // 2. Native Web Speech API fallback (works 100% offline on Android & Desktop)
-    fallbackWebSpeech(textToSpeak, language, category.material_id);
+    fallbackWebSpeech(textToSpeak, currentLanguage, category.material_id);
   };
 
   const fallbackWebSpeech = (text, lang, catId) => {
@@ -288,8 +287,8 @@ export default function PriceBoard() {
       return;
     }
     const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = lang === "hi" ? "hi-IN" : (lang === "mr" ? "mr-IN" : "en-IN");
-    utterance.rate = 0.95; // Slightly slower for clear rural comprehension
+    utterance.lang = lang === "mr" ? "mr-IN" : (lang === "hi" ? "hi-IN" : "en-IN");
+    utterance.rate = 0.95;
     utterance.pitch = 1.0;
 
     utterance.onend = () => setActiveSpeakingId(null);
@@ -298,10 +297,9 @@ export default function PriceBoard() {
     window.speechSynthesis.speak(utterance);
   };
 
-  // Read entire price board sequentially
   const speakAllPrices = () => {
-    const combined = categories.map(c => c.spoken_texts?.[language] || c.name_hi).join(" ... ");
-    fallbackWebSpeech(combined, language, "all");
+    const combined = categories.map(c => c.spoken_texts?.[currentLanguage] || c.name_hi).join(" ... ");
+    fallbackWebSpeech(combined, currentLanguage, "all");
   };
 
   return (
@@ -309,58 +307,23 @@ export default function PriceBoard() {
       {/* Header Bar */}
       <header className="priceboard-header">
         <div className="header-brand">
-          <div className="brand-badge">⚡ LIVE MANDI</div>
-          <h1 className="header-title">
-            {language === "hi" && "दैनिक कबाड़ भाव सूची"}
-            {language === "mr" && "दैनिक स्क्रॅप दर पत्रक"}
-            {language === "en" && "Daily Scrap Price Board"}
-          </h1>
-          <p className="header-subtitle">
-            {language === "hi" && "सरकारी सीपीसीबी दरों पर आधारित पारदर्शी मूल्य"}
-            {language === "mr" && "अधिकृत सीपीसीबी नियमांनुसार पारदर्शक दर"}
-            {language === "en" && "Transparent rates aligned with CPCB E-Waste Rules"}
-          </p>
+          <div className="brand-badge">⚡ {t('priceboard_badge')}</div>
+          <h1 className="header-title">{t('priceboard_title')}</h1>
+          <p className="header-subtitle">{t('priceboard_subtitle')}</p>
         </div>
 
-        {/* Controls: Location & Language */}
+        {/* Location Selector */}
         <div className="priceboard-controls">
           <div className="control-group">
-            <label className="control-label">📍 {language === "hi" ? "मंडी स्थान" : (language === "mr" ? "बाजारपेठ" : "Location")}</label>
+            <label className="control-label">📍 {t('priceboard_location')}</label>
             <select
               className="control-select"
               value={location}
               onChange={(e) => setLocation(e.target.value)}
             >
-              <option value="IN-MH-MUM">मुंबई - धारावी / कुर्ला</option>
-              <option value="IN-MH-PUN">पुणे - पिंपरी / भोसरी</option>
+              <option value="IN-MH-MUM">मुंबई - धारावी / कुर्ला (Dharavi Scrap Mandi)</option>
+              <option value="IN-MH-PUN">पुणे - पिंपरी / भोसरी (Bhosari Hub)</option>
             </select>
-          </div>
-
-          <div className="control-group">
-            <label className="control-label">🌐 {language === "hi" ? "भाषा" : (language === "mr" ? "भाषा" : "Language")}</label>
-            <div className="lang-pill-group">
-              <button
-                type="button"
-                className={`lang-pill ${language === 'hi' ? 'active' : ''}`}
-                onClick={() => setLanguage('hi')}
-              >
-                हिंदी
-              </button>
-              <button
-                type="button"
-                className={`lang-pill ${language === 'mr' ? 'active' : ''}`}
-                onClick={() => setLanguage('mr')}
-              >
-                मराठी
-              </button>
-              <button
-                type="button"
-                className={`lang-pill ${language === 'en' ? 'active' : ''}`}
-                onClick={() => setLanguage('en')}
-              >
-                EN
-              </button>
-            </div>
           </div>
         </div>
 
@@ -377,9 +340,8 @@ export default function PriceBoard() {
             type="button"
             className={`listen-all-btn ${activeSpeakingId === 'all' ? 'playing' : ''}`}
             onClick={speakAllPrices}
-            title="सभी भाव बोलकर सुनाएं"
           >
-            📢 {language === "hi" ? "सभी भाव सुनें" : (language === "mr" ? "सर्व दर ऐका" : "Listen All")}
+            📢 {t('priceboard_listen')}
           </button>
         </div>
       </header>
@@ -391,6 +353,10 @@ export default function PriceBoard() {
           const isUp = item.trend === "UP";
           const isDown = item.trend === "DOWN";
 
+          const displayName = currentLanguage === "hi"
+            ? item.name_hi
+            : (currentLanguage === "mr" ? item.name_mr : item.name_en);
+
           return (
             <article
               key={item.material_id}
@@ -400,19 +366,15 @@ export default function PriceBoard() {
               <div className="rate-col-material">
                 <div className="mat-icon-box">{item.icon}</div>
                 <div className="mat-name-block">
-                  <h3 className="mat-primary-name">
-                    {language === "hi" ? item.name_hi : (language === "mr" ? item.name_mr : item.name_en)}
-                  </h3>
-                  <span className="mat-secondary-name">
-                    {language === "en" ? item.name_hi : item.name_en}
-                  </span>
+                  <h3 className="mat-primary-name">{displayName}</h3>
+                  <span className="mat-secondary-name">{item.material_id}</span>
                 </div>
               </div>
 
               {/* Sparkline Visual */}
               <div className="rate-col-sparkline" title="7-दिवसीय रुझान ग्राफ">
                 <Sparkline points={item.sparkline} trend={item.trend} width={72} height={26} />
-                <span className="sparkline-subtext">7 दिन</span>
+                <span className="sparkline-subtext">7 {currentLanguage === 'en' ? 'days' : 'दिन'}</span>
               </div>
 
               {/* Trend Badge */}
@@ -437,14 +399,13 @@ export default function PriceBoard() {
                 </div>
               </div>
 
-              {/* Speaker Voice Action */}
+              {/* Speaker Voice Action (>= 48px touch target) */}
               <div className="rate-col-voice">
                 <button
                   type="button"
                   className={`voice-speaker-btn ${isSpeaking ? 'is-active-pulse' : ''}`}
                   onClick={() => speakPrice(item)}
-                  aria-label={`बोलकर सुनाएं: ${item.name_hi} का भाव`}
-                  title={item.active_speech || "भाव सुनें"}
+                  aria-label={`${t('priceboard_listen')}: ${displayName}`}
                 >
                   {isSpeaking ? (
                     <span className="sound-wave">
@@ -467,8 +428,8 @@ export default function PriceBoard() {
         <div className="regulatory-seal">
           <span className="seal-icon">🛡️</span>
           <div className="seal-text">
-            <strong>ई-अपशिष्ट (प्रबंधन) नियम 2022 के अनुसार</strong>
-            <p>अधिकृत रिसाइक्लर्स द्वारा न्यूनतम गारंटीकृत मूल्य। बिचौलियों के शोषण से मुक्ति।</p>
+            <strong>{t('cpcb_compliance_text')}</strong>
+            <p>{t('audit_disclaimer')}</p>
           </div>
         </div>
       </footer>

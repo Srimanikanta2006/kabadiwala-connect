@@ -1,9 +1,13 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import './EarningsLedger.css';
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
 export default function EarningsLedger() {
+  const { t, i18n } = useTranslation();
+  const currentLang = i18n.language || 'hi';
+
   const [collectorId, setCollectorId] = useState('col_test_001');
   const [ledger, setLedger] = useState(null);
   const [filter, setFilter] = useState('all'); // 'all' | 'completed' | 'pending'
@@ -23,7 +27,6 @@ export default function EarningsLedger() {
       setLedger(data);
     } catch (err) {
       console.warn('Backend unavailable, using resilient fallback ledger:', err);
-      // Resilient fallback dataset for demonstration
       setLedger({
         success: true,
         collector_id: id,
@@ -90,7 +93,7 @@ export default function EarningsLedger() {
           }
         ],
         spoken_summaries: {
-          hi: 'कुल प्राप्त कमाई ₹4,945 है। ₹1,850 का बकाया भुगतान बाकी है जो नकद मिलेगा।',
+          hi: 'कुल प्राप्त कमाई ₹4,945 है। ₹1,850 का बकाया बाकी है जो नकद मिलेगा।',
           mr: 'एकूण मिळालेली कमाई ₹4,945 आहे. ₹1,850 येणे बाकी आहे.'
         }
       });
@@ -107,12 +110,11 @@ export default function EarningsLedger() {
         body: JSON.stringify({ final_amount: amount })
       });
       if (!res.ok) throw new Error('Cash settlement failed');
-      setActionMessage({ type: 'success', text: '💵 ₹' + amount + ' नकद भुगतान सफलतापूर्वक दर्ज हुआ!' });
+      setActionMessage({ type: 'success', text: `💵 ₹${amount} ${t('cash_paid')}!` });
       fetchLedger(collectorId);
     } catch (err) {
       console.warn('Local fallback cash settlement:', err);
-      setActionMessage({ type: 'success', text: '💵 ₹' + amount + ' नकद भुगतान दर्ज हुआ (लोकल सुरक्षित मोड)!' });
-      // Optimistic update
+      setActionMessage({ type: 'success', text: `💵 ₹${amount} ${t('cash_paid')} (Local Mode)!` });
       setLedger((prev) => {
         if (!prev) return prev;
         const pendingItem = prev.pending_dues.find((t) => t.id === txId);
@@ -144,7 +146,7 @@ export default function EarningsLedger() {
     if ('speechSynthesis' in window) {
       window.speechSynthesis.cancel();
       const utterance = new SpeechSynthesisUtterance(text);
-      utterance.lang = 'hi-IN';
+      utterance.lang = currentLang === 'mr' ? 'mr-IN' : (currentLang === 'hi' ? 'hi-IN' : 'en-IN');
       utterance.rate = 0.95;
       window.speechSynthesis.speak(utterance);
     }
@@ -157,7 +159,6 @@ export default function EarningsLedger() {
     total_volume_kg: 0
   };
 
-  // Filter transactions
   const displayedTransactions = (() => {
     if (!ledger) return [];
     if (filter === 'completed') return ledger.completed_transactions || [];
@@ -165,21 +166,23 @@ export default function EarningsLedger() {
     return [...(ledger.pending_dues || []), ...(ledger.completed_transactions || [])];
   })();
 
+  const summarySpeech = currentLang === 'mr'
+    ? (ledger?.spoken_summaries?.mr || `एकूण कमाई ₹${metrics.total_completed_earnings_inr}.`)
+    : (ledger?.spoken_summaries?.hi || `कुल कमाई ₹${metrics.total_completed_earnings_inr}.`);
+
   return (
     <div className="ledger-container">
       {/* Header */}
       <header className="ledger-header">
-        <div className="ledger-badge">💰 Chunk 11 • Collector Cash-First Ledger</div>
-        <h1 className="ledger-title">कबाड़ीवाला खाता व कमाई बही (Earnings Ledger)</h1>
-        <p className="ledger-subtitle">
-          नकद व डिजिटल भुगतान का पारदर्शी हिसाब • लंबित बकाया व प्राप्त कमाई की अलग सूची
-        </p>
+        <div className="ledger-badge">💰 {t('ledger_badge')}</div>
+        <h1 className="ledger-title">{t('ledger_title')}</h1>
+        <p className="ledger-subtitle">{t('ledger_subtitle')}</p>
 
         <div className="collector-switch-row">
-          <label>संग्राहक प्रोफ़ाइल (Collector Profile):</label>
+          <label>{t('collector_profile')}:</label>
           <select value={collectorId} onChange={(e) => setCollectorId(e.target.value)}>
-            <option value="col_test_001">Ramzan Ali (धारावी 13वां कंपाउंड, मुंबई) - col_test_001</option>
-            <option value="col_test_002">Suresh Shinde (कुर्ला वेस्ट कबाड़ मंडी) - col_test_002</option>
+            <option value="col_test_001">Ramzan Ali (Dharavi 13th Compound) - col_test_001</option>
+            <option value="col_test_002">Suresh Shinde (Kurla Scrap Mandi) - col_test_002</option>
           </select>
         </div>
       </header>
@@ -196,9 +199,9 @@ export default function EarningsLedger() {
         <div className="metric-card completed-card">
           <div className="metric-icon">💵</div>
           <div className="metric-content">
-            <span className="metric-label">प्राप्त कुल कमाई (Completed Earnings)</span>
+            <span className="metric-label">{t('completed_earnings')}</span>
             <div className="metric-val">₹{metrics.total_completed_earnings_inr.toLocaleString('en-IN')}</div>
-            <span className="metric-sub">100% नकद / बैंक में प्राप्त</span>
+            <span className="metric-sub">{t('completed_earnings_sub')}</span>
           </div>
         </div>
 
@@ -206,9 +209,9 @@ export default function EarningsLedger() {
         <div className="metric-card pending-card">
           <div className="metric-icon">⏳</div>
           <div className="metric-content">
-            <span className="metric-label">लंबित बकाया राशि (Pending Dues)</span>
+            <span className="metric-label">{t('pending_dues')}</span>
             <div className="metric-val text-amber">₹{metrics.total_pending_dues_inr.toLocaleString('en-IN')}</div>
-            <span className="metric-sub">सत्यापन / उठाई के बाद देय</span>
+            <span className="metric-sub">{t('pending_dues_sub')}</span>
           </div>
         </div>
 
@@ -216,9 +219,9 @@ export default function EarningsLedger() {
         <div className="metric-card cash-card">
           <div className="metric-icon">🤝</div>
           <div className="metric-content">
-            <span className="metric-label">नकद भुगतान अंश (Cash Settled)</span>
+            <span className="metric-label">{t('cash_settled')}</span>
             <div className="metric-val text-emerald">₹{metrics.total_cash_earnings_inr.toLocaleString('en-IN')}</div>
-            <span className="metric-sub">बिना किसी डिजिटल रुकावट के</span>
+            <span className="metric-sub">{t('cash_settled_sub')}</span>
           </div>
         </div>
 
@@ -226,9 +229,9 @@ export default function EarningsLedger() {
         <div className="metric-card weight-card">
           <div className="metric-icon">⚖️</div>
           <div className="metric-content">
-            <span className="metric-label">कुल बिक्री वजन (Total Volume)</span>
+            <span className="metric-label">{t('total_volume')}</span>
             <div className="metric-val">{metrics.total_volume_kg} kg</div>
-            <span className="metric-sub">औपचारिक रीसाइक्लिंग चेन में</span>
+            <span className="metric-sub">{t('total_volume_sub')}</span>
           </div>
         </div>
       </div>
@@ -236,47 +239,47 @@ export default function EarningsLedger() {
       {/* Voice Summary Ribbon */}
       <div className="voice-summary-ribbon">
         <div className="voice-text">
-          <span>🔊 <strong>खाता सारांश (Hindi):</strong></span>
-          <em>{ledger?.spoken_summaries?.hi || 'खाता विवरण लोड हो रहा है...'}</em>
+          <span>🔊 <strong>{t('ledger_summary_label')}:</strong></span>
+          <em>{summarySpeech}</em>
         </div>
         <button
           className="voice-play-btn"
-          onClick={() => speakText(ledger?.spoken_summaries?.hi || 'खाता विवरण')}
+          onClick={() => speakText(summarySpeech)}
         >
-          🔊 सुनें (Listen)
+          {t('btn_listen')}
         </button>
       </div>
 
       {/* Filter Tabs & Transactions Table */}
       <div className="ledger-card">
         <div className="table-nav-row">
-          <h2 className="section-title">📜 लेनदेन इतिहास (Transaction History)</h2>
+          <h2 className="section-title">{t('tx_history_title')}</h2>
 
           <div className="filter-pill-group">
             <button
               className={`filter-btn ${filter === 'all' ? 'active' : ''}`}
               onClick={() => setFilter('all')}
             >
-              सभी लेनदेन ({ledger?.metrics?.all_transaction_count || 0})
+              {t('filter_all')} ({ledger?.metrics?.all_transaction_count || 0})
             </button>
             <button
               className={`filter-btn ${filter === 'completed' ? 'active' : ''}`}
               onClick={() => setFilter('completed')}
             >
-              ✅ पूर्ण भुगतान ({ledger?.metrics?.completed_transaction_count || 0})
+              {t('filter_completed')} ({ledger?.metrics?.completed_transaction_count || 0})
             </button>
             <button
               className={`filter-btn ${filter === 'pending' ? 'active' : ''}`}
               onClick={() => setFilter('pending')}
             >
-              ⏳ बकाया / लंबित ({ledger?.metrics?.pending_transaction_count || 0})
+              {t('filter_pending')} ({ledger?.metrics?.pending_transaction_count || 0})
             </button>
           </div>
         </div>
 
         {displayedTransactions.length === 0 ? (
           <div className="empty-ledger">
-            <p>इस श्रेणी में कोई लेनदेन नहीं मिला।</p>
+            <p>{t('no_tx_found')}</p>
           </div>
         ) : (
           <div className="tx-list">
@@ -289,20 +292,14 @@ export default function EarningsLedger() {
                     <div>
                       <div className="tx-recycler">{tx.recycler_name || 'Authorized Recycler Hub'}</div>
                       <div className="tx-date">
-                        {tx.created_at ? new Date(tx.created_at).toLocaleDateString('hi-IN', {
-                          day: 'numeric',
-                          month: 'short',
-                          year: 'numeric',
-                          hour: '2-digit',
-                          minute: '2-digit'
-                        }) : 'आज'}
+                        {tx.created_at ? new Date(tx.created_at).toLocaleDateString() : 'Today'}
                       </div>
                     </div>
                   </div>
 
                   <div className="tx-mid">
-                    <div>वजन: <strong>{tx.weight} kg</strong></div>
-                    <div>अनुमानित: ₹{tx.quoted_price}</div>
+                    <div>{t('weight_kg')}: <strong>{tx.weight} kg</strong></div>
+                    <div>{t('estimated_inr')}: ₹{tx.quoted_price}</div>
                   </div>
 
                   <div className="tx-right">
@@ -312,7 +309,7 @@ export default function EarningsLedger() {
 
                     <div className="tx-status-col">
                       <span className={`status-tag ${isPending ? 'pending-tag' : 'paid-tag'}`}>
-                        {isPending ? '⏳ बकाया (PENDING)' : '✅ नकद प्राप्त (CASH PAID)'}
+                        {isPending ? t('status_pending') : t('cash_paid')}
                       </span>
 
                       {/* Cash-first One-Click Settlement for pending dues */}
@@ -321,7 +318,7 @@ export default function EarningsLedger() {
                           className="settle-cash-btn"
                           onClick={() => handleSettleCash(tx.id, tx.final_price || tx.quoted_price)}
                         >
-                          💵 नकद मिला (Receive Cash)
+                          {t('btn_receive_cash')}
                         </button>
                       )}
                     </div>
