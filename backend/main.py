@@ -1094,6 +1094,7 @@ def get_incoming_lots_for_recycler(
             continue
 
         matched_lots.append({
+            "id": lot_id,
             "lot_id": lot_id,
             "handover_ref": handover_ref,
             "collector_id": lot.get("collector_id", "col_test_001"),

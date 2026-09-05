@@ -8,35 +8,40 @@ const INITIAL_FACILITIES = [
     name: 'EcoRecycle India Pvt Ltd (Ecoreco)',
     reg_no: 'CPCB/E-WASTE/REG/MH/2023/1042',
     location: 'Andheri East / Mumbai MMR',
-    materials: ['PCB', 'Cables', 'Batteries', 'Displays', 'Appliances']
+    materials: ['PCB', 'Cables', 'Batteries', 'Displays', 'Appliances'],
+    tier: 'Tier-1'
   },
   {
     id: 'rec_greencircle_02',
     name: 'GreenCircle Urban Recyclers',
     reg_no: 'CPCB/E-WASTE/REG/MH/2022/0891',
     location: 'Dharavi Link Road / Mumbai',
-    materials: ['PCB', 'Cables', 'Batteries']
+    materials: ['PCB', 'Cables', 'Batteries'],
+    tier: 'Tier-1'
   },
   {
     id: 'rec_cerebra_03',
     name: 'Cerebra Integrated Technologies Ltd',
     reg_no: 'CPCB/E-WASTE/REG/MH/2021/0432',
     location: 'TTC Industrial Area / Navi Mumbai',
-    materials: ['PCB', 'Displays', 'Appliances']
+    materials: ['PCB', 'Displays', 'Appliances'],
+    tier: 'Tier-1'
   },
   {
     id: 'rec_greenscape_04',
     name: 'Greenscape Eco Management Pvt Ltd',
     reg_no: 'CPCB/E-WASTE/REG/MH/2023/1187',
     location: 'Taloja MIDC / Navi Mumbai',
-    materials: ['Batteries', 'Motors', 'Plastics']
+    materials: ['Batteries', 'Motors', 'Plastics'],
+    tier: 'Tier-2'
   },
   {
     id: 'rec_envirocare_05',
     name: 'Enviro-Care Recycling Pvt Ltd',
     reg_no: 'CPCB/E-WASTE/REG/MH/2020/0219',
     location: 'Bhosari MIDC / Pune',
-    materials: ['PCB', 'Cables', 'Displays']
+    materials: ['PCB', 'Cables', 'Displays'],
+    tier: 'Tier-1'
   }
 ];
 
@@ -46,6 +51,7 @@ export default function RecyclerDashboard({ onRoleSwitch }) {
   const [activeTab, setActiveTab] = useState('incoming-lots');
   const [categoryFilter, setCategoryFilter] = useState('ALL');
   const [radiusFilter, setRadiusFilter] = useState('10');
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [lots, setLots] = useState([]);
   const [metrics, setMetrics] = useState({
     total_incoming_lots: 14,
@@ -130,15 +136,13 @@ export default function RecyclerDashboard({ onRoleSwitch }) {
         priority_label: 'High Priority • Grade A',
         time_posted: 'Posted 14:15 IST (42m ago)',
         image_url: 'https://lh3.googleusercontent.com/aida/AEtjO1Uibj7iPqmg9YKdnMYAfgjprFLErbb0FcOdAiLVCHgIpkj7gbP3YTmKP8zFMrg1kaOj63apJEhpOtxdLXe-93ri5nb5eVArP4y3X_auotJ1wePJz5s4YibZAvhuz-KAXyzC05MmFpsIy-yBUY4Mqu5yd0ohBBU3_J9_aC-nPfLKrNm8V66IvtxKehIH0e-8jnBWhBN-DbfYt6LisI-TlJcyw1QSl4R5LDqnipESfPn5rrrJ6LyUFidtmQ',
-        ai_badge: '92% Confidence (Collector Confirmed)',
+        ai_badge: '92% AI Vision Verified',
         location_label: 'Peenya Ind. Cluster (13.028°N, 77.518°E)',
         distance_km: 4.8,
         collector_name: 'Ramesh K. (Peenya Aggregator)',
         collector_rating: 4.8,
         collector_history: 'CPCB Registered Aggregator • 42 Handover Batches',
         net_weight_kg: 12.0,
-        gross_weight_kg: 12.4,
-        tare_weight_kg: 0.4,
         collector_asking_rate: 740,
         benchmark_min: 700,
         benchmark_max: 766,
@@ -155,7 +159,7 @@ export default function RecyclerDashboard({ onRoleSwitch }) {
         priority_label: 'Heavy Metals',
         time_posted: 'Posted 13:30 IST (1h ago)',
         image_url: 'https://lh3.googleusercontent.com/aida/AEtjO1WgXxj3PTs-7lfhFp-JK48EFoiQ6J122eiWOD5bFME_YW39QqWjSOtecSCCok96UgeiWft9i-8N-b4CLTLOt2TKYJpTgjDclW5fZ8pW2Ao12n1xdcxpIMTthmcakRwFYe5pJNiNHbEvQXiTZ6Dg62wI00Pp4LCfvkBxSm5ebeUHSLS26HhnhDK3yHfN-r9YHbPLIFxigyiHuXbRjgJuBMMKwgaWB7DxGJ8xsxedgkY1tTjZMRuMCZsxeAQ',
-        ai_badge: '89% Confidence (Insulated Copper)',
+        ai_badge: '89% AI Vision Verified',
         location_label: 'Yeshwanthpur Yard (13.018°N, 77.545°E)',
         distance_km: 7.2,
         collector_name: 'Dilip S. (Yard Manager)',
@@ -178,7 +182,7 @@ export default function RecyclerDashboard({ onRoleSwitch }) {
         priority_label: 'Hazardous • Fire Safe',
         time_posted: 'Offer Sent • Awaiting Sign-off',
         image_url: '/assets/icons/batt_lead.svg',
-        ai_badge: '86% Confidence (Li-ion)',
+        ai_badge: '86% AI Vision Verified',
         location_label: 'Rajajinagar Industrial (12.989°N, 77.553°E)',
         distance_km: 5.1,
         collector_name: 'Imran Bhai',
@@ -194,31 +198,43 @@ export default function RecyclerDashboard({ onRoleSwitch }) {
     ];
 
     // Combine backend lots at top, then stitch lots
-    const formattedBackend = backendLots.map((b) => ({
-      id: b.id,
-      handover_ref: b.handover_ref || `KC-${b.id.slice(0, 8)}`,
-      title: `${b.material_category || 'Scrap Material'} (${b.condition || 'Clean'})`,
-      subtitle: `Collector Lot #${(b.id || '').slice(0, 6)} • Direct Field Submission`,
-      category: (b.material_category || 'PCB').toUpperCase(),
-      category_code: b.cpcb_e_waste_code || 'GENERIC-E-WASTE',
-      priority_label: b.status === 'CONFIRMED' ? 'Confirmed Handover' : 'Active Field Lot',
-      time_posted: new Date(b.created_at || Date.now()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-      image_url: b.image_url || 'https://lh3.googleusercontent.com/aida/AEtjO1Uibj7iPqmg9YKdnMYAfgjprFLErbb0FcOdAiLVCHgIpkj7gbP3YTmKP8zFMrg1kaOj63apJEhpOtxdLXe-93ri5nb5eVArP4y3X_auotJ1wePJz5s4YibZAvhuz-KAXyzC05MmFpsIy-yBUY4Mqu5yd0ohBBU3_J9_aC-nPfLKrNm8V66IvtxKehIH0e-8jnBWhBN-DbfYt6LisI-TlJcyw1QSl4R5LDqnipESfPn5rrrJ6LyUFidtmQ',
-      ai_badge: `${Math.round((b.ai_confidence || 0.92) * 100)}% Verified`,
-      location_label: b.general_location || 'Dharavi / Kurla Cluster',
-      distance_km: 3.2,
-      collector_name: b.collector_name || 'Babu Rao (Collector)',
-      collector_rating: 4.8,
-      collector_history: 'Verified Door-to-Door Picker',
-      net_weight_kg: b.approximate_weight || 12.0,
-      collector_asking_rate: b.quoted_price ? Math.round(b.quoted_price / (b.approximate_weight || 1)) : 740,
-      benchmark_min: 700,
-      benchmark_max: 780,
-      suggested_rate: b.quoted_price ? Math.round(b.quoted_price / (b.approximate_weight || 1)) : 780,
-      status: b.status || 'PENDING'
-    }));
+    const formattedBackend = backendLots.slice(0, 10).map((b, idx) => {
+      const lotId = b.id || b.lot_id || `lot_backend_${idx}`;
+      return {
+        id: lotId,
+        handover_ref: b.handover_ref || `KC-${lotId.slice(0, 8)}`,
+        title: `${b.material_category || 'Scrap Material'} (${b.condition || 'Clean'})`,
+        subtitle: `Collector Lot #${lotId.slice(0, 6)} • Direct Field Submission`,
+        category: (b.material_category || 'PCB').toUpperCase(),
+        category_code: b.cpcb_e_waste_code || 'GENERIC-E-WASTE',
+        priority_label: b.status === 'CONFIRMED' ? 'Confirmed Handover' : 'Active Field Lot',
+        time_posted: new Date(b.created_at || Date.now()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        image_url: b.image_url || 'https://lh3.googleusercontent.com/aida/AEtjO1Uibj7iPqmg9YKdnMYAfgjprFLErbb0FcOdAiLVCHgIpkj7gbP3YTmKP8zFMrg1kaOj63apJEhpOtxdLXe-93ri5nb5eVArP4y3X_auotJ1wePJz5s4YibZAvhuz-KAXyzC05MmFpsIy-yBUY4Mqu5yd0ohBBU3_J9_aC-nPfLKrNm8V66IvtxKehIH0e-8jnBWhBN-DbfYt6LisI-TlJcyw1QSl4R5LDqnipESfPn5rrrJ6LyUFidtmQ',
+        ai_badge: `${Math.round((b.ai_confidence || 0.92) * 100)}% Verified`,
+        location_label: b.general_location || 'Dharavi / Kurla Cluster',
+        distance_km: 3.2,
+        collector_name: b.collector_name || 'Babu Rao (Collector)',
+        collector_rating: 4.8,
+        collector_history: 'Verified Door-to-Door Picker',
+        net_weight_kg: b.approximate_weight || 12.0,
+        collector_asking_rate: b.quoted_price ? Math.round(b.quoted_price / (b.approximate_weight || 1)) : 740,
+        benchmark_min: 700,
+        benchmark_max: 780,
+        suggested_rate: b.quoted_price ? Math.round(b.quoted_price / (b.approximate_weight || 1)) : 780,
+        status: b.status || 'PENDING'
+      };
+    });
 
-    return [...formattedBackend, ...stitchLots];
+    const seenIds = new Set();
+    const uniqueLots = [];
+    for (const lot of [...formattedBackend, ...stitchLots]) {
+      if (lot.id && !seenIds.has(lot.id)) {
+        seenIds.add(lot.id);
+        uniqueLots.push(lot);
+      }
+    }
+
+    return uniqueLots;
   };
 
   const filteredLots = lots.filter((lot) => {
@@ -323,170 +339,178 @@ export default function RecyclerDashboard({ onRoleSwitch }) {
     document.body.removeChild(link);
   };
 
+  const navItems = [
+    { id: 'incoming-lots', label: 'Incoming Lots', icon: 'inbox', badge: filteredLots.length },
+    { id: 'active-pickups', label: 'Active Pickups', icon: 'local_shipping', badge: '8' },
+    { id: 'material-inventory', label: 'Material Inventory', icon: 'inventory_2', badge: null },
+    { id: 'price-quotes', label: 'Price & Quotes', icon: 'currency_rupee', badge: null },
+    { id: 'traceability-epr', label: 'Traceability & EPR', icon: 'policy', badge: 'CPCB' },
+    { id: 'facility-settings', label: 'Facility Settings', icon: 'tune', badge: null }
+  ];
+
   return (
     <div className="bg-background font-body-md text-on-surface antialiased min-h-screen">
+      {/* Mobile Drawer Backdrop */}
+      {mobileMenuOpen && (
+        <div
+          onClick={() => setMobileMenuOpen(false)}
+          className="fixed inset-0 bg-black/50 z-40 lg:hidden backdrop-blur-sm transition-opacity"
+        />
+      )}
+
       {/* Left Sidebar */}
-      <aside className="fixed left-0 top-0 h-full w-72 bg-surface-container-low z-50 flex flex-col justify-between py-md shadow-[0_1px_8px_rgba(0,0,0,0.04)]">
+      <aside
+        className={`fixed left-0 top-0 h-full w-64 bg-surface-container-low z-50 flex flex-col justify-between py-4 shadow-sm border-r border-outline-variant/30 transition-transform duration-200 ease-in-out ${
+          mobileMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
+        }`}
+      >
         <div className="flex flex-col">
           {/* Logo Header */}
-          <div className="h-16 px-md flex items-center gap-sm">
-            <div className="w-9 h-9 rounded-lg bg-primary flex items-center justify-center">
-              <span className="material-symbols-outlined text-on-primary text-[20px]">recycling</span>
+          <div className="h-16 px-4 flex items-center justify-between border-b border-outline-variant/20">
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-lg bg-primary flex items-center justify-center text-on-primary shadow-sm">
+                <span className="material-symbols-outlined text-[20px]">recycling</span>
+              </div>
+              <div className="flex flex-col">
+                <span className="font-headline-md text-headline-md tracking-tight text-primary font-bold leading-none">
+                  RE:LINK
+                </span>
+                <span className="font-label-md text-[10px] text-on-surface-variant uppercase tracking-wider mt-0.5">
+                  Recycler Enterprise
+                </span>
+              </div>
             </div>
-            <div className="flex flex-col">
-              <span className="font-headline-md text-headline-md tracking-tight text-primary font-bold leading-none">RE:LINK</span>
-              <span className="font-label-md text-[10px] text-on-surface-variant uppercase tracking-wider mt-xs">Recycler Enterprise</span>
-            </div>
+            {/* Close button for mobile drawer */}
+            <button
+              onClick={() => setMobileMenuOpen(false)}
+              className="lg:hidden p-1.5 rounded-lg text-on-surface-variant hover:bg-surface-container"
+            >
+              <span className="material-symbols-outlined text-[20px]">close</span>
+            </button>
           </div>
 
           {/* Authorization Badge */}
-          <div className="px-md my-sm">
-            <div className="bg-surface-container rounded-lg p-sm flex items-center justify-between">
-              <div className="flex items-center gap-xs">
+          <div className="px-4 my-3">
+            <div className="bg-surface-container rounded-lg p-2.5 flex items-center justify-between border border-outline-variant/30">
+              <div className="flex items-center gap-2">
                 <span className="material-symbols-outlined text-primary text-[18px]">verified</span>
-                <span className="font-label-md text-label-md text-on-surface font-semibold">Authorized Unit</span>
+                <span className="font-label-md text-label-md text-on-surface font-semibold text-xs">
+                  Authorized Facility
+                </span>
               </div>
-              <span className="bg-primary-fixed text-on-primary-fixed-variant text-[11px] font-bold px-xs py-0.5 rounded-full uppercase">Tier-1</span>
+              <span className="bg-primary-fixed text-on-primary-fixed-variant text-[10px] font-bold px-2 py-0.5 rounded-full uppercase">
+                {selectedFacility.tier || 'Tier-1'}
+              </span>
             </div>
           </div>
 
-          {/* Sidebar Nav Items */}
-          <nav className="flex flex-col gap-xs px-md mt-xs">
-            <button
-              onClick={() => setActiveTab('incoming-lots')}
-              className={`flex items-center gap-md px-md py-sm transition-all min-h-touch-target-min rounded-lg text-left cursor-pointer ${
-                activeTab === 'incoming-lots'
-                  ? 'bg-primary-container text-on-primary-container font-bold shadow-sm'
-                  : 'text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface'
-              }`}
-            >
-              <span className="material-symbols-outlined text-[20px]">inbox</span>
-              <span className="font-label-lg text-label-lg flex-1">Incoming Lots</span>
-              <span className="bg-primary-fixed text-on-primary-fixed-variant text-xs font-bold px-2 py-0.5 rounded-full">
-                {filteredLots.length}
-              </span>
-            </button>
-
-            <button
-              onClick={() => setActiveTab('active-pickups')}
-              className={`flex items-center gap-md px-md py-sm transition-all min-h-touch-target-min rounded-lg text-left cursor-pointer ${
-                activeTab === 'active-pickups'
-                  ? 'bg-primary-container text-on-primary-container font-bold shadow-sm'
-                  : 'text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface'
-              }`}
-            >
-              <span className="material-symbols-outlined text-[20px]">local_shipping</span>
-              <span className="font-label-lg text-label-lg">Active Pickups</span>
-            </button>
-
-            <button
-              onClick={() => setActiveTab('material-inventory')}
-              className={`flex items-center gap-md px-md py-sm transition-all min-h-touch-target-min rounded-lg text-left cursor-pointer ${
-                activeTab === 'material-inventory'
-                  ? 'bg-primary-container text-on-primary-container font-bold shadow-sm'
-                  : 'text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface'
-              }`}
-            >
-              <span className="material-symbols-outlined text-[20px]">inventory_2</span>
-              <span className="font-label-lg text-label-lg">Material Inventory</span>
-            </button>
-
-            <button
-              onClick={() => setActiveTab('price-quotes')}
-              className={`flex items-center gap-md px-md py-sm transition-all min-h-touch-target-min rounded-lg text-left cursor-pointer ${
-                activeTab === 'price-quotes'
-                  ? 'bg-primary-container text-on-primary-container font-bold shadow-sm'
-                  : 'text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface'
-              }`}
-            >
-              <span className="material-symbols-outlined text-[20px]">currency_rupee</span>
-              <span className="font-label-lg text-label-lg">Price &amp; Quotes</span>
-            </button>
-
-            <button
-              onClick={() => setActiveTab('traceability-epr')}
-              className={`flex items-center gap-md px-md py-sm transition-all min-h-touch-target-min rounded-lg text-left cursor-pointer ${
-                activeTab === 'traceability-epr'
-                  ? 'bg-primary-container text-on-primary-container font-bold shadow-sm'
-                  : 'text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface'
-              }`}
-            >
-              <span className="material-symbols-outlined text-[20px]">policy</span>
-              <span className="font-label-lg text-label-lg">Traceability &amp; EPR</span>
-            </button>
-
-            <button
-              onClick={() => setActiveTab('facility-settings')}
-              className={`flex items-center gap-md px-md py-sm transition-all min-h-touch-target-min rounded-lg text-left cursor-pointer ${
-                activeTab === 'facility-settings'
-                  ? 'bg-primary-container text-on-primary-container font-bold shadow-sm'
-                  : 'text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface'
-              }`}
-            >
-              <span className="material-symbols-outlined text-[20px]">tune</span>
-              <span className="font-label-lg text-label-lg">Facility Settings</span>
-            </button>
+          {/* Sidebar Navigation */}
+          <nav className="flex flex-col gap-1 px-3 mt-1">
+            {navItems.map((item) => {
+              const isActive = activeTab === item.id;
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => {
+                    setActiveTab(item.id);
+                    setMobileMenuOpen(false);
+                  }}
+                  className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-left transition-all cursor-pointer font-label-lg text-sm ${
+                    isActive
+                      ? 'bg-primary-container text-on-primary-container font-bold shadow-sm'
+                      : 'text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface'
+                  }`}
+                >
+                  <span className="material-symbols-outlined text-[20px]">{item.icon}</span>
+                  <span className="flex-1">{item.label}</span>
+                  {item.badge !== null && (
+                    <span
+                      className={`text-[11px] font-bold px-2 py-0.5 rounded-full ${
+                        isActive
+                          ? 'bg-white/20 text-on-primary-container'
+                          : 'bg-surface-container text-on-surface-variant'
+                      }`}
+                    >
+                      {item.badge}
+                    </span>
+                  )}
+                </button>
+              );
+            })}
           </nav>
         </div>
 
-        {/* Bottom Monthly Quota Card */}
-        <div className="px-md">
-          <div className="bg-surface-container-highest rounded-xl p-md flex flex-col gap-xs">
+        {/* Monthly Quota Card */}
+        <div className="px-4">
+          <div className="bg-surface-container-highest rounded-xl p-3.5 flex flex-col gap-2 border border-outline-variant/30">
             <div className="flex items-center justify-between">
-              <span className="font-label-md text-[11px] uppercase tracking-wider text-on-surface-variant font-bold">Facility Quota</span>
-              <span className="font-label-md text-label-md text-primary font-bold">85.6%</span>
+              <span className="font-label-md text-[11px] uppercase tracking-wider text-on-surface-variant font-bold">
+                Monthly Quota
+              </span>
+              <span className="font-label-md text-xs text-primary font-bold">85.6%</span>
             </div>
             <div className="w-full bg-surface-variant h-2 rounded-full overflow-hidden">
-              <div className="bg-primary h-full rounded-full w-[85.6%]"></div>
+              <div className="bg-primary h-full rounded-full transition-all duration-500" style={{ width: '85.6%' }}></div>
             </div>
-            <span className="font-body-md text-[12px] text-on-surface-variant leading-tight">
-              Monthly Target: {metrics.total_verified_tonnage_mt || 42.8} / 50 MT
+            <span className="font-body-md text-[11px] text-on-surface-variant leading-tight">
+              Target: {metrics.total_verified_tonnage_mt || 42.8} / 50 MT
             </span>
           </div>
         </div>
       </aside>
 
       {/* Main Container */}
-      <div className="pl-72 flex flex-col min-h-screen">
+      <div className="lg:pl-64 flex flex-col min-h-screen">
         {/* Top Header Bar */}
-        <header className="fixed top-0 left-72 right-0 h-16 bg-surface/85 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)] z-40 flex items-center justify-between px-lg border-b border-outline-variant/40">
-          <div className="flex items-center gap-md">
+        <header className="fixed top-0 left-0 lg:left-64 right-0 h-16 bg-surface/90 backdrop-blur-md shadow-[0_1px_4px_rgba(0,0,0,0.03)] z-30 flex items-center justify-between px-4 sm:px-6 border-b border-outline-variant/30">
+          <div className="flex items-center gap-3">
+            {/* Mobile Hamburger Toggle */}
+            <button
+              onClick={() => setMobileMenuOpen(true)}
+              className="lg:hidden p-2 rounded-lg text-on-surface-variant hover:bg-surface-container cursor-pointer"
+              title="Open Navigation Menu"
+            >
+              <span className="material-symbols-outlined text-[24px]">menu</span>
+            </button>
+
             {/* Facility Selector Dropdown */}
-            <div className="flex items-center gap-xs px-sm py-1 bg-surface-container rounded-full border border-outline-variant/50">
-              <span className="material-symbols-outlined text-primary text-[18px]">verified_user</span>
+            <div className="flex items-center gap-2 px-3 py-1.5 bg-surface-container rounded-full border border-outline-variant/40 max-w-[200px] sm:max-w-[280px] md:max-w-[360px]">
+              <span className="material-symbols-outlined text-primary text-[18px] shrink-0">verified_user</span>
               <select
                 value={selectedFacility.id}
                 onChange={(e) => {
                   const fac = facilities.find((f) => f.id === e.target.value);
                   if (fac) setSelectedFacility(fac);
                 }}
-                className="bg-transparent font-label-md text-[12px] text-on-surface font-semibold outline-none cursor-pointer pr-2"
+                className="bg-transparent font-label-md text-xs text-on-surface font-semibold outline-none cursor-pointer truncate w-full"
               >
                 {facilities.map((fac) => (
                   <option key={fac.id} value={fac.id}>
-                    {fac.name} • {fac.reg_no}
+                    {fac.name}
                   </option>
                 ))}
               </select>
             </div>
 
-            <div className="flex items-center gap-xs px-sm py-xs bg-primary-fixed/50 text-on-primary-fixed-variant rounded-full text-[12px] font-medium">
+            {/* System Status Pill */}
+            <div className="hidden sm:flex items-center gap-1.5 px-3 py-1 bg-primary-fixed/40 text-on-primary-fixed-variant rounded-full text-xs font-medium">
               <span className="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
-              <span>System Online • Database Synced</span>
+              <span>Online • CPCB Synced</span>
             </div>
           </div>
 
-          <div className="flex items-center gap-md">
-            {/* Role Switcher back to Collector Mobile App */}
+          <div className="flex items-center gap-2 sm:gap-3">
+            {/* Role Switcher to Collector Mobile App */}
             <button
               onClick={onRoleSwitch}
-              className="bg-surface-container hover:bg-surface-container-high text-on-surface text-xs font-bold px-3 py-1.5 rounded-full flex items-center gap-1.5 border border-outline-variant transition-colors cursor-pointer shadow-sm"
+              className="bg-primary/10 hover:bg-primary/20 text-primary text-xs font-bold px-3 py-1.5 rounded-full flex items-center gap-1.5 border border-primary/20 transition-all cursor-pointer shadow-sm active:scale-95"
               title="Switch back to Collector Mobile View"
             >
-              <span className="material-symbols-outlined text-[16px] text-primary">smartphone</span>
-              <span>Switch to Collector Mobile App</span>
+              <span className="material-symbols-outlined text-[16px]">smartphone</span>
+              <span className="hidden sm:inline">Collector App</span>
             </button>
 
+            {/* Notification Bell */}
             <button
               aria-label="Notifications"
               className="w-9 h-9 rounded-full bg-surface-container hover:bg-surface-container-high flex items-center justify-center text-on-surface-variant transition-colors relative cursor-pointer"
@@ -496,633 +520,931 @@ export default function RecyclerDashboard({ onRoleSwitch }) {
               <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-error"></span>
             </button>
 
-            <div className="flex items-center gap-sm pl-sm">
-              <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center">
-                <span className="material-symbols-outlined text-on-primary text-[18px]">person</span>
+            {/* Profile Avatar */}
+            <div className="flex items-center gap-2 pl-1 border-l border-outline-variant/30">
+              <div className="w-8 h-8 rounded-full bg-primary text-on-primary flex items-center justify-center font-bold text-xs">
+                OP
               </div>
               <div className="hidden xl:flex flex-col text-left">
-                <span className="font-label-md text-label-md text-on-surface font-semibold leading-none">Plant Ops</span>
-                <span className="font-body-md text-[11px] text-on-surface-variant">Weighbridge Admin</span>
+                <span className="font-label-md text-xs text-on-surface font-semibold leading-tight">Plant Ops</span>
+                <span className="font-body-md text-[10px] text-on-surface-variant">Weighbridge Admin</span>
               </div>
             </div>
           </div>
         </header>
 
         {/* Main Workdesk Content */}
-        <main className="w-full pt-20 bg-background flex-1 px-lg py-md">
-          <div className="flex flex-col w-full gap-lg">
-            {/* Top Overview Metrics Strip */}
-            <section className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-md">
-              {/* Metric 1: Incoming Lots */}
-              <div className="bg-surface-container-lowest rounded-xl p-md shadow-sm flex flex-col justify-between relative overflow-hidden group hover:shadow-md transition-shadow">
-                <div className="flex items-start justify-between">
-                  <div>
-                    <span className="font-label-md text-label-md text-on-surface-variant font-medium">Incoming Available Lots</span>
-                    <div className="flex items-baseline gap-xs mt-xs">
-                      <span className="font-headline-lg text-headline-lg text-on-surface font-bold">
-                        {filteredLots.length}
-                      </span>
-                      <span className="font-label-md text-label-md text-primary font-semibold">Active Queue</span>
-                    </div>
-                  </div>
-                  <div className="w-11 h-11 rounded-lg bg-primary-fixed flex items-center justify-center text-on-primary-fixed-variant">
-                    <span className="material-symbols-outlined text-[24px]">move_to_inbox</span>
+        <main className="w-full pt-20 px-4 sm:px-6 pb-12 flex-1 max-w-7xl mx-auto space-y-6">
+          {/* Top Overview Metrics Strip */}
+          <section className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+            {/* Metric 1: Incoming Lots */}
+            <div className="bg-surface-container-lowest rounded-xl p-4 shadow-sm flex flex-col justify-between border border-outline-variant/30 hover:shadow-md transition-shadow">
+              <div className="flex items-start justify-between">
+                <div>
+                  <span className="font-label-md text-xs text-on-surface-variant font-medium">Incoming Lots</span>
+                  <div className="flex items-baseline gap-1.5 mt-1">
+                    <span className="font-headline-lg text-2xl sm:text-3xl text-on-surface font-bold">
+                      {filteredLots.length}
+                    </span>
+                    <span className="font-label-md text-xs text-primary font-semibold">Active</span>
                   </div>
                 </div>
-                <div className="mt-md pt-sm flex items-center justify-between text-on-surface-variant">
-                  <span className="font-label-md text-label-md flex items-center gap-xs text-primary font-medium">
-                    <span className="w-2 h-2 rounded-full bg-primary"></span>
-                    5 urgent &lt; 10 km
-                  </span>
-                  <span className="font-label-md text-label-md text-on-surface-variant">Dharavi &amp; Peenya clusters</span>
+                <div className="w-10 h-10 rounded-lg bg-primary-fixed flex items-center justify-center text-on-primary-fixed-variant">
+                  <span className="material-symbols-outlined text-[22px]">move_to_inbox</span>
                 </div>
               </div>
-
-              {/* Metric 2: Pending Quotes */}
-              <div className="bg-surface-container-lowest rounded-xl p-md shadow-sm flex flex-col justify-between relative overflow-hidden group hover:shadow-md transition-shadow">
-                <div className="flex items-start justify-between">
-                  <div>
-                    <span className="font-label-md text-label-md text-on-surface-variant font-medium">Pending Quotes</span>
-                    <div className="flex items-baseline gap-xs mt-xs">
-                      <span className="font-headline-lg text-headline-lg text-on-surface font-bold">
-                        {metrics.pending_verification_count || 6}
-                      </span>
-                      <span className="font-label-md text-label-md text-tertiary font-semibold">In Negotiation</span>
-                    </div>
-                  </div>
-                  <div className="w-11 h-11 rounded-lg bg-tertiary-fixed flex items-center justify-center text-on-tertiary-fixed-variant">
-                    <span className="material-symbols-outlined text-[24px]">currency_exchange</span>
-                  </div>
-                </div>
-                <div className="mt-md pt-sm flex items-center justify-between text-on-surface-variant">
-                  <span className="font-label-md text-label-md text-on-surface-variant font-medium">Avg response: 12 mins</span>
-                  <span className="font-label-md text-label-md text-primary font-medium">Active queue</span>
-                </div>
-              </div>
-
-              {/* Metric 3: Scheduled Pickups */}
-              <div className="bg-surface-container-lowest rounded-xl p-md shadow-sm flex flex-col justify-between relative overflow-hidden group hover:shadow-md transition-shadow">
-                <div className="flex items-start justify-between">
-                  <div>
-                    <span className="font-label-md text-label-md text-on-surface-variant font-medium">Scheduled Pickups Today</span>
-                    <div className="flex items-baseline gap-xs mt-xs">
-                      <span className="font-headline-lg text-headline-lg text-on-surface font-bold">8</span>
-                      <span className="font-label-md text-label-md text-secondary font-semibold">Scheduled</span>
-                    </div>
-                  </div>
-                  <div className="w-11 h-11 rounded-lg bg-secondary-fixed flex items-center justify-center text-on-secondary-fixed-variant">
-                    <span className="material-symbols-outlined text-[24px]">local_shipping</span>
-                  </div>
-                </div>
-                <div className="mt-md pt-sm flex items-center justify-between">
-                  <span className="font-label-md text-label-md text-on-surface-variant">5 Van dispatches, 3 Self-dropoffs</span>
-                  <span className="font-label-md text-label-md text-primary font-semibold">4 Pickups Completed</span>
-                </div>
-              </div>
-
-              {/* Metric 4: Monthly Sourced Material */}
-              <div className="bg-surface-container-lowest rounded-xl p-md shadow-sm flex flex-col justify-between relative overflow-hidden group hover:shadow-md transition-shadow">
-                <div className="flex items-start justify-between">
-                  <div>
-                    <span className="font-label-md text-label-md text-on-surface-variant font-medium">Monthly Sourced Material</span>
-                    <div className="flex items-baseline gap-xs mt-xs">
-                      <span className="font-headline-lg text-headline-lg text-on-surface font-bold">
-                        {metrics.total_verified_tonnage_mt || 42.8}
-                      </span>
-                      <span className="font-label-md text-label-md text-on-surface-variant">MT / 50 MT</span>
-                    </div>
-                  </div>
-                  <div className="w-11 h-11 rounded-lg bg-primary-container flex items-center justify-center text-on-primary">
-                    <span className="material-symbols-outlined text-[24px]">scale</span>
-                  </div>
-                </div>
-                <div className="mt-md pt-sm flex flex-col gap-xs">
-                  <div className="flex justify-between items-center text-on-surface-variant font-label-md text-[11px]">
-                    <span>Monthly Facility Quota</span>
-                    <span className="font-bold text-primary">85.6%</span>
-                  </div>
-                  <div className="w-full bg-surface-container-high h-1.5 rounded-full overflow-hidden">
-                    <div className="bg-primary h-full rounded-full" style={{ width: '85.6%' }}></div>
-                  </div>
-                </div>
-              </div>
-            </section>
-
-            {/* Filter Toolbar */}
-            <section className="bg-surface-container-lowest rounded-xl p-md shadow-sm flex flex-col lg:flex-row lg:items-center justify-between gap-md">
-              <div className="flex flex-wrap items-center gap-sm">
-                <span className="font-label-lg text-label-lg font-bold text-on-surface mr-xs flex items-center gap-xs">
-                  <span className="material-symbols-outlined text-primary text-[20px]">filter_list</span>
-                  Lots Queue:
+              <div className="mt-3 pt-2 flex items-center justify-between text-on-surface-variant text-[11px] border-t border-outline-variant/20">
+                <span className="flex items-center gap-1 text-primary font-medium">
+                  <span className="w-1.5 h-1.5 rounded-full bg-primary"></span>
+                  5 urgent &lt; 10 km
                 </span>
-                <button
-                  onClick={() => setCategoryFilter('ALL')}
-                  className={`px-md py-xs rounded-full font-label-md text-label-md font-semibold transition-all cursor-pointer ${
-                    categoryFilter === 'ALL'
-                      ? 'bg-primary text-on-primary shadow-sm'
-                      : 'bg-surface-container text-on-surface-variant hover:bg-surface-container-high'
-                  }`}
-                  type="button"
-                >
-                  All Categories ({lots.length})
-                </button>
-                <button
-                  onClick={() => setCategoryFilter('PCB')}
-                  className={`px-md py-xs rounded-full font-label-md text-label-md font-semibold transition-all cursor-pointer ${
-                    categoryFilter === 'PCB'
-                      ? 'bg-primary text-on-primary shadow-sm'
-                      : 'bg-surface-container text-on-surface-variant hover:bg-surface-container-high'
-                  }`}
-                  type="button"
-                >
-                  PCB / E-Waste
-                </button>
-                <button
-                  onClick={() => setCategoryFilter('CABLES')}
-                  className={`px-md py-xs rounded-full font-label-md text-label-md font-semibold transition-all cursor-pointer ${
-                    categoryFilter === 'CABLES'
-                      ? 'bg-primary text-on-primary shadow-sm'
-                      : 'bg-surface-container text-on-surface-variant hover:bg-surface-container-high'
-                  }`}
-                  type="button"
-                >
-                  Copper &amp; Wire Cables
-                </button>
-                <button
-                  onClick={() => setCategoryFilter('BATTERIES')}
-                  className={`px-md py-xs rounded-full font-label-md text-label-md font-semibold transition-all cursor-pointer ${
-                    categoryFilter === 'BATTERIES'
-                      ? 'bg-primary text-on-primary shadow-sm'
-                      : 'bg-surface-container text-on-surface-variant hover:bg-surface-container-high'
-                  }`}
-                  type="button"
-                >
-                  Li-ion / Lead Batteries
-                </button>
+                <span>Active Clusters</span>
               </div>
+            </div>
 
-              <div className="flex items-center gap-sm">
-                <div className="flex items-center bg-surface-container-low rounded-lg px-sm py-xs border border-outline-variant/30">
-                  <span className="material-symbols-outlined text-on-surface-variant text-[18px] mr-xs">near_me</span>
-                  <select
-                    value={radiusFilter}
-                    onChange={(e) => setRadiusFilter(e.target.value)}
-                    className="bg-transparent font-label-md text-label-md text-on-surface outline-none cursor-pointer"
-                  >
-                    <option value="10">Within 10 km Radius</option>
-                    <option value="5">Within 5 km Radius</option>
-                    <option value="25">Within 25 km Radius</option>
-                    <option value="ALL">All Operating Territory</option>
-                  </select>
-                </div>
-              </div>
-            </section>
-
-            {/* Confirmation Notice Banner if issued */}
-            {confirmationNotice && (
-              <div className="bg-emerald-600/10 border-2 border-emerald-600 rounded-xl p-4 shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-full bg-emerald-600 text-white flex items-center justify-center shrink-0">
-                    <span className="material-symbols-outlined text-[28px]">verified</span>
-                  </div>
-                  <div>
-                    <h4 className="font-bold text-emerald-900 dark:text-emerald-300 text-base">
-                      Weighbridge Handover Confirmed • CPCB Certificate Issued
-                    </h4>
-                    <p className="text-xs text-on-surface-variant mt-0.5">
-                      Certificate ID: <strong className="text-emerald-700 dark:text-emerald-400">{confirmationNotice.certificate_id}</strong> | Lot Ref: {confirmationNotice.lot_ref} | Net Weight: {confirmationNotice.verified_weight} kg | Settled: ₹{confirmationNotice.payout.toLocaleString('en-IN')} ({confirmationNotice.payment_mode})
-                    </p>
+            {/* Metric 2: Pending Quotes */}
+            <div className="bg-surface-container-lowest rounded-xl p-4 shadow-sm flex flex-col justify-between border border-outline-variant/30 hover:shadow-md transition-shadow">
+              <div className="flex items-start justify-between">
+                <div>
+                  <span className="font-label-md text-xs text-on-surface-variant font-medium">Pending Quotes</span>
+                  <div className="flex items-baseline gap-1.5 mt-1">
+                    <span className="font-headline-lg text-2xl sm:text-3xl text-on-surface font-bold">
+                      {metrics.pending_verification_count || 6}
+                    </span>
+                    <span className="font-label-md text-xs text-tertiary font-semibold">In Bidding</span>
                   </div>
                 </div>
-                <button
-                  onClick={() => setConfirmationNotice(null)}
-                  className="px-3 py-1.5 bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold rounded-lg shadow-sm cursor-pointer"
-                >
-                  Dismiss Notice
-                </button>
-              </div>
-            )}
-
-            {/* Main Workdesk: Asymmetrical Two-Column Split */}
-            <div className="grid grid-cols-1 xl:grid-cols-12 gap-lg items-start">
-              {/* Left / Primary Workspace: Incoming Scrap Lots Queue (8 Columns) */}
-              <div className="xl:col-span-8 flex flex-col gap-md">
-                {filteredLots.map((lot) => {
-                  const currentRate = rates[lot.id] || lot.suggested_rate;
-                  const totalPayout = Math.round(currentRate * lot.net_weight_kg);
-                  const fulfillment = fulfillments[lot.id] || 'van';
-
-                  return (
-                    <article
-                      key={lot.id}
-                      className="bg-surface-container-lowest rounded-xl shadow-md p-lg relative overflow-hidden transition-all duration-200 border border-outline-variant/30"
-                    >
-                      {/* Accent Top Bar */}
-                      <div className={`absolute top-0 left-0 right-0 h-1.5 ${lot.status === 'CONFIRMED' ? 'bg-emerald-600' : 'bg-primary'}`}></div>
-
-                      {/* Header Row */}
-                      <div className="flex flex-wrap items-start justify-between gap-sm mb-md">
-                        <div className="flex items-center gap-sm">
-                          <span className="bg-primary-fixed text-on-primary-fixed-variant font-label-md text-[12px] font-bold px-sm py-0.5 rounded-full uppercase tracking-wider">
-                            {lot.priority_label || 'High Priority • Grade A'}
-                          </span>
-                          <span className="font-headline-md text-headline-md font-bold text-on-surface">
-                            Lot #{lot.handover_ref}
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-xs bg-surface-container-low px-sm py-xs rounded-lg">
-                          <span className="material-symbols-outlined text-primary text-[18px]">schedule</span>
-                          <span className="font-label-md text-label-md text-on-surface font-semibold">{lot.time_posted}</span>
-                        </div>
-                      </div>
-
-                      {/* Main Lot Content: Image + Breakdown */}
-                      <div className="grid grid-cols-1 md:grid-cols-12 gap-md items-stretch">
-                        {/* Thumbnail & Inspection Evidence */}
-                        <div className="md:col-span-5 flex flex-col gap-xs">
-                          <div className="relative rounded-lg overflow-hidden bg-surface-container-high aspect-square flex items-center justify-center">
-                            <img
-                              alt={lot.title}
-                              className="w-full h-full object-cover"
-                              src={lot.image_url}
-                            />
-                            <div className="absolute bottom-2 left-2 right-2 bg-inverse-surface/90 backdrop-blur-md rounded-md px-sm py-xs flex items-center justify-between text-inverse-on-surface">
-                              <span className="font-label-md text-[11px] font-medium flex items-center gap-xs">
-                                <span className="material-symbols-outlined text-primary-fixed text-[16px]">psychology</span>
-                                AI Vision Classified
-                              </span>
-                              <span className="font-label-md text-[11px] font-bold text-primary-fixed">
-                                {lot.ai_badge}
-                              </span>
-                            </div>
-                          </div>
-                          {/* Geotag bar */}
-                          <div className="bg-surface-container-low rounded-lg p-xs flex items-center justify-between text-on-surface-variant font-label-md text-[11px]">
-                            <span className="flex items-center gap-xs truncate">
-                              <span className="material-symbols-outlined text-primary text-[16px]">location_on</span>
-                              {lot.location_label}
-                            </span>
-                            <span className="font-bold text-on-surface shrink-0">{lot.distance_km} km</span>
-                          </div>
-                        </div>
-
-                        {/* Specifications, Collector & Payout Matrix */}
-                        <div className="md:col-span-7 flex flex-col justify-between">
-                          <div>
-                            <div className="flex items-start justify-between mb-sm">
-                              <div>
-                                <h3 className="font-headline-md text-headline-md font-bold text-on-surface leading-snug">
-                                  {lot.title}
-                                </h3>
-                                <span className="font-body-md text-body-md text-on-surface-variant line-clamp-2">
-                                  {lot.subtitle}
-                                </span>
-                              </div>
-                            </div>
-
-                            {/* Collector Reputation Pill */}
-                            <div className="bg-surface-container-low rounded-lg p-sm flex items-center justify-between mb-md">
-                              <div className="flex items-center gap-sm">
-                                <div className="w-8 h-8 rounded-full bg-surface-container-highest flex items-center justify-center text-on-surface-variant font-bold text-[13px]">
-                                  {lot.collector_name.slice(0, 2).toUpperCase()}
-                                </div>
-                                <div>
-                                  <div className="flex items-center gap-xs">
-                                    <span className="font-label-md text-label-md font-bold text-on-surface">{lot.collector_name}</span>
-                                    <span className="material-symbols-outlined text-primary text-[16px]">verified</span>
-                                  </div>
-                                  <span className="font-body-md text-[12px] text-on-surface-variant">
-                                    {lot.collector_history} • {lot.collector_rating}★ rating
-                                  </span>
-                                </div>
-                              </div>
-                              <div className="flex items-center gap-0.5 bg-surface-container-lowest px-sm py-0.5 rounded-full shadow-sm">
-                                <span className="material-symbols-outlined text-primary text-[14px]">star</span>
-                                <span className="font-label-md text-label-md font-bold text-on-surface">{lot.collector_rating}</span>
-                              </div>
-                            </div>
-
-                            {/* Metrics Matrix: Net Weight & Market Spread */}
-                            <div className="grid grid-cols-3 gap-xs bg-surface-container rounded-lg p-sm mb-md text-center">
-                              <div>
-                                <span className="font-label-md text-[11px] text-on-surface-variant uppercase font-medium">Net Weight</span>
-                                <p className="font-action-xl text-action-xl font-bold text-on-surface">
-                                  {lot.net_weight_kg} <span className="text-[14px] font-normal text-on-surface-variant">kg</span>
-                                </p>
-                                <span className="font-body-md text-[10px] text-on-surface-variant">
-                                  Gross: {(lot.net_weight_kg + 0.4).toFixed(1)}kg
-                                </span>
-                              </div>
-                              <div>
-                                <span className="font-label-md text-[11px] text-on-surface-variant uppercase font-medium">Collector Asking</span>
-                                <p className="font-action-xl text-action-xl font-bold text-on-surface">
-                                  ₹{lot.collector_asking_rate} <span className="text-[12px] font-normal text-on-surface-variant">/kg</span>
-                                </p>
-                                <span className="font-body-md text-[10px] text-on-surface-variant">
-                                  Target ₹{Math.round(lot.collector_asking_rate * lot.net_weight_kg).toLocaleString('en-IN')}
-                                </span>
-                              </div>
-                              <div>
-                                <span className="font-label-md text-[11px] text-on-surface-variant uppercase font-medium">Market Benchmark</span>
-                                <p className="font-action-xl text-action-xl font-bold text-primary">
-                                  ₹{lot.benchmark_min} – ₹{lot.benchmark_max} <span className="text-[12px] font-normal text-on-surface-variant">/kg</span>
-                                </p>
-                                <span className="font-body-md text-[10px] text-on-surface-variant">Spot Index Reference</span>
-                              </div>
-                            </div>
-                          </div>
-
-                          {/* Recycler Decision & Offer Terminal */}
-                          <div className="bg-surface-container-low rounded-xl p-md flex flex-col gap-sm">
-                            <div className="flex flex-wrap items-center justify-between gap-sm">
-                              <label className="font-label-lg text-label-lg font-bold text-on-surface flex items-center gap-xs">
-                                <span className="material-symbols-outlined text-primary text-[18px]">calculate</span>
-                                Quote Procurement Rate:
-                              </label>
-                              <div className="flex items-center gap-xs bg-surface-container-lowest p-0.5 rounded-lg border border-outline-variant/30">
-                                <button
-                                  onClick={() => handleFulfillmentToggle(lot.id, 'van')}
-                                  className={`px-sm py-0.5 rounded text-[11px] font-bold cursor-pointer transition-colors ${
-                                    fulfillment === 'van'
-                                      ? 'bg-primary-fixed text-on-primary-fixed-variant'
-                                      : 'text-on-surface-variant hover:text-on-surface'
-                                  }`}
-                                  type="button"
-                                >
-                                  Recycler Van Dispatch
-                                </button>
-                                <button
-                                  onClick={() => handleFulfillmentToggle(lot.id, 'dropoff')}
-                                  className={`px-sm py-0.5 rounded text-[11px] font-bold cursor-pointer transition-colors ${
-                                    fulfillment === 'dropoff'
-                                      ? 'bg-primary-fixed text-on-primary-fixed-variant'
-                                      : 'text-on-surface-variant hover:text-on-surface'
-                                  }`}
-                                  type="button"
-                                >
-                                  Collector Self-Dropoff
-                                </button>
-                              </div>
-                            </div>
-
-                            <div className="flex flex-col sm:flex-row items-center gap-sm">
-                              {/* Large Price Input */}
-                              <div className="relative w-full sm:w-1/2">
-                                <span className="absolute left-sm top-1/2 -translate-y-1/2 font-headline-md text-headline-md font-bold text-on-surface-variant">₹</span>
-                                <input
-                                  type="number"
-                                  value={currentRate}
-                                  onChange={(e) => handleRateChange(lot.id, e.target.value)}
-                                  className="w-full bg-surface-container-lowest text-on-surface font-headline-md text-headline-md font-bold pl-8 pr-16 py-xs rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-primary h-12"
-                                  placeholder="0.00"
-                                />
-                                <span className="absolute right-sm top-1/2 -translate-y-1/2 font-label-md text-label-md text-on-surface-variant font-semibold">/ kg</span>
-                              </div>
-                              {/* Total Binding Value Display */}
-                              <div className="w-full sm:w-1/2 bg-surface-container-lowest rounded-lg h-12 px-md flex items-center justify-between shadow-sm">
-                                <span className="font-label-md text-label-md text-on-surface-variant">Total Binding Value:</span>
-                                <span className="font-action-xl text-action-xl font-bold text-primary">
-                                  ₹{totalPayout.toLocaleString('en-IN')}
-                                </span>
-                              </div>
-                            </div>
-
-                            {/* Action CTAs */}
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-sm mt-xs">
-                              <button
-                                onClick={() => alert(`Counter-offer of ₹${currentRate}/kg (Total ₹${totalPayout}) sent to ${lot.collector_name}.`)}
-                                className="w-full h-12 bg-surface-container-highest hover:bg-surface-container-high text-on-surface font-label-lg text-label-lg font-semibold rounded-lg flex items-center justify-center gap-xs transition-colors cursor-pointer"
-                                type="button"
-                              >
-                                <span className="material-symbols-outlined text-[20px]">reply</span>
-                                Send Counter-Offer
-                              </button>
-                              <button
-                                onClick={() => handleOpenWeighbridgeModal(lot)}
-                                className={`w-full h-12 font-action-xl text-label-lg font-bold rounded-lg shadow-md flex items-center justify-center gap-xs transition-transform active:scale-[0.98] cursor-pointer ${
-                                  lot.status === 'CONFIRMED'
-                                    ? 'bg-emerald-700 hover:bg-emerald-800 text-white'
-                                    : 'bg-primary hover:bg-primary-container text-on-primary'
-                                }`}
-                                type="button"
-                              >
-                                <span className="material-symbols-outlined text-[20px]">
-                                  {lot.status === 'CONFIRMED' ? 'verified' : 'check_circle'}
-                                </span>
-                                {lot.status === 'CONFIRMED' ? 'View CPCB Certificate' : 'Accept Lot & Confirm Weighbridge'}
-                              </button>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Operational Verification Indicator Bar */}
-                      <div className="mt-md pt-sm flex flex-wrap items-center justify-between gap-sm text-[12px] text-on-surface-variant font-label-md border-t border-outline-variant/30">
-                        <div className="flex items-center gap-md flex-wrap">
-                          <span className="flex items-center gap-xs text-primary font-semibold">
-                            <span className="material-symbols-outlined text-[16px]">fact_check</span>
-                            ✓ Digital Handover Log Ready
-                          </span>
-                          <span className="flex items-center gap-xs">
-                            <span className="material-symbols-outlined text-[16px]">tag</span>
-                            ✓ CPCB Code: #{lot.category_code}
-                          </span>
-                          <span className="flex items-center gap-xs">
-                            <span className="material-symbols-outlined text-[16px]">verified</span>
-                            ✓ Calibrated Scale Required
-                          </span>
-                        </div>
-                        <span className="text-on-surface-variant text-[11px] font-medium">Standard Operating Workflow</span>
-                      </div>
-                    </article>
-                  );
-                })}
-
-                {/* Pagination & Queue Footer */}
-                <div className="flex items-center justify-between p-sm text-on-surface-variant font-label-md text-label-md bg-surface-container-lowest rounded-xl shadow-sm">
-                  <span>Showing {filteredLots.length} lots queued for {selectedFacility.name}</span>
-                  <div className="flex gap-xs">
-                    <button className="px-sm py-xs rounded bg-surface-container hover:bg-surface-container-high text-on-surface cursor-pointer" type="button">
-                      Previous
-                    </button>
-                    <button className="px-sm py-xs rounded bg-primary text-on-primary font-bold cursor-pointer" type="button">
-                      1
-                    </button>
-                    <button className="px-sm py-xs rounded bg-surface-container hover:bg-surface-container-high text-on-surface cursor-pointer" type="button">
-                      Next
-                    </button>
-                  </div>
+                <div className="w-10 h-10 rounded-lg bg-tertiary-fixed flex items-center justify-center text-on-tertiary-fixed-variant">
+                  <span className="material-symbols-outlined text-[22px]">currency_exchange</span>
                 </div>
               </div>
+              <div className="mt-3 pt-2 flex items-center justify-between text-on-surface-variant text-[11px] border-t border-outline-variant/20">
+                <span>Avg response: 12m</span>
+                <span className="text-primary font-medium">Negotiation Open</span>
+              </div>
+            </div>
 
-              {/* Right Workspace Panel: Logistics Dispatch & Traceability (4 Columns) */}
-              <div className="xl:col-span-4 flex flex-col gap-md">
-                {/* Dispatch & Logistics Manager Card */}
-                <div className="bg-surface-container-lowest rounded-xl shadow-sm p-md flex flex-col gap-md border border-outline-variant/30">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-xs">
-                      <span className="material-symbols-outlined text-primary text-[22px]">route</span>
-                      <h3 className="font-headline-md text-headline-md font-bold text-on-surface">Today's Dispatch Line</h3>
-                    </div>
-                    <span className="bg-primary-fixed font-bold text-on-primary-fixed-variant text-[11px] px-sm py-0.5 rounded-full">
-                      8 Scheduled
-                    </span>
-                  </div>
-
-                  {/* Schedule Item 1 */}
-                  <div className="bg-surface-container-low rounded-lg p-sm flex flex-col gap-xs relative overflow-hidden">
-                    <div className="absolute left-0 top-0 bottom-0 w-1 bg-primary"></div>
-                    <div className="flex items-center justify-between pl-xs">
-                      <span className="font-label-md text-label-md font-bold text-on-surface flex items-center gap-xs">
-                        <span className="material-symbols-outlined text-primary text-[18px]">local_shipping</span>
-                        Van #KA-04-E-2091
-                      </span>
-                      <span className="font-label-md text-[12px] font-bold text-primary bg-primary-fixed/50 px-xs rounded">15:30 IST Target</span>
-                    </div>
-                    <div className="pl-xs text-on-surface-variant font-body-md text-[12px]">
-                      <p><strong className="text-on-surface">Driver:</strong> Suresh M. (+91 98450 12891)</p>
-                      <p><strong className="text-on-surface">Destination:</strong> Ramesh K. / Peenya Industrial</p>
-                    </div>
-                    <div className="mt-xs pt-xs flex items-center justify-between pl-xs font-label-md text-[11px] text-on-surface-variant border-t border-outline-variant/30">
-                      <span className="flex items-center gap-xs text-primary font-semibold">
-                        <span className="material-symbols-outlined text-[14px]">scale</span>
-                        Calibrated Field Scale on-board
-                      </span>
-                      <span>Est. 18 min transit</span>
-                    </div>
-                  </div>
-
-                  {/* Schedule Item 2 */}
-                  <div className="bg-surface-container-low rounded-lg p-sm flex flex-col gap-xs relative overflow-hidden">
-                    <div className="absolute left-0 top-0 bottom-0 w-1 bg-secondary"></div>
-                    <div className="flex items-center justify-between pl-xs">
-                      <span className="font-label-md text-label-md font-bold text-on-surface flex items-center gap-xs">
-                        <span className="material-symbols-outlined text-secondary text-[18px]">fire_truck</span>
-                        Truck #KA-02-B-9912
-                      </span>
-                      <span className="font-label-md text-[12px] font-semibold text-on-surface-variant">17:00 IST</span>
-                    </div>
-                    <div className="pl-xs text-on-surface-variant font-body-md text-[12px]">
-                      <p><strong className="text-on-surface">Driver:</strong> Anil Gowda (+91 94481 00214)</p>
-                      <p><strong className="text-on-surface">Mission:</strong> Yeshwanthpur Scrap Aggregators</p>
-                    </div>
-                    <div className="mt-xs pt-xs flex items-center justify-between pl-xs font-label-md text-[11px] text-on-surface-variant border-t border-outline-variant/30">
-                      <span>Payload Cap: 1,200 kg</span>
-                      <span className="text-secondary font-medium">Pre-routed via Outer Ring</span>
-                    </div>
-                  </div>
-
-                  {/* Settlement Mode Recording */}
-                  <div className="bg-surface-container rounded-lg p-sm flex flex-col gap-xs">
-                    <span className="font-label-md text-[11px] uppercase tracking-wider text-on-surface-variant font-bold">
-                      Settlement &amp; Payment Method
-                    </span>
-                    <div className="grid grid-cols-3 gap-xs">
-                      <button
-                        onClick={() => setSettlementMode('CASH')}
-                        className={`py-xs px-xs rounded font-label-md text-[12px] font-bold flex items-center justify-center gap-1 cursor-pointer transition-colors ${
-                          settlementMode === 'CASH'
-                            ? 'bg-surface-container-lowest shadow-sm text-primary border border-primary/30'
-                            : 'bg-surface-container text-on-surface-variant hover:bg-surface-container-lowest'
-                        }`}
-                        type="button"
-                      >
-                        <span>💵 Cash</span>
-                      </button>
-                      <button
-                        onClick={() => setSettlementMode('UPI')}
-                        className={`py-xs px-xs rounded font-label-md text-[12px] font-bold flex items-center justify-center gap-1 cursor-pointer transition-colors ${
-                          settlementMode === 'UPI'
-                            ? 'bg-surface-container-lowest shadow-sm text-primary border border-primary/30'
-                            : 'bg-surface-container text-on-surface-variant hover:bg-surface-container-lowest'
-                        }`}
-                        type="button"
-                      >
-                        <span>📱 UPI</span>
-                      </button>
-                      <button
-                        onClick={() => setSettlementMode('BANK')}
-                        className={`py-xs px-xs rounded font-label-md text-[12px] font-bold flex items-center justify-center gap-1 cursor-pointer transition-colors ${
-                          settlementMode === 'BANK'
-                            ? 'bg-surface-container-lowest shadow-sm text-primary border border-primary/30'
-                            : 'bg-surface-container text-on-surface-variant hover:bg-surface-container-lowest'
-                        }`}
-                        type="button"
-                      >
-                        <span>🏦 Bank</span>
-                      </button>
-                    </div>
-                    <span className="font-body-md text-[11px] text-on-surface-variant mt-1 text-center">
-                      Payment mode recorded upon physical weighbridge sign-off
-                    </span>
+            {/* Metric 3: Scheduled Pickups */}
+            <div className="bg-surface-container-lowest rounded-xl p-4 shadow-sm flex flex-col justify-between border border-outline-variant/30 hover:shadow-md transition-shadow">
+              <div className="flex items-start justify-between">
+                <div>
+                  <span className="font-label-md text-xs text-on-surface-variant font-medium">Pickups Scheduled</span>
+                  <div className="flex items-baseline gap-1.5 mt-1">
+                    <span className="font-headline-lg text-2xl sm:text-3xl text-on-surface font-bold">8</span>
+                    <span className="font-label-md text-xs text-secondary font-semibold">Runs Today</span>
                   </div>
                 </div>
+                <div className="w-10 h-10 rounded-lg bg-secondary-fixed flex items-center justify-center text-on-secondary-fixed-variant">
+                  <span className="material-symbols-outlined text-[22px]">local_shipping</span>
+                </div>
+              </div>
+              <div className="mt-3 pt-2 flex items-center justify-between text-on-surface-variant text-[11px] border-t border-outline-variant/20">
+                <span>5 Vans, 3 Dropoffs</span>
+                <span className="text-primary font-semibold">4 Completed</span>
+              </div>
+            </div>
 
-                {/* Realistic Traceability & Audit Verification Card */}
-                <div className="bg-surface-container-lowest rounded-xl shadow-sm p-md flex flex-col gap-md border border-outline-variant/30">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-xs">
-                      <span className="material-symbols-outlined text-primary text-[20px]">verified</span>
-                      <h4 className="font-headline-md text-headline-md font-bold text-on-surface">Traceability &amp; Verification</h4>
-                    </div>
-                    <span className="bg-primary text-on-primary text-[10px] font-bold px-xs py-0.5 rounded uppercase">
-                      Field Audit Ready
+            {/* Metric 4: Monthly Sourced Material */}
+            <div className="bg-surface-container-lowest rounded-xl p-4 shadow-sm flex flex-col justify-between border border-outline-variant/30 hover:shadow-md transition-shadow">
+              <div className="flex items-start justify-between">
+                <div>
+                  <span className="font-label-md text-xs text-on-surface-variant font-medium">Monthly Sourced</span>
+                  <div className="flex items-baseline gap-1 mt-1">
+                    <span className="font-headline-lg text-2xl sm:text-3xl text-on-surface font-bold">
+                      {metrics.total_verified_tonnage_mt || 42.8}
                     </span>
+                    <span className="font-label-md text-xs text-on-surface-variant">/ 50 MT</span>
                   </div>
-                  <ul className="flex flex-col gap-sm">
-                    <li className="flex items-start gap-sm bg-surface-container-low p-sm rounded-lg">
-                      <span className="text-[18px] mt-0.5">📍</span>
-                      <div>
-                        <span className="font-label-md text-label-md font-bold text-on-surface">1. Verified Location Check</span>
-                        <p className="font-body-md text-[12px] text-on-surface-variant">Physical handover coordinates logged via mobile GPS.</p>
-                      </div>
-                    </li>
-                    <li className="flex items-start gap-sm bg-surface-container-low p-sm rounded-lg">
-                      <span className="text-[18px] mt-0.5">⚖️</span>
-                      <div>
-                        <span className="font-label-md text-label-md font-bold text-on-surface">2. Physical Scale Calibration</span>
-                        <p className="font-body-md text-[12px] text-on-surface-variant">Gross, tare, and net weights recorded with calibrated scale stamp.</p>
-                      </div>
-                    </li>
-                    <li className="flex items-start gap-sm bg-surface-container-low p-sm rounded-lg">
-                      <span className="text-[18px] mt-0.5">📷</span>
-                      <div>
-                        <span className="font-label-md text-label-md font-bold text-on-surface">3. Handover Inspection Photo</span>
-                        <p className="font-body-md text-[12px] text-on-surface-variant">Visual proof of lot condition captured before payment release.</p>
-                      </div>
-                    </li>
-                    <li className="flex items-start gap-sm bg-surface-container-low p-sm rounded-lg">
-                      <span className="text-[18px] mt-0.5">📄</span>
-                      <div>
-                        <span className="font-label-md text-label-md font-bold text-on-surface">4. Digital Handover Receipt</span>
-                        <p className="font-body-md text-[12px] text-on-surface-variant">Instant CPCB EPR audit certificate issued (`CPCB-EPR-...`).</p>
-                      </div>
-                    </li>
-                  </ul>
-                  <button
-                    onClick={handleDownloadLedger}
-                    className="w-full py-sm bg-surface-container-high hover:bg-surface-container-highest text-on-surface font-label-md text-label-md font-bold rounded-lg flex items-center justify-center gap-xs transition-colors cursor-pointer shadow-sm"
-                    type="button"
-                  >
-                    <span className="material-symbols-outlined text-[18px]">download</span>
-                    Download Today's Transaction Ledger (CSV)
-                  </button>
+                </div>
+                <div className="w-10 h-10 rounded-lg bg-primary-container flex items-center justify-center text-on-primary">
+                  <span className="material-symbols-outlined text-[22px]">scale</span>
+                </div>
+              </div>
+              <div className="mt-3 pt-2 flex flex-col gap-1 border-t border-outline-variant/20">
+                <div className="flex justify-between items-center text-on-surface-variant text-[10px]">
+                  <span>Facility Quota</span>
+                  <span className="font-bold text-primary">85.6%</span>
+                </div>
+                <div className="w-full bg-surface-container-high h-1.5 rounded-full overflow-hidden">
+                  <div className="bg-primary h-full rounded-full" style={{ width: '85.6%' }}></div>
                 </div>
               </div>
             </div>
-          </div>
+          </section>
+
+          {/* Confirmation Notice Banner if issued */}
+          {confirmationNotice && (
+            <div className="bg-emerald-600/10 border-2 border-emerald-600 rounded-xl p-4 shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-emerald-600 text-white flex items-center justify-center shrink-0 shadow-sm">
+                  <span className="material-symbols-outlined text-[24px]">verified</span>
+                </div>
+                <div>
+                  <h4 className="font-bold text-emerald-900 dark:text-emerald-300 text-sm sm:text-base">
+                    Weighbridge Handover Confirmed • CPCB Certificate Issued
+                  </h4>
+                  <p className="text-xs text-on-surface-variant mt-0.5">
+                    Cert ID: <strong className="text-emerald-700 dark:text-emerald-400 font-mono">{confirmationNotice.certificate_id}</strong> | Lot: {confirmationNotice.lot_ref} | Net: {confirmationNotice.verified_weight} kg | Payout: ₹{confirmationNotice.payout.toLocaleString('en-IN')} ({confirmationNotice.payment_mode})
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setConfirmationNotice(null)}
+                className="px-3 py-1.5 bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold rounded-lg shadow-sm cursor-pointer shrink-0"
+              >
+                Dismiss Notice
+              </button>
+            </div>
+          )}
+
+          {/* TAB 1: INCOMING LOTS (CORE WORKFLOW) */}
+          {activeTab === 'incoming-lots' && (
+            <div className="space-y-6">
+              {/* Filter Toolbar */}
+              <section className="bg-surface-container-lowest rounded-xl p-3.5 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-3 border border-outline-variant/30">
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="font-label-lg text-xs font-bold text-on-surface mr-1 flex items-center gap-1">
+                    <span className="material-symbols-outlined text-primary text-[18px]">filter_list</span>
+                    Category:
+                  </span>
+                  {[
+                    { id: 'ALL', label: `All Lots (${lots.length})` },
+                    { id: 'PCB', label: 'Circuit Boards' },
+                    { id: 'CABLES', label: 'Copper Cables' },
+                    { id: 'BATTERIES', label: 'Batteries' }
+                  ].map((cat) => (
+                    <button
+                      key={cat.id}
+                      onClick={() => setCategoryFilter(cat.id)}
+                      className={`px-3 py-1 rounded-full text-xs font-semibold transition-all cursor-pointer ${
+                        categoryFilter === cat.id
+                          ? 'bg-primary text-on-primary shadow-sm'
+                          : 'bg-surface-container text-on-surface-variant hover:bg-surface-container-high'
+                      }`}
+                      type="button"
+                    >
+                      {cat.label}
+                    </button>
+                  ))}
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <div className="flex items-center bg-surface-container-low rounded-lg px-2.5 py-1 border border-outline-variant/30">
+                    <span className="material-symbols-outlined text-primary text-[16px] mr-1.5">near_me</span>
+                    <select
+                      value={radiusFilter}
+                      onChange={(e) => setRadiusFilter(e.target.value)}
+                      className="bg-transparent text-xs text-on-surface font-medium outline-none cursor-pointer"
+                    >
+                      <option value="10">Within 10 km Radius</option>
+                      <option value="5">Within 5 km Radius</option>
+                      <option value="25">Within 25 km Radius</option>
+                      <option value="ALL">All Territory</option>
+                    </select>
+                  </div>
+                </div>
+              </section>
+
+              {/* Main Two-Column Workdesk Grid */}
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+                {/* Left Column: Lots Queue (8 Columns) */}
+                <div className="lg:col-span-8 space-y-4">
+                  {filteredLots.length === 0 ? (
+                    <div className="bg-surface-container-lowest rounded-xl p-8 text-center border border-outline-variant/30">
+                      <span className="material-symbols-outlined text-4xl text-on-surface-variant">inbox</span>
+                      <p className="mt-2 text-sm font-semibold text-on-surface">No lots matching your filter</p>
+                      <button
+                        onClick={() => {
+                          setCategoryFilter('ALL');
+                          setRadiusFilter('ALL');
+                        }}
+                        className="mt-3 px-3 py-1.5 bg-primary text-on-primary text-xs font-bold rounded-lg"
+                      >
+                        Reset Filters
+                      </button>
+                    </div>
+                  ) : (
+                    filteredLots.map((lot) => {
+                      const currentRate = rates[lot.id] || lot.suggested_rate;
+                      const totalPayout = Math.round(currentRate * lot.net_weight_kg);
+                      const fulfillment = fulfillments[lot.id] || 'van';
+
+                      return (
+                        <article
+                          key={lot.id}
+                          className="bg-surface-container-lowest rounded-xl shadow-sm hover:shadow-md transition-shadow p-4 sm:p-5 border border-outline-variant/30 relative overflow-hidden"
+                        >
+                          {/* Accent Top Color Stripe */}
+                          <div
+                            className={`absolute top-0 left-0 right-0 h-1.5 ${
+                              lot.status === 'CONFIRMED' ? 'bg-emerald-600' : 'bg-primary'
+                            }`}
+                          ></div>
+
+                          {/* Header Bar */}
+                          <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
+                            <div className="flex items-center gap-2">
+                              <span className="bg-primary-fixed text-on-primary-fixed-variant text-[11px] font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider">
+                                {lot.priority_label || 'Grade A'}
+                              </span>
+                              <span className="font-headline-md text-sm sm:text-base font-bold text-on-surface">
+                                Lot #{lot.handover_ref}
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-1 bg-surface-container-low px-2 py-0.5 rounded-md text-xs text-on-surface-variant font-medium">
+                              <span className="material-symbols-outlined text-primary text-[15px]">schedule</span>
+                              <span>{lot.time_posted}</span>
+                            </div>
+                          </div>
+
+                          {/* Responsive Card Body: Side-by-Side on sm+, stacked on tiny */}
+                          <div className="flex flex-col sm:flex-row gap-4 items-stretch">
+                            {/* Left Image Column */}
+                            <div className="w-full sm:w-52 shrink-0 flex flex-col gap-2">
+                              <div className="relative rounded-lg overflow-hidden bg-surface-container-high h-44 sm:h-auto sm:flex-1 min-h-[160px] flex items-center justify-center border border-outline-variant/20">
+                                <img
+                                  alt={lot.title}
+                                  className="w-full h-full object-cover"
+                                  src={lot.image_url}
+                                />
+                                <div className="absolute bottom-2 left-2 right-2 bg-inverse-surface/90 backdrop-blur-md rounded px-2 py-1 flex items-center justify-between text-inverse-on-surface text-[10px]">
+                                  <span className="flex items-center gap-1 font-medium">
+                                    <span className="material-symbols-outlined text-primary-fixed text-[14px]">psychology</span>
+                                    AI Vision
+                                  </span>
+                                  <span className="font-bold text-primary-fixed">{lot.ai_badge}</span>
+                                </div>
+                              </div>
+                              <div className="bg-surface-container-low rounded-md px-2 py-1 flex items-center justify-between text-on-surface-variant text-[11px]">
+                                <span className="flex items-center gap-1 truncate mr-1">
+                                  <span className="material-symbols-outlined text-primary text-[14px]">location_on</span>
+                                  <span className="truncate">{lot.location_label}</span>
+                                </span>
+                                <span className="font-bold text-on-surface shrink-0">{lot.distance_km} km</span>
+                              </div>
+                            </div>
+
+                            {/* Right Details Column */}
+                            <div className="flex-1 min-w-0 flex flex-col justify-between space-y-3">
+                              <div>
+                                <h3 className="font-headline-md text-base sm:text-lg font-bold text-on-surface leading-tight">
+                                  {lot.title}
+                                </h3>
+                                <p className="font-body-md text-xs text-on-surface-variant line-clamp-2 mt-0.5">
+                                  {lot.subtitle}
+                                </p>
+
+                                {/* Collector Profile Card */}
+                                <div className="bg-surface-container-low rounded-lg p-2.5 flex items-center justify-between mt-2.5">
+                                  <div className="flex items-center gap-2 min-w-0">
+                                    <div className="w-7 h-7 rounded-full bg-surface-container-highest text-on-surface font-bold text-xs flex items-center justify-center shrink-0">
+                                      {lot.collector_name.slice(0, 2).toUpperCase()}
+                                    </div>
+                                    <div className="min-w-0">
+                                      <div className="flex items-center gap-1">
+                                        <span className="text-xs font-bold text-on-surface truncate">
+                                          {lot.collector_name}
+                                        </span>
+                                        <span className="material-symbols-outlined text-primary text-[14px]">verified</span>
+                                      </div>
+                                      <span className="text-[10px] text-on-surface-variant block truncate">
+                                        {lot.collector_history}
+                                      </span>
+                                    </div>
+                                  </div>
+                                  <div className="flex items-center gap-0.5 bg-surface-container-lowest px-2 py-0.5 rounded-full shadow-sm shrink-0">
+                                    <span className="material-symbols-outlined text-amber-500 text-[13px]">star</span>
+                                    <span className="text-xs font-bold text-on-surface">{lot.collector_rating}</span>
+                                  </div>
+                                </div>
+
+                                {/* 3-Metric Matrix */}
+                                <div className="grid grid-cols-3 gap-1 bg-surface-container rounded-lg p-2 mt-2.5 text-center">
+                                  <div className="border-r border-outline-variant/30">
+                                    <span className="text-[10px] text-on-surface-variant uppercase font-medium block">
+                                      Net Weight
+                                    </span>
+                                    <p className="text-sm font-bold text-on-surface">
+                                      {lot.net_weight_kg} <span className="text-[11px] font-normal text-on-surface-variant">kg</span>
+                                    </p>
+                                  </div>
+                                  <div className="border-r border-outline-variant/30">
+                                    <span className="text-[10px] text-on-surface-variant uppercase font-medium block">
+                                      Collector Asking
+                                    </span>
+                                    <p className="text-sm font-bold text-on-surface">
+                                      ₹{lot.collector_asking_rate} <span className="text-[11px] font-normal text-on-surface-variant">/kg</span>
+                                    </p>
+                                  </div>
+                                  <div>
+                                    <span className="text-[10px] text-on-surface-variant uppercase font-medium block">
+                                      Market Range
+                                    </span>
+                                    <p className="text-sm font-bold text-primary">
+                                      ₹{lot.benchmark_min}–{lot.benchmark_max} <span className="text-[11px] font-normal text-on-surface-variant">/kg</span>
+                                    </p>
+                                  </div>
+                                </div>
+                              </div>
+
+                              {/* Quotation Procurement Terminal */}
+                              <div className="bg-surface-container-low rounded-xl p-3 space-y-2.5 border border-outline-variant/20">
+                                {/* Fulfillment Switcher */}
+                                <div className="flex items-center justify-between flex-wrap gap-1.5">
+                                  <label className="text-xs font-bold text-on-surface flex items-center gap-1">
+                                    <span className="material-symbols-outlined text-primary text-[16px]">calculate</span>
+                                    Quote Procurement Rate:
+                                  </label>
+                                  <div className="flex items-center gap-1 bg-surface-container-lowest p-0.5 rounded-lg border border-outline-variant/30">
+                                    <button
+                                      onClick={() => handleFulfillmentToggle(lot.id, 'van')}
+                                      className={`px-2 py-0.5 rounded text-[10px] font-bold cursor-pointer transition-colors ${
+                                        fulfillment === 'van'
+                                          ? 'bg-primary-fixed text-on-primary-fixed-variant'
+                                          : 'text-on-surface-variant hover:text-on-surface'
+                                      }`}
+                                      type="button"
+                                    >
+                                      Van Pickup
+                                    </button>
+                                    <button
+                                      onClick={() => handleFulfillmentToggle(lot.id, 'dropoff')}
+                                      className={`px-2 py-0.5 rounded text-[10px] font-bold cursor-pointer transition-colors ${
+                                        fulfillment === 'dropoff'
+                                          ? 'bg-primary-fixed text-on-primary-fixed-variant'
+                                          : 'text-on-surface-variant hover:text-on-surface'
+                                      }`}
+                                      type="button"
+                                    >
+                                      Self Dropoff
+                                    </button>
+                                  </div>
+                                </div>
+
+                                {/* Price Input & Binding Total Display */}
+                                <div className="flex flex-col sm:flex-row items-center gap-2">
+                                  <div className="relative w-full sm:w-1/2">
+                                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm font-bold text-on-surface-variant">₹</span>
+                                    <input
+                                      type="number"
+                                      value={currentRate}
+                                      onChange={(e) => handleRateChange(lot.id, e.target.value)}
+                                      className="w-full bg-surface-container-lowest text-on-surface font-bold text-base pl-7 pr-12 py-1.5 rounded-lg shadow-sm border border-outline-variant/40 focus:outline-none focus:ring-2 focus:ring-primary h-10"
+                                      placeholder="0.00"
+                                    />
+                                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-on-surface-variant font-medium">/ kg</span>
+                                  </div>
+
+                                  <div className="w-full sm:w-1/2 bg-surface-container-lowest rounded-lg h-10 px-3 flex items-center justify-between shadow-sm border border-outline-variant/30">
+                                    <span className="text-xs text-on-surface-variant font-medium">Total Value:</span>
+                                    <span className="text-base font-bold text-primary font-mono">
+                                      ₹{totalPayout.toLocaleString('en-IN')}
+                                    </span>
+                                  </div>
+                                </div>
+
+                                {/* Action Buttons */}
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                  <button
+                                    onClick={() => alert(`Counter-offer of ₹${currentRate}/kg (Total ₹${totalPayout.toLocaleString('en-IN')}) sent to ${lot.collector_name}.`)}
+                                    className="h-10 bg-surface-container-highest hover:bg-surface-container-high text-on-surface text-xs font-semibold rounded-lg flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                                    type="button"
+                                  >
+                                    <span className="material-symbols-outlined text-[16px]">reply</span>
+                                    Counter-Offer
+                                  </button>
+                                  <button
+                                    onClick={() => handleOpenWeighbridgeModal(lot)}
+                                    className={`h-10 text-xs font-bold rounded-lg shadow-sm flex items-center justify-center gap-1.5 transition-all active:scale-98 cursor-pointer ${
+                                      lot.status === 'CONFIRMED'
+                                        ? 'bg-emerald-700 hover:bg-emerald-800 text-white'
+                                        : 'bg-primary hover:bg-primary-container text-on-primary'
+                                    }`}
+                                    type="button"
+                                  >
+                                    <span className="material-symbols-outlined text-[18px]">
+                                      {lot.status === 'CONFIRMED' ? 'verified' : 'check_circle'}
+                                    </span>
+                                    {lot.status === 'CONFIRMED' ? 'View CPCB Cert' : 'Accept & Weighbridge'}
+                                  </button>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Footer Checklist */}
+                          <div className="mt-3 pt-2 flex flex-wrap items-center justify-between gap-2 text-[11px] text-on-surface-variant border-t border-outline-variant/20">
+                            <div className="flex items-center gap-3 flex-wrap">
+                              <span className="flex items-center gap-1 text-primary font-medium">
+                                <span className="material-symbols-outlined text-[14px]">fact_check</span>
+                                Digital Log Ready
+                              </span>
+                              <span className="flex items-center gap-1">
+                                <span className="material-symbols-outlined text-[14px]">tag</span>
+                                CPCB Code: #{lot.category_code}
+                              </span>
+                              <span className="flex items-center gap-1">
+                                <span className="material-symbols-outlined text-[14px]">verified</span>
+                                Scale Calibrated
+                              </span>
+                            </div>
+                            <span className="text-[10px] text-on-surface-variant">EPR Verification Standard</span>
+                          </div>
+                        </article>
+                      );
+                    })
+                  )}
+                </div>
+
+                {/* Right Column: Logistics & Audit Panel (4 Columns) */}
+                <div className="lg:col-span-4 space-y-4">
+                  {/* Today's Dispatch Line */}
+                  <div className="bg-surface-container-lowest rounded-xl shadow-sm p-4 space-y-3 border border-outline-variant/30">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-1.5">
+                        <span className="material-symbols-outlined text-primary text-[20px]">route</span>
+                        <h3 className="font-headline-md text-sm font-bold text-on-surface">Today's Dispatch Line</h3>
+                      </div>
+                      <span className="bg-primary-fixed font-bold text-on-primary-fixed-variant text-[10px] px-2 py-0.5 rounded-full">
+                        8 Scheduled
+                      </span>
+                    </div>
+
+                    {/* Schedule 1 */}
+                    <div className="bg-surface-container-low rounded-lg p-2.5 flex flex-col gap-1 border-l-4 border-primary">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-bold text-on-surface flex items-center gap-1">
+                          <span className="material-symbols-outlined text-primary text-[16px]">local_shipping</span>
+                          Van #KA-04-E-2091
+                        </span>
+                        <span className="text-[10px] font-bold text-primary bg-primary-fixed/50 px-1.5 py-0.5 rounded">
+                          15:30 IST Target
+                        </span>
+                      </div>
+                      <div className="text-on-surface-variant text-[11px]">
+                        <p><strong className="text-on-surface">Driver:</strong> Suresh M. (+91 98450 12891)</p>
+                        <p><strong className="text-on-surface">Destination:</strong> Ramesh K. / Peenya Industrial</p>
+                      </div>
+                      <div className="mt-1 pt-1 flex items-center justify-between text-[10px] text-on-surface-variant border-t border-outline-variant/20">
+                        <span className="text-primary font-medium flex items-center gap-0.5">
+                          <span className="material-symbols-outlined text-[12px]">scale</span>
+                          Calibrated Scale on-board
+                        </span>
+                        <span>Est. 18m transit</span>
+                      </div>
+                    </div>
+
+                    {/* Schedule 2 */}
+                    <div className="bg-surface-container-low rounded-lg p-2.5 flex flex-col gap-1 border-l-4 border-secondary">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-bold text-on-surface flex items-center gap-1">
+                          <span className="material-symbols-outlined text-secondary text-[16px]">fire_truck</span>
+                          Truck #KA-02-B-9912
+                        </span>
+                        <span className="text-[10px] font-semibold text-on-surface-variant">17:00 IST</span>
+                      </div>
+                      <div className="text-on-surface-variant text-[11px]">
+                        <p><strong className="text-on-surface">Driver:</strong> Anil Gowda (+91 94481 00214)</p>
+                        <p><strong className="text-on-surface">Mission:</strong> Yeshwanthpur Scrap Aggregators</p>
+                      </div>
+                      <div className="mt-1 pt-1 flex items-center justify-between text-[10px] text-on-surface-variant border-t border-outline-variant/20">
+                        <span>Payload: 1,200 kg</span>
+                        <span className="text-secondary font-medium">Outer Ring Route</span>
+                      </div>
+                    </div>
+
+                    {/* Settlement Mode Picker */}
+                    <div className="bg-surface-container rounded-lg p-2.5 space-y-1.5">
+                      <span className="text-[10px] uppercase tracking-wider text-on-surface-variant font-bold block">
+                        Settlement &amp; Payment Method
+                      </span>
+                      <div className="grid grid-cols-3 gap-1">
+                        {[
+                          { id: 'CASH', label: '💵 Cash' },
+                          { id: 'UPI', label: '📱 UPI' },
+                          { id: 'BANK', label: '🏦 Bank' }
+                        ].map((m) => (
+                          <button
+                            key={m.id}
+                            onClick={() => setSettlementMode(m.id)}
+                            className={`py-1 rounded text-xs font-bold cursor-pointer transition-colors ${
+                              settlementMode === m.id
+                                ? 'bg-surface-container-lowest shadow-sm text-primary border border-primary/30'
+                                : 'bg-surface-container text-on-surface-variant hover:bg-surface-container-lowest'
+                            }`}
+                            type="button"
+                          >
+                            {m.label}
+                          </button>
+                        ))}
+                      </div>
+                      <span className="text-[10px] text-on-surface-variant block text-center mt-1">
+                        Payment signed off on physical weighbridge
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Traceability & Audit Verification */}
+                  <div className="bg-surface-container-lowest rounded-xl shadow-sm p-4 space-y-3 border border-outline-variant/30">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-1.5">
+                        <span className="material-symbols-outlined text-primary text-[18px]">verified</span>
+                        <h4 className="font-headline-md text-sm font-bold text-on-surface">Traceability &amp; Audit</h4>
+                      </div>
+                      <span className="bg-primary text-on-primary text-[9px] font-bold px-1.5 py-0.5 rounded uppercase">
+                        CPCB Audit Ready
+                      </span>
+                    </div>
+
+                    <ul className="space-y-2">
+                      <li className="flex items-start gap-2 bg-surface-container-low p-2 rounded-lg">
+                        <span className="text-base mt-0.5">📍</span>
+                        <div>
+                          <span className="text-xs font-bold text-on-surface block">1. Verified GPS Origin</span>
+                          <p className="text-[11px] text-on-surface-variant">Handover coordinates locked at aggregator site.</p>
+                        </div>
+                      </li>
+                      <li className="flex items-start gap-2 bg-surface-container-low p-2 rounded-lg">
+                        <span className="text-base mt-0.5">⚖️</span>
+                        <div>
+                          <span className="text-xs font-bold text-on-surface block">2. Calibrated Weighbridge</span>
+                          <p className="text-[11px] text-on-surface-variant">Gross and net weight stamped under Metrology Act.</p>
+                        </div>
+                      </li>
+                      <li className="flex items-start gap-2 bg-surface-container-low p-2 rounded-lg">
+                        <span className="text-base mt-0.5">📷</span>
+                        <div>
+                          <span className="text-xs font-bold text-on-surface block">3. Digital Handover Photos</span>
+                          <p className="text-[11px] text-on-surface-variant">Lot evidence captured before payout disbursement.</p>
+                        </div>
+                      </li>
+                      <li className="flex items-start gap-2 bg-surface-container-low p-2 rounded-lg">
+                        <span className="text-base mt-0.5">📄</span>
+                        <div>
+                          <span className="text-xs font-bold text-on-surface block">4. CPCB EPR Certificate</span>
+                          <p className="text-[11px] text-on-surface-variant">Instant EPR credit compliance issuance.</p>
+                        </div>
+                      </li>
+                    </ul>
+
+                    <button
+                      onClick={handleDownloadLedger}
+                      className="w-full py-2 bg-surface-container-high hover:bg-surface-container-highest text-on-surface text-xs font-bold rounded-lg flex items-center justify-center gap-1.5 transition-colors cursor-pointer shadow-sm"
+                      type="button"
+                    >
+                      <span className="material-symbols-outlined text-[16px]">download</span>
+                      Download Transaction Ledger (CSV)
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* TAB 2: ACTIVE PICKUPS LOGISTICS */}
+          {activeTab === 'active-pickups' && (
+            <div className="space-y-4">
+              <div className="bg-surface-container-lowest rounded-xl p-5 shadow-sm border border-outline-variant/30 flex items-center justify-between">
+                <div>
+                  <h3 className="text-lg font-bold text-on-surface">Active Fleet &amp; Collection Routes</h3>
+                  <p className="text-xs text-on-surface-variant mt-0.5">
+                    Real-time tracking of 8 collection vehicles assigned to {selectedFacility.name}
+                  </p>
+                </div>
+                <button className="px-3 py-1.5 bg-primary text-on-primary text-xs font-bold rounded-lg shadow-sm">
+                  + Dispatch New Vehicle
+                </button>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {[
+                  {
+                    id: 'KA-04-E-2091',
+                    driver: 'Suresh M.',
+                    phone: '+91 98450 12891',
+                    dest: 'Ramesh K. (Peenya Aggregator)',
+                    payload: '480 / 800 kg',
+                    status: 'In Transit',
+                    eta: '18 mins',
+                    scale: 'Calibrated Scale Certified'
+                  },
+                  {
+                    id: 'KA-02-B-9912',
+                    driver: 'Anil Gowda',
+                    phone: '+91 94481 00214',
+                    dest: 'Yeshwanthpur Industrial Aggregators',
+                    payload: '950 / 1200 kg',
+                    status: 'Loading at Yard',
+                    eta: 'On Site',
+                    scale: 'Digital Crane Scale Attached'
+                  },
+                  {
+                    id: 'MH-03-CB-4410',
+                    driver: 'Vikram Jadhav',
+                    phone: '+91 98200 44102',
+                    dest: 'Dharavi Link Road Scrap Market',
+                    payload: '620 / 1000 kg',
+                    status: 'En Route to Facility',
+                    eta: '25 mins',
+                    scale: 'Calibrated Scale Certified'
+                  },
+                  {
+                    id: 'KA-05-AB-7721',
+                    driver: 'Raju Narain',
+                    phone: '+91 97410 77219',
+                    dest: 'Rajajinagar Industrial E-Waste Hub',
+                    payload: '320 / 600 kg',
+                    status: 'Dispatched',
+                    eta: '40 mins',
+                    scale: 'Calibrated Scale Certified'
+                  }
+                ].map((v) => (
+                  <div key={v.id} className="bg-surface-container-lowest rounded-xl p-4 shadow-sm border border-outline-variant/30 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <div className="w-9 h-9 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
+                          <span className="material-symbols-outlined text-[20px]">local_shipping</span>
+                        </div>
+                        <div>
+                          <h4 className="font-bold text-sm text-on-surface">Vehicle #{v.id}</h4>
+                          <span className="text-[11px] text-on-surface-variant">{v.driver} ({v.phone})</span>
+                        </div>
+                      </div>
+                      <span className="bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2 py-0.5 rounded-full">
+                        {v.status}
+                      </span>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2 bg-surface-container-low p-2 rounded-lg text-xs">
+                      <div>
+                        <span className="text-[10px] text-on-surface-variant block">Destination</span>
+                        <strong className="text-on-surface truncate block">{v.dest}</strong>
+                      </div>
+                      <div>
+                        <span className="text-[10px] text-on-surface-variant block">Current Payload</span>
+                        <strong className="text-primary">{v.payload}</strong>
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-between text-xs text-on-surface-variant pt-1 border-t border-outline-variant/20">
+                      <span className="flex items-center gap-1 text-primary font-medium text-[11px]">
+                        <span className="material-symbols-outlined text-[14px]">scale</span>
+                        {v.scale}
+                      </span>
+                      <span className="font-bold text-on-surface">ETA: {v.eta}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* TAB 3: MATERIAL INVENTORY */}
+          {activeTab === 'material-inventory' && (
+            <div className="space-y-4">
+              <div className="bg-surface-container-lowest rounded-xl p-5 shadow-sm border border-outline-variant/30 flex items-center justify-between">
+                <div>
+                  <h3 className="text-lg font-bold text-on-surface">Plant Material Inventory &amp; Scrap Stock</h3>
+                  <p className="text-xs text-on-surface-variant mt-0.5">
+                    Live bay allocations and scrap inventory ready for valorization &amp; smelting
+                  </p>
+                </div>
+                <span className="text-xs font-bold text-primary bg-primary-fixed/50 px-3 py-1 rounded-full">
+                  Total Stock: 42.8 MT
+                </span>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {[
+                  { cat: 'Printed Circuit Boards (Grade A/B)', code: 'ITEW1-PCB', stock: '14.2 MT', bay: 'Bay 03-A', val: '₹1,06,50,000', icon: 'memory' },
+                  { cat: 'Telecom Copper Wire & Cable', code: 'ITEW-CBL-CU', stock: '18.4 MT', bay: 'Bay 01-C', val: '₹75,44,000', icon: 'electrical_services' },
+                  { cat: 'Li-ion Battery Modules', code: 'BATT-LI-ION', stock: '6.8 MT', bay: 'Hazardous Vault B', val: '₹7,48,000', icon: 'battery_charging_full' },
+                  { cat: 'CRT & Monitor Display Glass', code: 'ITEW2-DISP', stock: '2.1 MT', bay: 'Bay 04-D', val: '₹84,000', icon: 'tv' },
+                  { cat: 'Shredded Aluminum & Ferrous Frames', code: 'FERR-MET-01', stock: '1.3 MT', bay: 'Yard Silo 2', val: '₹65,000', icon: 'precision_manufacturing' }
+                ].map((item, idx) => (
+                  <div key={idx} className="bg-surface-container-lowest rounded-xl p-4 shadow-sm border border-outline-variant/30 space-y-3">
+                    <div className="flex items-start justify-between">
+                      <div className="w-9 h-9 rounded-lg bg-primary-fixed text-on-primary-fixed-variant flex items-center justify-center">
+                        <span className="material-symbols-outlined text-[20px]">{item.icon}</span>
+                      </div>
+                      <span className="text-[10px] font-bold bg-surface-container px-2 py-0.5 rounded font-mono">
+                        {item.code}
+                      </span>
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-sm text-on-surface">{item.cat}</h4>
+                      <p className="text-xs text-on-surface-variant">Storage Location: {item.bay}</p>
+                    </div>
+                    <div className="flex justify-between items-center bg-surface-container-low p-2 rounded-lg text-xs">
+                      <div>
+                        <span className="text-[10px] text-on-surface-variant block">Available Stock</span>
+                        <strong className="text-sm font-bold text-primary">{item.stock}</strong>
+                      </div>
+                      <div className="text-right">
+                        <span className="text-[10px] text-on-surface-variant block">Inventory Valuation</span>
+                        <strong className="text-xs font-bold text-on-surface">{item.val}</strong>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* TAB 4: PRICE ENGINE & QUOTES */}
+          {activeTab === 'price-quotes' && (
+            <div className="space-y-4">
+              <div className="bg-surface-container-lowest rounded-xl p-5 shadow-sm border border-outline-variant/30">
+                <h3 className="text-lg font-bold text-on-surface">Spot Price Engine &amp; Procurement Rates</h3>
+                <p className="text-xs text-on-surface-variant mt-0.5">
+                  CPCB-aligned benchmark pricing bands for regional aggregators &amp; door-to-door pickers
+                </p>
+              </div>
+
+              <div className="bg-surface-container-lowest rounded-xl p-5 shadow-sm border border-outline-variant/30 overflow-x-auto">
+                <table className="w-full text-left text-xs border-collapse">
+                  <thead>
+                    <tr className="border-b border-outline-variant/40 text-on-surface-variant uppercase text-[10px] font-bold">
+                      <th className="pb-3">Material Category</th>
+                      <th className="pb-3">CPCB Code</th>
+                      <th className="pb-3">Spot Benchmark</th>
+                      <th className="pb-3">Min Floor Rate</th>
+                      <th className="pb-3">Recycler Offer</th>
+                      <th className="pb-3">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-outline-variant/20">
+                    {[
+                      { cat: 'Printed Circuit Boards (Grade A)', code: 'ITEW1-PCB-HG', spot: '₹700 – ₹766/kg', floor: '₹650/kg', offer: '₹780/kg', status: 'Active Offer' },
+                      { cat: 'Printed Circuit Boards (Grade B/C)', code: 'ITEW1-PCB-MG', spot: '₹350 – ₹420/kg', floor: '₹300/kg', offer: '₹390/kg', status: 'Active Offer' },
+                      { cat: 'Insulated Copper Cables', code: 'ITEW-CBL-CU', spot: '₹400 – ₹430/kg', floor: '₹380/kg', offer: '₹420/kg', status: 'Active Offer' },
+                      { cat: 'Li-ion Battery Modules', code: 'BATT-LI-ION', spot: '₹95 – ₹120/kg', floor: '₹85/kg', offer: '₹110/kg', status: 'Active Offer' },
+                      { cat: 'Lead Acid Smelter Plates', code: 'BATT-LEAD-01', spot: '₹80 – ₹95/kg', floor: '₹72/kg', offer: '₹88/kg', status: 'Active Offer' }
+                    ].map((row, idx) => (
+                      <tr key={idx} className="hover:bg-surface-container-low transition-colors">
+                        <td className="py-3 font-bold text-on-surface">{row.cat}</td>
+                        <td className="py-3 font-mono text-on-surface-variant">{row.code}</td>
+                        <td className="py-3 text-primary font-semibold">{row.spot}</td>
+                        <td className="py-3 text-on-surface-variant">{row.floor}</td>
+                        <td className="py-3 font-bold text-primary">{row.offer}</td>
+                        <td className="py-3">
+                          <span className="bg-primary-fixed text-on-primary-fixed-variant text-[10px] font-bold px-2 py-0.5 rounded-full">
+                            {row.status}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
+          {/* TAB 5: TRACEABILITY & EPR REPORTS */}
+          {activeTab === 'traceability-epr' && (
+            <div className="space-y-4">
+              <div className="bg-surface-container-lowest rounded-xl p-5 shadow-sm border border-outline-variant/30 flex items-center justify-between">
+                <div>
+                  <h3 className="text-lg font-bold text-on-surface">CPCB EPR Certificate Registry</h3>
+                  <p className="text-xs text-on-surface-variant mt-0.5">
+                    Official e-waste recycling certificates issued for national EPR target fulfillment
+                  </p>
+                </div>
+                <button
+                  onClick={handleDownloadLedger}
+                  className="px-3 py-1.5 bg-primary text-on-primary text-xs font-bold rounded-lg shadow-sm flex items-center gap-1.5 cursor-pointer"
+                >
+                  <span className="material-symbols-outlined text-[16px]">download</span>
+                  Export EPR Ledger (CSV)
+                </button>
+              </div>
+
+              <div className="space-y-3">
+                {[
+                  {
+                    cert: 'CPCB-EPR-2026-MH-994102',
+                    lot: 'RL-2026-00479',
+                    collector: 'Dilip S. (Yard Manager)',
+                    material: 'Copper Cables (Heavy Metals)',
+                    weight: '35.0 kg',
+                    payout: '₹14,700',
+                    mode: 'CASH',
+                    date: '2026-09-05 11:20 IST',
+                    hash: 'SHA256: 8f9b4c2...e41a'
+                  },
+                  {
+                    cert: 'CPCB-EPR-2026-MH-994088',
+                    lot: 'RL-2026-00475',
+                    collector: 'Ramesh K. (Peenya Aggregator)',
+                    material: 'High-Grade PCB Motherboards',
+                    weight: '12.0 kg',
+                    payout: '₹9,360',
+                    mode: 'UPI',
+                    date: '2026-09-05 09:45 IST',
+                    hash: 'SHA256: 3a71f09...b11c'
+                  }
+                ].map((item, idx) => (
+                  <div key={idx} className="bg-surface-container-lowest rounded-xl p-4 shadow-sm border border-outline-variant/30 flex flex-col md:flex-row items-start md:items-center justify-between gap-3">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-lg bg-emerald-100 text-emerald-800 flex items-center justify-center shrink-0">
+                        <span className="material-symbols-outlined text-[24px]">verified</span>
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <span className="font-mono text-xs font-bold text-emerald-800 dark:text-emerald-300">
+                            {item.cert}
+                          </span>
+                          <span className="text-[10px] bg-surface-container px-2 py-0.5 rounded text-on-surface-variant font-mono">
+                            {item.hash}
+                          </span>
+                        </div>
+                        <p className="text-xs text-on-surface mt-0.5">
+                          <strong>{item.material}</strong> • {item.weight} from {item.collector}
+                        </p>
+                        <span className="text-[10px] text-on-surface-variant">
+                          Settled: {item.payout} via {item.mode} on {item.date}
+                        </span>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => alert(`Viewing Official CPCB Certificate ${item.cert}`)}
+                      className="px-3 py-1.5 bg-surface-container-high hover:bg-surface-container-highest text-on-surface text-xs font-semibold rounded-lg shrink-0 cursor-pointer"
+                    >
+                      View Certificate
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* TAB 6: FACILITY SETTINGS */}
+          {activeTab === 'facility-settings' && (
+            <div className="space-y-4">
+              <div className="bg-surface-container-lowest rounded-xl p-5 shadow-sm border border-outline-variant/30">
+                <h3 className="text-lg font-bold text-on-surface">Plant Authorization &amp; Calibration Settings</h3>
+                <p className="text-xs text-on-surface-variant mt-0.5">
+                  Regulated facility parameters for {selectedFacility.name}
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="bg-surface-container-lowest rounded-xl p-5 shadow-sm border border-outline-variant/30 space-y-3">
+                  <h4 className="font-bold text-sm text-on-surface">CPCB Registration Profile</h4>
+                  <div className="space-y-2 text-xs">
+                    <div>
+                      <span className="text-on-surface-variant block">Registration Number</span>
+                      <strong className="text-primary font-mono">{selectedFacility.reg_no}</strong>
+                    </div>
+                    <div>
+                      <span className="text-on-surface-variant block">Plant Operating Territory</span>
+                      <strong>{selectedFacility.location}</strong>
+                    </div>
+                    <div>
+                      <span className="text-on-surface-variant block">Authorized E-Waste Categories</span>
+                      <div className="flex flex-wrap gap-1 mt-1">
+                        {selectedFacility.materials.map((m, idx) => (
+                          <span key={idx} className="bg-surface-container px-2 py-0.5 rounded text-[10px] font-bold">
+                            {m}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-surface-container-lowest rounded-xl p-5 shadow-sm border border-outline-variant/30 space-y-3">
+                  <h4 className="font-bold text-sm text-on-surface">Weighbridge Metrology Calibration</h4>
+                  <div className="space-y-2 text-xs">
+                    <div>
+                      <span className="text-on-surface-variant block">Scale Calibrated On</span>
+                      <strong>2026-08-15 (Legal Metrology Dept, MH)</strong>
+                    </div>
+                    <div>
+                      <span className="text-on-surface-variant block">Next Recalibration Due</span>
+                      <strong className="text-emerald-700">2027-02-15 (Valid)</strong>
+                    </div>
+                    <div>
+                      <span className="text-on-surface-variant block">Acceptable Weight Tolerance</span>
+                      <strong>±0.1 kg standard field variance</strong>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
         </main>
       </div>
 
       {/* Weighbridge Verification & CPCB Confirmation Modal */}
       {inspectLot && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-surface rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-outline-variant flex flex-col gap-4 animate-in fade-in zoom-in-95 duration-200">
+          <div className="bg-surface rounded-2xl max-w-lg w-full p-5 sm:p-6 shadow-2xl border border-outline-variant flex flex-col gap-4 animate-in fade-in zoom-in-95 duration-200">
             <div className="flex items-start justify-between border-b border-outline-variant/60 pb-3">
               <div>
-                <span className="text-xs uppercase font-bold text-primary tracking-wider">Weighbridge Scale Verification</span>
-                <h3 className="text-xl font-bold text-on-surface mt-0.5">{inspectLot.title}</h3>
-                <span className="text-xs text-on-surface-variant">Ref: {inspectLot.handover_ref}</span>
+                <span className="text-[11px] uppercase font-bold text-primary tracking-wider">
+                  Weighbridge Scale Verification
+                </span>
+                <h3 className="text-lg sm:text-xl font-bold text-on-surface mt-0.5">{inspectLot.title}</h3>
+                <span className="text-xs text-on-surface-variant font-mono">Ref: {inspectLot.handover_ref}</span>
               </div>
               <button
                 onClick={() => setInspectLot(null)}
@@ -1134,17 +1456,17 @@ export default function RecyclerDashboard({ onRoleSwitch }) {
 
             <div className="grid grid-cols-2 gap-3 bg-surface-container-low p-3 rounded-xl">
               <div>
-                <span className="text-[11px] text-on-surface-variant font-medium">Collector / Origin</span>
-                <p className="font-bold text-sm text-on-surface">{inspectLot.collector_name}</p>
+                <span className="text-[10px] text-on-surface-variant font-medium">Collector / Origin</span>
+                <p className="font-bold text-xs sm:text-sm text-on-surface truncate">{inspectLot.collector_name}</p>
               </div>
               <div>
-                <span className="text-[11px] text-on-surface-variant font-medium">Assigned Recycler</span>
-                <p className="font-bold text-sm text-primary">{selectedFacility.name}</p>
+                <span className="text-[10px] text-on-surface-variant font-medium">Assigned Recycler</span>
+                <p className="font-bold text-xs sm:text-sm text-primary truncate">{selectedFacility.name}</p>
               </div>
             </div>
 
             <div>
-              <label className="text-xs font-bold text-on-surface block mb-1.5">
+              <label className="text-xs font-bold text-on-surface block mb-1">
                 Calibrated Scale Actual Net Weight (kg):
               </label>
               <div className="relative">
@@ -1153,23 +1475,28 @@ export default function RecyclerDashboard({ onRoleSwitch }) {
                   step="0.1"
                   value={weighbridgeInput}
                   onChange={(e) => setWeighbridgeInput(e.target.value)}
-                  className="w-full h-12 px-3 bg-surface-container-lowest border-2 border-primary rounded-xl font-bold text-xl text-on-surface focus:outline-none"
+                  className="w-full h-11 px-3 bg-surface-container-lowest border-2 border-primary rounded-xl font-bold text-lg text-on-surface focus:outline-none"
                 />
-                <span className="absolute right-3 top-3 text-sm font-bold text-on-surface-variant">kg</span>
+                <span className="absolute right-3 top-2.5 text-sm font-bold text-on-surface-variant">kg</span>
               </div>
-              <span className="text-[11px] text-on-surface-variant mt-1 block">
-                Stated Collector Weight: {inspectLot.net_weight_kg} kg | Scale Variance: ±{(Math.abs(parseFloat(weighbridgeInput || 0) - inspectLot.net_weight_kg)).toFixed(1)} kg
+              <span className="text-[10px] text-on-surface-variant mt-1 block">
+                Stated Collector Weight: {inspectLot.net_weight_kg} kg | Scale Variance: ±
+                {Math.abs((parseFloat(weighbridgeInput) || 0) - inspectLot.net_weight_kg).toFixed(1)} kg
               </span>
             </div>
 
             <div className="bg-surface-container-lowest p-3 rounded-xl border border-outline-variant/40 flex items-center justify-between">
               <span className="text-xs font-semibold text-on-surface">Settlement Amount ({settlementMode}):</span>
-              <span className="font-action-xl text-xl font-bold text-primary">
-                ₹{Math.round((parseFloat(weighbridgeInput) || inspectLot.net_weight_kg) * (rates[inspectLot.id] || inspectLot.suggested_rate)).toLocaleString('en-IN')}
+              <span className="text-lg font-bold text-primary font-mono">
+                ₹
+                {Math.round(
+                  (parseFloat(weighbridgeInput) || inspectLot.net_weight_kg) *
+                    (rates[inspectLot.id] || inspectLot.suggested_rate)
+                ).toLocaleString('en-IN')}
               </span>
             </div>
 
-            <div className="flex flex-col gap-2 text-xs text-on-surface-variant">
+            <div className="space-y-1.5 text-xs text-on-surface-variant">
               <label className="flex items-center gap-2 cursor-pointer">
                 <input type="checkbox" defaultChecked className="rounded text-primary focus:ring-primary w-4 h-4" />
                 <span>Dual visual signoff completed between collector &amp; weighbridge operator</span>
@@ -1180,20 +1507,20 @@ export default function RecyclerDashboard({ onRoleSwitch }) {
               </label>
             </div>
 
-            <div className="grid grid-cols-2 gap-3 pt-2">
+            <div className="grid grid-cols-2 gap-3 pt-2 border-t border-outline-variant/30">
               <button
                 onClick={() => setInspectLot(null)}
-                className="h-11 bg-surface-container hover:bg-surface-container-high text-on-surface font-bold text-xs rounded-xl cursor-pointer"
+                className="h-10 bg-surface-container hover:bg-surface-container-high text-on-surface font-bold text-xs rounded-xl cursor-pointer"
               >
                 Cancel
               </button>
               <button
                 onClick={handleConfirmWeighbridge}
                 disabled={isSubmittingConfirm}
-                className="h-11 bg-primary hover:bg-primary-container text-on-primary font-bold text-xs rounded-xl shadow-md flex items-center justify-center gap-2 cursor-pointer active:scale-98 transition-transform"
+                className="h-10 bg-primary hover:bg-primary-container text-on-primary font-bold text-xs rounded-xl shadow-md flex items-center justify-center gap-1.5 cursor-pointer active:scale-98 transition-transform"
               >
-                <span className="material-symbols-outlined text-[18px]">verified</span>
-                <span>{isSubmittingConfirm ? 'Issuing Certificate...' : 'Issue CPCB EPR Certificate'}</span>
+                <span className="material-symbols-outlined text-[16px]">verified</span>
+                <span>{isSubmittingConfirm ? 'Issuing...' : 'Issue CPCB Certificate'}</span>
               </button>
             </div>
           </div>

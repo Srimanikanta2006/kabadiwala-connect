@@ -60,7 +60,7 @@ export default function Screen01Home({
   return (
     <div className="collector-shell bg-background text-on-background min-h-screen pb-24 relative overflow-x-hidden">
       {/* TopAppBar */}
-      <header class="bg-surface dark:bg-on-background w-full sticky top-0 z-40">
+      <header className="bg-surface dark:bg-on-background w-full sticky top-0 z-40">
         <div className="flex justify-between items-center w-full px-margin-mobile h-touch-target-min border-b border-outline-variant dark:border-outline">
           <div className="flex items-center gap-sm cursor-pointer hover:bg-surface-container rounded-full p-1 transition-colors">
             <div className="w-8 h-8 rounded-full bg-primary/15 flex items-center justify-center border border-outline-variant text-primary font-bold text-sm">
