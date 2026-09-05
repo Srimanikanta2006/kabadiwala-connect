@@ -7,7 +7,8 @@ export default function Screen01Home({
   onSelectLot,
   recentLots = [],
   syncStatus = { isOnline: true, unsyncedCount: 0 },
-  onLanguageChange
+  onLanguageChange,
+  onSwitchRole
 }) {
   const { t, i18n } = useTranslation();
   const currentLang = i18n.language || 'hi';
@@ -70,12 +71,25 @@ export default function Screen01Home({
               <h1 className="font-headline-md text-headline-md font-bold text-primary dark:text-primary-fixed-dim leading-none">RE:LINK</h1>
             </div>
           </div>
-          <div className="flex items-center gap-xs">
+          <div className="flex items-center gap-2">
+            {/* Role / Portal Switcher */}
+            {onSwitchRole && (
+              <button
+                onClick={onSwitchRole}
+                aria-label="Switch Portal"
+                className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-primary-fixed/40 text-on-primary-fixed-variant border border-primary/30 hover:bg-primary-fixed transition-colors text-xs font-semibold cursor-pointer"
+                title="Switch Portal or Role"
+              >
+                <span className="material-symbols-outlined text-[16px]">domain</span>
+                <span className="hidden sm:inline">Recycler</span>
+              </button>
+            )}
+
             {/* Language Picker */}
             <button
               onClick={onLanguageChange}
               aria-label="Switch Language"
-              className="flex items-center gap-xs px-2.5 py-1 rounded-full bg-surface-container border border-outline-variant text-on-surface hover:bg-surface-container-high transition-colors text-xs font-label-md"
+              className="flex items-center gap-xs px-2.5 py-1 rounded-full bg-surface-container border border-outline-variant text-on-surface hover:bg-surface-container-high transition-colors text-xs font-label-md cursor-pointer"
             >
               <span className="material-symbols-outlined text-base text-primary">language</span>
               <span className="font-semibold">{currentLang === 'hi' ? 'हिन्दी' : (currentLang === 'mr' ? 'मराठी' : 'English')}</span>

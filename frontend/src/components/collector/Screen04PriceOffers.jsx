@@ -100,7 +100,7 @@ export default function Screen04PriceOffers({
       <header className="docked full-width top-0 border-b border-outline-variant bg-surface text-primary flex justify-between items-center w-full px-margin-mobile h-touch-target-min z-40 sticky">
         <div className="flex items-center gap-3">
           <button
-            onClick={() => onNavigate('ai_scan')}
+            onClick={() => onNavigate('lot_summary')}
             aria-label="Back"
             className="flex items-center justify-center w-touch-target-min h-touch-target-min hover:bg-surface-container rounded-full text-on-surface-variant transition-colors cursor-pointer"
           >

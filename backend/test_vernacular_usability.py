@@ -109,8 +109,10 @@ def test_touch_target_and_accessibility_css():
     CRITERION 3 & Step 4: Check color/contrast and touch-target size (>= 48px).
     Ensure CSS defines high-contrast buttons and accessible touch-target heights.
     """
-    css_path = os.path.join(FRONTEND_DIR, "src", "components", "QuickLotIconFlow.css")
-    assert os.path.exists(css_path), "QuickLotIconFlow.css must exist"
+    css_path = os.path.join(FRONTEND_DIR, "src", "components", "collector", "collectorStyles.css")
+    if not os.path.exists(css_path):
+        css_path = os.path.join(FRONTEND_DIR, "src", "components", "QuickLotIconFlow.css")
+    assert os.path.exists(css_path), "collectorStyles.css or QuickLotIconFlow.css must exist"
 
     with open(css_path, "r", encoding="utf-8") as f:
         css_content = f.read()

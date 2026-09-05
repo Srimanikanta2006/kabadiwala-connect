@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import Screen01Home from './Screen01Home';
 import Screen02AiIdentification from './Screen02AiIdentification';
 import Screen03CategorySelect from './Screen03CategorySelect';
+import Screen03bDigitalSummary from './Screen03bDigitalSummary';
 import Screen04PriceOffers from './Screen04PriceOffers';
 import Screen05HandoverReceipt from './Screen05HandoverReceipt';
 import Screen06EarningsHistory from './Screen06EarningsHistory';
@@ -33,11 +34,11 @@ const DEFAULT_LOT_DRAFT = {
   status: 'PENDING_CONFIRMATION'
 };
 
-export default function CollectorApp() {
+export default function CollectorApp({ onSwitchRole }) {
   const { i18n } = useTranslation();
   const fileInputRef = useRef(null);
 
-  const [activeScreen, setActiveScreen] = useState('home'); // 'home' | 'ai_scan' | 'category_select' | 'offers' | 'receipt' | 'earnings' | 'safety'
+  const [activeScreen, setActiveScreen] = useState('home'); // 'home' | 'ai_scan' | 'category_select' | 'lot_summary' | 'offers' | 'receipt' | 'earnings' | 'safety'
   const [lotDraft, setLotDraft] = useState(DEFAULT_LOT_DRAFT);
   const [recentLots, setRecentLots] = useState([]);
   const [syncStatus, setSyncStatus] = useState({
@@ -167,6 +168,27 @@ export default function CollectorApp() {
     }
   };
 
+  const handleSaveDraftOffline = async (draftToSave) => {
+    try {
+      const lotRecord = {
+        collector_id: 'col_test_001',
+        material_id: draftToSave.materialId || 'mat_pcb_high',
+        material_category: (draftToSave.materialTitle || 'PCB').split(' ')[0],
+        approximate_weight: draftToSave.weight || 12.0,
+        condition: draftToSave.condition || 'Used / Mixed',
+        quoted_price: draftToSave.lowEst || 8400,
+        image_data_url: draftToSave.photoUrl,
+        ai_confidence: (draftToSave.confidence || 92) / 100,
+        status: 'CREATED',
+        synced: false
+      };
+      const saved = await saveOfflineLot(lotRecord);
+      setRecentLots((prev) => [saved, ...prev]);
+    } catch (err) {
+      console.log('Error saving offline lot draft:', err);
+    }
+  };
+
   const handleResetLot = () => {
     setLotDraft({
       ...DEFAULT_LOT_DRAFT,
@@ -204,6 +226,7 @@ export default function CollectorApp() {
           recentLots={recentLots}
           syncStatus={syncStatus}
           onLanguageChange={handleLanguageCycle}
+          onSwitchRole={onSwitchRole}
         />
       )}
 
@@ -223,6 +246,16 @@ export default function CollectorApp() {
         <Screen03CategorySelect
           onSelectCategory={(cat) => handleUpdateDraft(cat)}
           onNavigate={setActiveScreen}
+        />
+      )}
+
+      {/* Screen 3b: Create Lot & Digital Summary (Stitch Screen) */}
+      {activeScreen === 'lot_summary' && (
+        <Screen03bDigitalSummary
+          lotDraft={lotDraft}
+          onNavigate={setActiveScreen}
+          onSaveOffline={handleSaveDraftOffline}
+          syncStatus={syncStatus}
         />
       )}
 

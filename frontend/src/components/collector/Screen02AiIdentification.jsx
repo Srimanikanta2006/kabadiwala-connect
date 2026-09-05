@@ -68,7 +68,7 @@ export default function Screen02AiIdentification({
       highEst,
       isConfirmed: true
     });
-    onNavigate('offers');
+    onNavigate('lot_summary');
   };
 
   return (
@@ -342,8 +342,8 @@ export default function Screen02AiIdentification({
             className="w-full py-3.5 px-4 bg-primary hover:bg-primary-container text-on-primary rounded-xl font-headline-md text-headline-md font-bold shadow-md flex items-center justify-between transition-all active:scale-[0.99] cursor-pointer"
           >
             <div className="flex items-center gap-2">
-              <span className="material-symbols-outlined">request_quote</span>
-              <span>Proceed to Recycler Offers</span>
+              <span className="material-symbols-outlined">receipt_long</span>
+              <span>Create Lot &amp; View Summary</span>
             </div>
             <span className="text-sm font-semibold bg-white/20 px-2.5 py-1 rounded-md">
               ₹{lowEst.toLocaleString('en-IN')} - ₹{highEst.toLocaleString('en-IN')}
