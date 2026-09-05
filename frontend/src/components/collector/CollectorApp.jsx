@@ -8,6 +8,7 @@ import Screen03bDigitalSummary from './Screen03bDigitalSummary';
 import Screen04PriceOffers from './Screen04PriceOffers';
 import Screen05HandoverReceipt from './Screen05HandoverReceipt';
 import Screen06EarningsHistory from './Screen06EarningsHistory';
+import Screen07MyLots from './Screen07MyLots';
 import SafetyGuidance from '../SafetyGuidance';
 import { saveOfflineLot, saveOfflineHandover, getRecentOfflineLots } from '../../db/offlineDb';
 import { syncEngine } from '../../services/syncEngine';
@@ -137,6 +138,7 @@ export default function CollectorApp({ onSwitchRole }) {
     // Save to Dexie offline database
     try {
       const lotRecord = {
+        id: acceptedDraft.id || `lot_${Date.now()}`,
         collector_id: 'col_test_001',
         material_id: acceptedDraft.materialId,
         material_category: acceptedDraft.materialTitle.split(' ')[0],
@@ -144,15 +146,18 @@ export default function CollectorApp({ onSwitchRole }) {
         condition: acceptedDraft.condition,
         quoted_price: acceptedDraft.totalEst,
         image_data_url: acceptedDraft.photoUrl,
-        ai_confidence: acceptedDraft.confidence / 100,
-        status: 'PENDING_CONFIRMATION',
+        ai_confidence: (acceptedDraft.confidence || 92) / 100,
+        status: 'OFFER_ACCEPTED',
+        acceptedRecycler: acceptedDraft.acceptedRecycler,
+        handover_ref: acceptedDraft.handoverRef || `RL-2026-${Math.floor(10000 + Math.random() * 90000)}`,
+        created_at: 'Just now',
         synced: false
       };
       const savedLot = await saveOfflineLot(lotRecord);
 
       const handoverRecord = {
         lot_id: savedLot.id,
-        handover_ref: acceptedDraft.handoverRef,
+        handover_ref: lotRecord.handover_ref,
         weight: acceptedDraft.weight,
         gps_lat: 19.0434,
         gps_lng: 72.8576,
@@ -162,7 +167,11 @@ export default function CollectorApp({ onSwitchRole }) {
         synced: false
       };
       await saveOfflineHandover(handoverRecord);
-      setRecentLots((prev) => [savedLot, ...prev]);
+      setRecentLots((prev) => [savedLot, ...prev.filter(l => l.id !== savedLot.id)]);
+
+      if (syncEngine.isEffectivelyOnline()) {
+        syncEngine.syncNow();
+      }
     } catch (err) {
       console.log('Error caching accepted lot:', err);
     }
@@ -171,6 +180,7 @@ export default function CollectorApp({ onSwitchRole }) {
   const handleSaveDraftOffline = async (draftToSave) => {
     try {
       const lotRecord = {
+        id: draftToSave.id || `lot_${Date.now()}`,
         collector_id: 'col_test_001',
         material_id: draftToSave.materialId || 'mat_pcb_high',
         material_category: (draftToSave.materialTitle || 'PCB').split(' ')[0],
@@ -179,13 +189,21 @@ export default function CollectorApp({ onSwitchRole }) {
         quoted_price: draftToSave.lowEst || 8400,
         image_data_url: draftToSave.photoUrl,
         ai_confidence: (draftToSave.confidence || 92) / 100,
-        status: 'CREATED',
+        status: 'AWAITING_OFFERS',
+        handover_ref: draftToSave.handoverRef || `RL-2026-${Math.floor(10000 + Math.random() * 90000)}`,
+        created_at: 'Just now',
         synced: false
       };
       const saved = await saveOfflineLot(lotRecord);
-      setRecentLots((prev) => [saved, ...prev]);
+      setRecentLots((prev) => [saved, ...prev.filter(l => l.id !== saved.id)]);
+
+      if (syncEngine.isEffectivelyOnline()) {
+        syncEngine.syncNow();
+      }
+      return saved;
     } catch (err) {
       console.log('Error saving offline lot draft:', err);
+      return null;
     }
   };
 
@@ -227,6 +245,30 @@ export default function CollectorApp({ onSwitchRole }) {
           syncStatus={syncStatus}
           onLanguageChange={handleLanguageCycle}
           onSwitchRole={onSwitchRole}
+        />
+      )}
+
+      {/* Screen 1b: My Lots & Active Tracking */}
+      {activeScreen === 'my_lots' && (
+        <Screen07MyLots
+          lots={recentLots}
+          onSelectLot={(lot) => {
+            setLotDraft((prev) => ({
+              ...prev,
+              ...lot,
+              materialTitle: lot.material_category || lot.materialTitle || 'Printed Circuit Board (PCB)'
+            }));
+            if (lot.status === 'AWAITING_OFFERS' || lot.status === 'CREATED') {
+              setActiveScreen('offers');
+            } else if (lot.status === 'OFFER_ACCEPTED' || lot.status === 'READY_FOR_PICKUP') {
+              setActiveScreen('receipt');
+            } else {
+              setActiveScreen('receipt');
+            }
+          }}
+          onNewScan={handleScanTrigger}
+          onNavigate={setActiveScreen}
+          syncStatus={syncStatus}
         />
       )}
 

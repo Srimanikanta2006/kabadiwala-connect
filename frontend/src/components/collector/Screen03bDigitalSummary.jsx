@@ -30,11 +30,12 @@ export default function Screen03bDigitalSummary({
       await onSaveOffline({
         ...lotDraft,
         lowEst,
-        highEst
+        highEst,
+        handoverRef
       });
     }
-    setSaveMessage('Saved to Offline SQLite Queue 💾');
-    setTimeout(() => setSaveMessage(null), 2500);
+    setSaveMessage(`✓ Saved to Offline Queue (#${handoverRef}) 💾`);
+    setTimeout(() => setSaveMessage(null), 3000);
   };
 
   return (
@@ -250,11 +251,11 @@ export default function Screen03bDigitalSummary({
             <span className="font-label-md text-[10px]">Scan</span>
           </button>
           <button
-            onClick={() => onNavigate('home')}
+            onClick={() => onNavigate('my_lots')}
             className="flex flex-col items-center gap-0.5 py-1 px-3 rounded-lg text-on-surface-variant hover:text-on-surface cursor-pointer"
           >
             <span className="material-symbols-outlined text-[20px]">format_list_bulleted</span>
-            <span className="font-label-md text-[10px]">Lots</span>
+            <span className="font-label-md text-[10px]">My Lots</span>
           </button>
           <button
             onClick={() => onNavigate('earnings')}

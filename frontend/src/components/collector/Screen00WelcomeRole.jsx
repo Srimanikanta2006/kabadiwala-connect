@@ -162,16 +162,26 @@ export default function Screen00WelcomeRole({ onSelectRole }) {
                   />
                   <span className="material-symbols-outlined text-primary text-[20px]">phone_android</span>
                 </div>
-                <button
-                  onClick={handleCollectorLogin}
-                  className="w-full h-12 rounded-xl bg-primary text-on-primary font-action-xl text-sm sm:text-base font-bold flex items-center justify-center gap-2 shadow-md hover:bg-primary-container transition-all active:scale-[0.99] cursor-pointer"
-                  type="button"
-                >
-                  <span>Launch Collector App</span>
-                  <span className="material-symbols-outlined text-[20px]">arrow_forward</span>
-                </button>
-              </div>
-            </section>
+                  <button
+                    onClick={handleCollectorLogin}
+                    className="w-full h-12 rounded-xl bg-primary text-on-primary font-action-xl text-sm sm:text-base font-bold flex items-center justify-center gap-2 shadow-md hover:bg-primary-container transition-all active:scale-[0.99] cursor-pointer"
+                    type="button"
+                  >
+                    <span>Launch Collector App</span>
+                    <span className="material-symbols-outlined text-[20px]">arrow_forward</span>
+                  </button>
+                  <div className="pt-1">
+                    <button
+                      onClick={() => onSelectRole('collector', '9845012891')}
+                      type="button"
+                      className="w-full py-2 px-3 bg-primary/10 hover:bg-primary/20 text-primary rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-colors cursor-pointer border border-primary/20"
+                    >
+                      <span className="material-symbols-outlined text-[16px]">bolt</span>
+                      <span>⚡ Quick Demo Login: Ramesh K. (+91 98450 12891)</span>
+                    </button>
+                  </div>
+                </div>
+              </section>
 
             {/* Card 2: Recycler */}
             <section className="bg-surface-container-lowest rounded-2xl p-6 lg:p-7 shadow-sm border-2 border-outline-variant/40 flex flex-col justify-between hover:shadow-md hover:border-secondary transition-all relative overflow-hidden group">
@@ -237,6 +247,16 @@ export default function Screen00WelcomeRole({ onSelectRole }) {
                   </div>
                   <span className="material-symbols-outlined text-[22px]">chevron_right</span>
                 </button>
+                <div className="pt-1">
+                  <button
+                    onClick={handleRecyclerLogin}
+                    type="button"
+                    className="w-full py-2 px-3 bg-secondary/10 hover:bg-secondary/20 text-secondary rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-colors cursor-pointer border border-secondary/20"
+                  >
+                    <span className="material-symbols-outlined text-[16px]">bolt</span>
+                    <span>⚡ Quick Demo Login: EcoRecycle India (Tier-1)</span>
+                  </button>
+                </div>
               </div>
             </section>
           </div>

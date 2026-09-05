@@ -84,6 +84,13 @@ export default function Screen01Home({
               <span>Home</span>
             </button>
             <button
+              onClick={() => onNavigate('my_lots')}
+              className="px-3 py-1.5 rounded-full text-on-surface hover:bg-surface-container transition-colors flex items-center gap-1.5 cursor-pointer"
+            >
+              <span className="material-symbols-outlined text-[16px]">inventory_2</span>
+              <span>My Lots</span>
+            </button>
+            <button
               onClick={onScanClick}
               className="px-3 py-1.5 rounded-full text-on-surface hover:bg-surface-container transition-colors flex items-center gap-1.5 cursor-pointer"
             >
@@ -467,12 +474,12 @@ export default function Screen01Home({
         </button>
 
         <button
-          onClick={() => onNavigate('ai_scan')}
-          aria-label="Sell / Lots"
+          onClick={() => onNavigate('my_lots')}
+          aria-label="My Lots"
           className="flex flex-col items-center justify-center min-h-[48px] min-w-[64px] text-on-surface-variant hover:bg-surface-container-low rounded-lg p-1 transition-colors cursor-pointer"
         >
           <span className="material-symbols-outlined">inventory_2</span>
-          <span className="font-label-md text-label-md mt-1 text-xs">Sell / Lots</span>
+          <span className="font-label-md text-label-md mt-1 text-xs">My Lots</span>
         </button>
 
         <button

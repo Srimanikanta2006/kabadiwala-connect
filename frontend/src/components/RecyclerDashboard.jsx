@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { getRecentOfflineLots } from '../db/offlineDb';
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
@@ -82,14 +83,45 @@ export default function RecyclerDashboard({ onRoleSwitch }) {
     setIsLoading(true);
     try {
       // 1. Fetch lots from backend
-      const resLots = await fetch(`${API_BASE}/recyclers/${facilityId}/lots`);
       let fetchedLots = [];
-      if (resLots.ok) {
-        const dataLots = await resLots.json();
-        fetchedLots = dataLots.lots || [];
+      try {
+        const resLots = await fetch(`${API_BASE}/recyclers/${facilityId}/lots`);
+        if (resLots.ok) {
+          const dataLots = await resLots.json();
+          fetchedLots = dataLots.lots || [];
+        }
+      } catch (e) {
+        console.log('Backend lots fetch skipped/offline:', e);
       }
 
-      // Merge backend lots with rich Stitch prototype cards
+      // Also get any newly created lots from local offlineDb (instant cross-portal handshake)
+      try {
+        const localLots = await getRecentOfflineLots(10);
+        if (localLots && localLots.length > 0) {
+          for (const ll of localLots) {
+            if (!fetchedLots.some(fl => fl.id === ll.id || fl.handover_ref === ll.handover_ref)) {
+              fetchedLots.unshift({
+                id: ll.id,
+                handover_ref: ll.handover_ref || `RL-2026-${ll.id.slice(0, 5).toUpperCase()}`,
+                material_category: ll.material_category || 'PCB',
+                material_id: ll.material_id || 'mat_pcb_high',
+                approximate_weight: ll.approximate_weight || 12.0,
+                condition: ll.condition || 'Good / Intact',
+                quoted_price: ll.quoted_price || 8400,
+                image_url: ll.photo_base64 || ll.image_url || ll.image_data_url || 'https://lh3.googleusercontent.com/aida/AEtjO1Uibj7iPqmg9YKdnMYAfgjprFLErbb0FcOdAiLVCHgIpkj7gbP3YTmKP8zFMrg1kaOj63apJEhpOtxdLXe-93ri5nb5eVArP4y3X_auotJ1wePJz5s4YibZAvhuz-KAXyzC05MmFpsIy-yBUY4Mqu5yd0ohBBU3_J9_aC-nPfLKrNm8V66IvtxKehIH0e-8jnBWhBN-DbfYt6LisI-TlJcyw1QSl4R5LDqnipESfPn5rrrJ6LyUFidtmQ',
+                ai_confidence: ll.ai_confidence || 0.92,
+                status: ll.status || 'PENDING',
+                created_at: ll.created_at || new Date().toISOString(),
+                general_location: 'Peenya / Dharavi Aggregation Yard'
+              });
+            }
+          }
+        }
+      } catch (dbErr) {
+        console.log('Local lots merge notice:', dbErr);
+      }
+
+      // Merge backend & local lots with rich Stitch prototype cards
       const mergedLots = mergeWithStitchLots(fetchedLots);
       setLots(mergedLots);
 

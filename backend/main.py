@@ -580,6 +580,28 @@ def create_new_lot(lot: Dict[str, Any] = Body(...), background_tasks: Background
     }
     clean_lot = {k: v for k, v in lot.items() if k in allowed_cols}
 
+    # Store in local memory cache so recyclers can see it immediately
+    from app.services.handover_service import _LOCAL_TRACEABILITY_CACHE
+    ref = lot.get("handover_ref") or f"KC-TRACE-{clean_lot['id'][:8].upper()}"
+    _LOCAL_TRACEABILITY_CACHE[ref] = {
+        "id": f"trace_{clean_lot['id']}",
+        "lot_id": clean_lot["id"],
+        "photo_url": clean_lot.get("image_url") or "/assets/icons/pcb_high.svg",
+        "weight": float(clean_lot.get("approximate_weight", 1.0)),
+        "timestamp": datetime.utcnow().isoformat(),
+        "gps_lat": float(lot.get("gps_lat", 19.0434)),
+        "gps_lng": float(lot.get("gps_lng", 72.8576)),
+        "handover_ref": ref,
+        "recycler_confirmation": False,
+        "status": "PENDING_CONFIRMATION",
+        "cpcb_certificate_id": None,
+        "created_at": datetime.utcnow().isoformat(),
+        "collector_id": clean_lot.get("collector_id", "col_test_001"),
+        "material_id": clean_lot.get("material_id", "mat_pcb_high"),
+        "material_category": clean_lot.get("material_category", "PCB"),
+        "quoted_price": float(clean_lot.get("quoted_price", 0.0))
+    }
+
     # Queue background anomaly check if background_tasks available
     if background_tasks:
         background_tasks.add_task(run_anomaly_background_sweep, batch_size=10)
