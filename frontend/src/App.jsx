@@ -1,58 +1,47 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import PriceBoard from './components/PriceBoard';
-import HandoverTraceability from './components/HandoverTraceability';
-import EarningsLedger from './components/EarningsLedger';
-import SafetyGuidance from './components/SafetyGuidance';
-import QuickLotIconFlow from './components/QuickLotIconFlow';
-import LanguagePicker from './components/LanguagePicker';
-import OfflineSyncBanner from './components/OfflineSyncBanner';
+import CollectorApp from './components/collector/CollectorApp';
 import RecyclerDashboard from './components/RecyclerDashboard';
+import OfflineSyncBanner from './components/OfflineSyncBanner';
+import LanguagePicker from './components/LanguagePicker';
 
 function App() {
   const { t } = useTranslation();
   const [userRole, setUserRole] = useState(() => localStorage.getItem('kabadiwala_user_role') || 'collector');
-  const [activeTab, setActiveTab] = useState(() => {
-    const savedRole = localStorage.getItem('kabadiwala_user_role');
-    return savedRole === 'recycler' ? 'recycler_portal' : 'icon_flow';
-  });
 
   const handleRoleChange = (role) => {
     setUserRole(role);
     localStorage.setItem('kabadiwala_user_role', role);
-    if (role === 'recycler') {
-      setActiveTab('recycler_portal');
-    } else {
-      setActiveTab('icon_flow');
-    }
   };
 
   return (
-    <div className="app-root">
-      {/* Top Application Navbar with Language Picker Prominently Positioned */}
+    <div className="app-root" style={{ minHeight: '100vh', background: '#f8fafc' }}>
+      {/* Top Application Navbar with Role Switcher & Language Picker */}
       <nav style={{
         background: '#0f172a',
-        padding: '0.85rem 1.25rem',
+        padding: '0.6rem 1.25rem',
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
         color: '#ffffff',
         borderBottom: '3px solid #0284c7',
         flexWrap: 'wrap',
-        gap: '0.75rem'
+        gap: '0.75rem',
+        zIndex: 50,
+        position: 'relative'
       }}>
         {/* Brand Logo & Subtitle */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-          <span style={{ fontSize: '1.6rem' }}>♻️</span>
+          <span style={{ fontSize: '1.5rem' }}>♻️</span>
           <div>
-            <strong style={{ fontSize: '1.15rem', letterSpacing: '0.5px' }}>{t('app_title')}</strong>
-            <span style={{ fontSize: '0.8rem', color: '#94a3b8', marginLeft: '0.5rem', display: 'inline-block' }}>
+            <strong style={{ fontSize: '1.1rem', letterSpacing: '0.5px' }}>{t('app_title')}</strong>
+            <span style={{ fontSize: '0.78rem', color: '#94a3b8', marginLeft: '0.5rem', display: 'inline-block' }}>
               {t('app_subtitle')}
             </span>
           </div>
         </div>
 
-        {/* Step 2: Prominent Language Picker & Role Switcher */}
+        {/* Role Switcher Pill & Language Picker */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem', flexWrap: 'wrap' }}>
           {/* Role Switcher Pill */}
           <div style={{
@@ -69,13 +58,14 @@ function App() {
                 color: '#ffffff',
                 border: 'none',
                 borderRadius: '6px',
-                padding: '0.35rem 0.7rem',
+                padding: '0.35rem 0.75rem',
                 fontSize: '0.82rem',
                 fontWeight: 700,
-                cursor: 'pointer'
+                cursor: 'pointer',
+                transition: 'background 0.2s'
               }}
             >
-              👷‍♂️ {t('role_collector')}
+              👷‍♂️ {t('role_collector')} (Stitch Mobile)
             </button>
             <button
               onClick={() => handleRoleChange('recycler')}
@@ -84,119 +74,34 @@ function App() {
                 color: '#ffffff',
                 border: 'none',
                 borderRadius: '6px',
-                padding: '0.35rem 0.7rem',
+                padding: '0.35rem 0.75rem',
                 fontSize: '0.82rem',
                 fontWeight: 700,
-                cursor: 'pointer'
+                cursor: 'pointer',
+                transition: 'background 0.2s'
               }}
             >
-              🏭 {t('role_recycler')}
+              🏭 {t('role_recycler')} (Desktop Portal)
             </button>
           </div>
 
           <LanguagePicker />
-
-          {/* Navigation Tabs (Available in Collector Mode) */}
-          {userRole === 'collector' && (
-            <div style={{ display: 'flex', gap: '0.35rem', flexWrap: 'wrap' }}>
-              <button
-                onClick={() => setActiveTab('icon_flow')}
-                style={{
-                  background: activeTab === 'icon_flow' ? '#f59e0b' : 'transparent',
-                  border: activeTab === 'icon_flow' ? 'none' : '1px solid #475569',
-                  color: '#ffffff',
-                  padding: '0.45rem 0.8rem',
-                  borderRadius: '6px',
-                  cursor: 'pointer',
-                  fontWeight: 800,
-                  fontSize: '0.86rem',
-                  minHeight: '40px'
-                }}
-              >
-                {t('tab_icon_flow')}
-              </button>
-              <button
-                onClick={() => setActiveTab('ledger')}
-                style={{
-                  background: activeTab === 'ledger' ? '#16a34a' : 'transparent',
-                  border: activeTab === 'ledger' ? 'none' : '1px solid #334155',
-                  color: '#ffffff',
-                  padding: '0.45rem 0.8rem',
-                  borderRadius: '6px',
-                  cursor: 'pointer',
-                  fontWeight: 700,
-                  fontSize: '0.86rem',
-                  minHeight: '40px'
-                }}
-              >
-                {t('tab_ledger')}
-              </button>
-              <button
-                onClick={() => setActiveTab('safety')}
-                style={{
-                  background: activeTab === 'safety' ? '#dc2626' : 'transparent',
-                  border: activeTab === 'safety' ? 'none' : '1px solid #334155',
-                  color: '#ffffff',
-                  padding: '0.45rem 0.8rem',
-                  borderRadius: '6px',
-                  cursor: 'pointer',
-                  fontWeight: 700,
-                  fontSize: '0.86rem',
-                  minHeight: '40px'
-                }}
-              >
-                {t('tab_safety')}
-              </button>
-              <button
-                onClick={() => setActiveTab('handover')}
-                style={{
-                  background: activeTab === 'handover' ? '#0284c7' : 'transparent',
-                  border: activeTab === 'handover' ? 'none' : '1px solid #334155',
-                  color: '#ffffff',
-                  padding: '0.45rem 0.8rem',
-                  borderRadius: '6px',
-                  cursor: 'pointer',
-                  fontWeight: 700,
-                  fontSize: '0.86rem',
-                  minHeight: '40px'
-                }}
-              >
-                {t('tab_handover')}
-              </button>
-              <button
-                onClick={() => setActiveTab('priceboard')}
-                style={{
-                  background: activeTab === 'priceboard' ? '#0284c7' : 'transparent',
-                  border: activeTab === 'priceboard' ? 'none' : '1px solid #334155',
-                  color: '#ffffff',
-                  padding: '0.45rem 0.8rem',
-                  borderRadius: '6px',
-                  cursor: 'pointer',
-                  fontWeight: 700,
-                  fontSize: '0.86rem',
-                  minHeight: '40px'
-                }}
-              >
-                {t('tab_priceboard')}
-              </button>
-            </div>
-          )}
         </div>
       </nav>
 
-      {/* Main Content View */}
-      <main style={{ minHeight: 'calc(100vh - 65px)', background: '#f8fafc', padding: '0.75rem 1rem' }}>
+      {/* Airplane Mode Offline Simulator Banner */}
+      <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0.5rem 1rem 0' }}>
         <OfflineSyncBanner />
-        {userRole === 'recycler' || activeTab === 'recycler_portal' ? (
-          <RecyclerDashboard onRoleSwitch={() => handleRoleChange('collector')} />
+      </div>
+
+      {/* Main Viewport Container */}
+      <main style={{ minHeight: 'calc(100vh - 120px)' }}>
+        {userRole === 'recycler' ? (
+          <div style={{ padding: '0.75rem 1rem' }}>
+            <RecyclerDashboard onRoleSwitch={() => handleRoleChange('collector')} />
+          </div>
         ) : (
-          <>
-            {activeTab === 'icon_flow' && <QuickLotIconFlow />}
-            {activeTab === 'ledger' && <EarningsLedger />}
-            {activeTab === 'safety' && <SafetyGuidance />}
-            {activeTab === 'handover' && <HandoverTraceability />}
-            {activeTab === 'priceboard' && <PriceBoard />}
-          </>
+          <CollectorApp />
         )}
       </main>
     </div>

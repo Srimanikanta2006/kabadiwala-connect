@@ -67,6 +67,14 @@ export async function getAllLocalLots() {
 }
 
 /**
+ * Get most recent local lots up to limit.
+ */
+export async function getRecentOfflineLots(limit = 10) {
+  const lots = await getAllLocalLots();
+  return lots.slice(0, limit);
+}
+
+/**
  * Save an offline handover record with unique reference & QR payload.
  */
 export async function saveOfflineHandover(handoverData) {
