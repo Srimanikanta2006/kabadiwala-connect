@@ -10,10 +10,23 @@ export default function Screen04PriceOffers({
   const { i18n } = useTranslation();
   const currentLang = i18n.language || 'hi';
 
-  const weight = lotDraft.weight || 12;
+  const unit = lotDraft.unit || 'kg';
+  const weight = lotDraft.weight || (unit === 'piece' ? 5 : 12);
   const materialTitle = lotDraft.materialTitle || 'Printed Circuit Boards (PCB)';
   const materialId = lotDraft.materialId || 'mat_pcb_high';
 
+  const getBaseRate = (matId, u) => {
+    if (u === 'piece') {
+      return matId === 'mat_pcb_high' ? 280 : (matId === 'mat_crt_monitor' ? 250 : (matId === 'mat_batteries_li_ion' ? 120 : (matId === 'mat_motors_magnets' ? 180 : 200)));
+    }
+    return matId === 'mat_pcb_high' ? 265 : (matId === 'mat_cables_copper' ? 385 : (matId === 'mat_batteries_li_ion' ? 190 : (matId === 'mat_batteries_lead' ? 88 : (matId === 'mat_motors_magnets' ? 145 : 105))));
+  };
+
+  const baseRate = getBaseRate(materialId, unit);
+  const mandiLow = Math.round(weight * baseRate * 0.95);
+  const mandiHigh = Math.round(weight * baseRate * 1.05);
+
+  const [isLoading, setIsLoading] = useState(true);
   const [offers, setOffers] = useState([
     {
       id: 'cpcb_mh_032',
@@ -24,7 +37,7 @@ export default function Screen04PriceOffers({
       capacityMta: 2500,
       state: 'Maharashtra',
       distance: 4.23,
-      rate: 275,
+      rate: unit === 'piece' ? 280 : 275,
       pickup: true,
       topMatch: true,
       sourceDoc: 'CPCB Directory 2023'
@@ -38,7 +51,7 @@ export default function Screen04PriceOffers({
       capacityMta: 1000,
       state: 'Maharashtra',
       distance: 4.23,
-      rate: 264,
+      rate: unit === 'piece' ? 270 : 264,
       pickup: false,
       topMatch: false,
       sourceDoc: 'CPCB Directory 2023'
@@ -48,6 +61,7 @@ export default function Screen04PriceOffers({
   // Query backend recycler matching endpoint for genuine CPCB facilities
   useEffect(() => {
     async function fetchMatches() {
+      setIsLoading(true);
       try {
         const res = await fetch(`http://localhost:8000/match-recyclers?material_id=${materialId}&weight=${weight}&lat=19.0434&lng=72.8576`);
         if (res.ok) {
@@ -64,7 +78,7 @@ export default function Screen04PriceOffers({
               state: rec.state_or_ut || 'Maharashtra',
               address: rec.address || '',
               distance: rec.distance_km != null ? Number(rec.distance_km.toFixed(2)) : (idx === 0 ? 4.23 : 5.8),
-              rate: Math.round(rec.offered_rate_per_kg || 264),
+              rate: unit === 'piece' ? baseRate : Math.round(rec.offered_rate_per_kg || baseRate),
               pickup: rec.pickup_available ?? true,
               topMatch: idx === 0,
               sourceDoc: rec.source_document ? 'CPCB Directory 2023' : 'Government Authorized'
@@ -73,10 +87,12 @@ export default function Screen04PriceOffers({
         }
       } catch (err) {
         console.log('Using local CPCB authorized recycler offers', err);
+      } finally {
+        setIsLoading(false);
       }
     }
     fetchMatches();
-  }, [materialId, weight]);
+  }, [materialId, weight, unit]);
 
   const speakText = (text) => {
     if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
@@ -153,7 +169,7 @@ export default function Screen04PriceOffers({
           <div>
             <p className="font-label-md text-secondary uppercase tracking-wider text-xs font-bold">Government-Authorised Buyer Quotes</p>
             <h2 className="text-xl sm:text-2xl text-on-background font-extrabold">
-              {weight}kg • {materialTitle}
+              {weight}{unit === 'piece' ? ' pcs (नग)' : 'kg'} • {materialTitle}
             </h2>
           </div>
           <button
@@ -176,92 +192,118 @@ export default function Screen04PriceOffers({
               </span>
             </div>
 
-            {/* Recycler Cards List */}
-            {offers.map((offer, idx) => {
-              const isTop = idx === 0;
-              return (
-                <div
-                  key={offer.id || idx}
-                  className={`bg-surface rounded-2xl p-5 relative overflow-hidden transition-all ${
-                    isTop ? 'border-2 border-primary shadow-md' : 'border border-outline-variant shadow-sm'
-                  }`}
-                >
-                  {isTop && (
-                    <div className="absolute top-0 right-0 bg-primary text-on-primary font-label-md text-[11px] font-bold px-3 py-1 rounded-bl-xl shadow-sm">
-                      TOP MCDA MATCH
+            {/* Recycler Cards List or Loading Skeleton */}
+            {isLoading ? (
+              <div className="space-y-4">
+                {[1, 2].map((i) => (
+                  <div key={i} className="bg-surface rounded-2xl p-5 border border-outline-variant shadow-sm animate-pulse space-y-3">
+                    <div className="flex justify-between items-center">
+                      <div className="h-5 bg-surface-container-high rounded w-2/3"></div>
+                      <div className="h-4 bg-surface-container-high rounded w-16"></div>
                     </div>
-                  )}
-
-                  <div className="flex justify-between items-start mb-2 pr-16">
-                    <div>
-                      <div className="flex items-center gap-2 mb-1 flex-wrap">
-                        <h4 className="font-bold text-on-surface text-base sm:text-lg">{offer.name}</h4>
-                        <span className="bg-emerald-100 text-emerald-800 text-[10px] font-extrabold px-2 py-0.5 rounded-full border border-emerald-300 flex items-center gap-1">
-                          <span className="material-symbols-outlined text-[13px] filled">verified</span>
-                          Authorised Facility (Source: CPCB Directory 2023)
-                        </span>
-                      </div>
-                      <p className="text-on-surface-variant flex items-center gap-1 text-xs">
-                        <span className="material-symbols-outlined text-[15px]">location_on</span>
-                        <span>{offer.distance} km away • {offer.state}</span>
-                        {offer.pickup && <span className="ml-1 text-primary font-semibold">• Vehicle Pickup Available</span>}
-                      </p>
-                    </div>
+                    <div className="h-3 bg-surface-container-low rounded w-1/2"></div>
+                    <div className="h-14 bg-surface-container-low rounded-xl"></div>
+                    <div className="h-11 bg-primary/20 rounded-xl"></div>
                   </div>
-
-                  {/* Statutory Credentials Banner */}
-                  <div className="mb-3 p-2 rounded-lg bg-surface-container-lowest border border-outline-variant/50 text-[11px] space-y-1">
-                    <div className="flex items-center justify-between text-secondary">
-                      <span><strong>Facility Type:</strong> <span className="text-on-surface font-semibold">{offer.facilityType}</span></span>
-                      <span><strong>Capacity:</strong> <span className="text-on-surface font-semibold">{offer.capacityMta?.toLocaleString('en-IN')} MTA</span></span>
-                    </div>
-                    <div className="text-secondary font-mono text-[10px] truncate" title={offer.statutoryRef}>
-                      <strong>Ref:</strong> {offer.statutoryRef}
-                    </div>
-                  </div>
-
-                  <div className="flex items-center justify-between mb-4 bg-surface-container-low p-3.5 rounded-xl border border-outline-variant/40">
-                    <div>
-                      <p className="text-secondary text-xs font-semibold">Offer Unit Rate</p>
-                      <p className="text-primary font-extrabold text-2xl font-mono">
-                        ₹{offer.rate} <span className="text-xs font-normal text-on-surface-variant">/kg</span>
-                      </p>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-secondary text-xs font-semibold">Total Handover Payout</p>
-                      <p className="text-on-surface font-extrabold text-2xl font-mono">
-                        ₹{Math.round(weight * offer.rate).toLocaleString('en-IN')}
-                      </p>
-                    </div>
-                  </div>
-
-                  <button
-                    onClick={() => handleAccept(offer)}
-                    className={`w-full h-12 rounded-xl transition-all flex items-center justify-center gap-2 font-bold text-sm sm:text-base cursor-pointer active:scale-[0.99] ${
-                      isTop
-                        ? 'bg-primary text-on-primary shadow-md hover:bg-primary-container'
-                        : 'bg-surface-container-high hover:bg-surface-container-highest text-on-surface border border-outline-variant/40'
+                ))}
+                <p className="text-center text-xs text-primary font-semibold flex items-center justify-center gap-1.5 pt-2">
+                  <span className="material-symbols-outlined animate-spin text-[18px]">progress_activity</span>
+                  <span>अधिकृत रीसाइक्लर केंद्र खोज रहे हैं... Matching CPCB Recyclers...</span>
+                </p>
+              </div>
+            ) : (
+              offers.map((offer, idx) => {
+                const isTop = idx === 0;
+                return (
+                  <div
+                    key={offer.id || idx}
+                    className={`bg-surface rounded-2xl p-5 relative overflow-hidden transition-all ${
+                      isTop ? 'border-2 border-primary shadow-md' : 'border border-outline-variant shadow-sm'
                     }`}
                   >
-                    <span>Accept &amp; Generate QR Pass</span>
-                    <span className="material-symbols-outlined text-[20px]">check_circle</span>
-                  </button>
-                </div>
-              );
-            })}
+                    {isTop && (
+                      <div className="absolute top-0 right-0 bg-primary text-on-primary font-label-md text-[11px] font-bold px-3 py-1 rounded-bl-xl shadow-sm">
+                        ⭐ BEST VALUE &amp; PROXIMITY
+                      </div>
+                    )}
+
+                    <div className="flex justify-between items-start mb-2 pr-16">
+                      <div>
+                        <div className="flex items-center gap-2 mb-1 flex-wrap">
+                          <h4 className="font-bold text-on-surface text-base sm:text-lg">{offer.name}</h4>
+                          <span className="bg-emerald-100 text-emerald-800 text-[10px] font-extrabold px-2 py-0.5 rounded-full border border-emerald-300 flex items-center gap-1">
+                            <span className="material-symbols-outlined text-[13px] filled">verified</span>
+                            Authorised Facility (Source: CPCB Directory 2023)
+                          </span>
+                        </div>
+                        <p className="text-on-surface-variant flex items-center gap-1 text-xs">
+                          <span className="material-symbols-outlined text-[15px]">location_on</span>
+                          <span>{offer.distance} km away • {offer.state}</span>
+                          {offer.pickup ? (
+                            <span className="ml-1 text-emerald-700 font-bold">• 🚚 Free Vehicle Pickup (गाड़ी आएगी)</span>
+                          ) : (
+                            <span className="ml-1 text-secondary font-medium">• 🏭 Self Drop-off</span>
+                          )}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Statutory Credentials Banner */}
+                    <div className="mb-3 p-2 rounded-lg bg-surface-container-lowest border border-outline-variant/50 text-[11px] space-y-1">
+                      <div className="flex items-center justify-between text-secondary">
+                        <span><strong>Facility Type:</strong> <span className="text-on-surface font-semibold">{offer.facilityType}</span></span>
+                        <span><strong>Capacity:</strong> <span className="text-on-surface font-semibold">{offer.capacityMta?.toLocaleString('en-IN')} MTA</span></span>
+                      </div>
+                      <div className="text-secondary font-mono text-[10px] truncate" title={offer.statutoryRef}>
+                        <strong>Ref:</strong> {offer.statutoryRef}
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-between mb-4 bg-surface-container-low p-3.5 rounded-xl border border-outline-variant/40">
+                      <div>
+                        <p className="text-secondary text-xs font-semibold">Offer Unit Rate</p>
+                        <p className="text-primary font-extrabold text-2xl font-mono">
+                          ₹{offer.rate} <span className="text-xs font-normal text-on-surface-variant">/{unit === 'piece' ? 'pc (नग)' : 'kg'}</span>
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-secondary text-xs font-semibold">Total Handover Payout</p>
+                        <p className="text-on-surface font-extrabold text-2xl font-mono">
+                          ₹{Math.round(weight * offer.rate).toLocaleString('en-IN')}
+                        </p>
+                      </div>
+                    </div>
+
+                    <button
+                      onClick={() => handleAccept(offer)}
+                      className={`w-full h-12 rounded-xl transition-all flex items-center justify-center gap-2 font-bold text-sm sm:text-base cursor-pointer active:scale-[0.99] ${
+                        isTop
+                          ? 'bg-primary text-on-primary shadow-md hover:bg-primary-container'
+                          : 'bg-surface-container-high hover:bg-surface-container-highest text-on-surface border border-outline-variant/40'
+                      }`}
+                    >
+                      <span>पर्ची बनाएं • Accept &amp; Generate Cash Voucher</span>
+                      <span className="material-symbols-outlined text-[20px]">check_circle</span>
+                    </button>
+                  </div>
+                );
+              })
+            )}
           </div>
 
           {/* Right Column: Mandi Valuation & Buyer Trust (md:col-span-5) */}
           <div className="md:col-span-5 space-y-4">
             {/* Valuation Card */}
             <div className="bg-primary-container text-on-primary-container rounded-2xl p-5 sm:p-6 shadow-md border border-outline-variant relative overflow-hidden flex flex-col items-center justify-center text-center space-y-2">
-              <p className="text-xs font-bold uppercase tracking-wider text-on-primary-container/80">Fair Mandi Valuation Band</p>
+              <p className="text-xs font-bold uppercase tracking-wider text-on-primary-container/80">
+                {currentLang === 'mr' ? 'शासकीय हमीभाव श्रेणी' : (currentLang === 'hi' ? 'सरकारी मंडी भाव सीमा' : 'Fair Mandi Valuation Band')}
+              </p>
               <p className="text-3xl sm:text-4xl font-extrabold font-mono tracking-tight">
-                ₹{Math.round(weight * 700).toLocaleString('en-IN')} – ₹{Math.round(weight * 780).toLocaleString('en-IN')}
+                ₹{mandiLow.toLocaleString('en-IN')} – ₹{mandiHigh.toLocaleString('en-IN')}
               </p>
               <p className="text-xs opacity-90 flex items-center gap-1">
                 <span className="material-symbols-outlined text-[16px]">info</span>
-                Calculated for {weight}kg at ₹700 – ₹780/kg
+                Calculated for {weight} {unit === 'piece' ? 'pcs (नग)' : 'kg'} at ~₹{baseRate}/{unit === 'piece' ? 'pc' : 'kg'} (CPCB Mandi Index)
               </p>
             </div>
 

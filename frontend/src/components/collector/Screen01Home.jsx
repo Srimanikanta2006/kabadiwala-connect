@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import PriceBoardModal from './PriceBoardModal';
-import EconomicsImpactModal from '../common/EconomicsImpactModal';
 import NotificationsModal from '../common/NotificationsModal';
 
 export default function Screen01Home({
@@ -17,13 +16,12 @@ export default function Screen01Home({
   const currentLang = i18n.language || 'hi';
 
   const [showPriceBoardModal, setShowPriceBoardModal] = useState(false);
-  const [showEconomicsModal, setShowEconomicsModal] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
 
   const [marketRates, setMarketRates] = useState([
-    { id: 'mat_pcb_high', name: 'Circuit Boards', sub: 'A-Grade PCB', rate: 780, unit: 'kg', icon: 'memory', spoken: 'सर्किट बोर्ड का भाव 780 रुपये प्रति किलो है।' },
-    { id: 'mat_cables_copper', name: 'Copper Cables', sub: 'Insulated Wire', rate: 420, unit: 'kg', icon: 'cable', spoken: 'तांबे के तार का भाव 420 रुपये प्रति किलो है।' },
-    { id: 'mat_batteries_li_ion', name: 'Li-ion Batteries', sub: 'Mixed lot', rate: 110, unit: 'kg', icon: 'battery_charging_full', spoken: 'लिथियम बैटरी का भाव 110 रुपये प्रति किलो है।' }
+    { id: 'mat_pcb_high', name: 'Circuit Boards', sub: 'A-Grade PCB', rate: 265, unit: 'kg', icon: 'memory', spoken: 'सर्किट बोर्ड का मंडी भाव 265 रुपये प्रति किलो है।' },
+    { id: 'mat_cables_copper', name: 'Copper Cables', sub: 'Insulated Wire', rate: 385, unit: 'kg', icon: 'cable', spoken: 'तांबे के तार का भाव 385 रुपये प्रति किलो है।' },
+    { id: 'mat_batteries_li_ion', name: 'Li-ion Batteries', sub: 'Mixed lot', rate: 190, unit: 'kg', icon: 'battery_charging_full', spoken: 'लिथियम बैटरी का भाव 190 रुपये प्रति किलो है।' }
   ]);
 
   // Load live prices from backend if available
@@ -34,10 +32,13 @@ export default function Screen01Home({
         if (res.ok) {
           const data = await res.json();
           if (data.categories && data.categories.length >= 3) {
+            const pcb = data.categories.find(c => c.material_id === 'mat_pcb_high') || data.categories[0];
+            const copper = data.categories.find(c => c.material_id === 'mat_cables_copper') || data.categories[1];
+            const battery = data.categories.find(c => c.material_id === 'mat_batteries_li_ion') || data.categories[2];
             setMarketRates([
-              { id: 'mat_pcb_high', name: 'Circuit Boards', sub: 'A-Grade PCB', rate: data.categories[0].current_rate || 780, unit: 'kg', icon: 'memory', spoken: `सर्किट बोर्ड का भाव ${data.categories[0].current_rate || 780} रुपये प्रति किलो है।` },
-              { id: 'mat_cables_copper', name: 'Copper Cables', sub: 'Insulated Wire', rate: data.categories[1].current_rate || 420, unit: 'kg', icon: 'cable', spoken: `तांबे के तार का भाव ${data.categories[1].current_rate || 420} रुपये प्रति किलो है।` },
-              { id: 'mat_batteries_li_ion', name: 'Li-ion Batteries', sub: 'Mixed lot', rate: data.categories[2].current_rate || 110, unit: 'kg', icon: 'battery_charging_full', spoken: `लिथियम बैटरी का भाव ${data.categories[2].current_rate || 110} रुपये प्रति किलो है।` }
+              { id: 'mat_pcb_high', name: 'Circuit Boards', sub: 'A-Grade PCB', rate: Math.round(pcb.current_rate || 265), unit: 'kg', icon: 'memory', spoken: `सर्किट बोर्ड का मंडी भाव ${Math.round(pcb.current_rate || 265)} रुपये प्रति किलो है।` },
+              { id: 'mat_cables_copper', name: 'Copper Cables', sub: 'Insulated Wire', rate: Math.round(copper.current_rate || 385), unit: 'kg', icon: 'cable', spoken: `तांबे के तार का भाव ${Math.round(copper.current_rate || 385)} रुपये प्रति किलो है।` },
+              { id: 'mat_batteries_li_ion', name: 'Li-ion Batteries', sub: 'Mixed lot', rate: Math.round(battery.current_rate || 190), unit: 'kg', icon: 'battery_charging_full', spoken: `लिथियम बैटरी का भाव ${Math.round(battery.current_rate || 190)} रुपये प्रति किलो है।` }
             ]);
           }
         }
@@ -125,27 +126,10 @@ export default function Screen01Home({
               <span className="material-symbols-outlined text-[16px]">health_and_safety</span>
               <span>Safety</span>
             </button>
-            <button
-              onClick={() => setShowEconomicsModal(true)}
-              className="px-3 py-1.5 rounded-full text-emerald-800 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-300/60 hover:bg-emerald-100 transition-colors flex items-center gap-1.5 cursor-pointer font-bold"
-            >
-              <span className="material-symbols-outlined text-[16px] text-emerald-600">bar_chart</span>
-              <span>Economics</span>
-            </button>
           </nav>
 
           {/* Right Header Controls */}
           <div className="flex items-center gap-2">
-            {/* Field Economics Quick Button for Mobile */}
-            <button
-              onClick={() => setShowEconomicsModal(true)}
-              aria-label="Economics & Impact"
-              className="flex md:hidden items-center gap-1 px-2.5 py-1.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-300 text-xs font-semibold cursor-pointer hover:bg-emerald-100"
-              title="Field Research & Unit Economics Impact"
-            >
-              <span className="material-symbols-outlined text-sm text-emerald-600">bar_chart</span>
-              <span className="text-[11px] font-bold">Impact</span>
-            </button>
 
             {/* Role / Portal Switcher */}
             {onSwitchRole && (
@@ -156,7 +140,7 @@ export default function Screen01Home({
                 title="Switch Portal or Role"
               >
                 <span className="material-symbols-outlined text-[16px] text-primary">domain</span>
-                <span className="hidden sm:inline">Recycler Portal</span>
+                <span className="hidden md:inline">Recycler Portal</span>
               </button>
             )}
 
@@ -164,19 +148,19 @@ export default function Screen01Home({
             <button
               onClick={() => setShowNotifications(true)}
               aria-label="Notifications"
-              className="w-8 h-8 rounded-full bg-surface-container hover:bg-surface-container-high border border-outline-variant flex items-center justify-center text-on-surface relative cursor-pointer transition-colors"
+              className="w-10 h-10 rounded-full bg-surface-container hover:bg-surface-container-high border border-outline-variant flex items-center justify-center text-on-surface relative cursor-pointer transition-colors shrink-0"
               title="Live Offers, Pickups & Payment Notifications"
             >
-              <span className="material-symbols-outlined text-[18px]">notifications</span>
-              <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-error animate-ping"></span>
-              <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-error"></span>
+              <span className="material-symbols-outlined text-[20px]">notifications</span>
+              <span className="absolute top-2 right-2 w-2 h-2 rounded-full bg-error animate-ping"></span>
+              <span className="absolute top-2 right-2 w-2 h-2 rounded-full bg-error"></span>
             </button>
 
             {/* Language Picker */}
             <button
               onClick={onLanguageChange}
               aria-label="Switch Language"
-              className="flex items-center gap-1 px-3 py-1.5 rounded-full bg-surface-container border border-outline-variant text-on-surface hover:bg-surface-container-high transition-colors text-xs font-semibold cursor-pointer"
+              className="flex items-center gap-1 h-10 px-3 rounded-full bg-surface-container border border-outline-variant text-on-surface hover:bg-surface-container-high transition-colors text-xs font-bold cursor-pointer shrink-0"
             >
               <span className="material-symbols-outlined text-sm text-primary">language</span>
               <span>{currentLang === 'hi' ? 'हिन्दी' : (currentLang === 'mr' ? 'मराठी' : 'EN')}</span>
@@ -184,17 +168,17 @@ export default function Screen01Home({
 
             {/* Cloud Sync Status */}
             <div
-              className={`flex items-center gap-1 px-2.5 py-1.5 rounded-full border text-xs font-semibold ${
+              className={`flex items-center gap-1 h-10 px-2.5 rounded-full border text-xs font-semibold shrink-0 ${
                 syncStatus.isOnline
                   ? 'bg-primary/10 border-primary/20 text-primary'
                   : 'bg-amber-100 border-amber-300 text-amber-900'
               }`}
               title="Cloud Sync Status"
             >
-              <span className="material-symbols-outlined text-[16px] filled">
+              <span className="material-symbols-outlined text-[18px] filled">
                 {syncStatus.isOnline ? 'cloud_done' : 'cloud_off'}
               </span>
-              <span className="hidden sm:inline">
+              <span className="hidden md:inline">
                 {syncStatus.isOnline ? 'Live' : `${syncStatus.unsyncedCount || 1} offline`}
               </span>
             </div>
@@ -316,6 +300,26 @@ export default function Screen01Home({
             <span className="material-symbols-outlined text-sm">table_chart</span>
             <span>View Full Regional Mandi Board (9 Categories &amp; Trends)</span>
             <span className="material-symbols-outlined text-sm">arrow_forward</span>
+          </button>
+
+          {/* 1-Tap Share Today's Rates on WhatsApp */}
+          <button
+            onClick={() => {
+              const text = encodeURIComponent(
+                `*RE:LINK Live E-Waste Mandi Rates (आज का भाव)*\n` +
+                `• Circuit Boards (PCB): ₹${marketRates[0]?.rate || 265}/kg\n` +
+                `• Copper Cables: ₹${marketRates[1]?.rate || 385}/kg\n` +
+                `• Li-ion Batteries: ₹${marketRates[2]?.rate || 190}/kg\n` +
+                `• Direct CPCB Scale Weighment & 100% Cash Settlement.\n` +
+                `Check live: https://relink-mandi.gov.in`
+              );
+              window.open(`https://api.whatsapp.com/send?text=${text}`, '_blank');
+            }}
+            className="w-full min-h-[44px] py-2.5 px-4 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all cursor-pointer shadow-sm active:scale-[0.99]"
+            type="button"
+          >
+            <span className="material-symbols-outlined text-sm">share</span>
+            <span>Share Today's Rates on WhatsApp (व्हाट्सएप पर भाव भेजें)</span>
           </button>
 
           {/* Category Fast Shortcuts */}
@@ -448,55 +452,25 @@ export default function Screen01Home({
                 </div>
               ))
             ) : (
-              <>
-                {/* Seed Lot 1 */}
-                <div
-                  onClick={() => onNavigate('receipt')}
-                  className="bg-surface rounded-xl p-3 sm:p-4 border border-outline-variant shadow-sm flex flex-col sm:flex-row justify-between gap-sm active:bg-surface-container-low transition-colors cursor-pointer hover:border-primary"
-                >
-                  <div className="flex gap-3 items-start">
-                    <div className="w-10 h-10 rounded-lg bg-surface-container flex items-center justify-center flex-shrink-0 text-secondary">
-                      <span className="material-symbols-outlined text-[20px]">inventory_2</span>
-                    </div>
-                    <div>
-                      <h3 className="text-sm font-bold text-on-background">Lot #8402</h3>
-                      <p className="text-xs text-secondary">Mixed PCB &amp; Cables • 42kg</p>
-                      <div className="inline-flex items-center px-2 py-0.5 mt-1 rounded-full bg-primary/10 border border-primary/20">
-                        <span className="w-1.5 h-1.5 rounded-full bg-primary mr-1.5"></span>
-                        <span className="text-[11px] font-semibold text-primary">Offer Received</span>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="flex flex-row sm:flex-col justify-between sm:justify-start items-center sm:items-end w-full sm:w-auto border-t sm:border-t-0 border-outline-variant pt-2 sm:pt-0 mt-1 sm:mt-0">
-                    <span className="text-xs text-secondary sm:hidden">Est. Value</span>
-                    <span className="text-base text-primary font-bold">~₹9,450</span>
-                  </div>
+              <div className="bg-surface rounded-2xl p-5 border border-outline-variant/60 shadow-sm text-center space-y-3">
+                <div className="w-12 h-12 rounded-full bg-primary/10 text-primary mx-auto flex items-center justify-center">
+                  <span className="material-symbols-outlined text-[26px]">inventory_2</span>
                 </div>
-
-                {/* Seed Lot 2 */}
-                <div
-                  onClick={() => onNavigate('receipt')}
-                  className="bg-surface rounded-xl p-3 sm:p-4 border border-outline-variant shadow-sm flex flex-col sm:flex-row justify-between gap-sm active:bg-surface-container-low transition-colors cursor-pointer opacity-85 hover:border-primary"
-                >
-                  <div className="flex gap-3 items-start">
-                    <div className="w-10 h-10 rounded-lg bg-surface-container flex items-center justify-center flex-shrink-0 text-secondary">
-                      <span className="material-symbols-outlined text-[20px]">inventory_2</span>
-                    </div>
-                    <div>
-                      <h3 className="text-sm font-bold text-on-background">Lot #8399</h3>
-                      <p className="text-xs text-secondary">CRT Monitors • 115kg</p>
-                      <div className="inline-flex items-center px-2 py-0.5 mt-1 rounded-full bg-surface-container-high border border-outline-variant">
-                        <span className="w-1.5 h-1.5 rounded-full bg-secondary mr-1.5"></span>
-                        <span className="text-[11px] font-semibold text-secondary">Pending Verification</span>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="flex flex-row sm:flex-col justify-between sm:justify-start items-center sm:items-end w-full sm:w-auto border-t sm:border-t-0 border-outline-variant pt-2 sm:pt-0 mt-1 sm:mt-0">
-                    <span className="text-xs text-secondary sm:hidden">Est. Value</span>
-                    <span className="text-base text-on-background font-bold">~₹3,200</span>
-                  </div>
+                <div>
+                  <h3 className="text-sm font-bold text-on-surface">कोई पिछला लॉट नहीं है • No Recent Lots</h3>
+                  <p className="text-xs text-on-surface-variant mt-0.5">
+                    कैमरा से कबाड़ स्कैन करें और सीधे अधिकृत रीसाइक्लर को बेचें।
+                  </p>
                 </div>
-              </>
+                <button
+                  onClick={onScanClick}
+                  className="px-4 py-2 bg-primary hover:bg-primary-container text-on-primary rounded-xl text-xs font-bold inline-flex items-center gap-1.5 shadow-sm transition-transform active:scale-95 cursor-pointer"
+                  type="button"
+                >
+                  <span className="material-symbols-outlined text-[16px]">photo_camera</span>
+                  <span>पहला लॉट स्कैन करें • Scan First Lot</span>
+                </button>
+              </div>
             )}
           </div>
         </section>
@@ -570,12 +544,6 @@ export default function Screen01Home({
         isOpen={showPriceBoardModal}
         onClose={() => setShowPriceBoardModal(false)}
         currentLang={currentLang}
-      />
-
-      {/* Field Research & Unit Economics Impact Modal */}
-      <EconomicsImpactModal
-        isOpen={showEconomicsModal}
-        onClose={() => setShowEconomicsModal(false)}
       />
 
       {/* Notifications & Live Activity Modal */}

@@ -13,6 +13,8 @@ ROBOFLOW_API_KEY = os.getenv("ROBOFLOW_API_KEY")
 ROBOFLOW_MODEL_ID = os.getenv("ROBOFLOW_MODEL_ID", "e-waste-dataset-r0ojc/43")
 ROBOFLOW_API_URL = os.getenv("ROBOFLOW_API_URL", "https://serverless.roboflow.com")
 
+__test__ = False
+
 def test_roboflow_inference(image_path: str):
     print(f"Testing Roboflow model: {ROBOFLOW_MODEL_ID}")
     print(f"Reading image: {image_path}")

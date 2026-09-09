@@ -11,7 +11,8 @@ export default function Screen05HandoverReceipt({
   const { i18n } = useTranslation();
   const currentLang = i18n.language || 'hi';
 
-  const weight = lotDraft.weight || 12.0;
+  const unit = lotDraft.unit || 'kg';
+  const weight = lotDraft.weight || (unit === 'piece' ? 5 : 12.0);
   const materialTitle = lotDraft.materialTitle || 'Printed Circuit Boards (PCB)';
   const agreedRate = lotDraft.agreedRate || 275;
   const totalPaid = Math.round(weight * agreedRate);
@@ -27,6 +28,7 @@ export default function Screen05HandoverReceipt({
   };
 
   const [backendHandoverRef, setBackendHandoverRef] = useState(null);
+  const [paymentMode, setPaymentMode] = useState('CASH_RECEIVED'); // 'CASH_RECEIVED' | 'UPI_RECEIVED' | 'PENDING_SETTLEMENT'
   const handoverRef = backendHandoverRef || lotDraft.handoverRef || `KC-TRACE-20260905-MH-${(lotDraft.id || '8F2A1C').slice(-6).toUpperCase()}`;
   const lotRef = `RL-MH-2026-${(lotDraft.id || '00482').slice(-5)}`;
   const certId = lotDraft.cpcbCertificateId || `CPCB-EPR-2026-MH-${(lotDraft.id || '9921ABCD').slice(-8).toUpperCase()}`;
@@ -50,7 +52,8 @@ export default function Screen05HandoverReceipt({
           cpcb_registration_no: recycler.statutoryRef || recycler.cpcbNo,
           statutory_reference: recycler.statutoryRef || recycler.cpcbNo,
           facility_name: recycler.name,
-          facility_type: recycler.facilityType || 'Recycler'
+          facility_type: recycler.facilityType || 'Recycler',
+          payment_mode: paymentMode
         };
         const res = await fetch('http://localhost:8000/handover/initiate', {
           method: 'POST',
@@ -68,7 +71,7 @@ export default function Screen05HandoverReceipt({
       }
     }
     syncHandover();
-  }, []);
+  }, [paymentMode]);
 
   const qrPayload = JSON.stringify({
     protocol: 'RE:LINK-TRACE-V1',
@@ -85,7 +88,7 @@ export default function Screen05HandoverReceipt({
     source: 'CPCB Directory 2023',
     gps: { lat: 19.0434, lng: 72.8576 },
     timestamp: new Date().toISOString(),
-    payment_status: 'PAID_CASH_CONFIRMED',
+    payment_status: paymentMode,
     status: 'CONFIRMED'
   });
 
@@ -99,11 +102,26 @@ export default function Screen05HandoverReceipt({
     }
   };
 
-  const handleSpeakReceipt = () => {
-    const speech = currentLang === 'mr'
-      ? `हँडओव्हर आणि देयक यशस्वी: ${totalPaid} रुपये रोख प्राप्त झाले. अधिकृत खरेदीदार ${recycler.name}.`
-      : `हैंडओवर और भुगतान सफल: ₹${totalPaid} नकद प्राप्त हुए। अधिकृत खरीदार ${recycler.name}।`;
+  const handleSpeakSoundbox = (mode = paymentMode) => {
+    let speech = '';
+    if (mode === 'CASH_RECEIVED') {
+      speech = currentLang === 'mr'
+        ? `री लिंक वर ${totalPaid.toLocaleString('en-IN')} रुपये रोख प्राप्त झाले.`
+        : `री-लिंक पर ${totalPaid.toLocaleString('en-IN')} रुपये नकद प्राप्त हुए।`;
+    } else if (mode === 'UPI_RECEIVED') {
+      speech = currentLang === 'mr'
+        ? `री लिंक वर ${totalPaid.toLocaleString('en-IN')} रुपये युपीआय द्वारे प्राप्त झाले.`
+        : `री-लिंक पर ${totalPaid.toLocaleString('en-IN')} रुपये यूपीआई प्राप्त हुए।`;
+    } else {
+      speech = currentLang === 'mr'
+        ? `वजनकाटा पडताळणीनंतर ${totalPaid.toLocaleString('en-IN')} रुपये बाकी देय आहेत.`
+        : `कांटा तौल सत्यापन के बाद ${totalPaid.toLocaleString('en-IN')} रुपये बकाया देय हैं।`;
+    }
     speakText(speech);
+  };
+
+  const handleSpeakReceipt = () => {
+    handleSpeakSoundbox(paymentMode);
   };
 
   const handleShare = () => {
@@ -187,54 +205,40 @@ export default function Screen05HandoverReceipt({
               <span className="text-[11px] text-secondary mt-0.5">Show this QR to the Recycler Weighbridge Scale Operator</span>
             </div>
 
-            {/* 4 Pillars of Traceability */}
+            {/* Scale & Handover Verification Checklist */}
             <div className="bg-surface rounded-2xl border border-outline-variant shadow-sm p-4 sm:p-5 space-y-3">
               <div className="flex items-center justify-between">
                 <h3 className="text-sm font-bold text-on-surface flex items-center gap-1.5">
                   <span className="material-symbols-outlined text-primary text-[20px] filled">verified_user</span>
-                  <span>4 Pillars of Traceability</span>
+                  <span>Handover Verification Checklist</span>
                 </h3>
-                <span className="text-[10px] text-primary bg-primary/10 px-2.5 py-0.5 rounded-full font-bold border border-primary/20">
-                  Audit Verified
+                <span className="text-[10px] text-emerald-700 bg-emerald-100 px-2.5 py-0.5 rounded-full font-bold border border-emerald-300">
+                  Verified Clean
                 </span>
               </div>
               <div className="space-y-2 text-xs">
-                <div className="flex items-start gap-2.5 p-2 rounded-xl bg-surface-container-low border border-outline-variant/30">
-                  <span className="material-symbols-outlined text-primary text-[18px] filled mt-0.5">location_on</span>
-                  <div className="flex-grow">
-                    <p className="font-semibold text-on-surface">GPS Geofenced Location</p>
-                    <p className="text-secondary text-[11px]">Dharavi Transit Hub • Lat 19.0434, Long 72.8576</p>
+                <div className="flex items-center justify-between p-2.5 rounded-xl bg-surface-container-low border border-outline-variant/30">
+                  <div className="flex items-center gap-2">
+                    <span className="material-symbols-outlined text-primary text-[18px]">scale</span>
+                    <span>Scale Weighment: <strong>{weight} {unit === 'piece' ? 'pcs (नग)' : 'kg'} Certified</strong></span>
                   </div>
-                  <span className="material-symbols-outlined text-emerald-600 text-[16px] filled">check_circle</span>
+                  <span className="material-symbols-outlined text-emerald-600 text-[18px] filled">check_circle</span>
                 </div>
 
-                <div className="flex items-start gap-2.5 p-2 rounded-xl bg-surface-container-low border border-outline-variant/30">
-                  <span className="material-symbols-outlined text-primary text-[18px] filled mt-0.5">photo_camera</span>
-                  <div className="flex-grow">
-                    <p className="font-semibold text-on-surface">Handover Photo Proof</p>
-                    <p className="text-secondary text-[11px]">Timestamped lot inspection &amp; scale capture verified</p>
+                <div className="flex items-center justify-between p-2.5 rounded-xl bg-surface-container-low border border-outline-variant/30">
+                  <div className="flex items-center gap-2">
+                    <span className="material-symbols-outlined text-primary text-[18px]">payments</span>
+                    <span>Payment Status: <strong>100% Cash / Bank Received</strong></span>
                   </div>
-                  <span className="material-symbols-outlined text-emerald-600 text-[16px] filled">check_circle</span>
+                  <span className="material-symbols-outlined text-emerald-600 text-[18px] filled">check_circle</span>
                 </div>
 
-                <div className="flex items-start gap-2.5 p-2 rounded-xl bg-surface-container-low border border-outline-variant/30">
-                  <span className="material-symbols-outlined text-primary text-[18px] filled mt-0.5">scale</span>
-                  <div className="flex-grow">
-                    <p className="font-semibold text-on-surface">Certified Weight Scale</p>
-                    <p className="text-secondary text-[11px]">
-                      Gross: {(weight + 0.4).toFixed(2)} kg | Tare: 0.40 kg | Net: {weight.toFixed(2)} kg
-                    </p>
+                <div className="flex items-center justify-between p-2.5 rounded-xl bg-surface-container-low border border-outline-variant/30">
+                  <div className="flex items-center gap-2">
+                    <span className="material-symbols-outlined text-primary text-[18px]">policy</span>
+                    <span>Authorized Buyer: <strong>{recycler.name}</strong></span>
                   </div>
-                  <span className="material-symbols-outlined text-emerald-600 text-[16px] filled">check_circle</span>
-                </div>
-
-                <div className="flex items-start gap-2.5 p-2 rounded-xl bg-surface-container-low border border-outline-variant/30">
-                  <span className="material-symbols-outlined text-primary text-[18px] filled mt-0.5">draw</span>
-                  <div className="flex-grow">
-                    <p className="font-semibold text-on-surface">Recycler Digital Sign-off</p>
-                    <p className="text-secondary text-[11px] font-mono">{certId}</p>
-                  </div>
-                  <span className="material-symbols-outlined text-emerald-600 text-[16px] filled">check_circle</span>
+                  <span className="material-symbols-outlined text-emerald-600 text-[18px] filled">check_circle</span>
                 </div>
               </div>
             </div>
@@ -259,14 +263,16 @@ export default function Screen05HandoverReceipt({
                 <div className="bg-surface-container-low p-3 rounded-xl border border-surface-variant">
                   <p className="text-xs text-secondary font-semibold">Material &amp; Quantity</p>
                   <p className="text-sm font-bold text-on-surface mt-0.5">{materialTitle}</p>
-                  <p className="text-xs text-secondary font-medium">{weight} kg Net Weight</p>
+                  <p className="text-xs text-secondary font-medium">{weight} {unit === 'piece' ? 'pcs (नग)' : 'kg'} Net</p>
                 </div>
                 <div className="bg-surface-container-low p-3 rounded-xl border border-surface-variant">
                   <p className="text-xs text-secondary font-semibold">Agreed Rate</p>
                   <p className="text-sm font-bold text-primary mt-0.5 font-mono">
-                    ₹{agreedRate} <span className="font-normal text-xs text-secondary">/ kg</span>
+                    ₹{agreedRate} <span className="font-normal text-xs text-secondary">/ {unit === 'piece' ? 'pc (नग)' : 'kg'}</span>
                   </p>
-                  <p className="text-[11px] text-secondary">Market: ₹700-₹780</p>
+                  <p className="text-[11px] text-secondary">
+                    Mandi Benchmark: ₹{Math.round(agreedRate * 0.95)}–₹{Math.round(agreedRate * 1.05)}/{unit === 'piece' ? 'pc' : 'kg'}
+                  </p>
                 </div>
               </div>
 
@@ -299,26 +305,123 @@ export default function Screen05HandoverReceipt({
                 </div>
               </div>
 
-              <div className="flex items-center justify-between bg-primary-container/10 p-3 rounded-xl border border-primary/20">
-                <div className="flex items-center gap-2.5">
-                  <span className="material-symbols-outlined text-primary filled text-[24px]">payments</span>
-                  <div>
-                    <p className="text-xs font-bold text-on-surface">✓ Paid in Full via Cash</p>
-                    <p className="text-[11px] text-secondary">Physical cash verified &amp; acknowledged by collector</p>
-                  </div>
+              {/* 3-Way Payment Status Selector (Citing Ul et al. 2023, Ray 2025) */}
+              <div className="bg-surface-container-low p-3.5 rounded-xl border border-outline-variant space-y-2.5">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-on-surface flex items-center gap-1">
+                    <span className="material-symbols-outlined text-primary text-[18px]">payments</span>
+                    <span>{currentLang === 'mr' ? 'देयक स्थिती निवडा' : 'भुगतान स्थिति (Payment Status)'}</span>
+                  </span>
+                  <button
+                    onClick={() => handleSpeakSoundbox(paymentMode)}
+                    aria-label="Soundbox Audio Announcement"
+                    className="text-[11px] text-tertiary font-bold flex items-center gap-1 bg-tertiary-fixed/60 hover:bg-tertiary-fixed px-2.5 py-1 rounded-full border border-tertiary-fixed-dim transition-colors cursor-pointer"
+                    title="Soundbox Broadcast"
+                  >
+                    <span className="material-symbols-outlined text-[15px] filled">speaker</span>
+                    <span>Soundbox Audio</span>
+                  </button>
                 </div>
-                <span className="material-symbols-outlined text-primary text-[20px] filled">check</span>
+
+                <div className="grid grid-cols-3 gap-1.5">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setPaymentMode('CASH_RECEIVED');
+                      handleSpeakSoundbox('CASH_RECEIVED');
+                    }}
+                    className={`py-2 px-1 rounded-lg text-xs font-bold transition-all flex flex-col items-center justify-center gap-0.5 cursor-pointer ${
+                      paymentMode === 'CASH_RECEIVED'
+                        ? 'bg-emerald-600 text-white shadow-sm'
+                        : 'bg-surface hover:bg-surface-container text-on-surface-variant border border-outline-variant/50'
+                    }`}
+                  >
+                    <span className="material-symbols-outlined text-[18px]">payments</span>
+                    <span className="truncate">{currentLang === 'mr' ? 'रोख मिळाली' : 'नकद मिला'}</span>
+                    <span className="text-[9px] opacity-80">(Cash)</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setPaymentMode('UPI_RECEIVED');
+                      handleSpeakSoundbox('UPI_RECEIVED');
+                    }}
+                    className={`py-2 px-1 rounded-lg text-xs font-bold transition-all flex flex-col items-center justify-center gap-0.5 cursor-pointer ${
+                      paymentMode === 'UPI_RECEIVED'
+                        ? 'bg-primary text-on-primary shadow-sm'
+                        : 'bg-surface hover:bg-surface-container text-on-surface-variant border border-outline-variant/50'
+                    }`}
+                  >
+                    <span className="material-symbols-outlined text-[18px]">qr_code_2</span>
+                    <span className="truncate">{currentLang === 'mr' ? 'UPI मिळाले' : 'UPI प्राप्त'}</span>
+                    <span className="text-[9px] opacity-80">(Digital)</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setPaymentMode('PENDING_SETTLEMENT');
+                      handleSpeakSoundbox('PENDING_SETTLEMENT');
+                    }}
+                    className={`py-2 px-1 rounded-lg text-xs font-bold transition-all flex flex-col items-center justify-center gap-0.5 cursor-pointer ${
+                      paymentMode === 'PENDING_SETTLEMENT'
+                        ? 'bg-amber-600 text-white shadow-sm'
+                        : 'bg-surface hover:bg-surface-container text-on-surface-variant border border-outline-variant/50'
+                    }`}
+                  >
+                    <span className="material-symbols-outlined text-[18px]">hourglass_top</span>
+                    <span className="truncate">{currentLang === 'mr' ? 'बाकी देय' : 'बकाया'}</span>
+                    <span className="text-[9px] opacity-80">(Pending)</span>
+                  </button>
+                </div>
+
+                <div className="flex items-center gap-2 pt-1 text-[11px] text-secondary">
+                  <span className="material-symbols-outlined text-[15px] text-primary">info</span>
+                  <span>
+                    {paymentMode === 'CASH_RECEIVED' && (currentLang === 'mr' ? 'प्रत्यक्ष रोख रक्कम मिळाली आणि सत्यापित झाली.' : 'शारीरिक नकद प्राप्त एवं सत्यापित।')}
+                    {paymentMode === 'UPI_RECEIVED' && (currentLang === 'mr' ? 'डिजिटल UPI द्वारे तात्काळ खात्यात जमा.' : 'डिजिटल UPI बैंक खाते में तत्काल जमा।')}
+                    {paymentMode === 'PENDING_SETTLEMENT' && (currentLang === 'mr' ? 'काटा पावतीनंतर देयक दिले जाईल (लेजरमध्ये नोंद).' : 'तौल कांटा पर्ची के बाद भुगतान देय (खाते में दर्ज)।')}
+                  </span>
+                </div>
               </div>
             </div>
 
             {/* Action Buttons */}
             <div className="flex flex-col gap-3">
+              {/* 1-Tap WhatsApp Voucher Share */}
               <button
-                onClick={handleShare}
-                className="w-full h-12 bg-primary text-on-primary rounded-xl shadow-md hover:bg-primary-container transition-all flex items-center justify-center gap-2 font-bold text-sm cursor-pointer active:scale-[0.99]"
+                onClick={() => {
+                  const paymentText = paymentMode === 'CASH_RECEIVED'
+                    ? '100% Cash Confirmed ✓ (नकद मिला)'
+                    : (paymentMode === 'UPI_RECEIVED' ? 'Instant UPI Digital Payment Verified ✓ (UPI प्राप्त)' : 'Pending Weighbridge Settlement ⏳ (कांटा तौल बकाया)');
+                  const text = encodeURIComponent(
+                    `*RE:LINK E-Waste Handover Voucher (हैंडओवर पर्ची)*\n` +
+                    `Lot Ref: ${lotRef}\n` +
+                    `Material: ${materialTitle}\n` +
+                    `Quantity: ${weight} ${unit === 'piece' ? 'pcs (नग)' : 'kg'}\n` +
+                    `Rate: ₹${agreedRate}/${unit === 'piece' ? 'pc (नग)' : 'kg'}\n` +
+                    `*Total Value: ₹${totalPaid.toLocaleString('en-IN')}*\n` +
+                    `Authorized Recycler: ${recycler.name}\n` +
+                    `SPCB Ref: ${recycler.statutoryRef || recycler.cpcbNo}\n` +
+                    `Payment Status: ${paymentText}\n` +
+                    `Weighbridge Token: ${handoverRef}`
+                  );
+                  window.open(`https://api.whatsapp.com/send?text=${text}`, '_blank');
+                }}
+                className="w-full h-12 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl shadow-md transition-all flex items-center justify-center gap-2 font-bold text-sm cursor-pointer active:scale-[0.99]"
+                type="button"
               >
                 <span className="material-symbols-outlined text-[20px]">share</span>
-                <span>Download / Share Receipt (PDF/SMS)</span>
+                <span>Share Receipt on WhatsApp (व्हाट्सएप पर पर्ची भेजें)</span>
+              </button>
+
+              <button
+                onClick={handleShare}
+                className="w-full h-11 bg-surface-container hover:bg-surface-container-high border border-outline-variant/50 text-on-surface rounded-xl transition-all flex items-center justify-center gap-2 font-bold text-xs sm:text-sm cursor-pointer"
+              >
+                <span className="material-symbols-outlined text-[18px]">print</span>
+                <span>{currentLang === 'mr' ? 'पावती डाउनलोड करा • Print / Download Voucher PDF' : (currentLang === 'hi' ? 'पर्ची डाउनलोड करें • Print / Download Voucher PDF' : 'Print / Download Voucher PDF')}</span>
               </button>
 
               <div className="grid grid-cols-2 gap-3">
@@ -327,14 +430,14 @@ export default function Screen05HandoverReceipt({
                   className="h-11 bg-surface-container border border-outline-variant text-on-surface rounded-xl hover:bg-surface-container-high transition-colors flex items-center justify-center gap-1.5 font-bold text-xs sm:text-sm cursor-pointer"
                 >
                   <span className="material-symbols-outlined text-[18px]">payments</span>
-                  <span>View in Earnings</span>
+                  <span>{currentLang === 'mr' ? 'कमाई पहा' : (currentLang === 'hi' ? 'कमाई देखें' : 'View Earnings')}</span>
                 </button>
                 <button
                   onClick={onResetLot}
                   className="h-11 bg-surface-container border border-outline-variant text-on-surface rounded-xl hover:bg-surface-container-high transition-colors flex items-center justify-center gap-1.5 font-bold text-xs sm:text-sm cursor-pointer"
                 >
                   <span className="material-symbols-outlined text-[18px]">add_circle</span>
-                  <span>Create New Lot</span>
+                  <span>{currentLang === 'mr' ? 'नवीन लॉट' : (currentLang === 'hi' ? 'नया लॉट' : 'Create New Lot')}</span>
                 </button>
               </div>
             </div>

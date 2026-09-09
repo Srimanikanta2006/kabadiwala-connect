@@ -13,20 +13,20 @@ export default function EconomicsImpactModal({ isOpen, onClose }) {
         {/* Modal Header */}
         <div className="p-4 sm:p-5 border-b border-outline-variant flex items-center justify-between bg-surface-container-low">
           <div className="flex items-center gap-2.5">
-            <div className="w-10 h-10 rounded-xl bg-emerald-600 text-white flex items-center justify-center shadow-sm">
+            <div className="w-10 h-10 rounded-xl bg-primary text-white flex items-center justify-center shadow-sm">
               <span className="material-symbols-outlined text-[22px]">trending_up</span>
             </div>
             <div>
               <div className="flex items-center gap-2">
                 <h3 className="font-bold text-base sm:text-lg text-on-surface">
-                  {currentLang === 'mr' ? 'अर्थशास्त्र आणि सामाजिक प्रभाव' : (currentLang === 'hi' ? 'अर्थशास्त्र एवं ज़मीनी प्रभाव' : 'Unit Economics & Ground Impact Report')}
+                  {currentLang === 'mr' ? 'बाजार दर पारदर्शकता अहवाल' : (currentLang === 'hi' ? 'बाजार मूल्य पारदर्शिता रिपोर्ट' : 'Market Price Transparency Overview')}
                 </h3>
-                <span className="bg-emerald-600/10 text-emerald-700 dark:text-emerald-400 text-[10px] font-bold px-2 py-0.5 rounded-full border border-emerald-600/20">
-                  Field Validated
+                <span className="bg-primary/10 text-primary text-[10px] font-bold px-2 py-0.5 rounded-full border border-primary/20">
+                  CPCB Verified Mandi
                 </span>
               </div>
               <p className="text-xs text-on-surface-variant mt-0.5">
-                Field Research across Dharavi (Mumbai) &amp; Bhosari MIDC (Pune) with 2 Working Collectors
+                Benchmark Rates across Authorized E-Waste Recyclers &amp; Dismantlers
               </p>
             </div>
           </div>
@@ -45,36 +45,36 @@ export default function EconomicsImpactModal({ isOpen, onClose }) {
             <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-2xl p-4 space-y-1.5">
               <div className="flex items-center justify-between">
                 <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-800 dark:text-emerald-300">
-                  Collector Income Uplift
+                  Value Realization
                 </span>
                 <span className="bg-emerald-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">
-                  +97.6% Uplift
+                  Fair Weight
                 </span>
               </div>
               <div className="flex items-baseline gap-2">
-                <span className="text-2xl font-extrabold text-emerald-700 dark:text-emerald-400">₹16,355</span>
-                <span className="text-on-surface-variant line-through text-xs">from ₹8,275/mo</span>
+                <span className="text-2xl font-extrabold text-emerald-700 dark:text-emerald-400">100% Certified</span>
+                <span className="text-on-surface-variant text-xs">Scale Accuracy</span>
               </div>
               <p className="text-[11px] text-on-surface-variant leading-relaxed">
-                By bypassing informal middlemen (*seths*) and eliminating 15% tare deductions, itinerant collectors nearly double their monthly e-waste earnings.
+                Direct digital scale calibration and verified Mandi rates ensure fair remuneration for collected electronics.
               </p>
             </div>
 
             <div className="bg-primary/10 border border-primary/30 rounded-2xl p-4 space-y-1.5">
               <div className="flex items-center justify-between">
                 <span className="text-[11px] font-bold uppercase tracking-wider text-primary">
-                  Platform Sustainability
+                  Statutory Compliance
                 </span>
                 <span className="bg-primary text-on-primary text-[10px] font-bold px-2 py-0.5 rounded-full">
-                  98.8% Margin
+                  Form-6 Pass
                 </span>
               </div>
               <div className="flex items-baseline gap-2">
-                <span className="text-2xl font-extrabold text-primary">2.0% EPR Fee</span>
-                <span className="text-xs text-on-surface-variant">Paid by Recyclers</span>
+                <span className="text-2xl font-extrabold text-primary">Zero Hassle</span>
+                <span className="text-xs text-on-surface-variant">Legal Protection</span>
               </div>
               <p className="text-[11px] text-on-surface-variant leading-relaxed">
-                <strong>100% Free for Collectors.</strong> Recyclers happily pay 2% because verified EPR audit certificates fulfill their statutory CPCB quota without intermediary markups.
+                Every lot transferred to an authorized recycler receives statutory Form-6 protection under E-Waste Rules 2022.
               </p>
             </div>
           </div>
@@ -82,8 +82,8 @@ export default function EconomicsImpactModal({ isOpen, onClose }) {
           {/* Benchmark Comparison Table */}
           <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <h4 className="font-bold text-sm text-on-surface">Material Buying Benchmark Comparison (Per Kilogram)</h4>
-              <span className="text-[10px] text-on-surface-variant">Mumbai &amp; Pune Industrial Belt</span>
+              <h4 className="font-bold text-sm text-on-surface">Material Benchmark Comparison (Per Kilogram)</h4>
+              <span className="text-[10px] text-on-surface-variant">Regional Industrial Average</span>
             </div>
 
             <div className="bg-surface-container-lowest rounded-xl border border-outline-variant/40 overflow-x-auto">
@@ -91,60 +91,34 @@ export default function EconomicsImpactModal({ isOpen, onClose }) {
                 <thead>
                   <tr className="bg-surface-container-low border-b border-outline-variant/40 text-on-surface-variant uppercase text-[10px] font-bold">
                     <th className="p-3">Material Category</th>
-                    <th className="p-3 text-right">Informal Middleman</th>
-                    <th className="p-3 text-right font-bold text-primary">RE:LINK Direct Rate</th>
-                    <th className="p-3 text-right text-emerald-700">Direct Uplift</th>
+                    <th className="p-3 text-right">Standard Unorganized Rate</th>
+                    <th className="p-3 text-right font-bold text-primary">RE:LINK Authorized Mandi</th>
+                    <th className="p-3 text-right text-emerald-700">Fair Value Gain</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-outline-variant/20">
                   {[
-                    { name: 'High-Grade PCB (Motherboards/RAM)', code: 'ITEW1-PCB-HG', middle: '₹110.00', relink: '₹280.00', uplift: '+154.5%', gain: '+₹170/kg' },
-                    { name: 'Insulated Copper Cables', code: 'ITEW-CBL-CU', middle: '₹210.00 (burnt)', relink: '₹380.00 (granulator)', uplift: '+81.0%', gain: '+₹170/kg' },
-                    { name: 'Lead-Acid Batteries', code: 'BATT-PB-ACID', middle: '₹65.00', relink: '₹105.00', uplift: '+61.5%', gain: '+₹40/kg' },
-                    { name: 'CRT TV & Monitors', code: 'CEEW1-CRT', middle: '₹5.00', relink: '₹15.00', uplift: '+200.0%', gain: '+₹10/kg' },
-                    { name: 'LCD / LED Panels', code: 'CEEW1-FPD', middle: '₹18.00', relink: '₹45.00', uplift: '+150.0%', gain: '+₹27/kg' },
-                    { name: 'Electric Motors & Magnets', code: 'ITEW-MTR-MAG', middle: '₹35.00', relink: '₹72.00', uplift: '+105.7%', gain: '+₹37/kg' }
+                    { name: 'High-Grade PCB (Motherboards/RAM)', code: 'ITEW1-PCB-HG', unorg: '₹140.00', relink: '₹280.00', gain: '+₹140/kg' },
+                    { name: 'Insulated Copper Cables', code: 'ITEW-CBL-CU', unorg: '₹240.00', relink: '₹380.00', gain: '+₹140/kg' },
+                    { name: 'Lead-Acid Batteries', code: 'BATT-PB-ACID', unorg: '₹75.00', relink: '₹105.00', gain: '+₹30/kg' },
+                    { name: 'CRT TV & Monitors', code: 'CEEW1-CRT', unorg: '₹8.00', relink: '₹16.00', gain: '+₹8/kg' },
+                    { name: 'LCD / LED Panels', code: 'CEEW1-FPD', unorg: '₹25.00', relink: '₹45.00', gain: '+₹20/kg' },
+                    { name: 'Electric Motors & Magnets', code: 'ITEW-MTR-MAG', unorg: '₹45.00', relink: '₹75.00', gain: '+₹30/kg' }
                   ].map((row, idx) => (
                     <tr key={idx} className="hover:bg-surface-container-low transition-colors">
                       <td className="p-3">
                         <strong className="block text-on-surface">{row.name}</strong>
                         <span className="text-[10px] font-mono text-on-surface-variant">{row.code}</span>
                       </td>
-                      <td className="p-3 text-right text-on-surface-variant line-through">{row.middle}</td>
+                      <td className="p-3 text-right text-on-surface-variant">{row.unorg}</td>
                       <td className="p-3 text-right font-bold text-primary">{row.relink}</td>
                       <td className="p-3 text-right font-bold text-emerald-700 dark:text-emerald-400">
-                        {row.gain} ({row.uplift})
+                        {row.gain}
                       </td>
                     </tr>
                   ))}
                 </tbody>
               </table>
-            </div>
-            <p className="text-[10px] text-on-surface-variant italic">
-              * Note: Informal buyers penalize burnt cables due to carbon char. Formal recyclers pay ₹380/kg for clean unburnt cables, creating a direct economic incentive against toxic open burning.
-            </p>
-          </div>
-
-          {/* Unit Economics P&L Model */}
-          <div className="bg-surface-container-low rounded-xl p-4 border border-outline-variant/40 space-y-2">
-            <h4 className="font-bold text-xs text-on-surface uppercase tracking-wider">Per-Transaction Platform Unit Economics</h4>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
-              <div className="bg-surface p-2.5 rounded-lg border border-outline-variant/30">
-                <span className="text-[10px] text-on-surface-variant block">Avg Lot Size</span>
-                <strong className="text-sm font-bold text-on-surface">45 kg (Mixed)</strong>
-              </div>
-              <div className="bg-surface p-2.5 rounded-lg border border-outline-variant/30">
-                <span className="text-[10px] text-on-surface-variant block">Avg Transaction Value</span>
-                <strong className="text-sm font-bold text-primary">₹11,500</strong>
-              </div>
-              <div className="bg-surface p-2.5 rounded-lg border border-outline-variant/30">
-                <span className="text-[10px] text-on-surface-variant block">Platform Revenue (2%)</span>
-                <strong className="text-sm font-bold text-emerald-700">₹230.00</strong>
-              </div>
-              <div className="bg-surface p-2.5 rounded-lg border border-outline-variant/30">
-                <span className="text-[10px] text-on-surface-variant block">Cloud &amp; SMS Cost</span>
-                <strong className="text-sm font-bold text-on-surface">₹2.70 / lot</strong>
-              </div>
             </div>
           </div>
         </div>
@@ -153,13 +127,13 @@ export default function EconomicsImpactModal({ isOpen, onClose }) {
         <div className="p-4 bg-surface-container-low border-t border-outline-variant flex items-center justify-between text-xs">
           <span className="text-on-surface-variant flex items-center gap-1">
             <span className="material-symbols-outlined text-[16px] text-primary">verified</span>
-            CPCB E-Waste Management Rules 2022 Statutory Framework
+            CPCB E-Waste (Management) Rules 2022 Framework
           </span>
           <button
             onClick={onClose}
             className="px-4 py-2 bg-primary text-on-primary font-bold text-xs rounded-xl shadow cursor-pointer hover:bg-primary-container transition-colors"
           >
-            Close Report
+            Close
           </button>
         </div>
       </div>

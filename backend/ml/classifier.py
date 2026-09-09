@@ -354,10 +354,10 @@ class MaterialClassifier:
         plastics_score = 0.3 + (2.0 if edge < 18.0 and 80.0 <= bright <= 160.0 else 0.0)
         scores["mat_mixed_plastics"] = max(0.1, plastics_score)
 
-        # Softmax normalization with temperature T=1.1
+        # Softmax normalization with temperature T=0.85 (sharper calibration, prevents probability dilution)
         categories = [c["id"] for c in self.categories]
         raw_vals = np.array([scores.get(cid, 0.1) for cid in categories], dtype=np.float64)
-        exp_vals = np.exp(raw_vals / 1.1)
+        exp_vals = np.exp(raw_vals / 0.85)
         probabilities = exp_vals / np.sum(exp_vals)
 
         prob_dict = {categories[i]: float(probabilities[i]) for i in range(len(categories))}
@@ -434,12 +434,32 @@ class MaterialClassifier:
                     "Washing Machine": "mat_motors_magnets"
                 }
                 app_cid = real_to_app.get(real_pred_class)
+
+                # Smart Battery Bifurcation (Li-Ion vs Lead-Acid)
+                # Separates phone/laptop Li-ion batteries from heavy vehicle/inverter lead-acid blocks
+                if real_pred_class == "Battery":
+                    bright = features.get("brightness", 100.0)
+                    r, g, b = features.get("r_ratio", 0.33), features.get("g_ratio", 0.33), features.get("b_ratio", 0.33)
+                    if bright > 130.0 or (abs(r - g) < 0.04 and abs(g - b) < 0.04 and bright > 90.0):
+                        app_cid = "mat_batteries_li_ion"
+                    else:
+                        app_cid = "mat_batteries_lead"
+
                 if app_cid and not matched_arch:
                     prob_dict[app_cid] = max(prob_dict.get(app_cid, 0.1), real_pred_conf * 4.0)
                     total = sum(prob_dict.values())
                     prob_dict = {k: v / total for k, v in prob_dict.items()}
             except Exception as e:
                 logger.warning(f"Real PyTorch model prediction error: {e}")
+
+        # Field environmental diagnostics (Low-light & blur detection - zero memory overhead)
+        bright_val = features.get("brightness", 100.0)
+        edge_val = features.get("edge_energy", 20.0)
+        field_quality_warning = None
+        if bright_val < 35.0:
+            field_quality_warning = "LOW_LIGHT"
+        elif edge_val < 6.0:
+            field_quality_warning = "BLURRY_IMAGE"
 
         # Allow testing override if provided
         if category_hint and category_hint in self.category_map:
@@ -562,6 +582,7 @@ class MaterialClassifier:
             },
             "top_3_predictions": top_3_predictions,
             "suggestions": suggestions,
+            "field_quality_warning": field_quality_warning,
             "real_dataset_class": real_pred_class,
             "real_model_active": bool(self.pytorch_model is not None),
             "roboflow": roboflow_data,

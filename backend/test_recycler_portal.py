@@ -30,7 +30,12 @@ def test_list_authorized_recyclers():
 
     for rec in data["data"]:
         assert rec["authorization_status"] == "ACTIVE"
-        assert rec["cpcb_registration_no"].startswith("CPCB/E-WASTE/REG/")
+        assert (
+            rec["cpcb_registration_no"].startswith("CPCB/E-WASTE/REG/")
+            or "Reg #" in rec["cpcb_registration_no"]
+            or "Pollution Control Board" in rec["cpcb_registration_no"]
+            or "CPCB" in rec["cpcb_registration_no"]
+        )
         assert isinstance(rec["materials_accepted"], list)
         assert len(rec["materials_accepted"]) > 0
         assert "offered_rates" in rec

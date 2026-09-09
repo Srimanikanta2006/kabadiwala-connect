@@ -6,7 +6,7 @@ export const REGIONAL_MANDI_DATA = {
     name: 'Mumbai MMR (Dharavi / Kurla Yard)',
     multiplier: 1.0,
     categories: [
-      { id: 'mat_pcb_high', name: 'High-Grade PCB', sub: 'Server / Telecom Motherboards', rate: 780, range: '₹720 – ₹810', trend: 'UP', change: '+₹35', icon: 'memory', spoken: 'मुंबई मंडी: हाई-ग्रेड सर्किट बोर्ड का भाव 780 रुपये प्रति किलो है।' },
+      { id: 'mat_pcb_high', name: 'High-Grade PCB', sub: 'Server / Telecom Motherboards', rate: 265, range: '₹250 – ₹285', trend: 'UP', change: '+₹15', icon: 'memory', spoken: 'मुंबई मंडी: हाई-ग्रेड सर्किट बोर्ड का भाव 265 रुपये प्रति किलो है।' },
       { id: 'mat_cables_copper', name: 'Copper Cables', sub: 'Insulated Wire Harness', rate: 420, range: '₹400 – ₹440', trend: 'UP', change: '+₹20', icon: 'cable', spoken: 'तांबे के तार का भाव 420 रुपये प्रति किलो है।' },
       { id: 'mat_batteries_lead', name: 'Lead-Acid Batteries', sub: 'Inverter / Auto Battery', rate: 105, range: '₹95 – ₹115', trend: 'STABLE', change: 'स्थिर', icon: 'battery_alert', spoken: 'लेड एसिड बैटरी का भाव 105 रुपये प्रति किलो है।' },
       { id: 'mat_batteries_li_ion', name: 'Li-ion Batteries', sub: 'Mobile / Laptop Packs', rate: 110, range: '₹95 – ₹125', trend: 'UP', change: '+₹15', icon: 'battery_charging_full', spoken: 'लिथियम बैटरी का भाव 110 रुपये प्रति किलो है।' },
@@ -21,7 +21,7 @@ export const REGIONAL_MANDI_DATA = {
     name: 'Pune Industrial (Bhosari MIDC)',
     multiplier: 0.98,
     categories: [
-      { id: 'mat_pcb_high', name: 'High-Grade PCB', sub: 'Server / Telecom Motherboards', rate: 765, range: '₹710 – ₹795', trend: 'UP', change: '+₹25', icon: 'memory', spoken: 'पुणे मंडी: हाई-ग्रेड सर्किट बोर्ड का भाव 765 रुपये प्रति किलो है।' },
+      { id: 'mat_pcb_high', name: 'High-Grade PCB', sub: 'Server / Telecom Motherboards', rate: 255, range: '₹240 – ₹275', trend: 'UP', change: '+₹10', icon: 'memory', spoken: 'पुणे मंडी: हाई-ग्रेड सर्किट बोर्ड का भाव 255 रुपये प्रति किलो है।' },
       { id: 'mat_cables_copper', name: 'Copper Cables', sub: 'Insulated Wire Harness', rate: 415, range: '₹395 – ₹430', trend: 'UP', change: '+₹15', icon: 'cable', spoken: 'तांबे के तार का भाव 415 रुपये प्रति किलो है।' },
       { id: 'mat_batteries_lead', name: 'Lead-Acid Batteries', sub: 'Inverter / Auto Battery', rate: 102, range: '₹92 – ₹110', trend: 'STABLE', change: 'स्थिर', icon: 'battery_alert', spoken: 'लेड एसिड बैटरी का भाव 102 रुपये प्रति किलो है।' },
       { id: 'mat_batteries_li_ion', name: 'Li-ion Batteries', sub: 'Mobile / Laptop Packs', rate: 108, range: '₹95 – ₹120', trend: 'UP', change: '+₹10', icon: 'battery_charging_full', spoken: 'लिथियम बैटरी का भाव 108 रुपये प्रति किलो है।' },
@@ -36,7 +36,7 @@ export const REGIONAL_MANDI_DATA = {
     name: 'Bengaluru (Peenya Industrial Cluster)',
     multiplier: 1.02,
     categories: [
-      { id: 'mat_pcb_high', name: 'High-Grade PCB', sub: 'Server / Telecom Motherboards', rate: 795, range: '₹735 – ₹830', trend: 'UP', change: '+₹40', icon: 'memory', spoken: 'बेंगलुरु मंडी: हाई-ग्रेड सर्किट बोर्ड का भाव 795 रुपये प्रति किलो है।' },
+      { id: 'mat_pcb_high', name: 'High-Grade PCB', sub: 'Server / Telecom Motherboards', rate: 270, range: '₹255 – ₹290', trend: 'UP', change: '+₹15', icon: 'memory', spoken: 'बेंगलुरु मंडी: हाई-ग्रेड सर्किट बोर्ड का भाव 270 रुपये प्रति किलो है।' },
       { id: 'mat_cables_copper', name: 'Copper Cables', sub: 'Insulated Wire Harness', rate: 425, range: '₹405 – ₹445', trend: 'UP', change: '+₹25', icon: 'cable', spoken: 'तांबे के तार का भाव 425 रुपये प्रति किलो है।' },
       { id: 'mat_batteries_lead', name: 'Lead-Acid Batteries', sub: 'Inverter / Auto Battery', rate: 108, range: '₹98 – ₹118', trend: 'STABLE', change: 'स्थिर', icon: 'battery_alert', spoken: 'लेड एसिड बैटरी का भाव 108 रुपये प्रति किलो है।' },
       { id: 'mat_batteries_li_ion', name: 'Li-ion Batteries', sub: 'Mobile / Laptop Packs', rate: 115, range: '₹100 – ₹130', trend: 'UP', change: '+₹20', icon: 'battery_charging_full', spoken: 'लिथियम बैटरी का भाव 115 रुपये प्रति किलो है।' },

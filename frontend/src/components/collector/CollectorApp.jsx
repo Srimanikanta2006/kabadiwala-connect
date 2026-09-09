@@ -22,17 +22,35 @@ const DEFAULT_LOT_DRAFT = {
   materialSub: 'Motherboard / Component Grade 1',
   confidence: 92,
   weight: 12.0,
+  unit: 'kg',
   condition: 'Used / Mixed',
   isConfirmed: false,
   acceptedRecycler: {
-    name: 'EcoRecycle India Pvt Ltd',
-    cpcbNo: 'CPCB/E-WASTE/REG/MH/2023/1042',
-    rate: 780
+    id: 'cpcb_mh_032',
+    name: 'CBS EWaste Recycling Industries',
+    cpcbNo: 'Maharashtra Pollution Control Board (MPCB) - Reg #MH/E-WASTE/032',
+    rate: 275
   },
-  agreedRate: 780,
-  totalEst: 9360,
+  agreedRate: 275,
+  totalEst: 3300,
   handoverRef: 'KC-TRACE-20260905-MH-8F2A1C',
-  status: 'PENDING_CONFIRMATION'
+  status: 'PENDING_CONFIRMATION',
+  items: [
+    {
+      id: 'item_init_01',
+      materialId: 'mat_pcb_high',
+      materialTitle: 'Printed Circuit Board (PCB)',
+      materialSub: 'Motherboard / Component Grade 1',
+      weight: 12.0,
+      unit: 'kg',
+      condition: 'Used / Mixed',
+      baseRate: 265,
+      lowEst: 2870,
+      highEst: 3450,
+      confidence: 92,
+      photoUrl: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBnrXAynZNALXyOl8wueunxDavXvrvwno8ShM4qL4CTD3UnF4MmWJ4LuV71LlqCfufAD8qkP3HoAHlCEuL7qoWrLSB0I4vFLT1hUpey49XO7COePpM-6at6f5FTV23fkqAjMDEO9Jg1r5sjRFSPBVvgkjtNYGN8HeK8__5iQzaZgcica5tUIT_hal2cwOajIdRrMqTOBd9zGHioWKGJwwIlmo-VT4oy01MOUIeUVPTlHh1ywxpynama'
+    }
+  ]
 };
 
 export default function CollectorApp({ onSwitchRole }) {
@@ -40,7 +58,23 @@ export default function CollectorApp({ onSwitchRole }) {
   const fileInputRef = useRef(null);
 
   const [activeScreen, setActiveScreen] = useState('home'); // 'home' | 'ai_scan' | 'category_select' | 'lot_summary' | 'offers' | 'receipt' | 'earnings' | 'safety'
-  const [lotDraft, setLotDraft] = useState(DEFAULT_LOT_DRAFT);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  
+  // Persist in-progress draft to sessionStorage (Fixes Issue 4.4)
+  const [lotDraft, setLotDraft] = useState(() => {
+    try {
+      const saved = sessionStorage.getItem('relink_lot_draft');
+      if (saved) return JSON.parse(saved);
+    } catch (e) {}
+    return DEFAULT_LOT_DRAFT;
+  });
+
+  useEffect(() => {
+    try {
+      sessionStorage.setItem('relink_lot_draft', JSON.stringify(lotDraft));
+    } catch (e) {}
+  }, [lotDraft]);
+
   const [recentLots, setRecentLots] = useState([]);
   const [syncStatus, setSyncStatus] = useState({
     isOnline: typeof navigator !== 'undefined' ? navigator.onLine : true,
@@ -74,9 +108,10 @@ export default function CollectorApp({ onSwitchRole }) {
     };
   }, []);
 
-  // Handle Photo Capture / Scan Trigger
+  // Handle Photo Capture / Scan Trigger with value reset (Fixes Issue 2.3)
   const handleScanTrigger = () => {
     if (fileInputRef.current) {
+      fileInputRef.current.value = '';
       fileInputRef.current.click();
     } else {
       setActiveScreen('ai_scan');
@@ -86,9 +121,12 @@ export default function CollectorApp({ onSwitchRole }) {
   const handleFileChange = async (e) => {
     const file = e.target.files?.[0];
     if (!file) {
-      setActiveScreen('ai_scan');
+      // If user cancels camera/file picker, stay cleanly on current screen (Fixes Issue 2.4)
       return;
     }
+
+    // Trigger instant analyzing visual overlay (Fixes Issue 2.2)
+    setIsAnalyzing(true);
 
     const reader = new FileReader();
     reader.onload = async (evt) => {
@@ -129,8 +167,10 @@ export default function CollectorApp({ onSwitchRole }) {
         }
       } catch (err) {
         setLotDraft((prev) => ({ ...prev, photoUrl: dataUrl }));
+      } finally {
+        setIsAnalyzing(false);
+        setActiveScreen('ai_scan');
       }
-      setActiveScreen('ai_scan');
     };
     reader.readAsDataURL(file);
   };
@@ -219,7 +259,44 @@ export default function CollectorApp({ onSwitchRole }) {
     }
   };
 
+  const handleAddItemToDraft = (newItem) => {
+    setLotDraft((prev) => {
+      const existingItems = prev.items || [];
+      const updatedItems = [...existingItems, { ...newItem, id: `item_${Date.now()}` }];
+      const totalWeight = updatedItems.reduce((sum, it) => sum + (Number(it.weight) || 0), 0);
+      const totalLow = updatedItems.reduce((sum, it) => sum + (Number(it.lowEst) || 0), 0);
+      const totalHigh = updatedItems.reduce((sum, it) => sum + (Number(it.highEst) || 0), 0);
+      return {
+        ...prev,
+        items: updatedItems,
+        weight: totalWeight,
+        lowEst: totalLow,
+        highEst: totalHigh,
+        totalEst: Math.round((totalLow + totalHigh) / 2)
+      };
+    });
+  };
+
+  const handleRemoveItemFromDraft = (itemId) => {
+    setLotDraft((prev) => {
+      const existingItems = prev.items || [];
+      const updatedItems = existingItems.filter(it => it.id !== itemId);
+      const totalWeight = updatedItems.reduce((sum, it) => sum + (Number(it.weight) || 0), 0);
+      const totalLow = updatedItems.reduce((sum, it) => sum + (Number(it.lowEst) || 0), 0);
+      const totalHigh = updatedItems.reduce((sum, it) => sum + (Number(it.highEst) || 0), 0);
+      return {
+        ...prev,
+        items: updatedItems,
+        weight: totalWeight,
+        lowEst: totalLow,
+        highEst: totalHigh,
+        totalEst: Math.round((totalLow + totalHigh) / 2)
+      };
+    });
+  };
+
   const handleResetLot = () => {
+    sessionStorage.removeItem('relink_lot_draft');
     setLotDraft({
       ...DEFAULT_LOT_DRAFT,
       id: `lot_${Date.now()}`,
@@ -230,6 +307,30 @@ export default function CollectorApp({ onSwitchRole }) {
 
   return (
     <div className="collector-main-container">
+      {/* AI Analyzing Scanning Overlay Modal (Fixes Issue 2.2) */}
+      {isAnalyzing && (
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex flex-col items-center justify-center p-6 text-white animate-in fade-in">
+          <div className="w-64 h-64 relative rounded-2xl overflow-hidden border-2 border-primary shadow-2xl flex items-center justify-center bg-surface-container-highest">
+            <div className="absolute inset-0 bg-primary/10"></div>
+            {/* Animated Laser Scanline */}
+            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-primary-fixed to-transparent animate-[pulse_1.5s_infinite] shadow-[0_0_15px_#68dba9]"></div>
+            <div className="flex flex-col items-center gap-3 relative z-10 text-center p-4">
+              <span className="material-symbols-outlined text-[48px] text-primary-fixed animate-spin">document_scanner</span>
+              <span className="text-xs font-bold uppercase tracking-widest text-primary-fixed">MobileNetV2 Edge Model</span>
+            </div>
+          </div>
+          <div className="mt-6 text-center space-y-1.5 max-w-sm">
+            <h3 className="text-lg font-bold text-white flex items-center justify-center gap-2">
+              <span>कबाड़ की पहचान हो रही है...</span>
+              <span className="w-2 h-2 rounded-full bg-primary-fixed animate-ping"></span>
+            </h3>
+            <p className="text-xs text-white/80">
+              AI Vision analyzing material composition, grade &amp; CPCB code
+            </p>
+          </div>
+        </div>
+      )}
+
       {/* Hidden file input for native camera capture */}
       <input
         type="file"
@@ -309,6 +410,8 @@ export default function CollectorApp({ onSwitchRole }) {
           lotDraft={lotDraft}
           onNavigate={setActiveScreen}
           onSaveOffline={handleSaveDraftOffline}
+          onAddItem={() => setActiveScreen('ai_scan')}
+          onRemoveItem={handleRemoveItemFromDraft}
           syncStatus={syncStatus}
         />
       )}
