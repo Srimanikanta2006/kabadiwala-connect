@@ -60,6 +60,28 @@ export default function CollectorApp({ onSwitchRole }) {
   const [activeScreen, setActiveScreen] = useState('home'); // 'home' | 'ai_scan' | 'category_select' | 'lot_summary' | 'offers' | 'receipt' | 'earnings' | 'safety'
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   
+  const normalize = (lng) => {
+    if (!lng) return 'hi';
+    const s = String(lng).toLowerCase();
+    if (s.startsWith('mr')) return 'mr';
+    if (s.startsWith('en')) return 'en';
+    return 'hi';
+  };
+
+  const [currentLang, setCurrentLang] = useState(() => {
+    return normalize(localStorage.getItem('relink_lang') || i18n.language);
+  });
+
+  useEffect(() => {
+    const handleLanguageChanged = (lng) => {
+      setCurrentLang(normalize(lng));
+    };
+    i18n.on('languageChanged', handleLanguageChanged);
+    return () => {
+      i18n.off('languageChanged', handleLanguageChanged);
+    };
+  }, [i18n]);
+
   // Persist in-progress draft to sessionStorage (Fixes Issue 4.4)
   const [lotDraft, setLotDraft] = useState(() => {
     try {
@@ -175,9 +197,16 @@ export default function CollectorApp({ onSwitchRole }) {
     reader.readAsDataURL(file);
   };
 
+  const handleLanguageChange = (lng) => {
+    const safe = normalize(lng);
+    i18n.changeLanguage(safe);
+    localStorage.setItem('relink_lang', safe);
+    setCurrentLang(safe);
+  };
+
   const handleLanguageCycle = () => {
-    const nextLang = i18n.language === 'en' ? 'hi' : (i18n.language === 'hi' ? 'mr' : 'en');
-    i18n.changeLanguage(nextLang);
+    const nextLang = currentLang === 'hi' ? 'mr' : (currentLang === 'mr' ? 'en' : 'hi');
+    handleLanguageChange(nextLang);
   };
 
   const handleUpdateDraft = (updates) => {
@@ -356,6 +385,7 @@ export default function CollectorApp({ onSwitchRole }) {
           }}
           recentLots={recentLots}
           syncStatus={syncStatus}
+          currentLang={currentLang}
           onLanguageChange={handleLanguageCycle}
           onSwitchRole={onSwitchRole}
         />
@@ -382,6 +412,8 @@ export default function CollectorApp({ onSwitchRole }) {
           onNewScan={handleScanTrigger}
           onNavigate={setActiveScreen}
           syncStatus={syncStatus}
+          currentLang={currentLang}
+          onLanguageChange={handleLanguageCycle}
         />
       )}
 
@@ -393,6 +425,8 @@ export default function CollectorApp({ onSwitchRole }) {
           onNavigate={setActiveScreen}
           onRetakePhoto={handleScanTrigger}
           syncStatus={syncStatus}
+          currentLang={currentLang}
+          onLanguageChange={handleLanguageCycle}
         />
       )}
 
@@ -401,6 +435,8 @@ export default function CollectorApp({ onSwitchRole }) {
         <Screen03CategorySelect
           onSelectCategory={(cat) => handleUpdateDraft(cat)}
           onNavigate={setActiveScreen}
+          currentLang={currentLang}
+          onLanguageChange={handleLanguageCycle}
         />
       )}
 
@@ -413,6 +449,8 @@ export default function CollectorApp({ onSwitchRole }) {
           onAddItem={() => setActiveScreen('ai_scan')}
           onRemoveItem={handleRemoveItemFromDraft}
           syncStatus={syncStatus}
+          currentLang={currentLang}
+          onLanguageChange={handleLanguageCycle}
         />
       )}
 
@@ -423,6 +461,8 @@ export default function CollectorApp({ onSwitchRole }) {
           onAcceptOffer={handleAcceptOffer}
           onNavigate={setActiveScreen}
           syncStatus={syncStatus}
+          currentLang={currentLang}
+          onLanguageChange={handleLanguageCycle}
         />
       )}
 
@@ -433,6 +473,8 @@ export default function CollectorApp({ onSwitchRole }) {
           onNavigate={setActiveScreen}
           onResetLot={handleResetLot}
           syncStatus={syncStatus}
+          currentLang={currentLang}
+          onLanguageChange={handleLanguageCycle}
         />
       )}
 
@@ -441,6 +483,8 @@ export default function CollectorApp({ onSwitchRole }) {
         <Screen06EarningsHistory
           onNavigate={setActiveScreen}
           syncStatus={syncStatus}
+          currentLang={currentLang}
+          onLanguageChange={handleLanguageCycle}
         />
       )}
 
@@ -455,32 +499,51 @@ export default function CollectorApp({ onSwitchRole }) {
               >
                 <span className="material-symbols-outlined">arrow_back</span>
               </button>
-              <h1 className="font-headline-md font-bold text-primary text-lg">Safety Guidance</h1>
+              <h1 className="font-headline-md font-bold text-primary text-lg">
+                {currentLang === 'mr' ? 'सुरक्षा मार्गदर्शन' : (currentLang === 'hi' ? 'सुरक्षा मार्गदर्शन' : 'Safety Guidance')}
+              </h1>
             </div>
-            <div className="w-8 h-8 rounded-full bg-primary/15 flex items-center justify-center border border-outline-variant text-primary font-bold text-xs">
-              👷‍♂️
+            <div className="flex items-center gap-2">
+              <button
+                onClick={handleLanguageCycle}
+                className="flex items-center gap-1 h-9 px-2.5 rounded-full bg-surface-container border border-outline-variant text-on-surface hover:bg-surface-container-high transition-colors text-xs font-bold cursor-pointer shrink-0"
+              >
+                <span className="material-symbols-outlined text-sm text-primary">language</span>
+                <span>{currentLang === 'hi' ? 'हिन्दी' : (currentLang === 'mr' ? 'मराठी' : 'EN')}</span>
+              </button>
+              <div className="w-8 h-8 rounded-full bg-primary/15 flex items-center justify-center border border-outline-variant text-primary font-bold text-xs">
+                👷‍♂️
+              </div>
             </div>
           </header>
           <div className="w-full max-w-5xl mx-auto p-4 sm:p-6 space-y-6">
-            <SafetyGuidance />
+            <SafetyGuidance currentLang={currentLang} onLanguageChange={handleLanguageCycle} />
           </div>
           {/* Bottom Nav (Mobile Only) */}
           <nav className="fixed bottom-0 left-0 w-full z-50 flex md:hidden justify-around items-center px-2 py-2 bg-surface border-t border-outline-variant shadow-md rounded-t-xl">
             <button onClick={() => setActiveScreen('home')} className="flex flex-col items-center justify-center p-2 text-on-surface-variant cursor-pointer">
               <span className="material-symbols-outlined">home</span>
-              <span className="font-label-md text-xs mt-1">Home</span>
+              <span className="font-label-md text-xs mt-1">
+                {currentLang === 'mr' ? 'मुख्य' : (currentLang === 'hi' ? 'होम' : 'Home')}
+              </span>
             </button>
             <button onClick={() => setActiveScreen('ai_scan')} className="flex flex-col items-center justify-center p-2 text-on-surface-variant cursor-pointer">
               <span className="material-symbols-outlined">inventory_2</span>
-              <span className="font-label-md text-xs mt-1">Sell / Lots</span>
+              <span className="font-label-md text-xs mt-1">
+                {currentLang === 'mr' ? 'लॉट' : (currentLang === 'hi' ? 'बेचें/लॉट' : 'Sell/Lots')}
+              </span>
             </button>
             <button onClick={() => setActiveScreen('earnings')} className="flex flex-col items-center justify-center p-2 text-on-surface-variant cursor-pointer">
               <span className="material-symbols-outlined">payments</span>
-              <span className="font-label-md text-xs mt-1">Earnings</span>
+              <span className="font-label-md text-xs mt-1">
+                {currentLang === 'mr' ? 'कमाई' : (currentLang === 'hi' ? 'कमाई' : 'Earnings')}
+              </span>
             </button>
             <button onClick={() => setActiveScreen('safety')} className="flex flex-col items-center justify-center bg-primary-container text-on-primary-container rounded-full px-4 py-1 scale-90 cursor-pointer">
               <span className="material-symbols-outlined filled">info</span>
-              <span className="font-label-md text-xs font-bold mt-1">Safety</span>
+              <span className="font-label-md text-xs font-bold mt-1">
+                {currentLang === 'mr' ? 'सुरक्षा' : (currentLang === 'hi' ? 'सुरक्षा' : 'Safety')}
+              </span>
             </button>
           </nav>
         </div>

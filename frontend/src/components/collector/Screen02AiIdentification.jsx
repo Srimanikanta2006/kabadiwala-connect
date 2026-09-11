@@ -1,15 +1,152 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 
+const AI_TRANSLATIONS = {
+  hi: {
+    aiScanComplete: 'एआई पहचान पूर्ण',
+    retakePhoto: 'दोबारा फोटो लें',
+    matchConfidence: 'पहचान सटीकता',
+    high: 'उच्च',
+    moderate: 'मध्यम',
+    low: 'कम (अस्पष्ट)',
+    detectedItems: 'पहचाने गए कबाड़ घटक',
+    otherMatches: 'अन्य संभावित श्रेणियां',
+    lotSpecs: 'लॉट विवरण व वजन',
+    quantityUnit: 'मात्रा / नग (इकाई)',
+    batchWeight: 'अनुमानित वजन (किग्रा)',
+    batchCondition: 'कबाड़ की भौतिक स्थिति',
+    goodIntact: 'उत्कृष्ट / सुरक्षित',
+    usedMixed: 'उपयोगित / मिश्रित',
+    damaged: 'क्षतिग्रस्त / टूटा',
+    mandiRate: 'मंडी हमीभाव दर',
+    verifiedIndex: 'सत्यापित सीपीसीबी दर सूचकांक',
+    createLot: 'लॉट बनाएं और भाव देखें',
+    confirmAnyway: 'पुष्टि करें',
+    navHome: 'होम',
+    navMyLots: 'लॉट',
+    navEarnings: 'कमाई',
+    navSafety: 'सुरक्षा',
+    audioLabel: 'ऑडियो',
+    twoChoices: '2 विकल्प',
+    option1Primary: 'विकल्प 1 (प्राथमिक)',
+    option2Alternative: 'विकल्प 2 (वैकल्पिक)',
+    selectThis: 'यही चुनें',
+    selectOption2: 'विकल्प 2 चुनें',
+    browseFullCatalog: 'या अन्य सभी 7 श्रेणियों में से चुनें →',
+    reviewRequired: 'समीक्षा आवश्यक',
+    changeCategory: 'श्रेणी बदलें',
+    isCorrect: 'क्या इस कबाड़ की सही पहचान हुई है?',
+    yesConfirm: 'हाँ, पुष्टि करें',
+    confirmed: '✓ पुष्टि हो गई',
+    aiVerified: 'एआई द्वारा सत्यापित',
+    localDraftReady: 'स्थानीय ड्राफ्ट तैयार',
+    offlineActive: 'ऑफ़लाइन डेटा सुरक्षित।',
+    scrap: 'कबाड़'
+  },
+  mr: {
+    aiScanComplete: 'एआई ओळख पूर्ण',
+    retakePhoto: 'पुन्हा फोटो घ्या',
+    matchConfidence: 'ओळख अचूकता',
+    high: 'उच्च',
+    moderate: 'मध्यम',
+    low: 'कमी (अस्पष्ट)',
+    detectedItems: 'शोधलेले भंगार घटक',
+    otherMatches: 'इतर संभाव्य श्रेणी',
+    lotSpecs: 'लॉट तपशील व वजन',
+    quantityUnit: 'नग संख्या (इकाई)',
+    batchWeight: 'अंदाजे वजन (किलो)',
+    batchCondition: 'भंगाराची प्रत्यक्ष स्थिती',
+    goodIntact: 'उत्कृष्ट / अखंड',
+    usedMixed: 'वापरलेले / मिश्र',
+    damaged: 'नादुरुस्त / तुटलेले',
+    mandiRate: 'बाजार हमीभाव दर',
+    verifiedIndex: 'सत्यापित सीपीसीबी दर सूची',
+    createLot: 'लॉट बनवा आणि दर पहा',
+    confirmAnyway: 'निश्चित करा',
+    navHome: 'मुख्य',
+    navMyLots: 'लॉट',
+    navEarnings: 'कमाई',
+    navSafety: 'सुरक्षा',
+    audioLabel: 'ध्वनी',
+    twoChoices: '2 पर्याय',
+    option1Primary: 'पर्याय 1 (प्राथमिक)',
+    option2Alternative: 'पर्याय 2 (पर्यायी)',
+    selectThis: 'हेच निवडा',
+    selectOption2: 'पर्याय 2 निवडा',
+    browseFullCatalog: 'किंवा इतर सर्व 7 श्रेणींमधून निवडा →',
+    reviewRequired: 'तपासणी आवश्यक',
+    changeCategory: 'श्रेणी बदला',
+    isCorrect: 'या मालाची योग्य ओळख झाली आहे का?',
+    yesConfirm: 'होय, निश्चित करा',
+    confirmed: '✓ निश्चित झाले',
+    aiVerified: 'एआई सत्यापित',
+    localDraftReady: 'स्थानिक मसुदा तयार',
+    offlineActive: 'ऑफलाइन डेटा सुरक्षित.',
+    scrap: 'भंगार'
+  },
+  en: {
+    aiScanComplete: 'AI Scan Complete',
+    retakePhoto: 'Retake Photo',
+    matchConfidence: 'Match Confidence',
+    high: 'High',
+    moderate: 'Moderate',
+    low: 'Low (Unclear/Dim)',
+    detectedItems: 'Detected Scrap Items',
+    otherMatches: 'Other Potential Matches',
+    lotSpecs: 'Lot Specifications',
+    quantityUnit: 'Quantity / Pieces',
+    batchWeight: 'Estimated Batch Weight',
+    batchCondition: 'Batch Physical Condition',
+    goodIntact: 'Good / Intact',
+    usedMixed: 'Used / Mixed',
+    damaged: 'Damaged',
+    mandiRate: 'Mandi Benchmark Rate',
+    verifiedIndex: 'Verified CPCB Index',
+    createLot: 'Create Lot & Summary',
+    confirmAnyway: 'Confirm',
+    navHome: 'Home',
+    navMyLots: 'My Lots',
+    navEarnings: 'Earnings',
+    navSafety: 'Safety',
+    audioLabel: 'Audio',
+    twoChoices: '2 Choices',
+    option1Primary: 'Option 1 (Primary)',
+    option2Alternative: 'Option 2 (Alternative)',
+    selectThis: 'Select This',
+    selectOption2: 'Select Option 2',
+    browseFullCatalog: 'Or browse full 7-category catalog →',
+    reviewRequired: 'Review Required',
+    changeCategory: 'Change Category',
+    isCorrect: 'Is this material identified correctly?',
+    yesConfirm: 'Yes, Confirm',
+    confirmed: '✓ Confirmed',
+    aiVerified: 'AI Verified',
+    localDraftReady: 'Local draft ready',
+    offlineActive: 'offline persistence active.',
+    scrap: 'scrap'
+  }
+};
+
 export default function Screen02AiIdentification({
   lotDraft,
   onUpdateDraft,
   onNavigate,
   onRetakePhoto,
-  syncStatus = { isOnline: true }
+  syncStatus = { isOnline: true },
+  currentLang: propLang,
+  onLanguageChange
 }) {
   const { i18n } = useTranslation();
-  const currentLang = i18n.language || 'hi';
+  const normalize = (lng) => {
+    if (!lng) return 'hi';
+    const s = String(lng).toLowerCase();
+    if (s.startsWith('mr')) return 'mr';
+    if (s.startsWith('en')) return 'en';
+    return 'hi';
+  };
+
+  const safeLang = normalize(propLang || i18n.language || localStorage.getItem('relink_lang'));
+  const t = AI_TRANSLATIONS[safeLang] || AI_TRANSLATIONS.hi;
 
   const [unit, setUnit] = useState(lotDraft.unit || 'kg');
   const [weight, setWeight] = useState(lotDraft.weight || (lotDraft.unit === 'piece' ? 5 : 12));
@@ -63,22 +200,24 @@ export default function Screen02AiIdentification({
     if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
       window.speechSynthesis.cancel();
       const utterance = new SpeechSynthesisUtterance(text);
-      utterance.lang = currentLang === 'mr' ? 'mr-IN' : (currentLang === 'hi' ? 'hi-IN' : 'en-IN');
+      utterance.lang = safeLang === 'mr' ? 'mr-IN' : (safeLang === 'hi' ? 'hi-IN' : 'en-IN');
       utterance.rate = 0.95;
       window.speechSynthesis.speak(utterance);
     }
   };
 
   const handleSpeakDetection = () => {
-    const speech = currentLang === 'mr'
+    const speech = safeLang === 'mr'
       ? `याची ओळख: ${materialTitle} (${confidence}% निश्चित). प्रमाण ${numericWeight} ${unit === 'piece' ? 'नग' : 'किलो'}.`
-      : `इसकी पहचान: ${materialTitle} (${confidence}% निश्चित)। मात्रा ${numericWeight} ${unit === 'piece' ? 'नग' : 'किलो'}।`;
+      : (safeLang === 'hi'
+          ? `इसकी पहचान: ${materialTitle} (${confidence}% निश्चित)। मात्रा ${numericWeight} ${unit === 'piece' ? 'नग' : 'किलो'}।`
+          : `Identified material: ${materialTitle} with ${confidence}% confidence. Quantity ${numericWeight} ${unit === 'piece' ? 'pieces' : 'kilograms'}.`);
     speakText(speech);
   };
 
   const handleConfirm = () => {
     setIsConfirmed(true);
-    speakText(currentLang === 'mr' ? 'श्रेणी निश्चित झाली' : 'श्रेणी कन्फर्म हुई');
+    speakText(safeLang === 'mr' ? 'श्रेणी निश्चित झाली' : (safeLang === 'hi' ? 'श्रेणी कन्फर्म हुई' : 'Category confirmed'));
   };
 
   const handleSelectAlternative = (title, sub, id, conf) => {
@@ -129,6 +268,15 @@ export default function Screen02AiIdentification({
             <span className="font-headline-md text-headline-md font-bold text-primary dark:text-primary-fixed-dim">RE:LINK</span>
           </div>
           <div className="flex items-center gap-2">
+            {onLanguageChange && (
+              <button
+                onClick={onLanguageChange}
+                className="flex items-center gap-1 h-9 px-2.5 rounded-full bg-surface-container border border-outline-variant text-on-surface hover:bg-surface-container-high transition-colors text-xs font-bold cursor-pointer shrink-0"
+              >
+                <span className="material-symbols-outlined text-sm text-primary">language</span>
+                <span>{safeLang === 'hi' ? 'हिन्दी' : (safeLang === 'mr' ? 'मराठी' : 'EN')}</span>
+              </button>
+            )}
             <div className="flex items-center gap-1 px-2.5 py-1 bg-primary-container/10 text-primary dark:text-primary-fixed-dim rounded-full text-xs font-semibold">
               <span className="material-symbols-outlined text-[16px] filled">cloud_done</span>
               <span>{syncStatus.isOnline ? 'Synced' : 'Offline'}</span>
@@ -143,7 +291,7 @@ export default function Screen02AiIdentification({
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <span className="w-2.5 h-2.5 rounded-full bg-primary animate-pulse"></span>
-            <span className="text-xs font-semibold uppercase tracking-wider text-primary">AI Scan Complete</span>
+            <span className="text-xs font-semibold uppercase tracking-wider text-primary">{t.aiScanComplete}</span>
           </div>
           <div className="text-xs text-on-surface-variant font-medium">
             Lot #{lotDraft.id ? lotDraft.id.slice(-6).toUpperCase() : 'RL-84920'}
@@ -177,7 +325,7 @@ export default function Screen02AiIdentification({
                 className="absolute bottom-3 right-3 bg-surface/90 backdrop-blur text-on-surface hover:bg-surface text-xs font-semibold px-3 py-1.5 rounded-full shadow border border-outline-variant flex items-center gap-1.5 active:scale-95 transition-all cursor-pointer"
               >
                 <span className="material-symbols-outlined text-[16px]">photo_camera</span>
-                <span>Retake Photo</span>
+                <span>{t.retakePhoto}</span>
               </button>
             </div>
 
@@ -202,11 +350,11 @@ export default function Screen02AiIdentification({
 
           <div className="mt-3 pt-3 border-t border-outline-variant/60">
             <div className="flex justify-between items-center text-xs font-semibold mb-1">
-              <span className="text-on-surface">Match Confidence</span>
+              <span className="text-on-surface">{t.matchConfidence}</span>
               <span className={`font-bold ${
                 confidence >= 80 ? 'text-primary' : (confidence >= 60 ? 'text-amber-600' : 'text-error')
               }`}>
-                {confidence}% {confidence >= 80 ? 'High' : (confidence >= 60 ? 'Moderate' : 'Low (Unclear/Dim)')}
+                {confidence}% {confidence >= 80 ? t.high : (confidence >= 60 ? t.moderate : t.low)}
               </span>
             </div>
             <div className="w-full h-2 rounded-full bg-surface-container overflow-hidden">
@@ -221,9 +369,11 @@ export default function Screen02AiIdentification({
 
           <div className="mt-3 flex items-center gap-2 bg-surface-container-low rounded-lg p-2 text-xs text-on-surface-variant">
             <span className="material-symbols-outlined text-tertiary text-[18px]">record_voice_over</span>
-            <span><strong>Audio:</strong> {currentLang === 'mr'
+            <span><strong>{t.audioLabel}:</strong> {safeLang === 'mr'
               ? `याची ओळख: ${materialTitle} (${confidence}% निश्चित).`
-              : `इसकी पहचान: ${materialTitle} (${confidence}% निश्चित)।`}</span>
+              : (safeLang === 'hi'
+                  ? `इसकी पहचान: ${materialTitle} (${confidence}% निश्चित)।`
+                  : `Identified: ${materialTitle} (${confidence}% match).`)}</span>
           </div>
 
           {lotDraft.boundingBoxes && lotDraft.boundingBoxes.length > 0 && (
@@ -231,7 +381,7 @@ export default function Screen02AiIdentification({
               <div className="flex items-center justify-between text-[11px] font-semibold text-on-surface-variant mb-2">
                 <span className="flex items-center gap-1 text-primary font-bold">
                   <span className="material-symbols-outlined text-[16px]">view_in_ar</span>
-                  <span>Detected Scrap Items ({lotDraft.boundingBoxes.length})</span>
+                  <span>{t.detectedItems} ({lotDraft.boundingBoxes.length})</span>
                 </span>
               </div>
               <div className="flex flex-wrap gap-1.5">
@@ -254,7 +404,7 @@ export default function Screen02AiIdentification({
 
           <div className="mt-3">
             <div className="text-[11px] font-semibold text-on-surface-variant mb-1.5 uppercase tracking-wide">
-              Other Potential Matches (Top Predictions):
+              {t.otherMatches}:
             </div>
             <div className="flex flex-wrap gap-2">
               {alternativeMatches.map((alt, idx) => {
@@ -283,22 +433,22 @@ export default function Screen02AiIdentification({
               <div className="flex items-center gap-2 text-amber-800 dark:text-amber-300 font-bold text-sm">
                 <span className="material-symbols-outlined text-[20px] text-amber-600">tune</span>
                 <span>
-                  {currentLang === 'mr'
+                  {safeLang === 'mr'
                     ? `${confidence}% मध्यम अचूकता — अचूक श्रेणी निवडा`
-                    : (currentLang === 'hi'
+                    : (safeLang === 'hi'
                         ? `${confidence}% मध्यम सटीकता — सही श्रेणी चुनें`
                         : `${confidence}% Moderate Match — Select Exact Category`)}
                 </span>
               </div>
               <span className="text-[10px] font-bold bg-amber-500/20 text-amber-900 dark:text-amber-200 px-2 py-0.5 rounded-full uppercase">
-                2 Choices
+                {t.twoChoices}
               </span>
             </div>
 
             <p className="text-xs text-on-surface-variant">
-              {currentLang === 'mr'
+              {safeLang === 'mr'
                 ? 'खालील दोन संभाव्य पर्यायांमधून योग्य श्रेणीवर टॅप करा:'
-                : (currentLang === 'hi'
+                : (safeLang === 'hi'
                     ? 'नीचे दिए गए 2 संभावित विकल्पों में से सही श्रेणी पर टैप करें:'
                     : 'Tap the correct scrap category between the top 2 AI detections:')}
             </p>
@@ -311,7 +461,7 @@ export default function Screen02AiIdentification({
               }`}>
                 <div>
                   <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold text-primary">Option 1 (Primary)</span>
+                    <span className="text-xs font-bold text-primary">{t.option1Primary}</span>
                     <span className="text-[11px] font-extrabold bg-primary/10 text-primary px-2 py-0.5 rounded-full">
                       {confidence}% Match
                     </span>
@@ -325,7 +475,7 @@ export default function Screen02AiIdentification({
                   className="w-full py-2 bg-primary text-on-primary hover:bg-primary-container rounded-lg text-xs font-bold flex items-center justify-center gap-1 cursor-pointer transition-colors"
                 >
                   <span className="material-symbols-outlined text-[16px]">check</span>
-                  <span>{currentLang === 'mr' ? 'हेच निवडा (Option 1)' : (currentLang === 'hi' ? 'यही चुनें (Option 1)' : 'Select This')}</span>
+                  <span>{t.selectThis}</span>
                 </button>
               </div>
 
@@ -334,7 +484,7 @@ export default function Screen02AiIdentification({
                 <div className="p-3.5 rounded-xl border-2 border-outline-variant bg-surface hover:border-amber-500/70 transition-all flex flex-col justify-between gap-2">
                   <div>
                     <div className="flex items-center justify-between">
-                      <span className="text-xs font-bold text-amber-700 dark:text-amber-400">Option 2 (Alternative)</span>
+                      <span className="text-xs font-bold text-amber-700 dark:text-amber-400">{t.option2Alternative}</span>
                       <span className="text-[11px] font-extrabold bg-amber-500/15 text-amber-800 dark:text-amber-300 px-2 py-0.5 rounded-full">
                         {Math.round((alternativeMatches[0].confidence || 0.15) * 100)}% Match
                       </span>
@@ -355,7 +505,7 @@ export default function Screen02AiIdentification({
                     className="w-full py-2 bg-surface-container hover:bg-surface-container-high text-on-surface border border-outline-variant rounded-lg text-xs font-bold flex items-center justify-center gap-1 cursor-pointer transition-colors"
                   >
                     <span className="material-symbols-outlined text-[16px]">check</span>
-                    <span>{currentLang === 'mr' ? 'पर्याय 2 निवडा' : (currentLang === 'hi' ? 'विकल्प 2 चुनें' : 'Select Option 2')}</span>
+                    <span>{t.selectOption2}</span>
                   </button>
                 </div>
               )}
@@ -367,7 +517,7 @@ export default function Screen02AiIdentification({
                 onClick={() => onNavigate('category_select')}
                 className="text-xs text-secondary hover:text-primary font-semibold underline cursor-pointer"
               >
-                {currentLang === 'mr' ? 'किंवा इतर सर्व 7 श्रेणींमधून निवडा →' : (currentLang === 'hi' ? 'या अन्य सभी 7 श्रेणियों में से चुनें →' : 'Or browse full 7-category catalog →')}
+                {t.browseFullCatalog}
               </button>
             </div>
           </div>
@@ -380,21 +530,21 @@ export default function Screen02AiIdentification({
               <div className="flex items-center gap-2 text-amber-700 dark:text-amber-400 font-bold text-sm">
                 <span className="material-symbols-outlined text-[20px] text-amber-600">warning</span>
                 <span>
-                  {currentLang === 'mr'
+                  {safeLang === 'mr'
                     ? `${confidence}% कमी अचूकता — कृपया श्रेणी तपासा`
-                    : (currentLang === 'hi'
+                    : (safeLang === 'hi'
                         ? `${confidence}% कम सटीकता — कृपया श्रेणी की पुष्टि करें`
                         : `${confidence}% Low Confidence — Please Verify Category`)}
                 </span>
               </div>
               <span className="text-[10px] font-bold bg-amber-500/20 text-amber-800 dark:text-amber-300 px-2 py-0.5 rounded-full uppercase">
-                Review Required
+                {t.reviewRequired}
               </span>
             </div>
             <p className="text-xs text-on-surface-variant leading-relaxed">
-              {currentLang === 'mr'
+              {safeLang === 'mr'
                 ? `कमी अचूकता (${confidence}%). अचूक सरकारी दरासाठी श्रेणी ग्रिडमधून खात्री करा.`
-                : (currentLang === 'hi'
+                : (safeLang === 'hi'
                     ? `कम सटीकता (${confidence}%)। सही सरकारी भाव पाने के लिए कृपया श्रेणी ग्रिड से चुनें।`
                     : `Estimated confidence is ${confidence}%. Please verify category from the 7-category grid.`)}
             </p>
@@ -404,14 +554,14 @@ export default function Screen02AiIdentification({
                 className="bg-amber-600 hover:bg-amber-700 active:scale-98 text-white font-bold py-2.5 px-3 rounded-lg text-xs flex items-center justify-center gap-1.5 shadow cursor-pointer transition-transform"
               >
                 <span className="material-symbols-outlined text-[18px]">grid_view</span>
-                <span>{currentLang === 'mr' ? 'श्रेणी ग्रिडमधून बदला' : (currentLang === 'hi' ? 'श्रेणी ग्रिड से बदलें' : 'Change Category')}</span>
+                <span>{t.changeCategory}</span>
               </button>
               <button
                 onClick={handleConfirm}
                 className="bg-surface hover:bg-surface-container border border-amber-500/50 text-amber-900 dark:text-amber-200 font-bold py-2.5 px-3 rounded-lg text-xs flex items-center justify-center gap-1 cursor-pointer"
               >
                 <span className="material-symbols-outlined text-[16px]">check</span>
-                <span>Confirm Anyway</span>
+                <span>{t.confirmAnyway}</span>
               </button>
             </div>
           </div>
@@ -420,7 +570,7 @@ export default function Screen02AiIdentification({
         {/* Confirmation Card */}
         <div className="bg-surface border border-outline-variant rounded-xl p-md shadow-sm">
           <h3 className="font-label-lg text-label-lg text-on-surface font-semibold mb-3 text-center">
-            {currentLang === 'mr' ? 'या मालाची योग्य ओळख झाली आहे का?' : (currentLang === 'hi' ? 'क्या इस कबाड़ की सही पहचान हुई है?' : 'Is this material identified correctly?')}
+            {t.isCorrect}
           </h3>
           <div className="grid grid-cols-2 gap-3">
             <button
@@ -430,7 +580,7 @@ export default function Screen02AiIdentification({
               }`}
             >
               <span className="material-symbols-outlined text-[20px] font-bold">check</span>
-              <span>{isConfirmed ? '✓ पुष्टि हो गई' : (currentLang === 'hi' ? 'हाँ, पुष्टि करें' : (currentLang === 'mr' ? 'होय, निश्चित करा' : 'Yes, Confirm'))}</span>
+              <span>{isConfirmed ? t.confirmed : t.yesConfirm}</span>
             </button>
             <button
               onClick={() => onNavigate('category_select')}
@@ -441,7 +591,7 @@ export default function Screen02AiIdentification({
               }`}
             >
               <span className="material-symbols-outlined text-[18px]">edit</span>
-              <span>{currentLang === 'mr' ? 'श्रेणी बदला' : (currentLang === 'hi' ? 'श्रेणी बदलें' : 'Change Category')}</span>
+              <span>{t.changeCategory}</span>
             </button>
           </div>
         </div>
@@ -452,16 +602,16 @@ export default function Screen02AiIdentification({
         {/* Quick Lot Details Card */}
         <div className="bg-surface border border-outline-variant rounded-2xl p-4 sm:p-5 shadow-sm flex flex-col gap-4">
           <div className="flex items-center justify-between border-b border-outline-variant/60 pb-2">
-            <span className="font-label-lg text-label-lg font-semibold text-on-surface">Lot Specifications</span>
+            <span className="font-label-lg text-label-lg font-semibold text-on-surface">{t.lotSpecs}</span>
             <span className="text-xs text-primary font-medium flex items-center gap-1">
-              <span className="material-symbols-outlined text-[14px]">auto_awesome</span> AI Verified
+              <span className="material-symbols-outlined text-[14px]">auto_awesome</span> {t.aiVerified}
             </span>
           </div>
 
           <div>
             <div className="flex items-center justify-between mb-1.5">
               <label className="text-xs font-semibold text-on-surface-variant">
-                {unit === 'piece' ? 'Quantity / नग (इकाई)' : 'Estimated Batch Weight / वज़न'}
+                {unit === 'piece' ? t.quantityUnit : t.batchWeight}
               </label>
               {/* Unit Toggle: Kg vs Pieces */}
               <div className="flex items-center bg-surface-container rounded-lg p-0.5 border border-outline-variant/50 text-xs">
@@ -472,7 +622,7 @@ export default function Screen02AiIdentification({
                     unit === 'kg' ? 'bg-primary text-on-primary shadow-xs' : 'text-on-surface-variant hover:text-on-surface'
                   }`}
                 >
-                  Kg (किलो)
+                  {safeLang === 'hi' ? 'किग्रा' : (safeLang === 'mr' ? 'किलो' : 'Kg')}
                 </button>
                 <button
                   type="button"
@@ -481,7 +631,7 @@ export default function Screen02AiIdentification({
                     unit === 'piece' ? 'bg-primary text-on-primary shadow-xs' : 'text-on-surface-variant hover:text-on-surface'
                   }`}
                 >
-                  Pieces (नग)
+                  {safeLang === 'en' ? 'Pieces' : 'नग'}
                 </button>
               </div>
             </div>
@@ -499,7 +649,7 @@ export default function Screen02AiIdentification({
                   className="w-full h-11 px-3 bg-surface-container-low border border-outline-variant rounded-lg font-headline-md text-headline-md font-bold text-on-surface focus:outline-none focus:border-primary text-lg"
                 />
                 <span className="absolute right-3 top-2.5 text-on-surface-variant font-medium text-sm">
-                  {unit === 'piece' ? 'pcs' : 'kg'}
+                  {unit === 'piece' ? (safeLang === 'en' ? 'pcs' : 'नग') : (safeLang === 'hi' ? 'किग्रा' : (safeLang === 'mr' ? 'किलो' : 'kg'))}
                 </span>
               </div>
               <button
@@ -507,39 +657,43 @@ export default function Screen02AiIdentification({
                 onClick={() => setWeight((w) => parseFloat(((typeof w === 'number' ? w : 0) + 1).toFixed(1)))}
                 className="h-11 px-2.5 bg-surface border border-outline-variant hover:bg-surface-container rounded-lg font-medium text-xs text-on-surface cursor-pointer"
               >
-                +{unit === 'piece' ? '1 नग' : '1kg'}
+                +{unit === 'piece' ? (safeLang === 'en' ? '1 pc' : '1 नग') : (safeLang === 'en' ? '1 kg' : '1 किग्रा')}
               </button>
               <button
                 type="button"
                 onClick={() => setWeight((w) => parseFloat(((typeof w === 'number' ? w : 0) + 5).toFixed(1)))}
                 className="h-11 px-2.5 bg-surface border border-outline-variant hover:bg-surface-container rounded-lg font-medium text-xs text-on-surface cursor-pointer"
               >
-                +{unit === 'piece' ? '5 नग' : '5kg'}
+                +{unit === 'piece' ? (safeLang === 'en' ? '5 pcs' : '5 नग') : (safeLang === 'en' ? '5 kg' : '5 किग्रा')}
               </button>
               <button
                 type="button"
                 onClick={() => setWeight((w) => parseFloat(((typeof w === 'number' ? w : 0) + 10).toFixed(1)))}
                 className="h-11 px-2.5 bg-surface border border-outline-variant hover:bg-surface-container rounded-lg font-medium text-xs text-on-surface cursor-pointer"
               >
-                +{unit === 'piece' ? '10 नग' : '10kg'}
+                +{unit === 'piece' ? (safeLang === 'en' ? '10 pcs' : '10 नग') : (safeLang === 'en' ? '10 kg' : '10 किग्रा')}
               </button>
             </div>
           </div>
 
           <div>
-            <label className="text-xs font-semibold text-on-surface-variant block mb-1.5">Batch Physical Condition</label>
+            <label className="text-xs font-semibold text-on-surface-variant block mb-1.5">{t.batchCondition}</label>
             <div className="grid grid-cols-3 gap-2">
-              {['Good / Intact', 'Used / Mixed', 'Damaged'].map((cond) => (
+              {[
+                { val: 'Good / Intact', label: t.goodIntact },
+                { val: 'Used / Mixed', label: t.usedMixed },
+                { val: 'Damaged', label: t.damaged }
+              ].map((c) => (
                 <button
-                  key={cond}
-                  onClick={() => setCondition(cond)}
+                  key={c.val}
+                  onClick={() => setCondition(c.val)}
                   className={`py-2 px-1 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
-                    condition === cond
+                    condition === c.val
                       ? 'bg-primary text-on-primary shadow-sm'
                       : 'border border-outline-variant text-on-surface hover:bg-surface-container'
                   }`}
                 >
-                  {cond}
+                  {c.label}
                 </button>
               ))}
             </div>
@@ -550,19 +704,19 @@ export default function Screen02AiIdentification({
             <div className="flex items-center gap-2">
               <span className="material-symbols-outlined text-primary text-[20px]">currency_rupee</span>
               <div>
-                <p className="text-xs font-bold text-on-surface">Mandi Benchmark Rate</p>
-                <p className="text-[11px] text-secondary">Verified MMR CPCB Index</p>
+                <p className="text-xs font-bold text-on-surface">{t.mandiRate}</p>
+                <p className="text-[11px] text-secondary">{t.verifiedIndex}</p>
               </div>
             </div>
             <span className="text-sm font-extrabold text-primary font-mono">
-              {unit === 'piece' ? `~₹${baseRate}/piece (नग)` : `₹${Math.round(baseRate * 0.95)} – ₹${Math.round(baseRate * 1.05)}/kg`}
+              {unit === 'piece' ? `~₹${baseRate}/${safeLang === 'en' ? 'pc' : 'नग'}` : `₹${Math.round(baseRate * 0.95)} – ₹${Math.round(baseRate * 1.05)}/${safeLang === 'en' ? 'kg' : (safeLang === 'mr' ? 'किलो' : 'किग्रा')}`}
             </span>
           </div>
 
           <div className="bg-surface-container-low border border-outline-variant/60 rounded-lg p-2.5 flex items-center gap-2">
             <span className="material-symbols-outlined text-primary text-[18px]">cloud_sync</span>
             <div className="text-[11px] text-on-surface-variant">
-              <span className="font-semibold text-on-surface">Local draft ready</span> — offline persistence active.
+              <span className="font-semibold text-on-surface">{t.localDraftReady}</span> — {t.offlineActive}
             </div>
           </div>
         </div>
@@ -575,14 +729,18 @@ export default function Screen02AiIdentification({
           >
             <div className="flex items-center gap-2">
               <span className="material-symbols-outlined">receipt_long</span>
-              <span className="text-sm sm:text-base">लॉट बनाएं और भाव देखें • Create Lot &amp; Summary</span>
+              <span className="text-sm sm:text-base">{t.createLot}</span>
             </div>
             <span className="text-sm font-extrabold bg-white/20 px-3 py-1 rounded-lg font-mono">
               ₹{lowEst.toLocaleString('en-IN')} - ₹{highEst.toLocaleString('en-IN')}
             </span>
           </button>
           <p className="text-center text-[11px] text-on-surface-variant mt-2">
-            Estimated based on {numericWeight} {unit === 'piece' ? 'pieces (नग)' : 'kg'} {materialTitle} scrap in your region
+            {safeLang === 'mr'
+              ? `${materialTitle} (${numericWeight} ${unit === 'piece' ? 'नग' : 'किलो'}) चे स्थानिक हमीभाव अंदाज`
+              : (safeLang === 'hi'
+                  ? `${materialTitle} (${numericWeight} ${unit === 'piece' ? 'नग' : 'किग्रा'}) का स्थानीय मंडी भाव अनुमान`
+                  : `Estimated based on ${numericWeight} ${unit === 'piece' ? 'pieces' : 'kg'} ${materialTitle} scrap in your region`)}
           </p>
         </div>
       </div>
@@ -593,19 +751,19 @@ export default function Screen02AiIdentification({
   <nav className="fixed bottom-0 left-0 w-full z-50 flex md:hidden justify-around items-center px-2 py-2 bg-surface border-t border-outline-variant shadow-md rounded-t-xl">
         <button onClick={() => onNavigate('home')} className="flex flex-col items-center justify-center p-2 text-on-surface-variant cursor-pointer">
           <span className="material-symbols-outlined">home</span>
-          <span className="font-label-md text-xs mt-1">Home</span>
+          <span className="font-label-md text-xs mt-1">{t.navHome}</span>
         </button>
         <button onClick={() => onNavigate('ai_scan')} className="flex flex-col items-center justify-center bg-primary-container text-on-primary-container rounded-full px-4 py-1 scale-90 cursor-pointer">
           <span className="material-symbols-outlined filled">inventory_2</span>
-          <span className="font-label-md text-xs font-bold mt-1">Sell / Lots</span>
+          <span className="font-label-md text-xs font-bold mt-1">{t.navMyLots}</span>
         </button>
         <button onClick={() => onNavigate('earnings')} className="flex flex-col items-center justify-center p-2 text-on-surface-variant cursor-pointer">
           <span className="material-symbols-outlined">payments</span>
-          <span className="font-label-md text-xs mt-1">Earnings</span>
+          <span className="font-label-md text-xs mt-1">{t.navEarnings}</span>
         </button>
         <button onClick={() => onNavigate('safety')} className="flex flex-col items-center justify-center p-2 text-on-surface-variant cursor-pointer">
           <span className="material-symbols-outlined">info</span>
-          <span className="font-label-md text-xs mt-1">Safety</span>
+          <span className="font-label-md text-xs mt-1">{t.navSafety}</span>
         </button>
       </nav>
     </div>

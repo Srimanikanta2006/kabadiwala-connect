@@ -1,15 +1,107 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+const MYLOTS_TRANSLATIONS = {
+  hi: {
+    pageTitle: 'मेरे स्क्रैप लॉट्स',
+    totalLotsTracked: 'कुल लॉट्स पंजीकृत',
+    newLotBtn: '+ नया लॉट',
+    filterAll: 'सभी लॉट्स',
+    filterAwaiting: '🟡 बोलियों की प्रतीक्षा',
+    filterAccepted: '🟢 स्वीकृत',
+    filterPickup: '🚚 पिकअप निर्धारित',
+    filterCompleted: '✅ पूर्ण',
+    emptyTitle: 'कोई लॉट नहीं मिला',
+    emptyDesc: 'इस फ़िल्टर से मेल खाने वाला कोई लॉट नहीं है। नया लॉट बनाने के लिए ई-कचरे की तस्वीर लें।',
+    scanPhotoBtn: 'कबाड़ की फोटो खींचें',
+    statusAwaiting: 'बोलियों की प्रतीक्षा',
+    statusAccepted: 'प्रस्ताव स्वीकृत',
+    statusPickup: 'पिकअप निर्धारित',
+    statusCompleted: 'पूर्ण एवं भुगतान प्राप्त',
+    finalPayout: 'अंतिम प्राप्त भुगतान',
+    estimatedMandi: 'अनुमानित मंडी मूल्य',
+    viewOffers: 'ऑफ़र देखें',
+    viewReceipt: 'रसीद देखें',
+    trackHandover: 'हस्तांतरण ट्रैक करें',
+    navHome: 'होम',
+    navMyLots: 'मेरे लॉट',
+    navEarnings: 'कमाई',
+    navSafety: 'सुरक्षा'
+  },
+  mr: {
+    pageTitle: 'माझे स्क्रॅप लॉट्स',
+    totalLotsTracked: 'एकूण लॉट्स नोंदणीकृत',
+    newLotBtn: '+ नवीन लॉट',
+    filterAll: 'सर्व लॉट्स',
+    filterAwaiting: '🟡 बोलींची प्रतीक्षा',
+    filterAccepted: '🟢 स्वीकारलेले',
+    filterPickup: '🚚 पिकअप नियोजित',
+    filterCompleted: '✅ पूर्ण',
+    emptyTitle: 'कोणताही लॉट आढळला नाही',
+    emptyDesc: 'या फिल्टरनुसार लॉट सापडला नाही. नवीन लॉट तयार करण्यासाठी ई-कचऱ्याचा फोटो काढा.',
+    scanPhotoBtn: 'भंगाराचा फोटो काढा',
+    statusAwaiting: 'बोलींची प्रतीक्षा',
+    statusAccepted: 'प्रस्ताव स्वीकारला',
+    statusPickup: 'पिकअप नियोजित',
+    statusCompleted: 'पूर्ण व देयक जमा',
+    finalPayout: 'अंतिम जमा रक्कम',
+    estimatedMandi: 'अंदाजे बाजार मूल्य',
+    viewOffers: 'ऑफर पहा',
+    viewReceipt: 'पावती पहा',
+    trackHandover: 'हस्तांतरण मागोवा',
+    navHome: 'मुख्य',
+    navMyLots: 'माझे लॉट्स',
+    navEarnings: 'कमाई',
+    navSafety: 'सुरक्षा'
+  },
+  en: {
+    pageTitle: 'My Scrap Lots',
+    totalLotsTracked: 'Total Lots Tracked',
+    newLotBtn: '+ New Lot',
+    filterAll: 'All Lots',
+    filterAwaiting: '🟡 Awaiting Offers',
+    filterAccepted: '🟢 Accepted',
+    filterPickup: '🚚 Pickup Scheduled',
+    filterCompleted: '✅ Completed',
+    emptyTitle: 'No Lots Found',
+    emptyDesc: 'No scrap lots match this filter. Take a photo of your scrap to generate a new verifiable lot.',
+    scanPhotoBtn: 'Scan Scrap Photo',
+    statusAwaiting: 'Awaiting Offers',
+    statusAccepted: 'Offer Accepted',
+    statusPickup: 'Pickup Scheduled',
+    statusCompleted: 'Completed & Paid',
+    finalPayout: 'Final Settled Payout',
+    estimatedMandi: 'Estimated Mandi Value',
+    viewOffers: 'View Offers',
+    viewReceipt: 'View Receipt',
+    trackHandover: 'Track Handover',
+    navHome: 'Home',
+    navMyLots: 'My Lots',
+    navEarnings: 'Earnings',
+    navSafety: 'Safety'
+  }
+};
+
 export default function Screen07MyLots({
   lots = [],
   onSelectLot,
   onNewScan,
   onNavigate,
-  syncStatus = { isOnline: true }
+  syncStatus = { isOnline: true },
+  currentLang: propLang,
+  onLanguageChange
 }) {
   const { i18n } = useTranslation();
-  const currentLang = i18n.language || 'hi';
+  const normalize = (lng) => {
+    if (!lng) return 'hi';
+    const s = String(lng).toLowerCase();
+    if (s.startsWith('mr')) return 'mr';
+    if (s.startsWith('en')) return 'en';
+    return 'hi';
+  };
+
+  const safeLang = normalize(propLang || i18n.language || localStorage.getItem('relink_lang'));
+  const t = MYLOTS_TRANSLATIONS[safeLang] || MYLOTS_TRANSLATIONS.hi;
   const [filter, setFilter] = useState('ALL');
 
   // Standard demo lots if none created yet
@@ -112,7 +204,7 @@ export default function Screen07MyLots({
         return (
           <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-500/30">
             <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
-            <span>Awaiting Offers</span>
+            <span>{t.statusAwaiting}</span>
           </span>
         );
       case 'OFFER_ACCEPTED':
@@ -120,7 +212,7 @@ export default function Screen07MyLots({
         return (
           <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-600/10 text-emerald-700 dark:text-emerald-400 border border-emerald-600/30">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-600"></span>
-            <span>Offer Accepted</span>
+            <span>{t.statusAccepted}</span>
           </span>
         );
       case 'READY_FOR_PICKUP':
@@ -128,7 +220,7 @@ export default function Screen07MyLots({
         return (
           <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-sky-500/10 text-sky-700 dark:text-sky-400 border border-sky-500/30">
             <span className="material-symbols-outlined text-[14px]">local_shipping</span>
-            <span>Pickup Scheduled</span>
+            <span>{t.statusPickup}</span>
           </span>
         );
       case 'COMPLETED':
@@ -136,7 +228,7 @@ export default function Screen07MyLots({
         return (
           <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-primary/10 text-primary border border-primary/30">
             <span className="material-symbols-outlined text-[14px]">check_circle</span>
-            <span>Completed &amp; Paid</span>
+            <span>{t.statusCompleted}</span>
           </span>
         );
       default:
@@ -177,25 +269,35 @@ export default function Screen07MyLots({
             </button>
             <div>
               <h1 className="font-headline-md font-bold text-lg text-on-surface">
-                {currentLang === 'mr' ? 'माझे स्क्रॅप लॉट्स' : (currentLang === 'hi' ? 'मेरे स्क्रैप लॉट्स' : 'My Scrap Lots')}
+                {t.pageTitle}
               </h1>
               <p className="text-[11px] text-on-surface-variant font-medium">
-                {allLots.length} {currentLang === 'mr' ? 'एकूण लॉट्स नोंदणीकृत' : (currentLang === 'hi' ? 'कुल लॉट्स पंजीकृत' : 'Total Lots Tracked')}
+                {allLots.length} {t.totalLotsTracked}
               </p>
             </div>
           </div>
 
           <div className="flex items-center gap-2">
+            {onLanguageChange && (
+              <button
+                onClick={onLanguageChange}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-primary/40 bg-primary-container/40 text-primary hover:bg-primary-container text-xs font-bold transition-all shadow-sm cursor-pointer"
+                title="Change Language"
+              >
+                <span className="material-symbols-outlined text-[16px]">translate</span>
+                <span>{safeLang === 'hi' ? 'हिन्दी' : safeLang === 'mr' ? 'मराठी' : 'EN'}</span>
+              </button>
+            )}
             <div className="hidden sm:flex items-center gap-1 px-2.5 py-1 bg-primary/10 text-primary rounded-full text-xs font-semibold">
               <span className="material-symbols-outlined text-[16px] filled">cloud_done</span>
-              <span>{syncStatus.isOnline ? 'Synced' : 'Offline'}</span>
+              <span>{syncStatus.isOnline ? (safeLang === 'mr' ? 'ऑनलाइन' : safeLang === 'hi' ? 'ऑनलाइन' : 'Online') : (safeLang === 'mr' ? 'ऑफलाइन' : safeLang === 'hi' ? 'ऑफलाइन' : 'Offline')}</span>
             </div>
             <button
               onClick={onNewScan}
               className="bg-primary hover:bg-primary-container text-on-primary font-bold text-xs px-3.5 py-2 rounded-xl flex items-center gap-1.5 shadow-sm active:scale-95 transition-all cursor-pointer"
             >
               <span className="material-symbols-outlined text-[18px]">photo_camera</span>
-              <span>+ New Lot</span>
+              <span>{t.newLotBtn}</span>
             </button>
           </div>
         </div>
@@ -206,11 +308,11 @@ export default function Screen07MyLots({
         {/* Filter Navigation Chips */}
         <div className="flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar text-xs font-semibold">
           {[
-            { id: 'ALL', label: 'All Lots' },
-            { id: 'AWAITING_OFFERS', label: '🟡 Awaiting Offers' },
-            { id: 'OFFER_ACCEPTED', label: '🟢 Accepted' },
-            { id: 'READY_FOR_PICKUP', label: '🚚 Pickup Scheduled' },
-            { id: 'COMPLETED', label: '✅ Completed' }
+            { id: 'ALL', label: t.filterAll },
+            { id: 'AWAITING_OFFERS', label: t.filterAwaiting },
+            { id: 'OFFER_ACCEPTED', label: t.filterAccepted },
+            { id: 'READY_FOR_PICKUP', label: t.filterPickup },
+            { id: 'COMPLETED', label: t.filterCompleted }
           ].map((tab) => (
             <button
               key={tab.id}
@@ -233,9 +335,9 @@ export default function Screen07MyLots({
               <span className="material-symbols-outlined text-[32px]">inventory_2</span>
             </div>
             <div className="space-y-1">
-              <h3 className="font-bold text-base text-on-surface">No Lots Found</h3>
+              <h3 className="font-bold text-base text-on-surface">{t.emptyTitle}</h3>
               <p className="text-xs text-on-surface-variant max-w-xs mx-auto">
-                No scrap lots match this filter. Take a photo of your scrap to generate a new verifiable lot.
+                {t.emptyDesc}
               </p>
             </div>
             <button
@@ -243,7 +345,7 @@ export default function Screen07MyLots({
               className="bg-primary text-on-primary font-bold text-xs px-5 py-2.5 rounded-xl shadow inline-flex items-center gap-2 hover:bg-primary-container cursor-pointer transition-colors"
             >
               <span className="material-symbols-outlined text-[18px]">photo_camera</span>
-              <span>Scan Scrap Photo</span>
+              <span>{t.scanPhotoBtn}</span>
             </button>
           </div>
         ) : (
@@ -303,7 +405,7 @@ export default function Screen07MyLots({
                   <div className="pt-2.5 border-t border-outline-variant/40 flex items-center justify-between">
                     <div>
                       <span className="text-[10px] text-on-surface-variant uppercase font-semibold block">
-                        {lot.status === 'COMPLETED' ? 'Final Settled Payout' : 'Estimated Mandi Value'}
+                        {lot.status === 'COMPLETED' ? t.finalPayout : t.estimatedMandi}
                       </span>
                       <span className="font-extrabold text-base text-primary">
                         ₹{Number(priceVal).toLocaleString('en-IN')}
@@ -316,8 +418,8 @@ export default function Screen07MyLots({
                     >
                       <span>
                         {lot.status === 'AWAITING_OFFERS' || lot.status === 'CREATED'
-                          ? 'View Offers'
-                          : (lot.status === 'COMPLETED' ? 'View Receipt' : 'Track Handover')}
+                          ? t.viewOffers
+                          : (lot.status === 'COMPLETED' ? t.viewReceipt : t.trackHandover)}
                       </span>
                       <span className="material-symbols-outlined text-[16px]">chevron_right</span>
                     </button>
@@ -336,28 +438,28 @@ export default function Screen07MyLots({
           className="flex flex-col items-center justify-center p-2 text-on-surface-variant cursor-pointer"
         >
           <span className="material-symbols-outlined">home</span>
-          <span className="font-label-md text-xs mt-1">Home</span>
+          <span className="font-label-md text-xs mt-1">{t.navHome}</span>
         </button>
         <button
           onClick={() => onNavigate('my_lots')}
           className="flex flex-col items-center justify-center bg-primary-container text-on-primary-container rounded-full px-4 py-1 scale-90 cursor-pointer"
         >
           <span className="material-symbols-outlined filled">inventory_2</span>
-          <span className="font-label-md text-xs font-bold mt-1">My Lots</span>
+          <span className="font-label-md text-xs font-bold mt-1">{t.navMyLots}</span>
         </button>
         <button
           onClick={() => onNavigate('earnings')}
           className="flex flex-col items-center justify-center p-2 text-on-surface-variant cursor-pointer"
         >
           <span className="material-symbols-outlined">payments</span>
-          <span className="font-label-md text-xs mt-1">Earnings</span>
+          <span className="font-label-md text-xs mt-1">{t.navEarnings}</span>
         </button>
         <button
           onClick={() => onNavigate('safety')}
           className="flex flex-col items-center justify-center p-2 text-on-surface-variant cursor-pointer"
         >
           <span className="material-symbols-outlined">info</span>
-          <span className="font-label-md text-xs mt-1">Safety</span>
+          <span className="font-label-md text-xs mt-1">{t.navSafety}</span>
         </button>
       </nav>
     </div>

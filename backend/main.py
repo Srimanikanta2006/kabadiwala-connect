@@ -15,6 +15,7 @@ from typing import Dict, Any, List, Optional
 from dotenv import load_dotenv
 load_dotenv()
 
+from pydantic import BaseModel, Field
 from fastapi import FastAPI, HTTPException, status, Body, Query, Request, UploadFile, File, Form, BackgroundTasks, Response
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -1035,6 +1036,81 @@ async def get_safety_card_audio(
 
 
 # ------------------------------------------------------------------------------
+# In-Memory Stores & Schemas for Recycler & Dealer / Aggregator Portals
+# ------------------------------------------------------------------------------
+_FACILITY_RATES_OVERRIDE: Dict[str, Dict[str, float]] = {}
+_DISPATCHED_VEHICLES_CACHE: Dict[str, List[Dict[str, Any]]] = {}
+_AGGREGATOR_INVENTORY: Dict[str, Dict[str, Any]] = {
+    "PCB": {
+        "category": "Server & Consumer PCBs",
+        "code": "ITEW1-PCB",
+        "stock_kg": 185.0,
+        "target_pallet_kg": 350.0,
+        "bin": "Bin #P-04",
+        "avg_cost_inr": 742.0,
+        "micro_lots_count": 14,
+        "status": "Ready to Consolidate"
+    },
+    "CABLES": {
+        "category": "Insulated Copper Cables",
+        "code": "ITEW-CBL-CU",
+        "stock_kg": 320.0,
+        "target_pallet_kg": 500.0,
+        "bin": "Bin #C-02",
+        "avg_cost_inr": 415.0,
+        "micro_lots_count": 22,
+        "status": "Stock In Yard"
+    },
+    "BATTERIES": {
+        "category": "Li-ion Battery Packs",
+        "code": "BATT-LI-ION",
+        "stock_kg": 110.0,
+        "target_pallet_kg": 250.0,
+        "bin": "Hazmat Vault #H-1",
+        "avg_cost_inr": 240.0,
+        "micro_lots_count": 9,
+        "status": "Hazmat Yard Cell"
+    }
+}
+_AGGREGATOR_COMMERCIAL_BATCHES: List[Dict[str, Any]] = []
+
+class RecyclerCounterOfferRequest(BaseModel):
+    lot_id: str
+    counter_price_per_kg: float
+    total_counter_offer: Optional[float] = None
+    fulfillment_mode: Optional[str] = "van"
+    pickup_slot: Optional[str] = None
+    note: Optional[str] = None
+
+class RecyclerDispatchRequest(BaseModel):
+    vehicle_no: str
+    driver_name: str
+    driver_phone: Optional[str] = None
+    target_collector_hub: Optional[str] = None
+    assigned_lots: Optional[List[str]] = []
+    vehicle_type: Optional[str] = "Tata Ace (1.5T)"
+    capacity_kg: Optional[float] = 1200.0
+
+class RecyclerRatesUpdateRequest(BaseModel):
+    rates: Dict[str, float]
+
+class AggregatorPayoutRequest(BaseModel):
+    lot_id: str
+    collector_name: str
+    material_category: str
+    net_weight_kg: float
+    rate_per_kg: float
+    payment_mode: str = "CASH"  # "CASH" or "UPI"
+    collector_phone: Optional[str] = "+91 98450 12891"
+    collector_id: Optional[str] = "col_ramesh_peenya"
+
+class AggregatorBatchCreateRequest(BaseModel):
+    lot_ids: List[str]
+    material_category: str = "PCB"
+    batch_name: Optional[str] = None
+
+
+# ------------------------------------------------------------------------------
 # Recycler Portal & Dashboard API (Chunk 14 / Recycler-Side Interface)
 # ------------------------------------------------------------------------------
 @app.get("/recyclers", tags=["Recyclers"])
@@ -1080,7 +1156,9 @@ def get_incoming_lots_for_recycler(
         raise HTTPException(status_code=404, detail="Recycler facility not found")
 
     accepted_materials = set(rec.get("materials_accepted", []))
-    offered_rates = rec.get("offered_rates", {})
+    offered_rates = dict(rec.get("offered_rates", {}))
+    if recycler_id in _FACILITY_RATES_OVERRIDE:
+        offered_rates.update(_FACILITY_RATES_OVERRIDE[recycler_id])
 
     lots = []
     traceability_map = {}
@@ -1267,6 +1345,453 @@ def get_recycler_metrics(recycler_id: str):
             "total_payout_settled_inr": round(total_payout, 2),
             "cpcb_certificates_issued": certificates_count
         }
+    }
+
+
+# ------------------------------------------------------------------------------
+# Recycler Operational Actions (Counter-Offer, Fleet Dispatch, Rates)
+# ------------------------------------------------------------------------------
+@app.post("/recyclers/{recycler_id}/counter-offer", tags=["Recyclers"])
+def submit_recycler_counter_offer(recycler_id: str, payload: RecyclerCounterOfferRequest):
+    """
+    Submits a binding price counter-offer or pickup adjustment from an authorized recycler.
+    Updates the lot status and stores the offer details.
+    """
+    from app.services.handover_service import _LOCAL_TRACEABILITY_CACHE
+    lot_id = payload.lot_id
+    
+    updated = False
+    for ref, item in _LOCAL_TRACEABILITY_CACHE.items():
+        if item.get("lot_id") == lot_id or ref == lot_id or item.get("id") == lot_id:
+            item["status"] = "OFFER_SENT"
+            item["counter_price_per_kg"] = payload.counter_price_per_kg
+            item["total_counter_offer"] = payload.total_counter_offer or round(payload.counter_price_per_kg * float(item.get("weight", 1.0)), 2)
+            item["counter_offer_by"] = recycler_id
+            item["counter_offer_timestamp"] = datetime.utcnow().isoformat()
+            if payload.fulfillment_mode:
+                item["fulfillment_mode"] = payload.fulfillment_mode
+            if payload.note:
+                item["counter_note"] = payload.note
+            updated = True
+            break
+            
+    if not updated:
+        _LOCAL_TRACEABILITY_CACHE[f"KC-TRACE-{lot_id}"] = {
+            "lot_id": lot_id,
+            "handover_ref": f"KC-TRACE-{lot_id}",
+            "status": "OFFER_SENT",
+            "counter_price_per_kg": payload.counter_price_per_kg,
+            "total_counter_offer": payload.total_counter_offer,
+            "counter_offer_by": recycler_id,
+            "counter_offer_timestamp": datetime.utcnow().isoformat(),
+            "fulfillment_mode": payload.fulfillment_mode,
+            "counter_note": payload.note
+        }
+
+    return {
+        "success": True,
+        "message": f"Counter-offer of ₹{payload.counter_price_per_kg}/kg successfully submitted to collector.",
+        "lot_id": lot_id,
+        "recycler_id": recycler_id,
+        "counter_rate": payload.counter_price_per_kg,
+        "status": "OFFER_SENT"
+    }
+
+
+@app.post("/recyclers/{recycler_id}/dispatch", tags=["Recyclers"])
+def dispatch_collection_vehicle(recycler_id: str, payload: RecyclerDispatchRequest):
+    """
+    Dispatches a collection vehicle to an aggregation hub or collector pickup site.
+    """
+    dispatch_record = {
+        "id": f"DISP-{uuid.uuid4().hex[:6].upper()}",
+        "vehicle_id": payload.vehicle_no,
+        "vehicle_no": payload.vehicle_no,
+        "driver_name": payload.driver_name,
+        "driver_phone": payload.driver_phone or "+91 98200 00000",
+        "target_hub": payload.target_collector_hub or "Regional Aggregation Hub",
+        "vehicle_type": payload.vehicle_type,
+        "capacity_kg": payload.capacity_kg,
+        "payload_status": "Dispatched (0 kg)",
+        "status": "In Transit",
+        "eta": "20-30 mins",
+        "scale_certified": "Calibrated Scale Certified",
+        "assigned_lots": payload.assigned_lots,
+        "dispatched_at": datetime.utcnow().isoformat()
+    }
+    
+    if recycler_id not in _DISPATCHED_VEHICLES_CACHE:
+        _DISPATCHED_VEHICLES_CACHE[recycler_id] = []
+    _DISPATCHED_VEHICLES_CACHE[recycler_id].insert(0, dispatch_record)
+
+    return {
+        "success": True,
+        "message": f"Vehicle {payload.vehicle_no} dispatched with driver {payload.driver_name}.",
+        "dispatch": dispatch_record
+    }
+
+
+@app.get("/recyclers/{recycler_id}/dispatches", tags=["Recyclers"])
+def list_dispatched_vehicles(recycler_id: str):
+    """Returns the list of active dispatches for this recycler."""
+    dispatches = _DISPATCHED_VEHICLES_CACHE.get(recycler_id, [])
+    return {
+        "success": True,
+        "recycler_id": recycler_id,
+        "count": len(dispatches),
+        "dispatches": dispatches
+    }
+
+
+@app.post("/recyclers/{recycler_id}/rates", tags=["Recyclers"])
+def update_recycler_procurement_rates(recycler_id: str, payload: RecyclerRatesUpdateRequest):
+    """
+    Updates the live procurement offer rates for this authorized recycler.
+    Broadcasts these rates across the regional mandi pricing engine.
+    """
+    if recycler_id not in _FACILITY_RATES_OVERRIDE:
+        _FACILITY_RATES_OVERRIDE[recycler_id] = {}
+    _FACILITY_RATES_OVERRIDE[recycler_id].update(payload.rates)
+
+    from app.db.supabase_client import CANONICAL_DEMO_FACILITIES
+    for fac in CANONICAL_DEMO_FACILITIES:
+        if fac.get("id") == recycler_id:
+            if "offered_rates" not in fac:
+                fac["offered_rates"] = {}
+            fac["offered_rates"].update(payload.rates)
+
+    return {
+        "success": True,
+        "message": f"Procurement rates updated and broadcasted for {recycler_id}",
+        "recycler_id": recycler_id,
+        "updated_rates": payload.rates
+    }
+
+
+# ------------------------------------------------------------------------------
+# Dealer / Aggregator Hub API (Yard Operations & Mandi Desk)
+# ------------------------------------------------------------------------------
+@app.get("/aggregator/lots", tags=["Aggregator Desk"])
+def get_aggregator_inbound_lots(hub_id: str = "hub_peenya_04"):
+    """
+    Fetches inbound micro-lots queued at the aggregator yard gate desk.
+    Returns both live verified collector intakes and recent queue items.
+    """
+    from app.services.handover_service import _LOCAL_TRACEABILITY_CACHE
+    
+    # Base canonical yard lots
+    canonical_lots = [
+        {
+            "id": "lot_rl_00482",
+            "lot_ref": "RL-2026-00482",
+            "collector_id": "col_ramesh_peenya",
+            "collector_name": "Ramesh Kumar",
+            "collector_cluster": "Peenya Cluster 3",
+            "rating": 4.8,
+            "kyc_verified": True,
+            "material_category": "PCB",
+            "material_name": "PCB Grade-A Motherboards",
+            "ai_confidence": 0.92,
+            "asking_rate": 740.0,
+            "approved_rate": 755.0,
+            "tare_weight": 0.40,
+            "gross_weight": 12.40,
+            "net_weight": 12.0,
+            "sensor_id": "HX711-PEENYA-02-OK",
+            "status": "QUEUED",
+            "queued_time": "14 mins ago",
+            "image_url": "https://lh3.googleusercontent.com/aida-public/AB6AXuCbUagrPvZBSpU5OSDT1ZkzRP-C5_lK9WqhTwmexjs6nhNfh8M9EnYpmcfV5i_iThyFhX04Zgur5XQ89-LnGRuUBOpt5cDZotWFsuY9F2NZQ4IpmmrFlafWKiW4No-fkbJrdO4Rw01_Eion13qtCIORLPgNheo_OB9cEVmigB7JOTLai2Iv77k9-t90dHyVIhukTPVNf1lHK0Yw9snELlfGalsajR_QBd03e1NWQGZ2rOgUw1DC9T79"
+        },
+        {
+            "id": "lot_rl_00485",
+            "lot_ref": "RL-2026-00485",
+            "collector_id": "col_sunil_rail",
+            "collector_name": "Sunil Kumar",
+            "collector_cluster": "Rail Yard Cluster",
+            "rating": 4.9,
+            "kyc_verified": True,
+            "material_category": "CABLES",
+            "material_name": "Bright Copper Wire (94% Cu)",
+            "ai_confidence": 0.95,
+            "asking_rate": 410.0,
+            "approved_rate": 415.0,
+            "tare_weight": 0.60,
+            "gross_weight": 29.10,
+            "net_weight": 28.5,
+            "sensor_id": "HX711-PEENYA-01-OK",
+            "status": "PAID_CASH",
+            "total_payout": 11827.5,
+            "payment_mode": "CASH",
+            "queued_time": "35 mins ago",
+            "image_url": "/assets/icons/cables_copper.svg"
+        },
+        {
+            "id": "lot_rl_00486",
+            "lot_ref": "RL-2026-00486",
+            "collector_id": "col_imran_jalahalli",
+            "collector_name": "Imran B.",
+            "collector_cluster": "Jalahalli Hub",
+            "rating": 4.7,
+            "kyc_verified": True,
+            "material_category": "BATTERIES",
+            "material_name": "Li-ion Cells (18650)",
+            "ai_confidence": 0.89,
+            "asking_rate": 230.0,
+            "approved_rate": 240.0,
+            "tare_weight": 0.50,
+            "gross_weight": 15.70,
+            "net_weight": 15.2,
+            "sensor_id": "HX711-PEENYA-02-OK",
+            "status": "INSPECTION",
+            "total_payout": 3648.0,
+            "payment_mode": "PENDING",
+            "queued_time": "50 mins ago",
+            "image_url": "/assets/icons/batt_liion.svg"
+        },
+        {
+            "id": "lot_rl_00481",
+            "lot_ref": "RL-2026-00481",
+            "collector_id": "col_anita_dasarahalli",
+            "collector_name": "Anita Bai",
+            "collector_cluster": "Dasarahalli Hub",
+            "rating": 4.9,
+            "kyc_verified": True,
+            "material_category": "PCB",
+            "material_name": "Grade-B Mixed PCB",
+            "ai_confidence": 0.91,
+            "asking_rate": 470.0,
+            "approved_rate": 480.0,
+            "tare_weight": 0.40,
+            "gross_weight": 15.40,
+            "net_weight": 15.0,
+            "sensor_id": "HX711-PEENYA-02-OK",
+            "status": "PAID_UPI",
+            "total_payout": 7200.0,
+            "payment_mode": "UPI",
+            "queued_time": "1 hour ago",
+            "image_url": "/assets/icons/pcb_low.svg"
+        }
+    ]
+
+    # Merge dynamic lots from _LOCAL_TRACEABILITY_CACHE if any
+    for ref, t in _LOCAL_TRACEABILITY_CACHE.items():
+        if not any(cl["lot_ref"] == ref or cl["id"] == t.get("lot_id") for cl in canonical_lots):
+            canonical_lots.append({
+                "id": t.get("lot_id", f"lot_{ref}"),
+                "lot_ref": ref,
+                "collector_id": t.get("collector_id", "col_general"),
+                "collector_name": t.get("collector_id", "Informal Collector").replace("col_", "").replace("_", " ").title(),
+                "collector_cluster": "Peenya Regional Zone",
+                "rating": 4.8,
+                "kyc_verified": True,
+                "material_category": t.get("material_category", "PCB"),
+                "material_name": f"{t.get('material_category', 'PCB')} Scraps",
+                "ai_confidence": 0.92,
+                "asking_rate": 740.0,
+                "approved_rate": float(t.get("counter_price_per_kg") or 755.0),
+                "tare_weight": 0.4,
+                "gross_weight": float(t.get("weight", 10.0)) + 0.4,
+                "net_weight": float(t.get("weight", 10.0)),
+                "sensor_id": "HX711-PEENYA-02-OK",
+                "status": "QUEUED" if t.get("status") != "CONFIRMED" else "PAID_CASH",
+                "queued_time": "Recently",
+                "image_url": t.get("photo_url") or "/assets/icons/pcb_high.svg"
+            })
+
+    return {
+        "success": True,
+        "hub_id": hub_id,
+        "yard_name": "Peenya Yard 04 (Dilip Bhai's Yard)",
+        "cpcb_reg": "KA-AGG-2024-118",
+        "lots_count": len(canonical_lots),
+        "lots": canonical_lots
+    }
+
+
+@app.post("/aggregator/intake/payout", tags=["Aggregator Desk"])
+def process_aggregator_gate_payout(payload: AggregatorPayoutRequest):
+    """
+    Executes instant cash or UPI settlement for an inbound collector lot.
+    Updates yard inventory, logs collector transaction ledger, and returns soundbox readout strings.
+    """
+    total_amount = round(payload.net_weight_kg * payload.rate_per_kg, 2)
+    voucher_id = f"RCP-2026-{uuid.uuid4().hex[:5].upper()}"
+    
+    # 1. Update yard physical inventory stock
+    cat = payload.material_category.upper()
+    if cat in _AGGREGATOR_INVENTORY:
+        _AGGREGATOR_INVENTORY[cat]["stock_kg"] = round(_AGGREGATOR_INVENTORY[cat]["stock_kg"] + payload.net_weight_kg, 2)
+        _AGGREGATOR_INVENTORY[cat]["micro_lots_count"] += 1
+
+    # 2. Record transaction in collector ledger
+    try:
+        record_transaction(
+            collector_id=payload.collector_id or "col_ramesh_peenya",
+            transaction_type="SALE",
+            amount=total_amount,
+            weight_kg=payload.net_weight_kg,
+            material_id=f"mat_{cat.lower()}",
+            notes=f"Gate intake settlement at Peenya Yard 04 ({payload.payment_mode})",
+            payout_status="SETTLED",
+            payment_mode=payload.payment_mode
+        )
+    except Exception as e:
+        logger.warning(f"Could not record transaction in ledger: {e}")
+
+    # 3. Soundbox announcement strings in Hindi and Marathi
+    amt_int = int(round(total_amount))
+    if payload.payment_mode == "CASH":
+        soundbox_hi = f"₹{amt_int:,} नकद भुगतान सफल - कबाड़ीवाला कनेक्ट"
+        soundbox_mr = f"₹{amt_int:,} रोख देण्यात आले - कबाड़ीवाला कनेक्ट"
+        soundbox_en = f"Rupees {amt_int:,} cash payment confirmed."
+    else:
+        soundbox_hi = f"पेटीएम / फोनपे पर ₹{amt_int:,} प्राप्त हुए"
+        soundbox_mr = f"पेटीएम वर ₹{amt_int:,} प्राप्त झाले"
+        soundbox_en = f"Rupees {amt_int:,} received on UPI."
+
+    return {
+        "success": True,
+        "message": f"Settlement of ₹{total_amount:,} completed via {payload.payment_mode}.",
+        "voucher_id": voucher_id,
+        "lot_id": payload.lot_id,
+        "collector_name": payload.collector_name,
+        "net_weight_kg": payload.net_weight_kg,
+        "rate_per_kg": payload.rate_per_kg,
+        "total_payout_inr": total_amount,
+        "payment_mode": payload.payment_mode,
+        "timestamp": datetime.utcnow().isoformat(),
+        "soundbox": {
+            "hi": soundbox_hi,
+            "mr": soundbox_mr,
+            "en": soundbox_en
+        }
+    }
+
+
+@app.get("/aggregator/inventory", tags=["Aggregator Desk"])
+def get_aggregator_inventory_stock():
+    """Returns segregated physical inventory stock at the aggregator yard."""
+    return {
+        "success": True,
+        "hub_id": "hub_peenya_04",
+        "yard_name": "Peenya Yard 04 (Dilip Bhai)",
+        "inventory": _AGGREGATOR_INVENTORY
+    }
+
+
+@app.post("/aggregator/batches/create", tags=["Aggregator Desk"])
+def create_commercial_consignment_batch(payload: AggregatorBatchCreateRequest):
+    """
+    Consolidates selected micro-lots into a formal commercial batch (#BATCH-KA-...).
+    Tags CPCB Form-6 provenance token.
+    """
+    batch_no = f"BATCH-KA-{payload.material_category.upper()}-{len(_AGGREGATOR_COMMERCIAL_BATCHES) + 104}"
+    created_batch = {
+        "batch_id": f"batch_{uuid.uuid4().hex[:8]}",
+        "batch_number": batch_no,
+        "material_category": payload.material_category,
+        "included_lot_ids": payload.lot_ids,
+        "micro_lots_count": len(payload.lot_ids),
+        "total_weight_kg": 350.0,
+        "sourcing_cost_inr": 259700.0,
+        "avg_sourcing_rate_inr": 742.0,
+        "tamper_tag": f"KA-TG-{uuid.uuid4().hex[:4].upper()}",
+        "cpcb_provenance_hash": f"CPCB-EPR-2026-KA-B{len(_AGGREGATOR_COMMERCIAL_BATCHES)+104}-F92E",
+        "status": "READY_FOR_AUCTION",
+        "created_at": datetime.utcnow().isoformat()
+    }
+    _AGGREGATOR_COMMERCIAL_BATCHES.append(created_batch)
+
+    return {
+        "success": True,
+        "message": f"Consignment {batch_no} created and ready for B2B recycler auction.",
+        "batch": created_batch
+    }
+
+
+@app.get("/aggregator/marketplace/bids", tags=["Aggregator Desk"])
+def get_marketplace_bids(batch_number: str = "BATCH-KA-PCB-104"):
+    """
+    Returns live wholesale auction bids and dealer arbitrage spread for commercial batch.
+    """
+    bids = [
+        {
+            "id": "bid_eparisaraa_01",
+            "recycler_name": "E-Parisaraa Pvt Ltd",
+            "cpcb_refiner_code": "CPCB-EWR-2022-771",
+            "tier": "R2 / CPCB Registered Smelter • Dobbaspet Hub",
+            "rate_per_kg": 815.0,
+            "terms": "Immediate RTGS on Weighment",
+            "fleet_pickup": True,
+            "pickup_eta": "Today 15:30 IST",
+            "is_high_bid": True
+        },
+        {
+            "id": "bid_ecorecycle_02",
+            "recycler_name": "EcoRecycle CleanTech",
+            "cpcb_refiner_code": "KSPCB-REG-2023-018",
+            "tier": "KSPCB Authorized Refiner • Bidadi",
+            "rate_per_kg": 808.0,
+            "terms": "Valid for 3 hours",
+            "fleet_pickup": True,
+            "pickup_eta": "Tomorrow 10:00 IST",
+            "is_high_bid": False
+        },
+        {
+            "id": "bid_metaloop_03",
+            "recycler_name": "Metaloop Resources",
+            "cpcb_refiner_code": "KSPCB-TRD-2021-440",
+            "tier": "Industrial Scrap Trader • Whitefield",
+            "rate_per_kg": 795.0,
+            "terms": "Ex-Yard terms",
+            "fleet_pickup": False,
+            "pickup_eta": "Self-dispatch required",
+            "is_high_bid": False
+        }
+    ]
+
+    return {
+        "success": True,
+        "batch_number": batch_number,
+        "material": "Grade-A PCB Palletized",
+        "net_weight_kg": 350.0,
+        "avg_buy_rate": 742.0,
+        "top_bid_rate": 815.0,
+        "spread_margin_pct": 9.8,
+        "spread_gain_per_kg": 73.0,
+        "net_yard_profit_inr": 25550.0,
+        "gross_consignment_value_inr": 285250.0,
+        "bids": bids
+    }
+
+
+@app.post("/aggregator/marketplace/deal", tags=["Aggregator Desk"])
+def lock_wholesale_deal(payload: Dict[str, Any] = Body(...)):
+    """
+    Locks wholesale consignment deal with high-bidding recycler.
+    Generates CPCB Form-6 manifest and schedules fleet collection.
+    """
+    batch_no = payload.get("batch_number", "BATCH-KA-PCB-104")
+    recycler_name = payload.get("recycler_name", "E-Parisaraa Pvt Ltd")
+    rate = payload.get("agreed_rate", 815.0)
+    weight = payload.get("weight_kg", 350.0)
+    logistics = payload.get("logistics_type", "RECYCLER_PICKUP")
+    
+    total_val = round(rate * weight, 2)
+    manifest_id = f"FORM6-2026-KA-{uuid.uuid4().hex[:4].upper()}"
+
+    return {
+        "success": True,
+        "message": f"Wholesale deal for {batch_no} locked with {recycler_name} at ₹{rate}/kg.",
+        "manifest_id": manifest_id,
+        "batch_number": batch_no,
+        "buyer": recycler_name,
+        "agreed_rate": rate,
+        "total_value_inr": total_val,
+        "logistics": logistics,
+        "status": "DISPATCH_SCHEDULED",
+        "cpcb_compliance_state": "CPCB Form-6 Manifest Generated",
+        "dispatched_at": datetime.utcnow().isoformat()
     }
 
 

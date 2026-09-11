@@ -2,14 +2,154 @@ import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { QRCodeSVG } from 'qrcode.react';
 
+const RECEIPT_TRANSLATIONS = {
+  hi: {
+    receiptTitle: 'डिजिटल हस्तांतरण रसीद',
+    verifiedHandover: 'सत्यापित हस्तांतरण',
+    pendingHandover: 'सत्यापन प्रक्रियाधीन',
+    handoverVerified: 'हस्तांतरण एवं भुगतान सत्यापित',
+    lotTransferred: 'कबाड़ अधिकृत रीसाइक्लर केंद्र को सफलतापूर्वक हस्तांतरित हुआ',
+    qrTokenTitle: 'वजनकांटा स्कैनर टोकन',
+    showQrPrompt: 'यह क्यूआर रीसाइक्लर वजनकांटा ऑपरेटर को दिखाएं',
+    checklistTitle: 'हस्तांतरण सत्यापन चेकलिस्ट',
+    checklistClean: 'सत्यापित सुरक्षित',
+    scaleWeighment: 'कांटा तौल:',
+    scaleCertified: 'प्रमाणित',
+    paymentStatusLabel: 'भुगतान स्थिति:',
+    paymentReceived: '100% नकद / बैंक में प्राप्त',
+    authorizedBuyer: 'अधिकृत खरीदार:',
+    lotRef: 'लॉट संदर्भ',
+    handoverToken: 'हस्तांतरण टोकन',
+    matAndQty: 'सामग्री एवं मात्रा',
+    agreedRate: 'स्वीकृत दर',
+    mandiBenchmark: 'मंडी हमीभाव:',
+    cpcbDirectory: 'अधिकृत केंद्र (सीपीसीबी 2023 सूची)',
+    totalPaid: 'कुल भुगतान',
+    selectPaymentStatus: 'भुगतान स्थिति चुनें',
+    soundboxAudio: 'साउंडबॉक्स ऑडियो',
+    cashReceived: 'नकद मिला',
+    cashSub: '(Cash)',
+    upiReceived: 'UPI प्राप्त',
+    upiSub: '(Digital)',
+    pendingSettlement: 'बकाया',
+    pendingSub: '(Pending)',
+    cashDesc: 'शारीरिक नकद प्राप्त एवं सत्यापित।',
+    upiDesc: 'डिजिटल UPI बैंक खाते में तत्काल जमा।',
+    pendingDesc: 'तौल कांटा पर्ची के बाद भुगतान देय (खाते में दर्ज)।',
+    shareWhatsApp: 'व्हाट्सएप पर पर्ची भेजें (Share Receipt on WhatsApp)',
+    printPdf: 'पर्ची डाउनलोड करें • Print / Download Voucher PDF',
+    viewEarnings: 'कमाई देखें',
+    newLot: 'नया लॉट',
+    navHome: 'होम',
+    navMyLots: 'लॉट',
+    navEarnings: 'कमाई',
+    navSafety: 'सुरक्षा'
+  },
+  mr: {
+    receiptTitle: 'डिजिटल हस्तांतरण पावती',
+    verifiedHandover: 'सत्यापित हस्तांतरण',
+    pendingHandover: 'पडताळणी बाकी',
+    handoverVerified: 'हस्तांतरण व देयक पडताळणी पूर्ण',
+    lotTransferred: 'भंगार अधिकृत रीसायकलिंग केंद्राकडे यशस्वीरित्या हस्तांतरित झाले',
+    qrTokenTitle: 'वजनकाटा स्कॅनर टोकन',
+    showQrPrompt: 'हा क्यूआर कोड रीसायकलर्सच्या वजनकाटा ऑपरेटरला दाखवा',
+    checklistTitle: 'हस्तांतरण पडताळणी चेकलिस्ट',
+    checklistClean: 'सत्यापित सुरक्षित',
+    scaleWeighment: 'काटा मोजणी:',
+    scaleCertified: 'प्रमाणित',
+    paymentStatusLabel: 'देयक स्थिती:',
+    paymentReceived: '100% रोख / बँक खात्यात जमा',
+    authorizedBuyer: 'अधिकृत खरेदीदार:',
+    lotRef: 'लॉट संदर्भ',
+    handoverToken: 'हस्तांतरण टोकन',
+    matAndQty: 'सामग्री व प्रमाण',
+    agreedRate: 'ठरलेला दर',
+    mandiBenchmark: 'बाजार हमीभाव:',
+    cpcbDirectory: 'अधिकृत केंद्र (सीपीसीबी सूची)',
+    totalPaid: 'एकूण देयक',
+    selectPaymentStatus: 'देयक स्थिती निवडा',
+    soundboxAudio: 'ध्वनीपेटी ऑडिओ',
+    cashReceived: 'रोख मिळाली',
+    cashSub: '(Cash)',
+    upiReceived: 'UPI मिळाले',
+    upiSub: '(Digital)',
+    pendingSettlement: 'बाकी देय',
+    pendingSub: '(Pending)',
+    cashDesc: 'प्रत्यक्ष रोख रक्कम मिळाली आणि सत्यापित झाली.',
+    upiDesc: 'डिजिटल UPI द्वारे तात्काळ खात्यात जमा.',
+    pendingDesc: 'काटा पावतीनंतर देयक दिले जाईल (लेजरमध्ये नोंद).',
+    shareWhatsApp: 'व्हॉट्सॲपवर पावती पाठवा (Share on WhatsApp)',
+    printPdf: 'पावती डाउनलोड करा • Print / Download Voucher PDF',
+    viewEarnings: 'कमाई पहा',
+    newLot: 'नवीन लॉट',
+    navHome: 'मुख्य',
+    navMyLots: 'लॉट',
+    navEarnings: 'कमाई',
+    navSafety: 'सुरक्षा'
+  },
+  en: {
+    receiptTitle: 'Digital Handover Receipt',
+    verifiedHandover: 'Verified Handover',
+    pendingHandover: 'Pending Confirmation',
+    handoverVerified: 'Handover & Payment Verified',
+    lotTransferred: 'Lot successfully transferred to Authorized Recycler',
+    qrTokenTitle: 'Weighbridge Scanner Token',
+    showQrPrompt: 'Show this QR to the Recycler Weighbridge Scale Operator',
+    checklistTitle: 'Handover Verification Checklist',
+    checklistClean: 'Verified Clean',
+    scaleWeighment: 'Scale Weighment:',
+    scaleCertified: 'Certified',
+    paymentStatusLabel: 'Payment Status:',
+    paymentReceived: '100% Cash / Bank Received',
+    authorizedBuyer: 'Authorized Buyer:',
+    lotRef: 'Lot Reference',
+    handoverToken: 'Handover Token',
+    matAndQty: 'Material & Quantity',
+    agreedRate: 'Agreed Rate',
+    mandiBenchmark: 'Mandi Benchmark:',
+    cpcbDirectory: 'Authorised Facility (Source: CPCB Directory 2023)',
+    totalPaid: 'Total Paid',
+    selectPaymentStatus: 'Payment Status',
+    soundboxAudio: 'Soundbox Audio',
+    cashReceived: 'Cash Received',
+    cashSub: '(Cash)',
+    upiReceived: 'UPI Received',
+    upiSub: '(Digital)',
+    pendingSettlement: 'Pending',
+    pendingSub: '(Pending)',
+    cashDesc: 'Physical cash received and verified.',
+    upiDesc: 'Instant UPI transferred to bank account.',
+    pendingDesc: 'Payment due upon weighbridge slip verification.',
+    shareWhatsApp: 'Share Receipt on WhatsApp',
+    printPdf: 'Print / Download Voucher PDF',
+    viewEarnings: 'View Earnings',
+    newLot: 'Create New Lot',
+    navHome: 'Home',
+    navMyLots: 'My Lots',
+    navEarnings: 'Earnings',
+    navSafety: 'Safety'
+  }
+};
+
 export default function Screen05HandoverReceipt({
   lotDraft,
   onNavigate,
   onResetLot,
-  syncStatus = { isOnline: true }
+  syncStatus = { isOnline: true },
+  currentLang: propLang,
+  onLanguageChange
 }) {
   const { i18n } = useTranslation();
-  const currentLang = i18n.language || 'hi';
+  const normalize = (lng) => {
+    if (!lng) return 'hi';
+    const s = String(lng).toLowerCase();
+    if (s.startsWith('mr')) return 'mr';
+    if (s.startsWith('en')) return 'en';
+    return 'hi';
+  };
+
+  const safeLang = normalize(propLang || i18n.language || localStorage.getItem('relink_lang'));
+  const t = RECEIPT_TRANSLATIONS[safeLang] || RECEIPT_TRANSLATIONS.hi;
 
   const unit = lotDraft.unit || 'kg';
   const weight = lotDraft.weight || (unit === 'piece' ? 5 : 12.0);
@@ -105,17 +245,17 @@ export default function Screen05HandoverReceipt({
   const handleSpeakSoundbox = (mode = paymentMode) => {
     let speech = '';
     if (mode === 'CASH_RECEIVED') {
-      speech = currentLang === 'mr'
+      speech = safeLang === 'mr'
         ? `री लिंक वर ${totalPaid.toLocaleString('en-IN')} रुपये रोख प्राप्त झाले.`
-        : `री-लिंक पर ${totalPaid.toLocaleString('en-IN')} रुपये नकद प्राप्त हुए।`;
+        : (safeLang === 'en' ? `On RE:LINK, Rupees ${totalPaid.toLocaleString('en-IN')} cash received.` : `री-लिंक पर ${totalPaid.toLocaleString('en-IN')} रुपये नकद प्राप्त हुए।`);
     } else if (mode === 'UPI_RECEIVED') {
-      speech = currentLang === 'mr'
+      speech = safeLang === 'mr'
         ? `री लिंक वर ${totalPaid.toLocaleString('en-IN')} रुपये युपीआय द्वारे प्राप्त झाले.`
-        : `री-लिंक पर ${totalPaid.toLocaleString('en-IN')} रुपये यूपीआई प्राप्त हुए।`;
+        : (safeLang === 'en' ? `On RE:LINK, Rupees ${totalPaid.toLocaleString('en-IN')} received via UPI.` : `री-लिंक पर ${totalPaid.toLocaleString('en-IN')} रुपये यूपीआई प्राप्त हुए।`);
     } else {
-      speech = currentLang === 'mr'
+      speech = safeLang === 'mr'
         ? `वजनकाटा पडताळणीनंतर ${totalPaid.toLocaleString('en-IN')} रुपये बाकी देय आहेत.`
-        : `कांटा तौल सत्यापन के बाद ${totalPaid.toLocaleString('en-IN')} रुपये बकाया देय हैं।`;
+        : (safeLang === 'en' ? `Balance of Rupees ${totalPaid.toLocaleString('en-IN')} pending after weighbridge verification.` : `कांटा तौल सत्यापन के बाद ${totalPaid.toLocaleString('en-IN')} रुपये बकाया देय हैं।`);
     }
     speakText(speech);
   };
@@ -150,13 +290,23 @@ export default function Screen05HandoverReceipt({
           </button>
           <div className="flex flex-col">
             <span className="font-label-md text-[11px] text-secondary font-semibold uppercase tracking-wider leading-none">RE:LINK</span>
-            <h1 className="font-headline-md text-[17px] font-bold text-on-surface leading-tight">Digital Handover Receipt</h1>
+            <h1 className="font-headline-md text-[17px] font-bold text-on-surface leading-tight">{t.receiptTitle}</h1>
           </div>
         </div>
         <div className="flex items-center gap-2">
+          {onLanguageChange && (
+            <button
+              onClick={onLanguageChange}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-primary/40 bg-primary-container/40 text-primary hover:bg-primary-container text-xs font-bold transition-all shadow-sm cursor-pointer"
+              title="Change Language"
+            >
+              <span className="material-symbols-outlined text-[16px]">translate</span>
+              <span>{safeLang === 'hi' ? 'हिन्दी' : safeLang === 'mr' ? 'मराठी' : 'EN'}</span>
+            </button>
+          )}
           <div className="flex items-center gap-1 bg-surface-container-low px-2.5 py-1 rounded-full border border-outline-variant text-xs text-primary font-medium">
             <span className="material-symbols-outlined text-[16px] filled">cloud_done</span>
-            <span>{syncStatus.isOnline ? 'Synced' : 'Offline'}</span>
+            <span>{syncStatus.isOnline ? (safeLang === 'mr' ? 'ऑनलाइन' : safeLang === 'hi' ? 'ऑनलाइन' : 'Online') : (safeLang === 'mr' ? 'ऑफलाइन' : safeLang === 'hi' ? 'ऑफलाइन' : 'Offline')}</span>
           </div>
         </div>
       </header>
@@ -174,35 +324,39 @@ export default function Screen05HandoverReceipt({
               </div>
               <div>
                 <span className="bg-primary-fixed text-on-primary-fixed font-label-md text-xs font-extrabold px-3.5 py-1 rounded-full uppercase tracking-wider">
-                  {isConfirmed ? 'Verified Handover' : 'Pending Confirmation'}
+                  {isConfirmed ? t.verifiedHandover : t.pendingHandover}
                 </span>
                 <h2 className="font-headline-md text-xl sm:text-2xl text-on-primary-container font-extrabold mt-1.5">
-                  Handover &amp; Payment Verified
+                  {t.handoverVerified}
                 </h2>
                 <p className="text-xs sm:text-sm opacity-90 mt-0.5">
-                  Lot successfully transferred to Authorized Recycler
+                  {t.lotTransferred}
                 </p>
               </div>
               <button
                 onClick={handleSpeakReceipt}
-                aria-label="Play Hindi Audio Guidance"
+                aria-label="Play Audio Guidance"
                 className="w-full mt-3 flex items-center justify-center gap-2 bg-tertiary-fixed text-on-tertiary-fixed py-2.5 px-3.5 rounded-xl border border-tertiary-fixed-dim hover:bg-tertiary-fixed-dim transition-colors shadow-sm text-left cursor-pointer"
               >
                 <span className="material-symbols-outlined text-[20px] text-tertiary filled">volume_up</span>
                 <span className="text-xs font-semibold leading-tight">
-                  सुनें: 'हैंडओवर और भुगतान सफल: ₹{totalPaid.toLocaleString('en-IN')} नकद प्राप्त'
+                  {safeLang === 'mr'
+                    ? `ऐका: 'हस्तांतरण व देयक यशस्वी: ₹${totalPaid.toLocaleString('en-IN')} प्राप्त'`
+                    : (safeLang === 'en'
+                      ? `Listen: 'Handover & Payment verified: ₹${totalPaid.toLocaleString('en-IN')} received'`
+                      : `सुनें: 'हैंडओवर और भुगतान सफल: ₹${totalPaid.toLocaleString('en-IN')} प्राप्त'`)}
                 </span>
               </button>
             </div>
 
             {/* Live Scannable QR Code */}
             <div className="bg-surface rounded-2xl border-2 border-primary/40 shadow-md p-5 flex flex-col items-center justify-center text-center">
-              <p className="text-xs font-bold uppercase tracking-wider text-secondary mb-2">Weighbridge Scanner Token</p>
+              <p className="text-xs font-bold uppercase tracking-wider text-secondary mb-2">{t.qrTokenTitle}</p>
               <div className="p-3.5 bg-white rounded-2xl shadow-inner border border-outline-variant inline-block">
                 <QRCodeSVG value={qrPayload} size={180} level="M" includeMargin={true} />
               </div>
               <p className="font-mono text-xs font-bold text-primary mt-2.5">{handoverRef}</p>
-              <span className="text-[11px] text-secondary mt-0.5">Show this QR to the Recycler Weighbridge Scale Operator</span>
+              <span className="text-[11px] text-secondary mt-0.5">{t.showQrPrompt}</span>
             </div>
 
             {/* Scale & Handover Verification Checklist */}
@@ -210,17 +364,17 @@ export default function Screen05HandoverReceipt({
               <div className="flex items-center justify-between">
                 <h3 className="text-sm font-bold text-on-surface flex items-center gap-1.5">
                   <span className="material-symbols-outlined text-primary text-[20px] filled">verified_user</span>
-                  <span>Handover Verification Checklist</span>
+                  <span>{t.checklistTitle}</span>
                 </h3>
                 <span className="text-[10px] text-emerald-700 bg-emerald-100 px-2.5 py-0.5 rounded-full font-bold border border-emerald-300">
-                  Verified Clean
+                  {t.checklistClean}
                 </span>
               </div>
               <div className="space-y-2 text-xs">
                 <div className="flex items-center justify-between p-2.5 rounded-xl bg-surface-container-low border border-outline-variant/30">
                   <div className="flex items-center gap-2">
                     <span className="material-symbols-outlined text-primary text-[18px]">scale</span>
-                    <span>Scale Weighment: <strong>{weight} {unit === 'piece' ? 'pcs (नग)' : 'kg'} Certified</strong></span>
+                    <span>{t.scaleWeighment} <strong>{weight} {unit === 'piece' ? (safeLang === 'en' ? 'pcs' : 'नग') : 'kg'} {t.scaleCertified}</strong></span>
                   </div>
                   <span className="material-symbols-outlined text-emerald-600 text-[18px] filled">check_circle</span>
                 </div>
@@ -228,7 +382,7 @@ export default function Screen05HandoverReceipt({
                 <div className="flex items-center justify-between p-2.5 rounded-xl bg-surface-container-low border border-outline-variant/30">
                   <div className="flex items-center gap-2">
                     <span className="material-symbols-outlined text-primary text-[18px]">payments</span>
-                    <span>Payment Status: <strong>100% Cash / Bank Received</strong></span>
+                    <span>{t.paymentStatusLabel} <strong>{t.paymentReceived}</strong></span>
                   </div>
                   <span className="material-symbols-outlined text-emerald-600 text-[18px] filled">check_circle</span>
                 </div>
@@ -236,7 +390,7 @@ export default function Screen05HandoverReceipt({
                 <div className="flex items-center justify-between p-2.5 rounded-xl bg-surface-container-low border border-outline-variant/30">
                   <div className="flex items-center gap-2">
                     <span className="material-symbols-outlined text-primary text-[18px]">policy</span>
-                    <span>Authorized Buyer: <strong>{recycler.name}</strong></span>
+                    <span>{t.authorizedBuyer} <strong>{recycler.name}</strong></span>
                   </div>
                   <span className="material-symbols-outlined text-emerald-600 text-[18px] filled">check_circle</span>
                 </div>
@@ -250,28 +404,28 @@ export default function Screen05HandoverReceipt({
             <div className="bg-surface rounded-2xl border border-outline-variant shadow-sm p-5 space-y-4">
               <div className="flex justify-between items-start border-b border-surface-variant pb-3">
                 <div className="flex flex-col">
-                  <span className="text-xs text-secondary font-semibold">Lot Reference</span>
+                  <span className="text-xs text-secondary font-semibold">{t.lotRef}</span>
                   <span className="text-base font-bold text-on-surface font-mono">{lotRef}</span>
                 </div>
                 <div className="text-right">
-                  <span className="text-xs text-secondary font-semibold">Handover Token</span>
+                  <span className="text-xs text-secondary font-semibold">{t.handoverToken}</span>
                   <p className="text-xs font-bold text-primary font-mono">{handoverRef.split('-').slice(-2).join('-')}</p>
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div className="bg-surface-container-low p-3 rounded-xl border border-surface-variant">
-                  <p className="text-xs text-secondary font-semibold">Material &amp; Quantity</p>
+                  <p className="text-xs text-secondary font-semibold">{t.matAndQty}</p>
                   <p className="text-sm font-bold text-on-surface mt-0.5">{materialTitle}</p>
-                  <p className="text-xs text-secondary font-medium">{weight} {unit === 'piece' ? 'pcs (नग)' : 'kg'} Net</p>
+                  <p className="text-xs text-secondary font-medium">{weight} {unit === 'piece' ? (safeLang === 'en' ? 'pcs' : 'नग') : 'kg'} Net</p>
                 </div>
                 <div className="bg-surface-container-low p-3 rounded-xl border border-surface-variant">
-                  <p className="text-xs text-secondary font-semibold">Agreed Rate</p>
+                  <p className="text-xs text-secondary font-semibold">{t.agreedRate}</p>
                   <p className="text-sm font-bold text-primary mt-0.5 font-mono">
-                    ₹{agreedRate} <span className="font-normal text-xs text-secondary">/ {unit === 'piece' ? 'pc (नग)' : 'kg'}</span>
+                    ₹{agreedRate} <span className="font-normal text-xs text-secondary">/ {unit === 'piece' ? (safeLang === 'en' ? 'pc' : 'नग') : 'kg'}</span>
                   </p>
                   <p className="text-[11px] text-secondary">
-                    Mandi Benchmark: ₹{Math.round(agreedRate * 0.95)}–₹{Math.round(agreedRate * 1.05)}/{unit === 'piece' ? 'pc' : 'kg'}
+                    {t.mandiBenchmark} ₹{Math.round(agreedRate * 0.95)}–₹{Math.round(agreedRate * 1.05)}/{unit === 'piece' ? (safeLang === 'en' ? 'pc' : 'नग') : 'kg'}
                   </p>
                 </div>
               </div>
@@ -282,7 +436,7 @@ export default function Screen05HandoverReceipt({
                     <div className="flex items-center gap-1.5 flex-wrap">
                       <span className="bg-emerald-100 text-emerald-800 text-[10px] font-extrabold px-2 py-0.5 rounded-full border border-emerald-300 flex items-center gap-1">
                         <span className="material-symbols-outlined text-[12px] filled">verified</span>
-                        Authorised Facility (Source: CPCB Directory 2023)
+                        {t.cpcbDirectory}
                       </span>
                       {recycler.facilityType && (
                         <span className="bg-primary/10 text-primary text-[10px] font-bold px-2 py-0.5 rounded-full border border-primary/20">
@@ -296,7 +450,7 @@ export default function Screen05HandoverReceipt({
                     </p>
                   </div>
                   <div className="text-right">
-                    <span className="text-xs text-secondary font-semibold">Total Paid</span>
+                    <span className="text-xs text-secondary font-semibold">{t.totalPaid}</span>
                     <p className="text-2xl font-extrabold text-primary font-mono">₹{totalPaid.toLocaleString('en-IN')}</p>
                   </div>
                 </div>
@@ -310,7 +464,7 @@ export default function Screen05HandoverReceipt({
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-bold text-on-surface flex items-center gap-1">
                     <span className="material-symbols-outlined text-primary text-[18px]">payments</span>
-                    <span>{currentLang === 'mr' ? 'देयक स्थिती निवडा' : 'भुगतान स्थिति (Payment Status)'}</span>
+                    <span>{t.selectPaymentStatus}</span>
                   </span>
                   <button
                     onClick={() => handleSpeakSoundbox(paymentMode)}
@@ -319,7 +473,7 @@ export default function Screen05HandoverReceipt({
                     title="Soundbox Broadcast"
                   >
                     <span className="material-symbols-outlined text-[15px] filled">speaker</span>
-                    <span>Soundbox Audio</span>
+                    <span>{t.soundboxAudio}</span>
                   </button>
                 </div>
 
@@ -337,8 +491,8 @@ export default function Screen05HandoverReceipt({
                     }`}
                   >
                     <span className="material-symbols-outlined text-[18px]">payments</span>
-                    <span className="truncate">{currentLang === 'mr' ? 'रोख मिळाली' : 'नकद मिला'}</span>
-                    <span className="text-[9px] opacity-80">(Cash)</span>
+                    <span className="truncate">{t.cashReceived}</span>
+                    <span className="text-[9px] opacity-80">{t.cashSub}</span>
                   </button>
 
                   <button
@@ -354,8 +508,8 @@ export default function Screen05HandoverReceipt({
                     }`}
                   >
                     <span className="material-symbols-outlined text-[18px]">qr_code_2</span>
-                    <span className="truncate">{currentLang === 'mr' ? 'UPI मिळाले' : 'UPI प्राप्त'}</span>
-                    <span className="text-[9px] opacity-80">(Digital)</span>
+                    <span className="truncate">{t.upiReceived}</span>
+                    <span className="text-[9px] opacity-80">{t.upiSub}</span>
                   </button>
 
                   <button
@@ -371,17 +525,17 @@ export default function Screen05HandoverReceipt({
                     }`}
                   >
                     <span className="material-symbols-outlined text-[18px]">hourglass_top</span>
-                    <span className="truncate">{currentLang === 'mr' ? 'बाकी देय' : 'बकाया'}</span>
-                    <span className="text-[9px] opacity-80">(Pending)</span>
+                    <span className="truncate">{t.pendingSettlement}</span>
+                    <span className="text-[9px] opacity-80">{t.pendingSub}</span>
                   </button>
                 </div>
 
                 <div className="flex items-center gap-2 pt-1 text-[11px] text-secondary">
                   <span className="material-symbols-outlined text-[15px] text-primary">info</span>
                   <span>
-                    {paymentMode === 'CASH_RECEIVED' && (currentLang === 'mr' ? 'प्रत्यक्ष रोख रक्कम मिळाली आणि सत्यापित झाली.' : 'शारीरिक नकद प्राप्त एवं सत्यापित।')}
-                    {paymentMode === 'UPI_RECEIVED' && (currentLang === 'mr' ? 'डिजिटल UPI द्वारे तात्काळ खात्यात जमा.' : 'डिजिटल UPI बैंक खाते में तत्काल जमा।')}
-                    {paymentMode === 'PENDING_SETTLEMENT' && (currentLang === 'mr' ? 'काटा पावतीनंतर देयक दिले जाईल (लेजरमध्ये नोंद).' : 'तौल कांटा पर्ची के बाद भुगतान देय (खाते में दर्ज)।')}
+                    {paymentMode === 'CASH_RECEIVED' && t.cashDesc}
+                    {paymentMode === 'UPI_RECEIVED' && t.upiDesc}
+                    {paymentMode === 'PENDING_SETTLEMENT' && t.pendingDesc}
                   </span>
                 </div>
               </div>
@@ -393,14 +547,14 @@ export default function Screen05HandoverReceipt({
               <button
                 onClick={() => {
                   const paymentText = paymentMode === 'CASH_RECEIVED'
-                    ? '100% Cash Confirmed ✓ (नकद मिला)'
-                    : (paymentMode === 'UPI_RECEIVED' ? 'Instant UPI Digital Payment Verified ✓ (UPI प्राप्त)' : 'Pending Weighbridge Settlement ⏳ (कांटा तौल बकाया)');
+                    ? (safeLang === 'en' ? '100% Cash Confirmed ✓' : '100% Cash Confirmed ✓ (नकद मिला)')
+                    : (paymentMode === 'UPI_RECEIVED' ? (safeLang === 'en' ? 'Instant UPI Digital Payment Verified ✓' : 'Instant UPI Digital Payment Verified ✓ (UPI प्राप्त)') : (safeLang === 'en' ? 'Pending Weighbridge Settlement ⏳' : 'Pending Weighbridge Settlement ⏳ (कांटा तौल बकाया)'));
                   const text = encodeURIComponent(
-                    `*RE:LINK E-Waste Handover Voucher (हैंडओवर पर्ची)*\n` +
+                    `*RE:LINK E-Waste Handover Voucher*\n` +
                     `Lot Ref: ${lotRef}\n` +
                     `Material: ${materialTitle}\n` +
-                    `Quantity: ${weight} ${unit === 'piece' ? 'pcs (नग)' : 'kg'}\n` +
-                    `Rate: ₹${agreedRate}/${unit === 'piece' ? 'pc (नग)' : 'kg'}\n` +
+                    `Quantity: ${weight} ${unit === 'piece' ? (safeLang === 'en' ? 'pcs' : 'नग') : 'kg'}\n` +
+                    `Rate: ₹${agreedRate}/${unit === 'piece' ? (safeLang === 'en' ? 'pc' : 'नग') : 'kg'}\n` +
                     `*Total Value: ₹${totalPaid.toLocaleString('en-IN')}*\n` +
                     `Authorized Recycler: ${recycler.name}\n` +
                     `SPCB Ref: ${recycler.statutoryRef || recycler.cpcbNo}\n` +
@@ -413,7 +567,7 @@ export default function Screen05HandoverReceipt({
                 type="button"
               >
                 <span className="material-symbols-outlined text-[20px]">share</span>
-                <span>Share Receipt on WhatsApp (व्हाट्सएप पर पर्ची भेजें)</span>
+                <span>{t.shareWhatsApp}</span>
               </button>
 
               <button
@@ -421,7 +575,7 @@ export default function Screen05HandoverReceipt({
                 className="w-full h-11 bg-surface-container hover:bg-surface-container-high border border-outline-variant/50 text-on-surface rounded-xl transition-all flex items-center justify-center gap-2 font-bold text-xs sm:text-sm cursor-pointer"
               >
                 <span className="material-symbols-outlined text-[18px]">print</span>
-                <span>{currentLang === 'mr' ? 'पावती डाउनलोड करा • Print / Download Voucher PDF' : (currentLang === 'hi' ? 'पर्ची डाउनलोड करें • Print / Download Voucher PDF' : 'Print / Download Voucher PDF')}</span>
+                <span>{t.printPdf}</span>
               </button>
 
               <div className="grid grid-cols-2 gap-3">
@@ -430,14 +584,14 @@ export default function Screen05HandoverReceipt({
                   className="h-11 bg-surface-container border border-outline-variant text-on-surface rounded-xl hover:bg-surface-container-high transition-colors flex items-center justify-center gap-1.5 font-bold text-xs sm:text-sm cursor-pointer"
                 >
                   <span className="material-symbols-outlined text-[18px]">payments</span>
-                  <span>{currentLang === 'mr' ? 'कमाई पहा' : (currentLang === 'hi' ? 'कमाई देखें' : 'View Earnings')}</span>
+                  <span>{t.viewEarnings}</span>
                 </button>
                 <button
                   onClick={onResetLot}
                   className="h-11 bg-surface-container border border-outline-variant text-on-surface rounded-xl hover:bg-surface-container-high transition-colors flex items-center justify-center gap-1.5 font-bold text-xs sm:text-sm cursor-pointer"
                 >
                   <span className="material-symbols-outlined text-[18px]">add_circle</span>
-                  <span>{currentLang === 'mr' ? 'नवीन लॉट' : (currentLang === 'hi' ? 'नया लॉट' : 'Create New Lot')}</span>
+                  <span>{t.newLot}</span>
                 </button>
               </div>
             </div>
@@ -449,19 +603,19 @@ export default function Screen05HandoverReceipt({
       <nav className="fixed bottom-0 left-0 w-full z-50 flex md:hidden justify-around items-center px-2 py-2 bg-surface border-t border-outline-variant shadow-md rounded-t-xl">
         <button onClick={() => onNavigate('home')} className="flex flex-col items-center justify-center p-2 text-on-surface-variant cursor-pointer">
           <span className="material-symbols-outlined">home</span>
-          <span className="font-label-md text-xs mt-1">Home</span>
+          <span className="font-label-md text-xs mt-1">{t.navHome}</span>
         </button>
         <button onClick={() => onNavigate('ai_scan')} className="flex flex-col items-center justify-center bg-primary-container text-on-primary-container rounded-full px-4 py-1 scale-90 cursor-pointer">
           <span className="material-symbols-outlined filled">inventory_2</span>
-          <span className="font-label-md text-xs font-bold mt-1">Sell / Lots</span>
+          <span className="font-label-md text-xs font-bold mt-1">{t.navMyLots}</span>
         </button>
         <button onClick={() => onNavigate('earnings')} className="flex flex-col items-center justify-center p-2 text-on-surface-variant cursor-pointer">
           <span className="material-symbols-outlined">payments</span>
-          <span className="font-label-md text-xs mt-1">Earnings</span>
+          <span className="font-label-md text-xs mt-1">{t.navEarnings}</span>
         </button>
         <button onClick={() => onNavigate('safety')} className="flex flex-col items-center justify-center p-2 text-on-surface-variant cursor-pointer">
           <span className="material-symbols-outlined">info</span>
-          <span className="font-label-md text-xs mt-1">Safety</span>
+          <span className="font-label-md text-xs mt-1">{t.navSafety}</span>
         </button>
       </nav>
     </div>

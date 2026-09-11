@@ -1,9 +1,95 @@
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-export default function Screen06EarningsHistory({ onNavigate, syncStatus = { isOnline: true } }) {
+const EARNINGS_TRANSLATIONS = {
+  hi: {
+    ledgerTitle: 'कमाई का बहीखाता (Earnings Ledger)',
+    settledBadge: 'शारीरिक नकद प्राप्त (Physical Cash Settled)',
+    totalCompletedEarnings: 'कुल प्राप्त कमाई',
+    pendingDuesLabel: 'कांटा तौल सत्यापन के लिए लंबित बकाया:',
+    cashGuaranteeBadge: '✓ तराजू पर 100% नकद भुगतान',
+    recentTransactions: 'हाल के लेन-देन',
+    liveAuditTrail: 'लाइव ऑडिट ट्रेल',
+    materialBreakdown: 'सामग्री अनुसार आय',
+    statusPaid: 'नकद प्राप्त',
+    statusPending: 'लंबित',
+    recent: 'हाल का',
+    navHome: 'होम',
+    navMyLots: 'बेचें / लॉट',
+    navEarnings: 'कमाई',
+    navSafety: 'सुरक्षा',
+    categories: {
+      PCB: 'पीसीबी (PCB)',
+      Cables: 'केबल एवं तार',
+      Batteries: 'बैटरी',
+      Mixed: 'मिश्रित ई-कबाड़'
+    }
+  },
+  mr: {
+    ledgerTitle: 'कमाई खतावणी (Earnings Ledger)',
+    settledBadge: 'प्रत्यक्ष रोख रक्कम जमा (Cash Settled)',
+    totalCompletedEarnings: 'एकूण झालेली कमाई',
+    pendingDuesLabel: 'काटा पडताळणीसाठी बाकी थकीत रक्कम:',
+    cashGuaranteeBadge: '✓ वजनकाट्यावर 100% रोख देयक',
+    recentTransactions: 'नुकतेच झालेले व्यवहार',
+    liveAuditTrail: 'थेट ऑडिट नोंद',
+    materialBreakdown: 'सामग्रीनुसार वर्गीकरण',
+    statusPaid: 'मिळाले',
+    statusPending: 'बाकी देय',
+    recent: 'नुकतेच',
+    navHome: 'मुख्य',
+    navMyLots: 'लॉट',
+    navEarnings: 'कमाई',
+    navSafety: 'सुरक्षा',
+    categories: {
+      PCB: 'पीसीबी (PCB)',
+      Cables: 'केबल आणि वायर',
+      Batteries: 'बॅटरी',
+      Mixed: 'मिश्र ई-कचरा'
+    }
+  },
+  en: {
+    ledgerTitle: 'Earnings Ledger',
+    settledBadge: 'Physical Cash Settled',
+    totalCompletedEarnings: 'Total Settled Earnings',
+    pendingDuesLabel: 'Pending dues awaiting weighbridge confirmation:',
+    cashGuaranteeBadge: '✓ 100% Cash Paid at Scale',
+    recentTransactions: 'Recent Transactions',
+    liveAuditTrail: 'Live Audit Trail',
+    materialBreakdown: 'Material Breakdown',
+    statusPaid: 'Paid',
+    statusPending: 'Pending',
+    recent: 'Recent',
+    navHome: 'Home',
+    navMyLots: 'Sell / Lots',
+    navEarnings: 'Earnings',
+    navSafety: 'Safety',
+    categories: {
+      PCB: 'PCB Boards',
+      Cables: 'Cables & Wire',
+      Batteries: 'Batteries',
+      Mixed: 'Mixed E-Waste'
+    }
+  }
+};
+
+export default function Screen06EarningsHistory({
+  onNavigate,
+  syncStatus = { isOnline: true },
+  currentLang: propLang,
+  onLanguageChange
+}) {
   const { i18n } = useTranslation();
-  const currentLang = i18n.language || 'hi';
+  const normalize = (lng) => {
+    if (!lng) return 'hi';
+    const s = String(lng).toLowerCase();
+    if (s.startsWith('mr')) return 'mr';
+    if (s.startsWith('en')) return 'en';
+    return 'hi';
+  };
+
+  const safeLang = normalize(propLang || i18n.language || localStorage.getItem('relink_lang'));
+  const t = EARNINGS_TRANSLATIONS[safeLang] || EARNINGS_TRANSLATIONS.hi;
 
   const [earnings, setEarnings] = useState({
     totalCompleted: 18450,
@@ -16,10 +102,10 @@ export default function Screen06EarningsHistory({ onNavigate, syncStatus = { isO
       { id: 'tx_4', desc: '18kg Batteries', amount: 4200, recycler: 'EcoRecycle India • Aug 08', status: 'Paid', icon: 'battery_charging_full', isPaid: true }
     ],
     breakdown: [
-      { name: 'PCB', pct: '42%', inr: '₹7,800', icon: 'memory', color: 'text-primary' },
-      { name: 'Cables', pct: '28%', inr: '₹5,250', icon: 'cable', color: 'text-tertiary' },
-      { name: 'Batteries', pct: '20%', inr: '₹3,700', icon: 'battery_charging_full', color: 'text-secondary' },
-      { name: 'Mixed', pct: '10%', inr: '₹1,700', icon: 'devices', color: 'text-secondary' }
+      { nameKey: 'PCB', defaultName: 'PCB', pct: '42%', inr: '₹7,800', icon: 'memory', color: 'text-primary' },
+      { nameKey: 'Cables', defaultName: 'Cables', pct: '28%', inr: '₹5,250', icon: 'cable', color: 'text-tertiary' },
+      { nameKey: 'Batteries', defaultName: 'Batteries', pct: '20%', inr: '₹3,700', icon: 'battery_charging_full', color: 'text-secondary' },
+      { nameKey: 'Mixed', defaultName: 'Mixed', pct: '10%', inr: '₹1,700', icon: 'devices', color: 'text-secondary' }
     ]
   });
 
@@ -39,14 +125,14 @@ export default function Screen06EarningsHistory({ onNavigate, syncStatus = { isO
               ...prev,
               totalCompleted: completed,
               pendingDues: pending,
-              transactions: txs.length > 0 ? txs.map((t, idx) => ({
-                id: t.id || `tx_${idx}`,
-                desc: `${t.weight || 12}kg ${t.material_category || 'Scrap'}`,
-                amount: t.final_price || 0,
-                recycler: t.recycler_name ? `${t.recycler_name} • Recent` : 'Authorized Recycler',
-                status: t.payment_status === 'COMPLETED' ? 'Paid' : 'Pending',
-                icon: (t.material_category || '').toLowerCase().includes('cable') ? 'cable' : 'memory',
-                isPaid: t.payment_status === 'COMPLETED'
+              transactions: txs.length > 0 ? txs.map((txItem, idx) => ({
+                id: txItem.id || `tx_${idx}`,
+                desc: `${txItem.weight || 12}kg ${txItem.material_category || 'Scrap'}`,
+                amount: txItem.final_price || 0,
+                recycler: txItem.recycler_name ? `${txItem.recycler_name} • Recent` : 'Authorized Recycler',
+                status: txItem.payment_status === 'COMPLETED' ? 'Paid' : 'Pending',
+                icon: (txItem.material_category || '').toLowerCase().includes('cable') ? 'cable' : 'memory',
+                isPaid: txItem.payment_status === 'COMPLETED'
               })) : prev.transactions
             }));
           }
@@ -62,16 +148,18 @@ export default function Screen06EarningsHistory({ onNavigate, syncStatus = { isO
     if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
       window.speechSynthesis.cancel();
       const utterance = new SpeechSynthesisUtterance(text);
-      utterance.lang = currentLang === 'mr' ? 'mr-IN' : (currentLang === 'hi' ? 'hi-IN' : 'en-IN');
+      utterance.lang = safeLang === 'mr' ? 'mr-IN' : (safeLang === 'hi' ? 'hi-IN' : 'en-IN');
       utterance.rate = 0.95;
       window.speechSynthesis.speak(utterance);
     }
   };
 
   const handleSpeakEarnings = () => {
-    const speech = currentLang === 'mr'
+    const speech = safeLang === 'mr'
       ? `या महिन्याची एकूण कमाई: ₹${earnings.totalCompleted.toLocaleString('en-IN')}. थकीत रक्कम ₹${earnings.pendingDues.toLocaleString('en-IN')}. सर्व व्यवहार थेट रोखीने पूर्ण होतात.`
-      : `इस महीने की कुल कमाई: ₹${earnings.totalCompleted.toLocaleString('en-IN')}। बकाया राशि ₹${earnings.pendingDues.toLocaleString('en-IN')}। सभी लेनदेन सीधे नकद में पूर्ण होते हैं।`;
+      : (safeLang === 'en'
+        ? `Total earnings this month: ₹${earnings.totalCompleted.toLocaleString('en-IN')}. Pending dues: ₹${earnings.pendingDues.toLocaleString('en-IN')}. 100% settled directly at scale.`
+        : `इस महीने की कुल कमाई: ₹${earnings.totalCompleted.toLocaleString('en-IN')}। बकाया राशि ₹${earnings.pendingDues.toLocaleString('en-IN')}। सभी लेनदेन सीधे नकद में पूर्ण होते हैं।`);
     speakText(speech);
   };
 
@@ -79,13 +167,30 @@ export default function Screen06EarningsHistory({ onNavigate, syncStatus = { isO
     <div className="collector-shell bg-background text-on-background min-h-screen flex flex-col pb-24 md:pb-0">
       {/* TopAppBar */}
       <header className="docked full-width top-0 border-b border-outline-variant bg-surface text-primary flex justify-between items-center w-full px-margin-mobile h-touch-target-min z-40 sticky">
-        <div className="flex items-center gap-md">
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => onNavigate('home')}
+            aria-label="Back"
+            className="flex items-center justify-center w-10 h-10 hover:bg-surface-container rounded-full text-on-surface-variant transition-colors cursor-pointer"
+          >
+            <span className="material-symbols-outlined">arrow_back</span>
+          </button>
           <span className="font-headline-md text-headline-md font-bold text-primary">RE:LINK</span>
         </div>
-        <div className="flex items-center gap-sm">
+        <div className="flex items-center gap-2">
+          {onLanguageChange && (
+            <button
+              onClick={onLanguageChange}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-primary/40 bg-primary-container/40 text-primary hover:bg-primary-container text-xs font-bold transition-all shadow-sm cursor-pointer"
+              title="Change Language"
+            >
+              <span className="material-symbols-outlined text-[16px]">translate</span>
+              <span>{safeLang === 'hi' ? 'हिन्दी' : safeLang === 'mr' ? 'मराठी' : 'EN'}</span>
+            </button>
+          )}
           <div className="flex items-center gap-1 bg-surface-container-low px-2.5 py-1 rounded-full border border-outline-variant text-xs text-primary font-medium">
             <span className="material-symbols-outlined text-[16px] filled">cloud_done</span>
-            <span>{syncStatus.isOnline ? 'Synced' : 'Offline'}</span>
+            <span>{syncStatus.isOnline ? (safeLang === 'mr' ? 'ऑनलाइन' : safeLang === 'hi' ? 'ऑनलाइन' : 'Online') : (safeLang === 'mr' ? 'ऑफलाइन' : safeLang === 'hi' ? 'ऑफलाइन' : 'Offline')}</span>
           </div>
           <div className="w-8 h-8 rounded-full bg-primary/15 flex items-center justify-center border border-outline-variant text-primary font-bold text-xs">
             👷‍♂️
@@ -97,15 +202,16 @@ export default function Screen06EarningsHistory({ onNavigate, syncStatus = { isO
       <main className="max-w-5xl mx-auto px-4 sm:px-6 py-6 space-y-6 flex-grow w-full">
         {/* Page Title */}
         <div className="flex items-center justify-between">
-          <h1 className="font-headline-lg-mobile text-headline-lg-mobile md:font-headline-lg md:text-headline-lg font-bold text-2xl">
-            Earnings Ledger
+          <h1 className="font-headline-lg-mobile text-headline-lg-mobile md:font-headline-lg md:text-headline-lg font-bold text-xl sm:text-2xl">
+            {t.ledgerTitle}
           </h1>
           <button
             onClick={handleSpeakEarnings}
             aria-label="Play Audio Guidance"
-            className="flex items-center gap-xs text-tertiary hover:bg-surface-container rounded-full p-2 transition-colors cursor-pointer"
+            className="flex items-center gap-1 text-tertiary bg-tertiary-fixed/40 hover:bg-tertiary-fixed px-3 py-1.5 rounded-full border border-tertiary-fixed-dim transition-colors cursor-pointer text-xs font-bold"
           >
-            <span className="material-symbols-outlined text-tertiary filled">volume_up</span>
+            <span className="material-symbols-outlined text-[18px] text-tertiary filled">volume_up</span>
+            <span>{safeLang === 'mr' ? 'ऐका' : (safeLang === 'hi' ? 'सुनें' : 'Listen')}</span>
           </button>
         </div>
 
@@ -116,7 +222,7 @@ export default function Screen06EarningsHistory({ onNavigate, syncStatus = { isO
           </div>
           <div className="z-10">
             <p className="font-body-lg text-body-lg text-on-surface-variant mb-xs text-xs text-secondary font-semibold uppercase tracking-wider">
-              {earnings.monthName} (Physical Cash Settled)
+              {earnings.monthName} ({t.settledBadge})
             </p>
             <div className="flex items-end gap-sm">
               <h2 className="font-headline-lg-mobile text-headline-lg-mobile md:font-headline-lg md:text-headline-lg font-extrabold text-primary text-3xl md:text-4xl">
@@ -128,12 +234,12 @@ export default function Screen06EarningsHistory({ onNavigate, syncStatus = { isO
               </div>
             </div>
             <p className="text-xs text-secondary mt-1">
-              Pending dues awaiting weighbridge confirmation: <strong className="text-amber-700 font-bold">₹{earnings.pendingDues.toLocaleString('en-IN')}</strong>
+              {t.pendingDuesLabel} <strong className="text-amber-700 font-bold">₹{earnings.pendingDues.toLocaleString('en-IN')}</strong>
             </p>
           </div>
           <div className="z-10 flex gap-sm mt-2 md:mt-0">
             <div className="bg-emerald-50 border border-emerald-300 text-emerald-800 font-label-lg text-xs rounded-lg px-4 py-2.5 flex items-center justify-center font-bold">
-              ✓ 100% Cash Paid at Scale
+              {t.cashGuaranteeBadge}
             </div>
           </div>
         </section>
@@ -143,8 +249,8 @@ export default function Screen06EarningsHistory({ onNavigate, syncStatus = { isO
           {/* Transactions List */}
           <div className="md:col-span-2 space-y-md">
             <div className="flex items-center justify-between border-b border-outline-variant pb-2">
-              <h3 className="font-headline-md text-headline-md font-bold text-base">Recent Transactions</h3>
-              <span className="text-tertiary font-label-md text-xs font-semibold">Live Audit Trail</span>
+              <h3 className="font-headline-md text-headline-md font-bold text-base">{t.recentTransactions}</h3>
+              <span className="text-tertiary font-label-md text-xs font-semibold">{t.liveAuditTrail}</span>
             </div>
             <div className="space-y-sm">
               {earnings.transactions.map((tx) => (
@@ -174,7 +280,7 @@ export default function Screen06EarningsHistory({ onNavigate, syncStatus = { isO
                         <span className="material-symbols-outlined text-[13px]">
                           {tx.isPaid ? 'check_circle' : 'schedule'}
                         </span>
-                        <span>{tx.status}</span>
+                        <span>{tx.isPaid ? t.statusPaid : t.statusPending}</span>
                       </div>
                     </div>
                   </div>
@@ -186,12 +292,12 @@ export default function Screen06EarningsHistory({ onNavigate, syncStatus = { isO
           {/* Material Breakdown (Bento Grid) */}
           <div className="space-y-md">
             <h3 className="font-headline-md text-headline-md font-bold text-base border-b border-outline-variant pb-2">
-              Material Breakdown
+              {t.materialBreakdown}
             </h3>
             <div className="grid grid-cols-2 gap-sm">
               {earnings.breakdown.map((item) => (
                 <div
-                  key={item.name}
+                  key={item.nameKey || item.defaultName}
                   className="bg-surface rounded-lg p-md border border-outline-variant shadow-sm flex flex-col justify-between h-28 p-3"
                 >
                   <div className="flex items-start justify-between">
@@ -201,7 +307,9 @@ export default function Screen06EarningsHistory({ onNavigate, syncStatus = { isO
                     <span className="font-label-md text-label-md text-on-surface-variant text-xs font-bold">{item.pct}</span>
                   </div>
                   <div>
-                    <p className="font-label-md text-label-md text-on-surface-variant text-xs text-secondary">{item.name}</p>
+                    <p className="font-label-md text-label-md text-on-surface-variant text-xs text-secondary truncate">
+                      {t.categories[item.nameKey] || item.defaultName}
+                    </p>
                     <p className="font-label-lg text-label-lg font-bold text-sm">{item.inr}</p>
                   </div>
                 </div>
@@ -215,19 +323,19 @@ export default function Screen06EarningsHistory({ onNavigate, syncStatus = { isO
       <nav className="fixed bottom-0 left-0 w-full z-50 flex md:hidden justify-around items-center px-2 py-2 bg-surface border-t border-outline-variant shadow-md rounded-t-xl">
         <button onClick={() => onNavigate('home')} className="flex flex-col items-center justify-center p-2 text-on-surface-variant cursor-pointer">
           <span className="material-symbols-outlined">home</span>
-          <span className="font-label-md text-xs mt-1">Home</span>
+          <span className="font-label-md text-xs mt-1">{t.navHome}</span>
         </button>
         <button onClick={() => onNavigate('ai_scan')} className="flex flex-col items-center justify-center p-2 text-on-surface-variant cursor-pointer">
           <span className="material-symbols-outlined">inventory_2</span>
-          <span className="font-label-md text-xs mt-1">Sell / Lots</span>
+          <span className="font-label-md text-xs mt-1">{t.navMyLots}</span>
         </button>
         <button onClick={() => onNavigate('earnings')} className="flex flex-col items-center justify-center bg-primary-container text-on-primary-container rounded-full px-4 py-1 scale-90 cursor-pointer">
           <span className="material-symbols-outlined filled">payments</span>
-          <span className="font-label-md text-xs font-bold mt-1">Earnings</span>
+          <span className="font-label-md text-xs font-bold mt-1">{t.navEarnings}</span>
         </button>
         <button onClick={() => onNavigate('safety')} className="flex flex-col items-center justify-center p-2 text-on-surface-variant cursor-pointer">
           <span className="material-symbols-outlined">info</span>
-          <span className="font-label-md text-xs mt-1">Safety</span>
+          <span className="font-label-md text-xs mt-1">{t.navSafety}</span>
         </button>
       </nav>
     </div>

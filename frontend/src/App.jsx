@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import Screen00WelcomeRole from './components/collector/Screen00WelcomeRole';
 import CollectorApp from './components/collector/CollectorApp';
 import RecyclerDashboard from './components/RecyclerDashboard';
+import DealerDashboard from './components/DealerDashboard';
 import OfflineSyncBanner from './components/OfflineSyncBanner';
 
 function App() {
@@ -34,7 +35,17 @@ function App() {
     );
   }
 
-  // 3. Collector Mobile App Workflow (Screens 01-06)
+  // 3. Dealer / Aggregator Hub (Yard Desk)
+  if (userRole === 'dealer' || userRole === 'aggregator') {
+    return (
+      <div className="min-h-screen bg-background text-on-surface">
+        <OfflineSyncBanner />
+        <DealerDashboard onRoleSwitch={() => handleRoleChange(null)} />
+      </div>
+    );
+  }
+
+  // 4. Collector Mobile App Workflow (Screens 01-06)
   return (
     <div className="min-h-screen bg-background text-on-surface">
       <OfflineSyncBanner />

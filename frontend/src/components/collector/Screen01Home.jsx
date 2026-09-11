@@ -3,17 +3,189 @@ import { useTranslation } from 'react-i18next';
 import PriceBoardModal from './PriceBoardModal';
 import NotificationsModal from '../common/NotificationsModal';
 
+const HOME_TRANSLATIONS = {
+  hi: {
+    mandiTag: 'कलेक्टर मंडी',
+    navHome: 'होम',
+    navMyLots: 'मेरे लॉट',
+    navAiScan: 'एआई स्कैन',
+    navCategories: 'श्रेणियां',
+    navEarnings: 'कमाई',
+    navSafety: 'सुरक्षा',
+    recyclerPortal: 'रीसायकलर पोर्टल',
+    syncLive: 'लाइव',
+    syncOffline: 'ऑफलाइन',
+    scanTitle: 'कबाड़ स्कैन करें • तुरंत पहचानें',
+    scanSubtitle: 'एआई कैमरा पहचान • तुरंत भाव',
+    openViewfinder: 'एआई कैमरा खोलें',
+    manualGrid: 'मैनुअल 7-श्रेणी ग्रिड',
+    marketRatesTitle: 'आज के बाजार भाव',
+    perKg: '/ किग्रा',
+    pcbName: 'सर्किट बोर्ड (PCB)',
+    pcbSub: 'ए-ग्रेड पीसीबी (मदरबोर्ड)',
+    cableName: 'तांबे के तार व केबल',
+    cableSub: 'इंसुलेटेड तांबा वायर',
+    batteryName: 'ली-आयन बैटरी',
+    batterySub: 'मिश्रित लॉट',
+    viewFullBoard: 'पूरा क्षेत्रीय मंडी बोर्ड देखें (9 श्रेणियां व रुझान)',
+    shareWhatsApp: 'व्हाट्सएप पर आज के भाव साझा करें',
+    fastPicker: 'त्वरित श्रेणी चयन',
+    viewAll7: 'सभी 7 श्रेणियां देखें',
+    pcbs: 'पीसीबी',
+    cables: 'तार / केबल',
+    batteries: 'बैटरी',
+    mandiInsights: 'मंडी बाजार रुझान',
+    todaysTrends: 'आज के रुझान',
+    copperWires: 'तांबे के तार व केबल',
+    copperTrend: '+8.4% इस सप्ताह',
+    serverPcbs: 'ए-ग्रेड सर्वर पीसीबी',
+    serverPcbPeak: '₹780/किग्रा उच्चतम',
+    batteryWarning: 'फूली हुई ली-आयन चेतावनी',
+    mustIsolate: 'अलग रखें (सुरक्षा)',
+    recentLots: 'हाल ही के फील्ड लॉट्स',
+    offlineCached: 'ऑफलाइन सुरक्षित',
+    estValue: 'अनुमानित मूल्य',
+    handoverConfirmed: 'हैंडओवर सत्यापित',
+    offerReceived: 'ऑफर प्राप्त',
+    noRecentLotsTitle: 'कोई पिछला लॉट नहीं है',
+    noRecentLotsDesc: 'कैमरा से कबाड़ स्कैन करें और सीधे अधिकृत रीसाइक्लर को बेचें।',
+    scanFirstLot: 'पहला लॉट स्कैन करें',
+    verifiedFacilities: 'क्षेत्र में सत्यापित संयंत्र',
+    facilitiesActive: '10 किमी में 14 सक्रिय',
+    facilitiesDesc: 'इको-रीसायकल एमएमआर (3.2 किमी), ग्रीन-सर्कल धारावी (1.8 किमी) और सेरेब्रा एमआईडीसी (7.4 किमी) आज उच्च ग्रेड पीसीबी और तांबे के तारों के लिए सक्रिय बोलियां लगा रहे हैं।',
+    exploreBids: 'लाइव रीसायकलर बोलियां देखें',
+    lotNumber: 'लॉट #',
+    mixedScrap: 'मिश्रित कबाड़'
+  },
+  mr: {
+    mandiTag: 'कलेक्टर बाजार',
+    navHome: 'मुख्य',
+    navMyLots: 'माझे लॉट',
+    navAiScan: 'एआई स्कॅन',
+    navCategories: 'श्रेणी',
+    navEarnings: 'कमाई',
+    navSafety: 'सुरक्षा',
+    recyclerPortal: 'रिसायकलर पोर्टल',
+    syncLive: 'थेट',
+    syncOffline: 'ऑफलाइन',
+    scanTitle: 'भंगार स्कॅन करा • त्वरित ओळखा',
+    scanSubtitle: 'एआई कॅमेरा तपासणी • तात्काळ वजन व दर',
+    openViewfinder: 'एआई कॅमेरा उघडा',
+    manualGrid: '7-श्रेणी मॅन्युअल ग्रिड',
+    marketRatesTitle: 'आजचे बाजार दर',
+    perKg: '/ किलो',
+    pcbName: 'सर्किट बोर्ड (PCB)',
+    pcbSub: 'ए-ग्रेड पीसीबी (मदरबोर्ड)',
+    cableName: 'तांब्याची केबल व वायर',
+    cableSub: 'इन्सुलेटेड तांब्याची वायर',
+    batteryName: 'ली-आयन बॅटरी',
+    batterySub: 'मिश्रित लॉट',
+    viewFullBoard: 'संपूर्ण प्रादेशिक बाजार दर तक्ता पहा (9 श्रेणी व कल)',
+    shareWhatsApp: 'आजचे दर व्हॉट्सॲपवर पाठवा',
+    fastPicker: 'जलद श्रेणी निवड',
+    viewAll7: 'सर्व 7 श्रेणी पहा',
+    pcbs: 'पीसीबी',
+    cables: 'केबल / वायर',
+    batteries: 'बॅटरी',
+    mandiInsights: 'बाजार विश्‍लेषण व कल',
+    todaysTrends: 'आजचा कल',
+    copperWires: 'तांब्याच्या तारा व केबल',
+    copperTrend: '+8.4% या आठवड्यात',
+    serverPcbs: 'ए-ग्रेड सर्व्हर पीसीबी',
+    serverPcbPeak: '₹780/किलो सर्वोच्च',
+    batteryWarning: 'फुगलेल्या बॅटऱ्या चेतावणी',
+    mustIsolate: 'स्वतंत्र ठेवा (सुरक्षा)',
+    recentLots: 'नुकतेच नोंदवलेले लॉट',
+    offlineCached: 'ऑफलाइन जतन',
+    estValue: 'अंदाजे मूल्य',
+    handoverConfirmed: 'हस्तांतरण प्रमाणित',
+    offerReceived: 'ऑफर प्राप्त',
+    noRecentLotsTitle: 'कोणतेही अलीकडील लॉट नाहीत',
+    noRecentLotsDesc: 'कॅमेऱ्याने भंगार स्कॅन करा आणि अधिकृत रिसायकलर्सना थेट विका.',
+    scanFirstLot: 'पहिला लॉट स्कॅन करा',
+    verifiedFacilities: 'परिसरातील अधिकृत प्रकल्प',
+    facilitiesActive: '10 किमी मध्ये 14 सक्रिय',
+    facilitiesDesc: 'इको-रिसायकल एमएमआर (3.2 किमी), ग्रीन-सर्कल धारावी (1.8 किमी) आणि सेरेब्रा एमआयडीसी (7.4 किमी) आज उच्च-दर्जाच्या पीसीबी आणि तांब्याच्या केबल्ससाठी थेट दर देत आहेत.',
+    exploreBids: 'थेट रिसायकलर दर पहा',
+    lotNumber: 'लॉट #',
+    mixedScrap: 'मिश्रित भंगार'
+  },
+  en: {
+    mandiTag: 'Collector Mandi',
+    navHome: 'Home',
+    navMyLots: 'My Lots',
+    navAiScan: 'AI Scan',
+    navCategories: 'Categories',
+    navEarnings: 'Earnings',
+    navSafety: 'Safety',
+    recyclerPortal: 'Recycler Portal',
+    syncLive: 'Live',
+    syncOffline: 'Offline',
+    scanTitle: 'Scan & Identify E-Waste',
+    scanSubtitle: 'AI Camera Detection • Instant Rate',
+    openViewfinder: 'Open AI Viewfinder',
+    manualGrid: 'Manual 7-Category Grid',
+    marketRatesTitle: 'Current Market Rates',
+    perKg: '/ kg',
+    pcbName: 'Circuit Boards (PCB)',
+    pcbSub: 'A-Grade PCB Motherboard',
+    cableName: 'Copper Cables',
+    cableSub: 'Insulated Wire',
+    batteryName: 'Li-ion Batteries',
+    batterySub: 'Mixed lot',
+    viewFullBoard: 'View Full Regional Mandi Board (9 Categories & Trends)',
+    shareWhatsApp: "Share Today's Rates on WhatsApp",
+    fastPicker: 'Fast Category Picker',
+    viewAll7: 'View All 7 Categories',
+    pcbs: 'PCBs',
+    cables: 'Cables',
+    batteries: 'Batteries',
+    mandiInsights: 'Mandi Market Insights',
+    todaysTrends: "TODAY'S TRENDS",
+    copperWires: 'Copper Wires & Cables',
+    copperTrend: '+8.4% this week',
+    serverPcbs: 'A-Grade Server PCBs',
+    serverPcbPeak: '₹780/kg Peak',
+    batteryWarning: 'Swollen Li-ion Warning',
+    mustIsolate: 'Must isolate',
+    recentLots: 'Recent Field Lots',
+    offlineCached: 'Offline Cached',
+    estValue: 'Est. Value',
+    handoverConfirmed: 'Handover Confirmed',
+    offerReceived: 'Offer Received',
+    noRecentLotsTitle: 'No Recent Lots',
+    noRecentLotsDesc: 'Scan scrap with camera and sell directly to authorized recyclers.',
+    scanFirstLot: 'Scan First Lot',
+    verifiedFacilities: 'Verified Facilities in Area',
+    facilitiesActive: '14 Active in 10km',
+    facilitiesDesc: 'EcoRecycle MMR (3.2 km), GreenCircle Dharavi (1.8 km), and Cerebra MIDC (7.4 km) are actively quoting for high-grade PCBs and insulated copper cables today.',
+    exploreBids: 'Explore Live Recycler Bids',
+    lotNumber: 'Lot #',
+    mixedScrap: 'Mixed Scrap'
+  }
+};
+
 export default function Screen01Home({
   onScanClick,
   onNavigate,
   onSelectLot,
   recentLots = [],
   syncStatus = { isOnline: true, unsyncedCount: 0 },
+  currentLang: propLang,
   onLanguageChange,
   onSwitchRole
 }) {
-  const { t, i18n } = useTranslation();
-  const currentLang = i18n.language || 'hi';
+  const { i18n } = useTranslation();
+  const normalize = (lng) => {
+    if (!lng) return 'hi';
+    const s = String(lng).toLowerCase();
+    if (s.startsWith('mr')) return 'mr';
+    if (s.startsWith('en')) return 'en';
+    return 'hi';
+  };
+
+  const safeLang = normalize(propLang || i18n.language || localStorage.getItem('relink_lang'));
+  const t = HOME_TRANSLATIONS[safeLang] || HOME_TRANSLATIONS.hi;
 
   const [showPriceBoardModal, setShowPriceBoardModal] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
@@ -53,16 +225,18 @@ export default function Screen01Home({
     if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
       window.speechSynthesis.cancel();
       const utterance = new SpeechSynthesisUtterance(text);
-      utterance.lang = currentLang === 'mr' ? 'mr-IN' : (currentLang === 'hi' ? 'hi-IN' : 'en-IN');
+      utterance.lang = safeLang === 'mr' ? 'mr-IN' : (safeLang === 'hi' ? 'hi-IN' : 'en-IN');
       utterance.rate = 0.95;
       window.speechSynthesis.speak(utterance);
     }
   };
 
   const handleSpeakAllRates = () => {
-    const summary = currentLang === 'mr'
+    const summary = safeLang === 'mr'
       ? `आजचे बाजार दर: सर्किट बोर्ड ${marketRates[0].rate} रुपये, तांब्याची केबल ${marketRates[1].rate} रुपये, बॅटरी ${marketRates[2].rate} रुपये प्रति किलो.`
-      : `आज के बाजार भाव: सर्किट बोर्ड ${marketRates[0].rate} रुपये, तांबे के तार ${marketRates[1].rate} रुपये, बैटरी ${marketRates[2].rate} रुपये प्रति किलो।`;
+      : (safeLang === 'hi'
+          ? `आज के बाजार भाव: सर्किट बोर्ड ${marketRates[0].rate} रुपये, तांबे के तार ${marketRates[1].rate} रुपये, बैटरी ${marketRates[2].rate} रुपये प्रति किलो।`
+          : `Today's market rates: Circuit boards ₹${marketRates[0].rate}, Copper cables ₹${marketRates[1].rate}, Batteries ₹${marketRates[2].rate} per kilogram.`);
     speakText(summary);
   };
 
@@ -78,7 +252,7 @@ export default function Screen01Home({
             </div>
             <div className="flex flex-col leading-tight">
               <span className="font-headline-md text-lg sm:text-xl font-bold text-primary dark:text-primary-fixed-dim">RE:LINK</span>
-              <span className="text-[10px] text-primary/80 font-bold uppercase tracking-wider hidden sm:inline">Collector Mandi</span>
+              <span className="text-[10px] text-primary/80 font-bold uppercase tracking-wider hidden sm:inline">{t.mandiTag}</span>
             </div>
           </div>
 
@@ -89,42 +263,42 @@ export default function Screen01Home({
               className="px-3 py-1.5 rounded-full bg-primary text-on-primary shadow-sm font-bold flex items-center gap-1.5 cursor-pointer"
             >
               <span className="material-symbols-outlined text-[16px] filled">home</span>
-              <span>Home</span>
+              <span>{t.navHome}</span>
             </button>
             <button
               onClick={() => onNavigate('my_lots')}
               className="px-3 py-1.5 rounded-full text-on-surface hover:bg-surface-container transition-colors flex items-center gap-1.5 cursor-pointer"
             >
               <span className="material-symbols-outlined text-[16px]">inventory_2</span>
-              <span>My Lots</span>
+              <span>{t.navMyLots}</span>
             </button>
             <button
               onClick={onScanClick}
               className="px-3 py-1.5 rounded-full text-on-surface hover:bg-surface-container transition-colors flex items-center gap-1.5 cursor-pointer"
             >
               <span className="material-symbols-outlined text-[16px]">photo_camera</span>
-              <span>AI Scan</span>
+              <span>{t.navAiScan}</span>
             </button>
             <button
               onClick={() => onNavigate('category_select')}
               className="px-3 py-1.5 rounded-full text-on-surface hover:bg-surface-container transition-colors flex items-center gap-1.5 cursor-pointer"
             >
               <span className="material-symbols-outlined text-[16px]">grid_view</span>
-              <span>Categories</span>
+              <span>{t.navCategories}</span>
             </button>
             <button
               onClick={() => onNavigate('earnings')}
               className="px-3 py-1.5 rounded-full text-on-surface hover:bg-surface-container transition-colors flex items-center gap-1.5 cursor-pointer"
             >
               <span className="material-symbols-outlined text-[16px]">payments</span>
-              <span>Earnings</span>
+              <span>{t.navEarnings}</span>
             </button>
             <button
               onClick={() => onNavigate('safety')}
               className="px-3 py-1.5 rounded-full text-on-surface hover:bg-surface-container transition-colors flex items-center gap-1.5 cursor-pointer"
             >
               <span className="material-symbols-outlined text-[16px]">health_and_safety</span>
-              <span>Safety</span>
+              <span>{t.navSafety}</span>
             </button>
           </nav>
 
@@ -140,7 +314,7 @@ export default function Screen01Home({
                 title="Switch Portal or Role"
               >
                 <span className="material-symbols-outlined text-[16px] text-primary">domain</span>
-                <span className="hidden md:inline">Recycler Portal</span>
+                <span className="hidden md:inline">{t.recyclerPortal}</span>
               </button>
             )}
 
@@ -163,7 +337,7 @@ export default function Screen01Home({
               className="flex items-center gap-1 h-10 px-3 rounded-full bg-surface-container border border-outline-variant text-on-surface hover:bg-surface-container-high transition-colors text-xs font-bold cursor-pointer shrink-0"
             >
               <span className="material-symbols-outlined text-sm text-primary">language</span>
-              <span>{currentLang === 'hi' ? 'हिन्दी' : (currentLang === 'mr' ? 'मराठी' : 'EN')}</span>
+              <span>{safeLang === 'hi' ? 'हिन्दी' : (safeLang === 'mr' ? 'मराठी' : 'EN')}</span>
             </button>
 
             {/* Cloud Sync Status */}
@@ -179,7 +353,7 @@ export default function Screen01Home({
                 {syncStatus.isOnline ? 'cloud_done' : 'cloud_off'}
               </span>
               <span className="hidden md:inline">
-                {syncStatus.isOnline ? 'Live' : `${syncStatus.unsyncedCount || 1} offline`}
+                {syncStatus.isOnline ? t.syncLive : `${syncStatus.unsyncedCount || 1} ${t.syncOffline}`}
               </span>
             </div>
           </div>
@@ -198,10 +372,10 @@ export default function Screen01Home({
           >
             <div className="flex items-center gap-sm font-action-xl text-action-xl font-bold text-lg sm:text-xl">
               <span className="material-symbols-outlined" style={{ fontSize: '28px' }}>photo_camera</span>
-              <span>Scan &amp; Identify E-Waste</span>
+              <span>{t.scanTitle}</span>
             </div>
             <span className="text-xs text-on-primary/90 font-label-md mt-1 flex items-center gap-1 font-medium">
-              <span className="material-symbols-outlined text-xs">auto_awesome</span> AI Camera Detection • तुरंत पहचानें
+              <span className="material-symbols-outlined text-xs">auto_awesome</span> {t.scanSubtitle}
             </span>
           </button>
           <div className="flex items-center justify-center gap-3 pt-2.5">
@@ -210,7 +384,7 @@ export default function Screen01Home({
               className="text-xs font-bold text-primary hover:underline flex items-center gap-1 cursor-pointer"
             >
               <span className="material-symbols-outlined text-[15px]">view_in_ar</span>
-              <span>Open AI Viewfinder</span>
+              <span>{t.openViewfinder}</span>
             </button>
             <span className="text-outline-variant text-xs">•</span>
             <button
@@ -218,7 +392,7 @@ export default function Screen01Home({
               className="text-xs font-semibold text-on-surface-variant hover:text-on-surface hover:underline flex items-center gap-1 cursor-pointer"
             >
               <span className="material-symbols-outlined text-[15px]">grid_view</span>
-              <span>Manual 7-Category Grid</span>
+              <span>{t.manualGrid}</span>
             </button>
           </div>
         </section>
@@ -226,7 +400,7 @@ export default function Screen01Home({
         {/* Current Market Rates (Bento/Card Grid) */}
         <section className="space-y-md">
           <div className="flex items-center gap-xs">
-            <h2 className="font-headline-md text-headline-md text-on-background font-bold text-lg">Current Market Rates</h2>
+            <h2 className="font-headline-md text-headline-md text-on-background font-bold text-lg">{t.marketRatesTitle}</h2>
             <button
               onClick={handleSpeakAllRates}
               aria-label="Play audio instruction for current market rates"
@@ -246,10 +420,10 @@ export default function Screen01Home({
                 <div className="w-10 h-10 rounded-lg bg-surface flex items-center justify-center border border-outline-variant shadow-sm mb-sm">
                   <span className="material-symbols-outlined text-primary">memory</span>
                 </div>
-                <h3 className="font-label-lg text-label-lg text-on-surface-variant font-semibold">Circuit Boards</h3>
-                <p className="font-body-md text-body-md text-secondary text-xs">A-Grade PCB</p>
+                <h3 className="font-label-lg text-label-lg text-on-surface-variant font-semibold">{t.pcbName}</h3>
+                <p className="font-body-md text-body-md text-secondary text-xs">{t.pcbSub}</p>
                 <p className="font-headline-md text-headline-md text-on-background mt-sm font-bold text-base">
-                  ₹{marketRates[0].rate} <span className="font-body-md text-body-md text-secondary font-normal text-xs">/ kg</span>
+                  ₹{marketRates[0].rate} <span className="font-body-md text-body-md text-secondary font-normal text-xs">{t.perKg}</span>
                 </p>
               </div>
             </div>
@@ -264,10 +438,10 @@ export default function Screen01Home({
                 <div className="w-10 h-10 rounded-lg bg-surface flex items-center justify-center border border-outline-variant shadow-sm mb-sm">
                   <span className="material-symbols-outlined text-primary">cable</span>
                 </div>
-                <h3 className="font-label-lg text-label-lg text-on-surface-variant font-semibold">Copper Cables</h3>
-                <p className="font-body-md text-body-md text-secondary text-xs">Insulated Wire</p>
+                <h3 className="font-label-lg text-label-lg text-on-surface-variant font-semibold">{t.cableName}</h3>
+                <p className="font-body-md text-body-md text-secondary text-xs">{t.cableSub}</p>
                 <p className="font-headline-md text-headline-md text-on-background mt-sm font-bold text-base">
-                  ₹{marketRates[1].rate} <span className="font-body-md text-body-md text-secondary font-normal text-xs">/ kg</span>
+                  ₹{marketRates[1].rate} <span className="font-body-md text-body-md text-secondary font-normal text-xs">{t.perKg}</span>
                 </p>
               </div>
             </div>
@@ -282,12 +456,12 @@ export default function Screen01Home({
                   <span className="material-symbols-outlined text-primary">battery_charging_full</span>
                 </div>
                 <div>
-                  <h3 className="font-label-lg text-label-lg text-on-surface-variant font-semibold">Li-ion Batteries</h3>
-                  <p className="font-body-md text-body-md text-secondary text-xs">Mixed lot</p>
+                  <h3 className="font-label-lg text-label-lg text-on-surface-variant font-semibold">{t.batteryName}</h3>
+                  <p className="font-body-md text-body-md text-secondary text-xs">{t.batterySub}</p>
                 </div>
               </div>
               <p className="font-headline-md text-headline-md text-on-background text-right font-bold text-base">
-                ₹{marketRates[2].rate} <span className="font-body-md text-body-md text-secondary text-xs">/ kg</span>
+                ₹{marketRates[2].rate} <span className="font-body-md text-body-md text-secondary text-xs">{t.perKg}</span>
               </p>
             </div>
           </div>
@@ -298,7 +472,7 @@ export default function Screen01Home({
             className="w-full py-2.5 px-4 bg-primary/10 hover:bg-primary/15 border border-primary/30 rounded-xl text-primary font-bold text-xs flex items-center justify-center gap-2 transition-all cursor-pointer shadow-xs active:scale-[0.99]"
           >
             <span className="material-symbols-outlined text-sm">table_chart</span>
-            <span>View Full Regional Mandi Board (9 Categories &amp; Trends)</span>
+            <span>{t.viewFullBoard}</span>
             <span className="material-symbols-outlined text-sm">arrow_forward</span>
           </button>
 
@@ -307,9 +481,9 @@ export default function Screen01Home({
             onClick={() => {
               const text = encodeURIComponent(
                 `*RE:LINK Live E-Waste Mandi Rates (आज का भाव)*\n` +
-                `• Circuit Boards (PCB): ₹${marketRates[0]?.rate || 265}/kg\n` +
-                `• Copper Cables: ₹${marketRates[1]?.rate || 385}/kg\n` +
-                `• Li-ion Batteries: ₹${marketRates[2]?.rate || 190}/kg\n` +
+                `• ${t.pcbName}: ₹${marketRates[0]?.rate || 265}/kg\n` +
+                `• ${t.cableName}: ₹${marketRates[1]?.rate || 385}/kg\n` +
+                `• ${t.batteryName}: ₹${marketRates[2]?.rate || 190}/kg\n` +
                 `• Direct CPCB Scale Weighment & 100% Cash Settlement.\n` +
                 `Check live: https://relink-mandi.gov.in`
               );
@@ -319,18 +493,18 @@ export default function Screen01Home({
             type="button"
           >
             <span className="material-symbols-outlined text-sm">share</span>
-            <span>Share Today's Rates on WhatsApp (व्हाट्सएप पर भाव भेजें)</span>
+            <span>{t.shareWhatsApp}</span>
           </button>
 
           {/* Category Fast Shortcuts */}
           <div className="bg-surface-container-low rounded-xl p-4 border border-outline-variant/40 space-y-2.5">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold uppercase tracking-wider text-secondary">Fast Category Picker</span>
+              <span className="text-xs font-bold uppercase tracking-wider text-secondary">{t.fastPicker}</span>
               <button
                 onClick={() => onNavigate('category_select')}
                 className="text-xs font-bold text-primary hover:underline flex items-center gap-0.5 cursor-pointer"
               >
-                <span>View All 7 Categories</span>
+                <span>{t.viewAll7}</span>
                 <span className="material-symbols-outlined text-[14px]">arrow_forward</span>
               </button>
             </div>
@@ -340,21 +514,21 @@ export default function Screen01Home({
                 className="flex items-center gap-2 p-2 bg-surface rounded-lg border border-outline-variant/50 hover:border-primary text-left transition-colors cursor-pointer"
               >
                 <span className="material-symbols-outlined text-primary text-[18px]">memory</span>
-                <span className="text-xs font-medium truncate">PCBs</span>
+                <span className="text-xs font-medium truncate">{t.pcbs}</span>
               </button>
               <button
                 onClick={() => onNavigate('category_select')}
                 className="flex items-center gap-2 p-2 bg-surface rounded-lg border border-outline-variant/50 hover:border-primary text-left transition-colors cursor-pointer"
               >
                 <span className="material-symbols-outlined text-primary text-[18px]">cable</span>
-                <span className="text-xs font-medium truncate">Cables</span>
+                <span className="text-xs font-medium truncate">{t.cables}</span>
               </button>
               <button
                 onClick={() => onNavigate('category_select')}
                 className="flex items-center gap-2 p-2 bg-surface rounded-lg border border-outline-variant/50 hover:border-primary text-left transition-colors cursor-pointer"
               >
                 <span className="material-symbols-outlined text-primary text-[18px]">battery_charging_full</span>
-                <span className="text-xs font-medium truncate">Batteries</span>
+                <span className="text-xs font-medium truncate">{t.batteries}</span>
               </button>
             </div>
           </div>
@@ -368,10 +542,10 @@ export default function Screen01Home({
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <span className="material-symbols-outlined text-primary text-[20px]">insights</span>
-              <h3 className="font-bold text-sm text-on-surface">Mandi Market Insights</h3>
+              <h3 className="font-bold text-sm text-on-surface">{t.mandiInsights}</h3>
             </div>
             <span className="bg-primary text-on-primary text-[10px] font-bold px-2 py-0.5 rounded-full uppercase">
-              TODAY'S TRENDS
+              {t.todaysTrends}
             </span>
           </div>
 
@@ -379,23 +553,23 @@ export default function Screen01Home({
             <div className="flex items-center justify-between p-2 bg-surface rounded-lg border border-outline-variant/30">
               <div className="flex items-center gap-2">
                 <span className="material-symbols-outlined text-emerald-600 text-[16px]">trending_up</span>
-                <span className="font-medium">Copper Wires &amp; Cables</span>
+                <span className="font-medium">{t.copperWires}</span>
               </div>
-              <span className="font-bold text-emerald-700">+8.4% this week</span>
+              <span className="font-bold text-emerald-700">{t.copperTrend}</span>
             </div>
             <div className="flex items-center justify-between p-2 bg-surface rounded-lg border border-outline-variant/30">
               <div className="flex items-center gap-2">
                 <span className="material-symbols-outlined text-primary text-[16px]">verified</span>
-                <span className="font-medium">A-Grade Server PCBs</span>
+                <span className="font-medium">{t.serverPcbs}</span>
               </div>
-              <span className="font-bold text-primary">₹780/kg Peak</span>
+              <span className="font-bold text-primary">{t.serverPcbPeak}</span>
             </div>
             <div className="flex items-center justify-between p-2 bg-surface rounded-lg border border-outline-variant/30">
               <div className="flex items-center gap-2">
                 <span className="material-symbols-outlined text-amber-600 text-[16px]">warning</span>
-                <span className="font-medium">Swollen Li-ion Warning</span>
+                <span className="font-medium">{t.batteryWarning}</span>
               </div>
-              <span className="font-semibold text-amber-800">Must isolate</span>
+              <span className="font-semibold text-amber-800">{t.mustIsolate}</span>
             </div>
           </div>
         </section>
@@ -404,16 +578,16 @@ export default function Screen01Home({
         <section className="space-y-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-xs">
-              <h2 className="font-headline-md text-headline-md text-on-background font-bold text-base">Recent Field Lots</h2>
+              <h2 className="font-headline-md text-headline-md text-on-background font-bold text-base">{t.recentLots}</h2>
               <button
-                onClick={() => speakText('हाल ही के लॉट्स: लॉट 8402, 42 किलो सर्किट बोर्ड, अनुमानित मूल्य 9450 रुपये')}
+                onClick={() => speakText(safeLang === 'mr' ? 'नुकतेच नोंदवलेले लॉट पहा' : 'हाल ही के लॉट्स देखें')}
                 aria-label="Play audio instruction for recent lots"
                 className="w-7 h-7 rounded-full flex items-center justify-center text-tertiary hover:bg-surface-container transition-colors cursor-pointer"
               >
                 <span className="material-symbols-outlined text-[18px] text-tertiary">volume_up</span>
               </button>
             </div>
-            <span className="text-xs text-secondary font-semibold">Offline Cached</span>
+            <span className="text-xs text-secondary font-semibold">{t.offlineCached}</span>
           </div>
 
           <div className="space-y-sm">
@@ -430,21 +604,21 @@ export default function Screen01Home({
                     </div>
                     <div>
                       <h3 className="font-label-lg text-sm text-on-background font-bold">
-                        Lot #{String(lot.id || idx + 8400).slice(-4)}
+                        {t.lotNumber}{String(lot.id || idx + 8400).slice(-4)}
                       </h3>
                       <p className="font-body-md text-secondary text-xs">
-                        {lot.material_category || 'Mixed Scrap'} • {lot.approximate_weight || 12}kg
+                        {lot.material_category || t.mixedScrap} • {lot.approximate_weight || 12}kg
                       </p>
                       <div className="inline-flex items-center px-2 py-0.5 mt-1 rounded-full bg-tertiary-container/15 border border-tertiary-container/30">
                         <span className="w-1.5 h-1.5 rounded-full bg-tertiary mr-1.5"></span>
                         <span className="text-[11px] font-semibold text-on-tertiary-container">
-                          {lot.status === 'CONFIRMED' || lot.status === 'HANDED_OVER' ? 'Handover Confirmed' : 'Offer Received'}
+                          {lot.status === 'CONFIRMED' || lot.status === 'HANDED_OVER' ? t.handoverConfirmed : t.offerReceived}
                         </span>
                       </div>
                     </div>
                   </div>
                   <div className="flex flex-row sm:flex-col justify-between sm:justify-start items-center sm:items-end w-full sm:w-auto border-t sm:border-t-0 border-outline-variant pt-2 sm:pt-0 mt-1 sm:mt-0">
-                    <span className="text-xs text-secondary sm:hidden">Est. Value</span>
+                    <span className="text-xs text-secondary sm:hidden">{t.estValue}</span>
                     <span className="text-base text-primary font-bold">
                       ~₹{Math.round(lot.quoted_price || (lot.approximate_weight || 12) * 240)}
                     </span>
@@ -457,9 +631,9 @@ export default function Screen01Home({
                   <span className="material-symbols-outlined text-[26px]">inventory_2</span>
                 </div>
                 <div>
-                  <h3 className="text-sm font-bold text-on-surface">कोई पिछला लॉट नहीं है • No Recent Lots</h3>
+                  <h3 className="text-sm font-bold text-on-surface">{t.noRecentLotsTitle}</h3>
                   <p className="text-xs text-on-surface-variant mt-0.5">
-                    कैमरा से कबाड़ स्कैन करें और सीधे अधिकृत रीसाइक्लर को बेचें।
+                    {t.noRecentLotsDesc}
                   </p>
                 </div>
                 <button
@@ -468,7 +642,7 @@ export default function Screen01Home({
                   type="button"
                 >
                   <span className="material-symbols-outlined text-[16px]">photo_camera</span>
-                  <span>पहला लॉट स्कैन करें • Scan First Lot</span>
+                  <span>{t.scanFirstLot}</span>
                 </button>
               </div>
             )}
@@ -478,18 +652,18 @@ export default function Screen01Home({
         {/* Nearby CPCB Recycler Network Status */}
         <section className="bg-surface rounded-2xl p-4 border border-outline-variant shadow-sm space-y-2.5">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold uppercase tracking-wider text-on-surface">Verified Facilities in Area</span>
-            <span className="text-xs text-emerald-700 font-bold">14 Active in 10km</span>
+            <span className="text-xs font-bold uppercase tracking-wider text-on-surface">{t.verifiedFacilities}</span>
+            <span className="text-xs text-emerald-700 font-bold">{t.facilitiesActive}</span>
           </div>
           <p className="text-xs text-on-surface-variant">
-            EcoRecycle MMR (3.2 km), GreenCircle Dharavi (1.8 km), and Cerebra MIDC (7.4 km) are actively quoting for high-grade PCBs and insulated copper cables today.
+            {t.facilitiesDesc}
           </p>
           <div className="pt-1 flex items-center gap-2">
             <button
               onClick={() => onNavigate('offers')}
               className="text-xs font-bold text-primary hover:underline flex items-center gap-1 cursor-pointer"
             >
-              <span>Explore Live Recycler Bids</span>
+              <span>{t.exploreBids}</span>
               <span className="material-symbols-outlined text-[14px]">arrow_forward</span>
             </button>
           </div>
@@ -508,7 +682,7 @@ export default function Screen01Home({
           <div className="flex flex-col items-center justify-center bg-primary-container text-on-primary-container rounded-full px-4 py-1">
             <span className="material-symbols-outlined filled">home</span>
           </div>
-          <span className="font-label-md text-label-md mt-1 text-primary font-bold text-xs">Home</span>
+          <span className="font-label-md text-label-md mt-1 text-primary font-bold text-xs">{t.navHome}</span>
         </button>
 
         <button
@@ -517,7 +691,7 @@ export default function Screen01Home({
           className="flex flex-col items-center justify-center min-h-[48px] min-w-[64px] text-on-surface-variant hover:bg-surface-container-low rounded-lg p-1 transition-colors cursor-pointer"
         >
           <span className="material-symbols-outlined">inventory_2</span>
-          <span className="font-label-md text-label-md mt-1 text-xs">My Lots</span>
+          <span className="font-label-md text-label-md mt-1 text-xs">{t.navMyLots}</span>
         </button>
 
         <button
@@ -526,7 +700,7 @@ export default function Screen01Home({
           className="flex flex-col items-center justify-center min-h-[48px] min-w-[64px] text-on-surface-variant hover:bg-surface-container-low rounded-lg p-1 transition-colors cursor-pointer"
         >
           <span className="material-symbols-outlined">payments</span>
-          <span className="font-label-md text-label-md mt-1 text-xs">Earnings</span>
+          <span className="font-label-md text-label-md mt-1 text-xs">{t.navEarnings}</span>
         </button>
 
         <button
@@ -535,7 +709,7 @@ export default function Screen01Home({
           className="flex flex-col items-center justify-center min-h-[48px] min-w-[64px] text-on-surface-variant hover:bg-surface-container-low rounded-lg p-1 transition-colors cursor-pointer"
         >
           <span className="material-symbols-outlined">info</span>
-          <span className="font-label-md text-label-md mt-1 text-xs">Safety</span>
+          <span className="font-label-md text-label-md mt-1 text-xs">{t.navSafety}</span>
         </button>
       </nav>
 
@@ -543,7 +717,7 @@ export default function Screen01Home({
       <PriceBoardModal
         isOpen={showPriceBoardModal}
         onClose={() => setShowPriceBoardModal(false)}
-        currentLang={currentLang}
+        currentLang={safeLang}
       />
 
       {/* Notifications & Live Activity Modal */}

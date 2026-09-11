@@ -1,14 +1,151 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+const SUMMARY_TRANSLATIONS = {
+  hi: {
+    digitalScrapLot: 'डिजिटल कबाड़ लॉट',
+    pageTitle: 'लॉट सारांश एवं तात्कालिक भाव',
+    verifiableRef: 'सत्यापनीय लॉट संदर्भ',
+    readyForBids: 'भाव के लिए तैयार',
+    items: 'घटक',
+    item: 'घटक',
+    consignmentItems: 'कंसाइनमेंट घटक',
+    totalEquiv: 'कुल समतुल्य वजन',
+    verified: 'सत्यापित',
+    match: 'सटीकता',
+    totalItems: 'कुल घटक',
+    netWeight: 'शुद्ध वजन',
+    quantity: 'मात्रा',
+    condition: 'स्थिति',
+    collectionHub: 'संग्रह केंद्र',
+    addAnotherItem: '➕ और कबाड़ सामान जोड़ें • Add Another Item',
+    envImpact: 'पर्यावरणीय प्रभाव',
+    esgVerified: 'सीपीसीबी ईएसजी सत्यापित',
+    co2Saved: 'CO₂ उत्सर्जन की बचत',
+    toxicsDiverted: 'जमीन से बचाए गए जहरीले पदार्थ',
+    form6Assurance: 'सीपीसीबी फॉर्म-6 पूर्व-मान्य: तौल कांटा सत्यापन पर आधिकारिक ई-कचरा हस्तांतरण प्रपत्र स्वतः जारी।',
+    estimatedMandiVal: 'अनुमानित मंडी मूल्य',
+    liveMandiIndex: 'लाइव मंडी सूचकांक',
+    calculatedAt: 'के भाव पर परिकलित',
+    forVerifiedScrap: 'सत्यापित कबाड़ हेतु',
+    recyclersReady: '14 अधिकृत रीसाइक्लर 10 किमी में बोली के लिए तैयार',
+    pickupReadiness: 'पिकअप तत्परता',
+    highDemand: 'उच्च मांग',
+    fastestBuyer: 'निकटतम अधिकृत खरीदार:',
+    averageHandover: 'औसत कांटा हस्तांतरण:',
+    settlementGuarantee: 'भुगतान गारंटी:',
+    guaranteeDetail: '100% नकद / UPI तुरंत कांटे पर',
+    findOffers: 'अधिकृत रीसाइक्लर चुनें (14 नज़दीक)',
+    saveDraftOffline: 'फ़ोन में ड्राफ्ट सहेजें (ऑफलाइन)',
+    savedToOffline: 'ऑफ़लाइन कतार में सहेजा गया',
+    navScan: 'स्कैन',
+    navMyLots: 'लॉट',
+    navEarnings: 'कमाई',
+    navSupport: 'सुरक्षा'
+  },
+  mr: {
+    digitalScrapLot: 'डिजिटल स्क्रॅप लॉट',
+    pageTitle: 'लॉट तपशील व तात्काळ मूल्यांकन',
+    verifiableRef: 'सत्यापित लॉट संदर्भ',
+    readyForBids: 'बोलीसाठी तयार',
+    items: 'घटक',
+    item: 'घटक',
+    consignmentItems: 'लॉटमधील एकूण घटक',
+    totalEquiv: 'एकूण समतुल्य वजन',
+    verified: 'सत्यापित',
+    match: 'अचूकता',
+    totalItems: 'एकूण घटक',
+    netWeight: 'निव्वळ वजन',
+    quantity: 'प्रमाण / संख्या',
+    condition: 'स्थिती',
+    collectionHub: 'संकलन केंद्र',
+    addAnotherItem: '➕ आणि कबाड सामान जोडा • Add Another Item',
+    envImpact: 'पर्यावरणीय प्रभाव',
+    esgVerified: 'सीपीसीबी ईएसजी प्रमाणित',
+    co2Saved: 'CO₂ उत्सर्जनात बचत',
+    toxicsDiverted: 'मातीचे प्रदूषण टाळलेले धातू',
+    form6Assurance: 'सीपीसीबी फॉर्म-6 पूर्व-मान्य: वजनकाटा पडताळणीनंतर अधिकृत ई-कचरा हस्तांतरण पावती जारी.',
+    estimatedMandiVal: 'अंदाजे बाजार हमीभाव',
+    liveMandiIndex: 'थेट बाजार निर्देशांक',
+    calculatedAt: 'या दराने अंदाजित',
+    forVerifiedScrap: 'सत्यापित भंगारासाठी',
+    recyclersReady: '14 अधिकृत केंद्र 10 किमी परिसरात तयार',
+    pickupReadiness: 'पिकअप तत्परता',
+    highDemand: 'मोठी मागणी',
+    fastestBuyer: 'जवळचे अधिकृत खरेदीदार:',
+    averageHandover: 'काटा तपासणी वेळ:',
+    settlementGuarantee: 'देयक हमी:',
+    guaranteeDetail: '100% रोख / UPI तत्काळ वजनकाट्यावर',
+    findOffers: 'अधिकृत रीसायकलर्सचे भाव पहा (14 जवळपास)',
+    saveDraftOffline: 'फोनमध्ये मसुदा सेव्ह करा (ऑफलाइन)',
+    savedToOffline: 'ऑफलाइन रांगेत जतन केले',
+    navScan: 'स्कॅन',
+    navMyLots: 'लॉट',
+    navEarnings: 'कमाई',
+    navSupport: 'सुरक्षा'
+  },
+  en: {
+    digitalScrapLot: 'Digital Scrap Lot',
+    pageTitle: 'Lot Summary & Instant Valuation',
+    verifiableRef: 'Verifiable Lot Reference',
+    readyForBids: 'Ready for Bids',
+    items: 'Items',
+    item: 'Item',
+    consignmentItems: 'Consignment Items',
+    totalEquiv: 'Total Equiv. Weight',
+    verified: 'Verified',
+    match: 'Match',
+    totalItems: 'Total Items',
+    netWeight: 'Net Weight',
+    quantity: 'Quantity',
+    condition: 'Condition',
+    collectionHub: 'Collection Hub',
+    addAnotherItem: '➕ Add Another Item to Lot',
+    envImpact: 'Environmental Impact',
+    esgVerified: 'CPCB ESG Verified',
+    co2Saved: 'CO₂ Emissions Saved',
+    toxicsDiverted: 'Toxics Kept from Soil',
+    form6Assurance: 'CPCB Form-6 Pre-Validated: Guaranteed statutory e-waste transfer manifest generated upon weighbridge scale settlement.',
+    estimatedMandiVal: 'Estimated Mandi Value',
+    liveMandiIndex: 'Live Mandi Index',
+    calculatedAt: 'Calculated at',
+    forVerifiedScrap: 'for verified scrap',
+    recyclersReady: '14 authorized recyclers ready to bid within 10 km',
+    pickupReadiness: 'Pickup Readiness',
+    highDemand: 'High Demand',
+    fastestBuyer: 'Fastest Nearby Buyer:',
+    averageHandover: 'Average Scale Handover:',
+    settlementGuarantee: 'Settlement Guarantee:',
+    guaranteeDetail: '100% Cash / UPI on scale',
+    findOffers: 'Find Recycler Offers (14 Nearby)',
+    saveDraftOffline: 'Save Draft to Phone (Offline Queue)',
+    savedToOffline: 'Saved to Offline Queue',
+    navScan: 'Scan',
+    navMyLots: 'My Lots',
+    navEarnings: 'Earnings',
+    navSupport: 'Safety'
+  }
+};
+
 export default function Screen03bDigitalSummary({
   lotDraft,
   onNavigate,
   onSaveOffline,
-  syncStatus = { isOnline: true }
+  syncStatus = { isOnline: true },
+  currentLang: propLang,
+  onLanguageChange
 }) {
   const { i18n } = useTranslation();
-  const currentLang = i18n.language || 'hi';
+  const normalize = (lng) => {
+    if (!lng) return 'hi';
+    const s = String(lng).toLowerCase();
+    if (s.startsWith('mr')) return 'mr';
+    if (s.startsWith('en')) return 'en';
+    return 'hi';
+  };
+
+  const safeLang = normalize(propLang || i18n.language || localStorage.getItem('relink_lang'));
+  const t = SUMMARY_TRANSLATIONS[safeLang] || SUMMARY_TRANSLATIONS.hi;
   const [saveMessage, setSaveMessage] = useState(null);
 
   const unit = lotDraft.unit || 'kg';
@@ -90,14 +227,16 @@ export default function Screen03bDigitalSummary({
               <span>{syncStatus.isOnline ? 'Live' : 'Offline'}</span>
             </div>
             <button
-              onClick={() => {
-                const nextLang = currentLang === 'en' ? 'hi' : (currentLang === 'hi' ? 'mr' : 'en');
+              onClick={onLanguageChange ? onLanguageChange : () => {
+                const nextLang = safeLang === 'hi' ? 'mr' : (safeLang === 'mr' ? 'en' : 'hi');
                 i18n.changeLanguage(nextLang);
+                localStorage.setItem('relink_lang', nextLang);
               }}
-              className="h-8 px-2.5 bg-surface-container rounded-full text-on-surface text-xs font-semibold hover:bg-surface-container-high transition-colors cursor-pointer border border-outline-variant/30"
+              className="flex items-center gap-1 h-8 px-2.5 bg-surface-container rounded-full text-on-surface text-xs font-bold hover:bg-surface-container-high transition-colors cursor-pointer border border-outline-variant/30"
               type="button"
             >
-              {currentLang.toUpperCase()}
+              <span className="material-symbols-outlined text-sm text-primary">language</span>
+              <span>{safeLang === 'hi' ? 'हिन्दी' : (safeLang === 'mr' ? 'मराठी' : 'EN')}</span>
             </button>
           </div>
         </div>
@@ -117,10 +256,10 @@ export default function Screen03bDigitalSummary({
           </button>
           <div className="flex flex-col items-center text-center">
             <span className="font-label-md text-[10px] text-on-surface-variant uppercase tracking-wider font-semibold">
-              Digital Scrap Lot
+              {t.digitalScrapLot}
             </span>
             <h1 className="font-headline-md text-lg sm:text-xl font-bold text-on-surface leading-tight">
-              {currentLang === 'mr' ? 'लॉट तपशील व तात्काळ मूल्यांकन' : (currentLang === 'hi' ? 'लॉट सारांश एवं तात्कालिक भाव' : 'Lot Summary & Instant Valuation')}
+              {t.pageTitle}
             </h1>
           </div>
           <div className="w-10 h-10"></div>
@@ -133,7 +272,7 @@ export default function Screen03bDigitalSummary({
               <span className="material-symbols-outlined text-[18px]">check_circle</span>
               {saveMessage}
             </span>
-            <span className="text-[10px] bg-white/20 px-2 py-0.5 rounded">IndexedDB Offline Synced</span>
+            <span className="text-[10px] bg-white/20 px-2 py-0.5 rounded">{t.savedToOffline}</span>
           </div>
         )}
 
@@ -145,7 +284,7 @@ export default function Screen03bDigitalSummary({
             <div className="bg-surface-container-lowest rounded-2xl p-4 sm:p-5 shadow-sm flex items-center justify-between border border-surface-container-high">
               <div className="flex flex-col">
                 <span className="font-label-md text-[10px] uppercase tracking-wider text-on-surface-variant font-semibold">
-                  Verifiable Lot Reference
+                  {t.verifiableRef}
                 </span>
                 <span className="font-headline-md text-base sm:text-lg text-on-surface font-bold tracking-tight mt-0.5 font-mono text-primary">
                   #{handoverRef}
@@ -153,7 +292,7 @@ export default function Screen03bDigitalSummary({
               </div>
               <span className="bg-primary-fixed text-on-primary-fixed-variant px-3 py-1 rounded-full font-label-md text-xs font-bold flex items-center gap-1">
                 <span className="material-symbols-outlined text-[15px]">verified</span>
-                Ready for Bids ({items.length} {items.length > 1 ? 'Items' : 'Item'})
+                {t.readyForBids} ({items.length} {items.length > 1 ? t.items : t.item})
               </span>
             </div>
 
@@ -163,10 +302,10 @@ export default function Screen03bDigitalSummary({
                 <div className="flex items-center justify-between border-b border-outline-variant/30 pb-2">
                   <span className="text-xs font-bold uppercase tracking-wider text-on-surface flex items-center gap-1.5">
                     <span className="material-symbols-outlined text-primary text-[18px]">inventory_2</span>
-                    Consignment Items ({items.length})
+                    {t.consignmentItems} ({items.length})
                   </span>
                   <span className="text-xs font-semibold text-primary">
-                    Total: {totalWeightKg.toFixed(1)} kg equiv.
+                    {t.totalEquiv}: {totalWeightKg.toFixed(1)} kg
                   </span>
                 </div>
                 <div className="space-y-2">
@@ -175,12 +314,12 @@ export default function Screen03bDigitalSummary({
                       <div>
                         <p className="font-bold text-on-surface">{it.materialTitle}</p>
                         <p className="text-[11px] text-on-surface-variant">
-                          {it.weight} {it.unit === 'piece' ? 'pcs (नग)' : 'kg'} • {it.condition}
+                          {it.weight} {it.unit === 'piece' ? (safeLang === 'en' ? 'pcs' : 'नग') : (safeLang === 'hi' ? 'किग्रा' : (safeLang === 'mr' ? 'किलो' : 'kg'))} • {it.condition}
                         </p>
                       </div>
                       <div className="text-right">
                         <p className="font-bold text-primary font-mono">₹{it.lowEst?.toLocaleString('en-IN')} - ₹{it.highEst?.toLocaleString('en-IN')}</p>
-                        <span className="text-[10px] text-emerald-700 bg-emerald-100 px-1.5 py-0.5 rounded font-bold">Verified</span>
+                        <span className="text-[10px] text-emerald-700 bg-emerald-100 px-1.5 py-0.5 rounded font-bold">{t.verified}</span>
                       </div>
                     </div>
                   ))}
@@ -198,7 +337,7 @@ export default function Screen03bDigitalSummary({
                 />
                 <div className="absolute top-3 right-3 bg-surface-container-lowest/90 backdrop-blur-md px-3 py-1 rounded-full text-on-surface text-xs font-bold flex items-center gap-1.5 shadow-sm border border-outline-variant/30">
                   <span className="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
-                  {confidence}% Match
+                  {confidence}% {t.match}
                 </div>
               </div>
               <div className="p-4 flex items-center justify-between">
@@ -216,22 +355,22 @@ export default function Screen03bDigitalSummary({
             <div className="grid grid-cols-3 gap-3">
               <div className="bg-surface-container-lowest p-3.5 rounded-xl text-center border border-surface-container-high">
                 <span className="font-label-md text-[10px] uppercase text-on-surface-variant font-bold block mb-0.5">
-                  {items.length > 1 ? 'Total Items' : (unit === 'piece' ? 'Quantity' : 'Net Weight')}
+                  {items.length > 1 ? t.totalItems : (unit === 'piece' ? t.quantity : t.netWeight)}
                 </span>
                 <span className="font-headline-md text-xl text-on-surface font-extrabold block">
-                  {items.length > 1 ? `${items.length} items` : weight}
+                  {items.length > 1 ? `${items.length} ${t.items}` : weight}
                 </span>
                 <span className="font-body-md text-[11px] text-on-surface-variant">
-                  {items.length > 1 ? `~${totalWeightKg.toFixed(1)} kg total` : (unit === 'piece' ? 'pcs (नग)' : 'kg (est.)')}
+                  {items.length > 1 ? `~${totalWeightKg.toFixed(1)} kg` : (unit === 'piece' ? (safeLang === 'en' ? 'pcs' : 'नग') : (safeLang === 'hi' ? 'किग्रा' : (safeLang === 'mr' ? 'किलो' : 'kg')))}
                 </span>
               </div>
               <div className="bg-surface-container-lowest p-3.5 rounded-xl text-center border border-surface-container-high">
-                <span className="font-label-md text-[10px] uppercase text-on-surface-variant font-bold block mb-0.5">Condition</span>
+                <span className="font-label-md text-[10px] uppercase text-on-surface-variant font-bold block mb-0.5">{t.condition}</span>
                 <span className="font-headline-md text-sm text-primary font-bold block truncate mt-1">{condition}</span>
-                <span className="font-body-md text-[11px] text-on-surface-variant">Verified</span>
+                <span className="font-body-md text-[11px] text-on-surface-variant">{t.verified}</span>
               </div>
               <div className="bg-surface-container-lowest p-3.5 rounded-xl text-center border border-surface-container-high">
-                <span className="font-label-md text-[10px] uppercase text-on-surface-variant font-bold block mb-0.5">Collection Hub</span>
+                <span className="font-label-md text-[10px] uppercase text-on-surface-variant font-bold block mb-0.5">{t.collectionHub}</span>
                 <span className="font-label-lg text-sm text-on-surface font-bold block truncate mt-1">Dharavi</span>
                 <span className="font-body-md text-[11px] text-on-surface-variant truncate block">Mumbai MMR</span>
               </div>
@@ -244,7 +383,7 @@ export default function Screen03bDigitalSummary({
               className="w-full py-2.5 px-4 bg-surface hover:bg-surface-container text-primary font-bold text-xs sm:text-sm rounded-xl border border-primary/30 flex items-center justify-center gap-2 transition-all cursor-pointer shadow-xs"
             >
               <span className="material-symbols-outlined text-[18px]">add_photo_alternate</span>
-              <span>{currentLang === 'mr' ? '➕ आणि कबाड सामान जोडा • Add Another Item' : (currentLang === 'hi' ? '➕ और कबाड़ सामान जोड़ें • Add Another Item' : '➕ Add Another Item to Lot')}</span>
+              <span>{t.addAnotherItem}</span>
             </button>
 
             {/* Circular Economy & Environmental Impact Card */}
@@ -252,21 +391,21 @@ export default function Screen03bDigitalSummary({
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2 text-emerald-800 dark:text-emerald-300 font-bold text-xs uppercase tracking-wider">
                   <span className="material-symbols-outlined text-[20px] text-emerald-600">eco</span>
-                  <span>{currentLang === 'mr' ? 'पर्यावरणीय प्रभाव • Environmental Impact' : 'पर्यावरणीय प्रभाव • Environmental Impact'}</span>
+                  <span>{t.envImpact}</span>
                 </div>
                 <span className="text-[10px] bg-emerald-600 text-white font-bold px-2 py-0.5 rounded-full">
-                  CPCB ESG Verified
+                  {t.esgVerified}
                 </span>
               </div>
               <div className="grid grid-cols-2 gap-2 pt-1 text-xs">
                 <div className="bg-white/80 dark:bg-zinc-900/60 p-2.5 rounded-xl border border-emerald-500/20">
-                  <span className="text-secondary text-[11px] block">CO₂ Emissions Saved</span>
+                  <span className="text-secondary text-[11px] block">{t.co2Saved}</span>
                   <span className="font-extrabold text-emerald-700 dark:text-emerald-400 text-base font-mono">
                     ~{co2AvoidedKg} kg CO₂e
                   </span>
                 </div>
                 <div className="bg-white/80 dark:bg-zinc-900/60 p-2.5 rounded-xl border border-emerald-500/20">
-                  <span className="text-secondary text-[11px] block">Toxics Kept from Soil</span>
+                  <span className="text-secondary text-[11px] block">{t.toxicsDiverted}</span>
                   <span className="font-extrabold text-emerald-700 dark:text-emerald-400 text-base font-mono">
                     ~{toxicDivertedKg} kg Metals
                   </span>
@@ -280,7 +419,7 @@ export default function Screen03bDigitalSummary({
             {/* CPCB Form-6 Assurance Card */}
             <div className="bg-surface-container-low border border-outline-variant/50 rounded-xl p-3 flex items-center gap-2.5 text-xs text-on-surface-variant">
               <span className="material-symbols-outlined text-primary text-[20px]">policy</span>
-              <span><strong>CPCB Form-6 Pre-Validated:</strong> Guaranteed statutory e-waste transfer manifest generated upon weighbridge scale settlement.</span>
+              <span><strong>CPCB Form-6:</strong> {t.form6Assurance}</span>
             </div>
           </div>
 
@@ -290,42 +429,42 @@ export default function Screen03bDigitalSummary({
             <div className="bg-primary text-on-primary rounded-2xl p-5 sm:p-6 shadow-md space-y-2">
               <div className="flex items-center justify-between">
                 <span className="font-label-md text-xs text-on-primary/80 uppercase tracking-wider font-semibold">
-                  Estimated Mandi Value
+                  {t.estimatedMandiVal}
                 </span>
                 <span className="bg-white/20 text-on-primary text-[10px] px-2.5 py-0.5 rounded-full font-bold">
-                  Live Mandi Index
+                  {t.liveMandiIndex}
                 </span>
               </div>
               <div className="font-headline-lg text-3xl sm:text-4xl font-extrabold tracking-tight font-mono">
                 ₹{totalLowEst.toLocaleString('en-IN')} – ₹{totalHighEst.toLocaleString('en-IN')}
               </div>
               <p className="text-xs text-on-primary/80">
-                Calculated at {unit === 'piece' ? `~₹${baseRate}/piece` : `₹${Math.round(baseRate * 0.95)} – ₹${Math.round(baseRate * 1.05)}/kg`} for {items.length > 1 ? `${items.length} items (~${totalWeightKg.toFixed(1)}kg)` : `${weight} ${unit === 'piece' ? 'pieces (नग)' : 'kg'}`} verified scrap.
+                {t.calculatedAt} {unit === 'piece' ? `~₹${baseRate}/${safeLang === 'en' ? 'pc' : 'नग'}` : `₹${Math.round(baseRate * 0.95)} – ₹${Math.round(baseRate * 1.05)}/${safeLang === 'en' ? 'kg' : (safeLang === 'mr' ? 'किलो' : 'किग्रा')}`} {items.length > 1 ? `(${items.length} ${t.items}, ~${totalWeightKg.toFixed(1)}kg)` : `(${weight} ${unit === 'piece' ? (safeLang === 'en' ? 'pieces' : 'नग') : (safeLang === 'hi' ? 'किग्रा' : (safeLang === 'mr' ? 'किलो' : 'kg'))})`} {t.forVerifiedScrap}.
               </p>
               <div className="flex items-center gap-1.5 pt-2 text-on-primary text-xs font-semibold border-t border-white/20">
                 <span className="material-symbols-outlined text-[18px]">hub</span>
-                <span>14 authorized recyclers ready to bid within 10 km</span>
+                <span>{t.recyclersReady}</span>
               </div>
             </div>
 
             {/* Recycler Field Readiness Notice */}
             <div className="bg-surface-container-lowest rounded-2xl p-4 border border-surface-container-high space-y-2 text-xs">
               <div className="flex items-center justify-between font-bold text-on-surface">
-                <span>Pickup Readiness</span>
-                <span className="text-emerald-700">High Demand</span>
+                <span>{t.pickupReadiness}</span>
+                <span className="text-emerald-700">{t.highDemand}</span>
               </div>
               <div className="space-y-1 text-on-surface-variant">
                 <div className="flex justify-between">
-                  <span>Fastest Nearby Buyer:</span>
+                  <span>{t.fastestBuyer}</span>
                   <strong className="text-on-surface">EcoRecycle MMR (3.2 km)</strong>
                 </div>
                 <div className="flex justify-between">
-                  <span>Average Scale Handover:</span>
+                  <span>{t.averageHandover}</span>
                   <strong className="text-on-surface">&lt; 45 minutes</strong>
                 </div>
                 <div className="flex justify-between">
-                  <span>Settlement Guarantee:</span>
-                  <strong className="text-emerald-700">100% Cash / UPI on scale</strong>
+                  <span>{t.settlementGuarantee}</span>
+                  <strong className="text-emerald-700">{t.guaranteeDetail}</strong>
                 </div>
               </div>
             </div>
@@ -337,7 +476,7 @@ export default function Screen03bDigitalSummary({
                 className="w-full h-13 py-3.5 bg-primary-container hover:bg-primary text-on-primary rounded-xl font-action-xl text-sm sm:text-base font-bold flex items-center justify-center gap-2 shadow-md transition-all active:scale-[0.99] cursor-pointer"
                 type="button"
               >
-                <span>{currentLang === 'mr' ? 'अधिकृत रीसायकलर्सचे भाव पहा (14 जवळपास)' : (currentLang === 'hi' ? 'अधिकृत रीसाइक्लर चुनें (14 नज़दीक)' : 'Find Recycler Offers (14 Nearby)')}</span>
+                <span>{t.findOffers}</span>
                 <span className="material-symbols-outlined text-[20px]">arrow_forward</span>
               </button>
               <button
@@ -346,7 +485,7 @@ export default function Screen03bDigitalSummary({
                 type="button"
               >
                 <span className="material-symbols-outlined text-secondary text-[18px]">cloud_download</span>
-                <span>{currentLang === 'mr' ? 'फोनमध्ये मसुदा सेव्ह करा (ऑफलाइन)' : (currentLang === 'hi' ? 'फ़ोन में ड्राफ्ट सहेजें (ऑफलाइन)' : 'Save Draft to Phone (Offline Queue)')}</span>
+                <span>{t.saveDraftOffline}</span>
               </button>
             </div>
           </div>
@@ -359,28 +498,28 @@ export default function Screen03bDigitalSummary({
             className="flex flex-col items-center gap-0.5 py-1 px-3 rounded-lg text-primary font-bold cursor-pointer"
           >
             <span className="material-symbols-outlined text-[20px]">photo_camera</span>
-            <span className="font-label-md text-[10px]">Scan</span>
+            <span className="font-label-md text-[10px]">{t.navScan}</span>
           </button>
           <button
             onClick={() => onNavigate('my_lots')}
             className="flex flex-col items-center gap-0.5 py-1 px-3 rounded-lg text-on-surface-variant hover:text-on-surface cursor-pointer"
           >
             <span className="material-symbols-outlined text-[20px]">format_list_bulleted</span>
-            <span className="font-label-md text-[10px]">My Lots</span>
+            <span className="font-label-md text-[10px]">{t.navMyLots}</span>
           </button>
           <button
             onClick={() => onNavigate('earnings')}
             className="flex flex-col items-center gap-0.5 py-1 px-3 rounded-lg text-on-surface-variant hover:text-on-surface cursor-pointer"
           >
             <span className="material-symbols-outlined text-[20px]">account_balance_wallet</span>
-            <span className="font-label-md text-[10px]">Earnings</span>
+            <span className="font-label-md text-[10px]">{t.navEarnings}</span>
           </button>
           <button
             onClick={() => onNavigate('safety')}
             className="flex flex-col items-center gap-0.5 py-1 px-3 rounded-lg text-on-surface-variant hover:text-on-surface cursor-pointer"
           >
             <span className="material-symbols-outlined text-[20px]">support_agent</span>
-            <span className="font-label-md text-[10px]">Support</span>
+            <span className="font-label-md text-[10px]">{t.navSupport}</span>
           </button>
         </nav>
       </main>

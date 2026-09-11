@@ -51,7 +51,14 @@ export const REGIONAL_MANDI_DATA = {
 
 export default function PriceBoardModal({ isOpen, onClose }) {
   const { i18n } = useTranslation();
-  const currentLang = i18n.language || 'hi';
+  const normalize = (lng) => {
+    if (!lng) return 'hi';
+    const s = String(lng).toLowerCase();
+    if (s.startsWith('mr')) return 'mr';
+    if (s.startsWith('en')) return 'en';
+    return 'hi';
+  };
+  const currentLang = normalize(i18n.language || localStorage.getItem('relink_lang'));
   const [selectedLoc, setSelectedLoc] = useState('IN-MH-MUM');
 
   if (!isOpen) return null;
@@ -71,7 +78,9 @@ export default function PriceBoardModal({ isOpen, onClose }) {
   const handleBroadcastAll = () => {
     const summary = currentLang === 'mr'
       ? `${locData.name} आजचे दर: सर्किट बोर्ड ${locData.categories[0].rate} रुपये, तांब्याची केबल ${locData.categories[1].rate} रुपये, बॅटरी ${locData.categories[2].rate} रुपये, मोटर ${locData.categories[7].rate} रुपये प्रति किलो.`
-      : `${locData.name} आज के भाव: सर्किट बोर्ड ${locData.categories[0].rate} रुपये, तांबे के तार ${locData.categories[1].rate} रुपये, बैटरी ${locData.categories[2].rate} रुपये, मोटर ${locData.categories[7].rate} रुपये प्रति किलो।`;
+      : (currentLang === 'en'
+        ? `${locData.name} market rates today: Circuit Boards ₹${locData.categories[0].rate}, Copper Cables ₹${locData.categories[1].rate}, Batteries ₹${locData.categories[2].rate}, Motors ₹${locData.categories[7].rate} per kilogram.`
+        : `${locData.name} आज के भाव: सर्किट बोर्ड ${locData.categories[0].rate} रुपये, तांबे के तार ${locData.categories[1].rate} रुपये, बैटरी ${locData.categories[2].rate} रुपये, मोटर ${locData.categories[7].rate} रुपये प्रति किलो।`);
     speakText(summary);
   };
 
@@ -94,7 +103,7 @@ export default function PriceBoardModal({ isOpen, onClose }) {
                 </span>
               </div>
               <p className="text-xs text-on-surface-variant mt-0.5">
-                {currentLang === 'mr' ? 'अधिकृत पुनर्वापर दर आणि कल' : 'पारदर्शी बाजार दर एवं मूल्य रुझान'}
+                {currentLang === 'mr' ? 'अधिकृत पुनर्वापर दर आणि कल' : (currentLang === 'en' ? 'Authorized Recycling Rates & Trends' : 'पारदर्शी बाजार दर एवं मूल्य रुझान')}
               </p>
             </div>
           </div>
@@ -134,7 +143,7 @@ export default function PriceBoardModal({ isOpen, onClose }) {
             className="px-3 py-1.5 bg-tertiary-fixed hover:bg-tertiary-container text-tertiary font-bold rounded-xl flex items-center gap-1.5 shadow-sm border border-outline-variant cursor-pointer transition-colors"
           >
             <span className="material-symbols-outlined text-[18px] filled">volume_up</span>
-            <span>{currentLang === 'mr' ? 'सर्व दर ऐका' : 'पूरा भाव सुनें (Audio)'}</span>
+            <span>{currentLang === 'mr' ? 'सर्व दर ऐका' : (currentLang === 'en' ? 'Hear All Rates (Audio)' : 'पूरा भाव सुनें (Audio)')}</span>
           </button>
         </div>
 
