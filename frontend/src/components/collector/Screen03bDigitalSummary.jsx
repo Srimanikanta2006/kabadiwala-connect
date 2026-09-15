@@ -20,22 +20,22 @@ const SUMMARY_TRANSLATIONS = {
     collectionHub: 'संग्रह केंद्र',
     addAnotherItem: '➕ और कबाड़ सामान जोड़ें • Add Another Item',
     envImpact: 'पर्यावरणीय प्रभाव',
-    esgVerified: 'सीपीसीबी ईएसजी सत्यापित',
+    esgVerified: '100% पर्यावरण सुरक्षा',
     co2Saved: 'CO₂ उत्सर्जन की बचत',
     toxicsDiverted: 'जमीन से बचाए गए जहरीले पदार्थ',
-    form6Assurance: 'सीपीसीबी फॉर्म-6 पूर्व-मान्य: तौल कांटा सत्यापन पर आधिकारिक ई-कचरा हस्तांतरण प्रपत्र स्वतः जारी।',
+    form6Assurance: 'सुरक्षित एवं वैध हस्तांतरण: पंजीकृत डीलर को प्रत्यक्ष बिक्री, तुरंत कांटा तौल व पूरी सुरक्षा।',
     estimatedMandiVal: 'अनुमानित मंडी मूल्य',
     liveMandiIndex: 'लाइव मंडी सूचकांक',
     calculatedAt: 'के भाव पर परिकलित',
     forVerifiedScrap: 'सत्यापित कबाड़ हेतु',
-    recyclersReady: '14 अधिकृत रीसाइक्लर 10 किमी में बोली के लिए तैयार',
+    recyclersReady: '14 अधिकृत स्क्रैप डीलर एवं यार्ड 10 किमी के भीतर',
     pickupReadiness: 'पिकअप तत्परता',
     highDemand: 'उच्च मांग',
-    fastestBuyer: 'निकटतम अधिकृत खरीदार:',
+    fastestBuyer: 'निकटतम अधिकृत डीलर:',
     averageHandover: 'औसत कांटा हस्तांतरण:',
     settlementGuarantee: 'भुगतान गारंटी:',
     guaranteeDetail: '100% नकद / UPI तुरंत कांटे पर',
-    findOffers: 'अधिकृत रीसाइक्लर चुनें (14 नज़दीक)',
+    findOffers: 'पास के अधिकृत डीलर देखें (14 उपलब्ध)',
     saveDraftOffline: 'फ़ोन में ड्राफ्ट सहेजें (ऑफलाइन)',
     savedToOffline: 'ऑफ़लाइन कतार में सहेजा गया',
     navScan: 'स्कैन',
@@ -61,22 +61,22 @@ const SUMMARY_TRANSLATIONS = {
     collectionHub: 'संकलन केंद्र',
     addAnotherItem: '➕ आणि कबाड सामान जोडा • Add Another Item',
     envImpact: 'पर्यावरणीय प्रभाव',
-    esgVerified: 'सीपीसीबी ईएसजी प्रमाणित',
+    esgVerified: '100% पर्यावरणपूरक पुनर्वापर',
     co2Saved: 'CO₂ उत्सर्जनात बचत',
     toxicsDiverted: 'मातीचे प्रदूषण टाळलेले धातू',
-    form6Assurance: 'सीपीसीबी फॉर्म-6 पूर्व-मान्य: वजनकाटा पडताळणीनंतर अधिकृत ई-कचरा हस्तांतरण पावती जारी.',
+    form6Assurance: 'सुरक्षित आणि कायदेशीर विक्री: नोंदणीकृत डीलरकडे कायदेशीर हस्तांतरण, थेट वजनकाटा व पूर्ण देयक.',
     estimatedMandiVal: 'अंदाजे बाजार हमीभाव',
     liveMandiIndex: 'थेट बाजार निर्देशांक',
     calculatedAt: 'या दराने अंदाजित',
     forVerifiedScrap: 'सत्यापित भंगारासाठी',
-    recyclersReady: '14 अधिकृत केंद्र 10 किमी परिसरात तयार',
+    recyclersReady: '14 अधिकृत स्क्रॅप डीलर्स व यार्ड 10 किमी परिसरात',
     pickupReadiness: 'पिकअप तत्परता',
     highDemand: 'मोठी मागणी',
-    fastestBuyer: 'जवळचे अधिकृत खरेदीदार:',
+    fastestBuyer: 'जवळचे अधिकृत डीलर:',
     averageHandover: 'काटा तपासणी वेळ:',
     settlementGuarantee: 'देयक हमी:',
     guaranteeDetail: '100% रोख / UPI तत्काळ वजनकाट्यावर',
-    findOffers: 'अधिकृत रीसायकलर्सचे भाव पहा (14 जवळपास)',
+    findOffers: 'जवळचे अधिकृत डीलर्स शोधा (14 उपलब्ध)',
     saveDraftOffline: 'फोनमध्ये मसुदा सेव्ह करा (ऑफलाइन)',
     savedToOffline: 'ऑफलाइन रांगेत जतन केले',
     navScan: 'स्कॅन',
@@ -102,22 +102,22 @@ const SUMMARY_TRANSLATIONS = {
     collectionHub: 'Collection Hub',
     addAnotherItem: '➕ Add Another Item to Lot',
     envImpact: 'Environmental Impact',
-    esgVerified: 'CPCB ESG Verified',
+    esgVerified: 'Eco-Friendly Verified',
     co2Saved: 'CO₂ Emissions Saved',
     toxicsDiverted: 'Toxics Kept from Soil',
-    form6Assurance: 'CPCB Form-6 Pre-Validated: Guaranteed statutory e-waste transfer manifest generated upon weighbridge scale settlement.',
+    form6Assurance: 'Safe & Legal Handover: Sold directly to verified licensed dealers. 100% legal, zero dispute or fraud.',
     estimatedMandiVal: 'Estimated Mandi Value',
     liveMandiIndex: 'Live Mandi Index',
     calculatedAt: 'Calculated at',
     forVerifiedScrap: 'for verified scrap',
-    recyclersReady: '14 authorized recyclers ready to bid within 10 km',
+    recyclersReady: '14 verified scrap dealers & yards nearby (< 10 km)',
     pickupReadiness: 'Pickup Readiness',
     highDemand: 'High Demand',
-    fastestBuyer: 'Fastest Nearby Buyer:',
+    fastestBuyer: 'Fastest Nearby Dealer:',
     averageHandover: 'Average Scale Handover:',
     settlementGuarantee: 'Settlement Guarantee:',
     guaranteeDetail: '100% Cash / UPI on scale',
-    findOffers: 'Find Recycler Offers (14 Nearby)',
+    findOffers: 'Find Nearby Dealers (14 Available)',
     saveDraftOffline: 'Save Draft to Phone (Offline Queue)',
     savedToOffline: 'Saved to Offline Queue',
     navScan: 'Scan',
@@ -222,10 +222,6 @@ export default function Screen03bDigitalSummary({
           </div>
 
           <div className="flex items-center gap-2">
-            <div className="flex items-center gap-1.5 px-2.5 py-1 bg-surface-container rounded-full text-xs font-medium text-on-surface-variant border border-outline-variant/30">
-              <span className={`w-2 h-2 rounded-full ${syncStatus.isOnline ? 'bg-primary animate-pulse' : 'bg-amber-500'}`}></span>
-              <span>{syncStatus.isOnline ? 'Live' : 'Offline'}</span>
-            </div>
             <button
               onClick={onLanguageChange ? onLanguageChange : () => {
                 const nextLang = safeLang === 'hi' ? 'mr' : (safeLang === 'mr' ? 'en' : 'hi');
@@ -412,18 +408,22 @@ export default function Screen03bDigitalSummary({
                 </div>
               </div>
               <p className="text-[11px] text-on-surface-variant pt-1">
-                Zero open burning. Every kilo collected is routed directly to formal CPCB recyclers under Form-6 transfer manifests.
+                {safeLang === 'mr'
+                  ? 'स्वच्छ व्यवस्था: तुमचा स्थानिक स्क्रॅप डीलर हे सर्व भंगार गोळा करून प्रमाणित रिसायकलिंग प्रकल्पांकडे सुरक्षितपणे पाठवतो.'
+                  : (safeLang === 'hi'
+                      ? 'पारदर्शी व्यवस्था: आपका स्थानीय डीलर आपके कबाड़ को एकत्र कर सुरक्षित रूप से अधिकृत रीसाइक्लिंग संयंत्रों तक पहुंचाता है।'
+                      : 'Clean & Fair Ecosystem: Your verified local dealer aggregates your scrap lots and safely transports them to certified recycling plants.')}
               </p>
             </div>
 
-            {/* CPCB Form-6 Assurance Card */}
+            {/* Safe Handover Guarantee Card */}
             <div className="bg-surface-container-low border border-outline-variant/50 rounded-xl p-3 flex items-center gap-2.5 text-xs text-on-surface-variant">
-              <span className="material-symbols-outlined text-primary text-[20px]">policy</span>
-              <span><strong>CPCB Form-6:</strong> {t.form6Assurance}</span>
+              <span className="material-symbols-outlined text-primary text-[20px]">verified_user</span>
+              <span><strong>{safeLang === 'mr' ? 'कायदेशीर पावती:' : (safeLang === 'hi' ? 'वैध रसीद व सुरक्षा:' : 'Safe Handover:')}</strong> {t.form6Assurance}</span>
             </div>
           </div>
 
-          {/* Right Column: High-Impact Valuation & Recycler Actions (md:col-span-5) */}
+          {/* Right Column: High-Impact Valuation & Dealer Actions (md:col-span-5) */}
           <div className="md:col-span-5 space-y-4">
             {/* Clean High-Impact Value Card */}
             <div className="bg-primary text-on-primary rounded-2xl p-5 sm:p-6 shadow-md space-y-2">
@@ -442,12 +442,12 @@ export default function Screen03bDigitalSummary({
                 {t.calculatedAt} {unit === 'piece' ? `~₹${baseRate}/${safeLang === 'en' ? 'pc' : 'नग'}` : `₹${Math.round(baseRate * 0.95)} – ₹${Math.round(baseRate * 1.05)}/${safeLang === 'en' ? 'kg' : (safeLang === 'mr' ? 'किलो' : 'किग्रा')}`} {items.length > 1 ? `(${items.length} ${t.items}, ~${totalWeightKg.toFixed(1)}kg)` : `(${weight} ${unit === 'piece' ? (safeLang === 'en' ? 'pieces' : 'नग') : (safeLang === 'hi' ? 'किग्रा' : (safeLang === 'mr' ? 'किलो' : 'kg'))})`} {t.forVerifiedScrap}.
               </p>
               <div className="flex items-center gap-1.5 pt-2 text-on-primary text-xs font-semibold border-t border-white/20">
-                <span className="material-symbols-outlined text-[18px]">hub</span>
+                <span className="material-symbols-outlined text-[18px]">storefront</span>
                 <span>{t.recyclersReady}</span>
               </div>
             </div>
 
-            {/* Recycler Field Readiness Notice */}
+            {/* Dealer Field Readiness Notice */}
             <div className="bg-surface-container-lowest rounded-2xl p-4 border border-surface-container-high space-y-2 text-xs">
               <div className="flex items-center justify-between font-bold text-on-surface">
                 <span>{t.pickupReadiness}</span>
@@ -456,11 +456,11 @@ export default function Screen03bDigitalSummary({
               <div className="space-y-1 text-on-surface-variant">
                 <div className="flex justify-between">
                   <span>{t.fastestBuyer}</span>
-                  <strong className="text-on-surface">EcoRecycle MMR (3.2 km)</strong>
+                  <strong className="text-on-surface">Peenya Scrap Yard #04 - Dilip Bhai (1.2 km)</strong>
                 </div>
                 <div className="flex justify-between">
                   <span>{t.averageHandover}</span>
-                  <strong className="text-on-surface">&lt; 45 minutes</strong>
+                  <strong className="text-on-surface">{safeLang === 'mr' ? '< ४५ मिनिटे' : (safeLang === 'hi' ? '< 45 मिनट' : '< 45 minutes')}</strong>
                 </div>
                 <div className="flex justify-between">
                   <span>{t.settlementGuarantee}</span>

@@ -3,8 +3,8 @@ import { useTranslation } from 'react-i18next';
 
 const EARNINGS_TRANSLATIONS = {
   hi: {
-    ledgerTitle: 'कमाई का बहीखाता (Earnings Ledger)',
-    settledBadge: 'शारीरिक नकद प्राप्त (Physical Cash Settled)',
+    ledgerTitle: 'कमाई का बहीखाता',
+    settledBadge: 'नकद भुगतान प्राप्त',
     totalCompletedEarnings: 'कुल प्राप्त कमाई',
     pendingDuesLabel: 'कांटा तौल सत्यापन के लिए लंबित बकाया:',
     cashGuaranteeBadge: '✓ तराजू पर 100% नकद भुगतान',
@@ -19,15 +19,15 @@ const EARNINGS_TRANSLATIONS = {
     navEarnings: 'कमाई',
     navSafety: 'सुरक्षा',
     categories: {
-      PCB: 'पीसीबी (PCB)',
+      PCB: 'पीसीबी',
       Cables: 'केबल एवं तार',
       Batteries: 'बैटरी',
       Mixed: 'मिश्रित ई-कबाड़'
     }
   },
   mr: {
-    ledgerTitle: 'कमाई खतावणी (Earnings Ledger)',
-    settledBadge: 'प्रत्यक्ष रोख रक्कम जमा (Cash Settled)',
+    ledgerTitle: 'कमाई खतावणी',
+    settledBadge: 'रोख रक्कम जमा',
     totalCompletedEarnings: 'एकूण झालेली कमाई',
     pendingDuesLabel: 'काटा पडताळणीसाठी बाकी थकीत रक्कम:',
     cashGuaranteeBadge: '✓ वजनकाट्यावर 100% रोख देयक',
@@ -42,7 +42,7 @@ const EARNINGS_TRANSLATIONS = {
     navEarnings: 'कमाई',
     navSafety: 'सुरक्षा',
     categories: {
-      PCB: 'पीसीबी (PCB)',
+      PCB: 'पीसीबी',
       Cables: 'केबल आणि वायर',
       Batteries: 'बॅटरी',
       Mixed: 'मिश्र ई-कचरा'
@@ -96,10 +96,10 @@ export default function Screen06EarningsHistory({
     pendingDues: 5250,
     monthName: 'September 2026',
     transactions: [
-      { id: 'tx_1', desc: '10kg PCB', amount: 7800, recycler: 'EcoRecycle India • Aug 29', status: 'Paid', icon: 'memory', isPaid: true },
-      { id: 'tx_2', desc: '25kg Cables', amount: 5250, recycler: 'GreenCircle • Aug 26', status: 'Pending', icon: 'cable', isPaid: false },
-      { id: 'tx_3', desc: '5kg Mixed E-Waste', amount: 1200, recycler: 'City Depot • Aug 15', status: 'Paid', icon: 'devices', isPaid: true },
-      { id: 'tx_4', desc: '18kg Batteries', amount: 4200, recycler: 'EcoRecycle India • Aug 08', status: 'Paid', icon: 'battery_charging_full', isPaid: true }
+      { id: 'tx_1', desc: '10kg PCB', amount: 7800, dealer: 'Peenya Yard #04 (Dilip Bhai) • Aug 29', status: 'Paid', icon: 'memory', isPaid: true },
+      { id: 'tx_2', desc: '25kg Cables', amount: 5250, dealer: 'Dharavi Aggregator Yard • Aug 26', status: 'Pending', icon: 'cable', isPaid: false },
+      { id: 'tx_3', desc: '5kg Mixed E-Waste', amount: 1200, dealer: 'Kurla Mandi Yard • Aug 15', status: 'Paid', icon: 'devices', isPaid: true },
+      { id: 'tx_4', desc: '18kg Batteries', amount: 4200, dealer: 'Peenya Yard #04 (Dilip Bhai) • Aug 08', status: 'Paid', icon: 'battery_charging_full', isPaid: true }
     ],
     breakdown: [
       { nameKey: 'PCB', defaultName: 'PCB', pct: '42%', inr: '₹7,800', icon: 'memory', color: 'text-primary' },
@@ -129,7 +129,7 @@ export default function Screen06EarningsHistory({
                 id: txItem.id || `tx_${idx}`,
                 desc: `${txItem.weight || 12}kg ${txItem.material_category || 'Scrap'}`,
                 amount: txItem.final_price || 0,
-                recycler: txItem.recycler_name ? `${txItem.recycler_name} • Recent` : 'Authorized Recycler',
+                dealer: txItem.dealer_name || txItem.recycler_name ? `${txItem.dealer_name || txItem.recycler_name} • Recent` : 'Authorized Scrap Dealer',
                 status: txItem.payment_status === 'COMPLETED' ? 'Paid' : 'Pending',
                 icon: (txItem.material_category || '').toLowerCase().includes('cable') ? 'cable' : 'memory',
                 isPaid: txItem.payment_status === 'COMPLETED'
@@ -188,10 +188,6 @@ export default function Screen06EarningsHistory({
               <span>{safeLang === 'hi' ? 'हिन्दी' : safeLang === 'mr' ? 'मराठी' : 'EN'}</span>
             </button>
           )}
-          <div className="flex items-center gap-1 bg-surface-container-low px-2.5 py-1 rounded-full border border-outline-variant text-xs text-primary font-medium">
-            <span className="material-symbols-outlined text-[16px] filled">cloud_done</span>
-            <span>{syncStatus.isOnline ? (safeLang === 'mr' ? 'ऑनलाइन' : safeLang === 'hi' ? 'ऑनलाइन' : 'Online') : (safeLang === 'mr' ? 'ऑफलाइन' : safeLang === 'hi' ? 'ऑफलाइन' : 'Offline')}</span>
-          </div>
           <div className="w-8 h-8 rounded-full bg-primary/15 flex items-center justify-center border border-outline-variant text-primary font-bold text-xs">
             👷‍♂️
           </div>
@@ -269,7 +265,7 @@ export default function Screen06EarningsHistory({
                       </p>
                     </div>
                     <div className="flex justify-between items-center text-xs text-on-surface-variant">
-                      <p className="truncate text-secondary text-xs">{tx.recycler}</p>
+                      <p className="truncate text-secondary text-xs">{tx.dealer || tx.recycler}</p>
                       <div
                         className={`flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold ${
                           tx.isPaid

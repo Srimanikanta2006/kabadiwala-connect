@@ -135,11 +135,12 @@ export default function Screen03CategorySelect({ onSelectCategory, onNavigate, c
   };
 
   const handleSelect = (cat) => {
-    const subtitle = safeLang === 'mr' ? (cat.marathi || cat.hindi) : (safeLang === 'en' ? cat.title : cat.hindi);
+    const primaryName = safeLang === 'mr' ? cat.marathi : (safeLang === 'hi' ? cat.hindi : cat.title);
+    const subName = safeLang === 'en' ? cat.title : (safeLang === 'mr' ? cat.spoken_mr : cat.spoken_hi);
     onSelectCategory({
       materialId: cat.id,
-      materialTitle: cat.title,
-      materialSub: subtitle,
+      materialTitle: primaryName,
+      materialSub: subName,
       confidence: 100
     });
     onNavigate('ai_scan');
@@ -235,11 +236,13 @@ export default function Screen03CategorySelect({ onSelectCategory, onNavigate, c
               </div>
               <div className="p-md border-t border-outline-variant w-full bg-surface flex flex-col items-center text-center">
                 <span className="font-headline-md text-headline-md font-bold text-on-surface group-hover:text-primary transition-colors text-base">
-                  {cat.title}
-                </span>
-                <span className="font-label-md text-label-md text-primary font-bold text-sm mt-0.5">
                   {safeLang === 'mr' ? cat.marathi : (safeLang === 'hi' ? cat.hindi : cat.title)}
                 </span>
+                {safeLang !== 'en' && (
+                  <span className="font-label-md text-label-md text-on-surface-variant font-medium text-xs mt-0.5">
+                    {cat.title}
+                  </span>
+                )}
               </div>
             </button>
           ))}

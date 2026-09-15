@@ -8,36 +8,36 @@ const RECEIPT_TRANSLATIONS = {
     verifiedHandover: 'सत्यापित हस्तांतरण',
     pendingHandover: 'सत्यापन प्रक्रियाधीन',
     handoverVerified: 'हस्तांतरण एवं भुगतान सत्यापित',
-    lotTransferred: 'कबाड़ अधिकृत रीसाइक्लर केंद्र को सफलतापूर्वक हस्तांतरित हुआ',
+    lotTransferred: 'कबाड़ अधिकृत डीलर यार्ड को सफलतापूर्वक हस्तांतरित हुआ',
     qrTokenTitle: 'वजनकांटा स्कैनर टोकन',
-    showQrPrompt: 'यह क्यूआर रीसाइक्लर वजनकांटा ऑपरेटर को दिखाएं',
+    showQrPrompt: 'यह QR कोड डीलर यार्ड के कांटा ऑपरेटर को दिखाएं',
     checklistTitle: 'हस्तांतरण सत्यापन चेकलिस्ट',
     checklistClean: 'सत्यापित सुरक्षित',
     scaleWeighment: 'कांटा तौल:',
     scaleCertified: 'प्रमाणित',
     paymentStatusLabel: 'भुगतान स्थिति:',
     paymentReceived: '100% नकद / बैंक में प्राप्त',
-    authorizedBuyer: 'अधिकृत खरीदार:',
+    authorizedBuyer: 'अधिकृत डीलर यार्ड:',
     lotRef: 'लॉट संदर्भ',
     handoverToken: 'हस्तांतरण टोकन',
     matAndQty: 'सामग्री एवं मात्रा',
     agreedRate: 'स्वीकृत दर',
     mandiBenchmark: 'मंडी हमीभाव:',
-    cpcbDirectory: 'अधिकृत केंद्र (सीपीसीबी 2023 सूची)',
+    cpcbDirectory: 'अधिकृत स्क्रैप डीलर यार्ड',
     totalPaid: 'कुल भुगतान',
     selectPaymentStatus: 'भुगतान स्थिति चुनें',
     soundboxAudio: 'साउंडबॉक्स ऑडियो',
     cashReceived: 'नकद मिला',
-    cashSub: '(Cash)',
+    cashSub: '(नकद)',
     upiReceived: 'UPI प्राप्त',
-    upiSub: '(Digital)',
+    upiSub: '(डिजिटल)',
     pendingSettlement: 'बकाया',
-    pendingSub: '(Pending)',
+    pendingSub: '(लंबित)',
     cashDesc: 'शारीरिक नकद प्राप्त एवं सत्यापित।',
     upiDesc: 'डिजिटल UPI बैंक खाते में तत्काल जमा।',
     pendingDesc: 'तौल कांटा पर्ची के बाद भुगतान देय (खाते में दर्ज)।',
-    shareWhatsApp: 'व्हाट्सएप पर पर्ची भेजें (Share Receipt on WhatsApp)',
-    printPdf: 'पर्ची डाउनलोड करें • Print / Download Voucher PDF',
+    shareWhatsApp: 'व्हाट्सएप पर पर्ची भेजें',
+    printPdf: 'पर्ची डाउनलोड करें (PDF)',
     viewEarnings: 'कमाई देखें',
     newLot: 'नया लॉट',
     navHome: 'होम',
@@ -50,36 +50,36 @@ const RECEIPT_TRANSLATIONS = {
     verifiedHandover: 'सत्यापित हस्तांतरण',
     pendingHandover: 'पडताळणी बाकी',
     handoverVerified: 'हस्तांतरण व देयक पडताळणी पूर्ण',
-    lotTransferred: 'भंगार अधिकृत रीसायकलिंग केंद्राकडे यशस्वीरित्या हस्तांतरित झाले',
+    lotTransferred: 'भंगार अधिकृत डीलर यार्डकडे यशस्वीरित्या हस्तांतरित झाले',
     qrTokenTitle: 'वजनकाटा स्कॅनर टोकन',
-    showQrPrompt: 'हा क्यूआर कोड रीसायकलर्सच्या वजनकाटा ऑपरेटरला दाखवा',
+    showQrPrompt: 'हा QR कोड डीलर यार्डच्या वजनकाटा ऑपरेटरला दाखवा',
     checklistTitle: 'हस्तांतरण पडताळणी चेकलिस्ट',
     checklistClean: 'सत्यापित सुरक्षित',
     scaleWeighment: 'काटा मोजणी:',
     scaleCertified: 'प्रमाणित',
     paymentStatusLabel: 'देयक स्थिती:',
-    paymentReceived: '100% रोख / बँक खात्यात जमा',
-    authorizedBuyer: 'अधिकृत खरेदीदार:',
+    paymentReceived: '100% रोख / बँक जमा',
+    authorizedBuyer: 'अधिकृत डीलर यार्ड:',
     lotRef: 'लॉट संदर्भ',
     handoverToken: 'हस्तांतरण टोकन',
     matAndQty: 'सामग्री व प्रमाण',
-    agreedRate: 'ठरलेला दर',
-    mandiBenchmark: 'बाजार हमीभाव:',
-    cpcbDirectory: 'अधिकृत केंद्र (सीपीसीबी सूची)',
-    totalPaid: 'एकूण देयक',
+    agreedRate: 'मान्य दर',
+    mandiBenchmark: 'हमीभाव निर्देशांक:',
+    cpcbDirectory: 'अधिकृत स्क्रॅप डीलर यार्ड',
+    totalPaid: 'एकूण देयक रक्कम',
     selectPaymentStatus: 'देयक स्थिती निवडा',
-    soundboxAudio: 'ध्वनीपेटी ऑडिओ',
-    cashReceived: 'रोख मिळाली',
-    cashSub: '(Cash)',
-    upiReceived: 'UPI मिळाले',
-    upiSub: '(Digital)',
-    pendingSettlement: 'बाकी देय',
-    pendingSub: '(Pending)',
-    cashDesc: 'प्रत्यक्ष रोख रक्कम मिळाली आणि सत्यापित झाली.',
-    upiDesc: 'डिजिटल UPI द्वारे तात्काळ खात्यात जमा.',
+    soundboxAudio: 'साउंडबॉक्स ध्वनी',
+    cashReceived: 'रोख मिळाले',
+    cashSub: '(रोख)',
+    upiReceived: 'UPI जमा',
+    upiSub: '(डिजिटल)',
+    pendingSettlement: 'बाकी',
+    pendingSub: '(बाकी)',
+    cashDesc: 'प्रत्यक्ष रोख रक्कम मिळाली व तपासली.',
+    upiDesc: 'तातडीने बँक खात्यात UPI द्वारे जमा.',
     pendingDesc: 'काटा पावतीनंतर देयक दिले जाईल (लेजरमध्ये नोंद).',
-    shareWhatsApp: 'व्हॉट्सॲपवर पावती पाठवा (Share on WhatsApp)',
-    printPdf: 'पावती डाउनलोड करा • Print / Download Voucher PDF',
+    shareWhatsApp: 'व्हॉट्सॲपवर पावती पाठवा',
+    printPdf: 'पावती डाउनलोड करा (PDF)',
     viewEarnings: 'कमाई पहा',
     newLot: 'नवीन लॉट',
     navHome: 'मुख्य',
@@ -156,23 +156,61 @@ export default function Screen05HandoverReceipt({
   const materialTitle = lotDraft.materialTitle || 'Printed Circuit Boards (PCB)';
   const agreedRate = lotDraft.agreedRate || 275;
   const totalPaid = Math.round(weight * agreedRate);
-  const recycler = lotDraft.acceptedRecycler || {
-    id: 'cpcb_mh_032',
-    name: 'CBS EWaste Recycling Industries',
-    statutoryRef: 'Maharashtra Pollution Control Board (MPCB) - Reg #MH/E-WASTE/032',
-    cpcbNo: 'Maharashtra Pollution Control Board (MPCB) - Reg #MH/E-WASTE/032',
-    facilityType: 'Recycler',
-    capacityMta: 2500,
-    state: 'Maharashtra',
-    sourceDoc: 'CPCB Directory 2023'
+  const isDealer = lotDraft.buyerType === 'DEALER' || lotDraft.acceptedBuyer?.tier?.includes('Aggregator') || lotDraft.acceptedBuyer?.facilityType?.includes('Aggregator');
+  const buyer = lotDraft.acceptedBuyer || lotDraft.acceptedRecycler || {
+    id: 'hub_peenya_04',
+    name: 'Peenya Industrial Aggregator Yard #04 (Dilip Bhai)',
+    adminName: 'Dilip Bhai',
+    statutoryRef: 'CPCB Aggregator Reg #KA-AGG-2024-118',
+    cpcbNo: 'CPCB Aggregator Reg #KA-AGG-2024-118',
+    facilityType: 'Authorised Aggregator Yard',
+    tier: 'Aggregator Yard',
+    address: 'Gate Desk #02, 4th Cross, Peenya Industrial Area Phase 1, Bengaluru',
+    state: 'Karnataka'
   };
+  const recycler = buyer;
 
   const [backendHandoverRef, setBackendHandoverRef] = useState(null);
   const [paymentMode, setPaymentMode] = useState('CASH_RECEIVED'); // 'CASH_RECEIVED' | 'UPI_RECEIVED' | 'PENDING_SETTLEMENT'
-  const handoverRef = backendHandoverRef || lotDraft.handoverRef || `KC-TRACE-20260905-MH-${(lotDraft.id || '8F2A1C').slice(-6).toUpperCase()}`;
-  const lotRef = `RL-MH-2026-${(lotDraft.id || '00482').slice(-5)}`;
-  const certId = lotDraft.cpcbCertificateId || `CPCB-EPR-2026-MH-${(lotDraft.id || '9921ABCD').slice(-8).toUpperCase()}`;
+  const handoverRef = backendHandoverRef || lotDraft.handoverRef || `KC-TRACE-20260912-KA-${(lotDraft.id || '8F2A1C').slice(-6).toUpperCase()}`;
+  const lotRef = `RL-2026-${(lotDraft.id || '00482').slice(-5)}`;
+  const certId = lotDraft.cpcbCertificateId || `CPCB-EPR-2026-KA-${(lotDraft.id || '9921ABCD').slice(-8).toUpperCase()}`;
   const isConfirmed = lotDraft.status === 'CONFIRMED' || lotDraft.status === 'HANDED_OVER' || true;
+
+  // Cross-Portal Handshake: write directly to localStorage so DealerDashboard.jsx immediately loads this lot
+  useEffect(() => {
+    if (isDealer) {
+      try {
+        const existing = JSON.parse(localStorage.getItem('relink_inbound_dealer_lots') || '[]');
+        const lotItem = {
+          id: lotDraft.id || `lot_${Date.now()}`,
+          lot_ref: handoverRef.startsWith('RL-') ? handoverRef : lotRef,
+          collector_id: 'col_ramesh_peenya',
+          collector_name: 'Ramesh Kumar',
+          collector_cluster: 'Peenya Cluster 3',
+          rating: 4.8,
+          kyc_verified: true,
+          material_category: (lotDraft.materialId || 'pcb').includes('pcb') ? 'PCB' : ((lotDraft.materialId || '').includes('cable') ? 'CABLES' : ((lotDraft.materialId || '').includes('batt') ? 'BATTERIES' : 'DISPLAYS')),
+          material_name: materialTitle,
+          ai_confidence: 0.94,
+          asking_rate: agreedRate,
+          approved_rate: agreedRate,
+          tare_weight: 0.40,
+          gross_weight: Number((weight + 0.40).toFixed(2)),
+          net_weight: Number(weight.toFixed(2)),
+          sensor_id: buyer.scaleSensorId || 'HX711-PEENYA-02-OK',
+          status: 'QUEUED',
+          queued_time: 'Just now',
+          image_url: lotDraft.photoUrl || '/assets/icons/pcb_high.svg',
+          is_new_live_intake: true
+        };
+        const updated = [lotItem, ...existing.filter(l => l.lot_ref !== lotItem.lot_ref && l.id !== lotItem.id)];
+        localStorage.setItem('relink_inbound_dealer_lots', JSON.stringify(updated));
+      } catch (e) {
+        console.log('Dealer inbound storage sync notice:', e);
+      }
+    }
+  }, [isDealer, lotRef, handoverRef, materialTitle, agreedRate, weight]);
 
   // Sync to backend digital handover service if online
   useEffect(() => {
@@ -181,18 +219,22 @@ export default function Screen05HandoverReceipt({
         const payload = {
           lot_id: lotDraft.id || `lot_${Date.now()}`,
           weight: Number(weight),
-          gps_lat: 19.0434,
-          gps_lng: 72.8576,
-          collector_id: 'col_dharavi_01',
+          gps_lat: 13.0285,
+          gps_lng: 77.5195,
+          collector_id: 'col_ramesh_peenya',
           material_id: lotDraft.materialId || 'mat_pcb_high',
           material_category: materialTitle,
           quoted_price: totalPaid,
-          state: 'MH',
-          recycler_id: recycler.id,
-          cpcb_registration_no: recycler.statutoryRef || recycler.cpcbNo,
-          statutory_reference: recycler.statutoryRef || recycler.cpcbNo,
-          facility_name: recycler.name,
-          facility_type: recycler.facilityType || 'Recycler',
+          state: 'KA',
+          buyer_type: isDealer ? 'DEALER' : 'RECYCLER',
+          dealer_id: buyer.id,
+          dealer_name: buyer.name,
+          admin_name: buyer.adminName || 'Dilip Bhai',
+          recycler_id: buyer.id,
+          cpcb_registration_no: buyer.statutoryRef || buyer.cpcbNo,
+          statutory_reference: buyer.statutoryRef || buyer.cpcbNo,
+          facility_name: buyer.name,
+          facility_type: buyer.facilityType || (isDealer ? 'Authorised Aggregator Yard' : 'Recycler'),
           payment_mode: paymentMode
         };
         const res = await fetch('http://localhost:8000/handover/initiate', {
@@ -211,32 +253,33 @@ export default function Screen05HandoverReceipt({
       }
     }
     syncHandover();
-  }, [paymentMode]);
+  }, [paymentMode, isDealer, weight, totalPaid, buyer, materialTitle]);
 
   const qrPayload = JSON.stringify({
     protocol: 'RE:LINK-TRACE-V1',
     handover_ref: handoverRef,
     lot_id: lotRef,
+    buyer_type: isDealer ? 'DEALER' : 'RECYCLER',
+    dealer_id: buyer.id,
+    dealer_name: buyer.name,
+    admin_name: buyer.adminName || 'Dilip Bhai',
     material: materialTitle,
     weight_kg: weight,
     rate_inr: agreedRate,
     total_inr: totalPaid,
-    recycler_id: recycler.id,
-    recycler_name: recycler.name,
-    statutory_reference: recycler.statutoryRef || recycler.cpcbNo,
-    facility_type: recycler.facilityType || 'Recycler',
-    source: 'CPCB Directory 2023',
-    gps: { lat: 19.0434, lng: 72.8576 },
+    statutory_reference: buyer.statutoryRef || buyer.cpcbNo,
+    facility_type: buyer.facilityType || (isDealer ? 'Authorised Aggregator Yard' : 'Authorised Recycler'),
     timestamp: new Date().toISOString(),
     payment_status: paymentMode,
-    status: 'CONFIRMED'
+    status: 'QUEUED_AT_GATE'
   });
+
 
   const speakText = (text) => {
     if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
       window.speechSynthesis.cancel();
       const utterance = new SpeechSynthesisUtterance(text);
-      utterance.lang = currentLang === 'mr' ? 'mr-IN' : (currentLang === 'hi' ? 'hi-IN' : 'en-IN');
+      utterance.lang = safeLang === 'mr' ? 'mr-IN' : (safeLang === 'hi' ? 'hi-IN' : 'en-IN');
       utterance.rate = 0.95;
       window.speechSynthesis.speak(utterance);
     }
@@ -304,10 +347,6 @@ export default function Screen05HandoverReceipt({
               <span>{safeLang === 'hi' ? 'हिन्दी' : safeLang === 'mr' ? 'मराठी' : 'EN'}</span>
             </button>
           )}
-          <div className="flex items-center gap-1 bg-surface-container-low px-2.5 py-1 rounded-full border border-outline-variant text-xs text-primary font-medium">
-            <span className="material-symbols-outlined text-[16px] filled">cloud_done</span>
-            <span>{syncStatus.isOnline ? (safeLang === 'mr' ? 'ऑनलाइन' : safeLang === 'hi' ? 'ऑनलाइन' : 'Online') : (safeLang === 'mr' ? 'ऑफलाइन' : safeLang === 'hi' ? 'ऑफलाइन' : 'Offline')}</span>
-          </div>
         </div>
       </header>
 
@@ -356,7 +395,11 @@ export default function Screen05HandoverReceipt({
                 <QRCodeSVG value={qrPayload} size={180} level="M" includeMargin={true} />
               </div>
               <p className="font-mono text-xs font-bold text-primary mt-2.5">{handoverRef}</p>
-              <span className="text-[11px] text-secondary mt-0.5">{t.showQrPrompt}</span>
+              <span className="text-[11px] text-secondary mt-0.5">
+                {isDealer
+                  ? (safeLang === 'mr' ? 'हा क्यूआर कोड यार्ड गेट ऑपरेटरला (दिलीप भाई) दाखवा' : (safeLang === 'hi' ? 'यह क्यूआर कोड यार्ड गेट ऑपरेटर (दिलीप भाई) को दिखाएं' : 'Show this QR to the Yard Gate Scale Operator (Dilip Bhai)'))
+                  : t.showQrPrompt}
+              </span>
             </div>
 
             {/* Scale & Handover Verification Checklist */}
@@ -446,7 +489,7 @@ export default function Screen05HandoverReceipt({
                     </div>
                     <h4 className="text-sm font-bold text-on-surface mt-1">{recycler.name}</h4>
                     <p className="text-[11px] text-secondary">
-                      {recycler.state || 'Maharashtra'} • {recycler.capacityMta ? `${recycler.capacityMta.toLocaleString('en-IN')} MTA Capacity` : 'Authorised E-Waste Unit'}
+                      {recycler.address || recycler.state || 'Peenya Industrial Area'} • {safeLang === 'mr' ? 'प्रमाणित वजनकाटा' : (safeLang === 'hi' ? 'प्रमाणित कांटा' : 'Calibrated Scale')}
                     </p>
                   </div>
                   <div className="text-right">
@@ -455,7 +498,11 @@ export default function Screen05HandoverReceipt({
                   </div>
                 </div>
                 <div className="pt-1.5 border-t border-outline-variant/40 text-[10px] text-secondary font-mono truncate" title={recycler.statutoryRef || recycler.cpcbNo}>
-                  <strong>SPCB Ref:</strong> {recycler.statutoryRef || recycler.cpcbNo}
+                  <strong>{safeLang === 'mr' ? 'नोंदणी:' : (safeLang === 'hi' ? 'यार्ड पंजीकरण:' : 'Yard ID:')}</strong> {recycler.statutoryRef || recycler.cpcbNo}
+                </div>
+                <div className="pt-1.5 border-t border-outline-variant/30 flex items-center gap-1.5 text-[10px] text-emerald-700 dark:text-emerald-400 font-semibold">
+                  <span className="material-symbols-outlined text-[14px]">recycling</span>
+                  <span>{safeLang === 'mr' ? 'डीलरमार्फत प्रमाणित औद्योगिक रिसायकलिंग प्रकल्पाकडे पाठवले जाईल' : (safeLang === 'hi' ? 'डीलर द्वारा प्रमाणित रीसाइक्लिंग प्लांट को प्रेषित' : 'Aggregated by dealer for certified industrial recycling')}</span>
                 </div>
               </div>
 

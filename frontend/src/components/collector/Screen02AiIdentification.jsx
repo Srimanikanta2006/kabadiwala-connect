@@ -277,10 +277,6 @@ export default function Screen02AiIdentification({
                 <span>{safeLang === 'hi' ? 'हिन्दी' : (safeLang === 'mr' ? 'मराठी' : 'EN')}</span>
               </button>
             )}
-            <div className="flex items-center gap-1 px-2.5 py-1 bg-primary-container/10 text-primary dark:text-primary-fixed-dim rounded-full text-xs font-semibold">
-              <span className="material-symbols-outlined text-[16px] filled">cloud_done</span>
-              <span>{syncStatus.isOnline ? 'Synced' : 'Offline'}</span>
-            </div>
           </div>
         </div>
       </header>
@@ -313,10 +309,12 @@ export default function Screen02AiIdentification({
               <div className="absolute inset-6 border-2 border-primary-fixed border-dashed rounded-xl pointer-events-none flex flex-col justify-between p-3">
                 <div className="self-start bg-primary text-on-primary text-xs font-bold px-2.5 py-1 rounded-md shadow-sm flex items-center gap-1.5">
                   <span className="material-symbols-outlined text-[16px]">document_scanner</span>
-                  <span>{materialTitle.split(' ')[0]} detected • {confidence}% Match</span>
+                  <span>
+                    {materialTitle.split(' ')[0]} {safeLang === 'mr' ? 'ओळख' : (safeLang === 'hi' ? 'पहचान' : 'detected')} • {confidence}% {safeLang === 'mr' ? 'अचूकता' : (safeLang === 'hi' ? 'सटीकता' : 'Match')}
+                  </span>
                 </div>
                 <div className="self-end bg-inverse-surface/85 backdrop-blur-sm text-white text-[11px] px-2.5 py-1 rounded-md border border-white/20">
-                  High Value E-Scrap Grade 1
+                  {safeLang === 'mr' ? 'उच्च मूल्य ई-भंगार ग्रेड 1' : (safeLang === 'hi' ? 'उच्च मूल्य ई-कचरा ग्रेड 1' : 'High Value E-Scrap Grade 1')}
                 </div>
               </div>
               {/* Retake Button */}
@@ -463,7 +461,7 @@ export default function Screen02AiIdentification({
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-bold text-primary">{t.option1Primary}</span>
                     <span className="text-[11px] font-extrabold bg-primary/10 text-primary px-2 py-0.5 rounded-full">
-                      {confidence}% Match
+                      {confidence}% {safeLang === 'mr' ? 'अचूकता' : (safeLang === 'hi' ? 'सटीकता' : 'Match')}
                     </span>
                   </div>
                   <h4 className="font-bold text-on-surface text-sm mt-1">{materialTitle}</h4>
@@ -486,13 +484,15 @@ export default function Screen02AiIdentification({
                     <div className="flex items-center justify-between">
                       <span className="text-xs font-bold text-amber-700 dark:text-amber-400">{t.option2Alternative}</span>
                       <span className="text-[11px] font-extrabold bg-amber-500/15 text-amber-800 dark:text-amber-300 px-2 py-0.5 rounded-full">
-                        {Math.round((alternativeMatches[0].confidence || 0.15) * 100)}% Match
+                        {Math.round((alternativeMatches[0].confidence || 0.15) * 100)}% {safeLang === 'mr' ? 'अचूकता' : (safeLang === 'hi' ? 'सटीकता' : 'Match')}
                       </span>
                     </div>
                     <h4 className="font-bold text-on-surface text-sm mt-1">
                       {alternativeMatches[0].category_name || alternativeMatches[0].name_en || alternativeMatches[0].category}
                     </h4>
-                    <p className="text-[11px] text-on-surface-variant">Alternative CPCB Class</p>
+                    <p className="text-[11px] text-on-surface-variant">
+                      {safeLang === 'mr' ? 'पर्यायी CPCB श्रेणी' : (safeLang === 'hi' ? 'वैकल्पिक CPCB श्रेणी' : 'Alternative CPCB Class')}
+                    </p>
                   </div>
                   <button
                     type="button"
@@ -657,21 +657,21 @@ export default function Screen02AiIdentification({
                 onClick={() => setWeight((w) => parseFloat(((typeof w === 'number' ? w : 0) + 1).toFixed(1)))}
                 className="h-11 px-2.5 bg-surface border border-outline-variant hover:bg-surface-container rounded-lg font-medium text-xs text-on-surface cursor-pointer"
               >
-                +{unit === 'piece' ? (safeLang === 'en' ? '1 pc' : '1 नग') : (safeLang === 'en' ? '1 kg' : '1 किग्रा')}
+                +{unit === 'piece' ? (safeLang === 'en' ? '1 pc' : '1 नग') : (safeLang === 'en' ? '1 kg' : (safeLang === 'mr' ? '1 किलो' : '1 किग्रा'))}
               </button>
               <button
                 type="button"
                 onClick={() => setWeight((w) => parseFloat(((typeof w === 'number' ? w : 0) + 5).toFixed(1)))}
                 className="h-11 px-2.5 bg-surface border border-outline-variant hover:bg-surface-container rounded-lg font-medium text-xs text-on-surface cursor-pointer"
               >
-                +{unit === 'piece' ? (safeLang === 'en' ? '5 pcs' : '5 नग') : (safeLang === 'en' ? '5 kg' : '5 किग्रा')}
+                +{unit === 'piece' ? (safeLang === 'en' ? '5 pcs' : '5 नग') : (safeLang === 'en' ? '5 kg' : (safeLang === 'mr' ? '5 किलो' : '5 किग्रा'))}
               </button>
               <button
                 type="button"
                 onClick={() => setWeight((w) => parseFloat(((typeof w === 'number' ? w : 0) + 10).toFixed(1)))}
                 className="h-11 px-2.5 bg-surface border border-outline-variant hover:bg-surface-container rounded-lg font-medium text-xs text-on-surface cursor-pointer"
               >
-                +{unit === 'piece' ? (safeLang === 'en' ? '10 pcs' : '10 नग') : (safeLang === 'en' ? '10 kg' : '10 किग्रा')}
+                +{unit === 'piece' ? (safeLang === 'en' ? '10 pcs' : '10 नग') : (safeLang === 'en' ? '10 kg' : (safeLang === 'mr' ? '10 किलो' : '10 किग्रा'))}
               </button>
             </div>
           </div>

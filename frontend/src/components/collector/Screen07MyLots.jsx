@@ -118,9 +118,14 @@ export default function Screen07MyLots({
       ai_confidence: 0.92,
       status: 'AWAITING_OFFERS',
       photo_url: 'https://lh3.googleusercontent.com/aida/AEtjO1Uibj7iPqmg9YKdnMYAfgjprFLErbb0FcOdAiLVCHgIpkj7gbP3YTmKP8zFMrg1kaOj63apJEhpOtxdLXe-93ri5nb5eVArP4y3X_auotJ1wePJz5s4YibZAvhuz-KAXyzC05MmFpsIy-yBUY4Mqu5yd0ohBBU3_J9_aC-nPfLKrNm8V66IvtxKehIH0e-8jnBWhBN-DbfYt6LisI-TlJcyw1QSl4R5LDqnipESfPn5rrrJ6LyUFidtmQ',
+      acceptedDealer: {
+        name: 'Peenya Industrial Aggregator Yard #04 (Dilip Bhai)',
+        cpcbNo: 'KA-AGG-2024-118',
+        rate: 780
+      },
       acceptedRecycler: {
-        name: 'EcoRecycle India Pvt Ltd',
-        cpcbNo: 'CPCB/E-WASTE/REG/MH/2023/1042',
+        name: 'Peenya Industrial Aggregator Yard #04 (Dilip Bhai)',
+        cpcbNo: 'KA-AGG-2024-118',
         rate: 780
       },
       created_at: 'Today, 14:15 IST'
@@ -137,9 +142,14 @@ export default function Screen07MyLots({
       ai_confidence: 0.89,
       status: 'OFFER_ACCEPTED',
       photo_url: 'https://lh3.googleusercontent.com/aida/AEtjO1WgXxj3PTs-7lfhFp-JK48EFoiQ6J122eiWOD5bFME_YW39QqWjSOtecSCCok96UgeiWft9i-8N-b4CLTLOt2TKYJpTgjDclW5fZ8pW2Ao12n1xdcxpIMTthmcakRwFYe5pJNiNHbEvQXiTZ6Dg62wI00Pp4LCfvkBxSm5ebeUHSLS26HhnhDK3yHfN-r9YHbPLIFxigyiHuXbRjgJuBMMKwgaWB7DxGJ8xsxedgkY1tTjZMRuMCZsxeAQ',
+      acceptedDealer: {
+        name: 'Dharavi Link Road Scrap Aggregation Center',
+        cpcbNo: 'MH-AGG-2023-042',
+        rate: 420
+      },
       acceptedRecycler: {
-        name: 'GreenCircle Urban Recyclers',
-        cpcbNo: 'CPCB/E-WASTE/REG/MH/2022/0891',
+        name: 'Dharavi Link Road Scrap Aggregation Center',
+        cpcbNo: 'MH-AGG-2023-042',
         rate: 420
       },
       created_at: 'Today, 11:30 IST'
@@ -156,9 +166,14 @@ export default function Screen07MyLots({
       ai_confidence: 0.94,
       status: 'READY_FOR_PICKUP',
       photo_url: 'https://lh3.googleusercontent.com/aida/AEtjO1UPtZp9W1V_v4d6u-w1k0p-x0',
+      acceptedDealer: {
+        name: 'Kurla E-Waste Yard & Mandi Hub',
+        cpcbNo: 'MH-AGG-2024-091',
+        rate: 110
+      },
       acceptedRecycler: {
-        name: 'EcoRecycle India Pvt Ltd',
-        cpcbNo: 'CPCB/E-WASTE/REG/MH/2023/1042',
+        name: 'Kurla E-Waste Yard & Mandi Hub',
+        cpcbNo: 'MH-AGG-2024-091',
         rate: 110
       },
       created_at: 'Yesterday, 16:45 IST'
@@ -175,9 +190,14 @@ export default function Screen07MyLots({
       ai_confidence: 0.96,
       status: 'COMPLETED',
       photo_url: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBnrXAynZNALXyOl8wueunxDavXvrvwno8ShM4qL4CTD3UnF4MmWJ4LuV71LlqCfufAD8qkP3HoAHlCEuL7qoWrLSB0I4vFLT1hUpey49XO7COePpM-6at6f5FTV23fkqAjMDEO9Jg1r5sjRFSPBVvgkjtNYGN8HeK8__5iQzaZgcica5tUIT_hal2cwOajIdRrMqTOBd9zGHioWKGJwwIlmo-VT4oy01MOUIeUVPTlHh1ywxpynama',
+      acceptedDealer: {
+        name: 'Peenya Industrial Aggregator Yard #04 (Dilip Bhai)',
+        cpcbNo: 'KA-AGG-2024-118',
+        rate: 780
+      },
       acceptedRecycler: {
-        name: 'Cerebra Integrated Technologies',
-        cpcbNo: 'CPCB/E-WASTE/REG/MH/2021/0432',
+        name: 'Peenya Industrial Aggregator Yard #04 (Dilip Bhai)',
+        cpcbNo: 'KA-AGG-2024-118',
         rate: 780
       },
       created_at: '03 Sep 2026, 10:20 IST'
@@ -288,10 +308,6 @@ export default function Screen07MyLots({
                 <span>{safeLang === 'hi' ? 'हिन्दी' : safeLang === 'mr' ? 'मराठी' : 'EN'}</span>
               </button>
             )}
-            <div className="hidden sm:flex items-center gap-1 px-2.5 py-1 bg-primary/10 text-primary rounded-full text-xs font-semibold">
-              <span className="material-symbols-outlined text-[16px] filled">cloud_done</span>
-              <span>{syncStatus.isOnline ? (safeLang === 'mr' ? 'ऑनलाइन' : safeLang === 'hi' ? 'ऑनलाइन' : 'Online') : (safeLang === 'mr' ? 'ऑफलाइन' : safeLang === 'hi' ? 'ऑफलाइन' : 'Offline')}</span>
-            </div>
             <button
               onClick={onNewScan}
               className="bg-primary hover:bg-primary-container text-on-primary font-bold text-xs px-3.5 py-2 rounded-xl flex items-center gap-1.5 shadow-sm active:scale-95 transition-all cursor-pointer"

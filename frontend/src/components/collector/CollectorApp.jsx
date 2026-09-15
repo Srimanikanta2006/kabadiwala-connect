@@ -53,12 +53,14 @@ const DEFAULT_LOT_DRAFT = {
   ]
 };
 
-export default function CollectorApp({ onSwitchRole }) {
+export default function CollectorApp({ onSwitchRole, currentLang: propLang, onLanguageChange: propOnLanguageChange }) {
   const { i18n } = useTranslation();
   const fileInputRef = useRef(null);
 
   const [activeScreen, setActiveScreen] = useState('home'); // 'home' | 'ai_scan' | 'category_select' | 'lot_summary' | 'offers' | 'receipt' | 'earnings' | 'safety'
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [scanningPreview, setScanningPreview] = useState(null);
+  const [scanStep, setScanStep] = useState(1);
   
   const normalize = (lng) => {
     if (!lng) return 'hi';
@@ -68,19 +70,27 @@ export default function CollectorApp({ onSwitchRole }) {
     return 'hi';
   };
 
-  const [currentLang, setCurrentLang] = useState(() => {
-    return normalize(localStorage.getItem('relink_lang') || i18n.language);
+  const [internalLang, setInternalLang] = useState(() => {
+    return normalize(propLang || localStorage.getItem('relink_lang') || i18n.language);
   });
 
   useEffect(() => {
+    if (propLang) {
+      setInternalLang(normalize(propLang));
+    }
+  }, [propLang]);
+
+  useEffect(() => {
     const handleLanguageChanged = (lng) => {
-      setCurrentLang(normalize(lng));
+      setInternalLang(normalize(lng));
     };
     i18n.on('languageChanged', handleLanguageChanged);
     return () => {
       i18n.off('languageChanged', handleLanguageChanged);
     };
   }, [i18n]);
+
+  const currentLang = normalize(propLang || internalLang);
 
   // Persist in-progress draft to sessionStorage (Fixes Issue 4.4)
   const [lotDraft, setLotDraft] = useState(() => {
@@ -147,8 +157,19 @@ export default function CollectorApp({ onSwitchRole }) {
       return;
     }
 
-    // Trigger instant analyzing visual overlay (Fixes Issue 2.2)
+    try {
+      const tempUrl = URL.createObjectURL(file);
+      setScanningPreview(tempUrl);
+    } catch (err) {
+      // Ignore preview creation error
+    }
+
+    // Trigger instant analyzing visual overlay
     setIsAnalyzing(true);
+    setScanStep(1);
+
+    const stepTimer1 = setTimeout(() => setScanStep(2), 600);
+    const stepTimer2 = setTimeout(() => setScanStep(3), 1300);
 
     const reader = new FileReader();
     reader.onload = async (evt) => {
@@ -190,6 +211,8 @@ export default function CollectorApp({ onSwitchRole }) {
       } catch (err) {
         setLotDraft((prev) => ({ ...prev, photoUrl: dataUrl }));
       } finally {
+        clearTimeout(stepTimer1);
+        clearTimeout(stepTimer2);
         setIsAnalyzing(false);
         setActiveScreen('ai_scan');
       }
@@ -199,9 +222,13 @@ export default function CollectorApp({ onSwitchRole }) {
 
   const handleLanguageChange = (lng) => {
     const safe = normalize(lng);
-    i18n.changeLanguage(safe);
-    localStorage.setItem('relink_lang', safe);
-    setCurrentLang(safe);
+    if (propOnLanguageChange) {
+      propOnLanguageChange(safe);
+    } else {
+      i18n.changeLanguage(safe);
+      localStorage.setItem('relink_lang', safe);
+      setInternalLang(safe);
+    }
   };
 
   const handleLanguageCycle = () => {
@@ -249,6 +276,38 @@ export default function CollectorApp({ onSwitchRole }) {
       };
       await saveOfflineHandover(handoverRecord);
       setRecentLots((prev) => [savedLot, ...prev.filter(l => l.id !== savedLot.id)]);
+
+      // Cross-Portal Live Handshake to Dealer Dashboard
+      if (acceptedDraft.buyerType === 'DEALER' || acceptedDraft.acceptedBuyer?.tier?.includes('Aggregator')) {
+        try {
+          const existing = JSON.parse(localStorage.getItem('relink_inbound_dealer_lots') || '[]');
+          const newDealerItem = {
+            id: savedLot.id,
+            lot_ref: lotRecord.handover_ref,
+            collector_id: 'col_ramesh_peenya',
+            collector_name: 'Ramesh Kumar',
+            collector_cluster: 'Peenya Cluster 3',
+            rating: 4.8,
+            kyc_verified: true,
+            material_category: acceptedDraft.materialTitle.split(' ')[0] || 'PCB',
+            material_name: acceptedDraft.materialTitle,
+            ai_confidence: (acceptedDraft.confidence || 92) / 100,
+            asking_rate: acceptedDraft.agreedRate || 755,
+            approved_rate: acceptedDraft.agreedRate || 755,
+            tare_weight: 0.40,
+            gross_weight: Number((Number(acceptedDraft.weight) + 0.40).toFixed(2)),
+            net_weight: Number(acceptedDraft.weight),
+            sensor_id: acceptedDraft.acceptedBuyer?.scaleSensorId || 'HX711-PEENYA-02-OK',
+            status: 'QUEUED',
+            queued_time: 'Just now',
+            image_url: acceptedDraft.photoUrl || '/assets/icons/pcb_high.svg',
+            is_new_live_intake: true
+          };
+          localStorage.setItem('relink_inbound_dealer_lots', JSON.stringify([newDealerItem, ...existing.filter(l => l.lot_ref !== newDealerItem.lot_ref)]));
+        } catch (storageErr) {
+          console.log('Error saving to dealer queue:', storageErr);
+        }
+      }
 
       if (syncEngine.isEffectivelyOnline()) {
         syncEngine.syncNow();
@@ -336,25 +395,107 @@ export default function CollectorApp({ onSwitchRole }) {
 
   return (
     <div className="collector-main-container">
-      {/* AI Analyzing Scanning Overlay Modal (Fixes Issue 2.2) */}
+      {/* Smart Scrap Scanner Overlay Modal */}
       {isAnalyzing && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex flex-col items-center justify-center p-6 text-white animate-in fade-in">
-          <div className="w-64 h-64 relative rounded-2xl overflow-hidden border-2 border-primary shadow-2xl flex items-center justify-center bg-surface-container-highest">
-            <div className="absolute inset-0 bg-primary/10"></div>
-            {/* Animated Laser Scanline */}
-            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-primary-fixed to-transparent animate-[pulse_1.5s_infinite] shadow-[0_0_15px_#68dba9]"></div>
-            <div className="flex flex-col items-center gap-3 relative z-10 text-center p-4">
-              <span className="material-symbols-outlined text-[48px] text-primary-fixed animate-spin">document_scanner</span>
-              <span className="text-xs font-bold uppercase tracking-widest text-primary-fixed">MobileNetV2 Edge Model</span>
+        <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex flex-col items-center justify-center p-6 text-white animate-in fade-in duration-200">
+          <div className="w-72 h-72 relative rounded-3xl overflow-hidden border-2 border-primary/70 shadow-[0_0_35px_rgba(26,125,75,0.35)] flex items-center justify-center bg-surface-container-highest">
+            {/* Background Image Preview if available */}
+            {scanningPreview ? (
+              <img
+                src={scanningPreview}
+                alt="Scanned item preview"
+                className="absolute inset-0 w-full h-full object-cover opacity-85 filter contrast-105"
+              />
+            ) : (
+              <div className="absolute inset-0 bg-radial from-primary/20 via-surface-container-highest to-black/80 flex items-center justify-center">
+                <span className="material-symbols-outlined text-[64px] text-primary/40 animate-pulse">inventory_2</span>
+              </div>
+            )}
+
+            {/* Dark contrast gradient */}
+            <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/20 to-black/80"></div>
+
+            {/* Viewfinder Target Grid and Corner Brackets */}
+            <div className="absolute inset-3 border border-white/20 rounded-2xl pointer-events-none">
+              {/* Corner Accents */}
+              <div className="absolute -top-1 -left-1 w-5 h-5 border-t-2 border-l-2 border-primary rounded-tl-lg"></div>
+              <div className="absolute -top-1 -right-1 w-5 h-5 border-t-2 border-r-2 border-primary rounded-tr-lg"></div>
+              <div className="absolute -bottom-1 -left-1 w-5 h-5 border-b-2 border-l-2 border-primary rounded-bl-lg"></div>
+              <div className="absolute -bottom-1 -right-1 w-5 h-5 border-b-2 border-r-2 border-primary rounded-br-lg"></div>
+
+              {/* Center Target Reticle */}
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="w-16 h-16 rounded-full border border-primary/40 flex items-center justify-center animate-ping opacity-30"></div>
+                <div className="absolute w-8 h-8 rounded-full border-2 border-primary/80 flex items-center justify-center">
+                  <div className="w-2 h-2 rounded-full bg-primary animate-pulse"></div>
+                </div>
+              </div>
+            </div>
+
+            {/* Animated Laser Scanning Beam */}
+            <div className="absolute inset-x-0 h-1 bg-gradient-to-r from-transparent via-emerald-400 to-transparent shadow-[0_0_15px_#34d399] animate-[pulse_1.2s_infinite] top-1/3"></div>
+
+            {/* Top Pill Inside Viewfinder */}
+            <div className="absolute top-3 left-0 right-0 flex justify-center z-10">
+              <span className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-black/75 border border-primary/50 text-[11px] font-bold tracking-wide text-emerald-300 shadow-md">
+                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                <span>
+                  {currentLang === 'mr' ? 'स्मार्ट भंगार स्कॅनर' : (currentLang === 'hi' ? 'स्मार्ट कबाड़ स्कैनर' : 'Smart Scrap Scanner')}
+                </span>
+              </span>
             </div>
           </div>
-          <div className="mt-6 text-center space-y-1.5 max-w-sm">
-            <h3 className="text-lg font-bold text-white flex items-center justify-center gap-2">
-              <span>कबाड़ की पहचान हो रही है...</span>
-              <span className="w-2 h-2 rounded-full bg-primary-fixed animate-ping"></span>
-            </h3>
-            <p className="text-xs text-white/80">
-              AI Vision analyzing material composition, grade &amp; CPCB code
+
+          {/* Friendly Status and Steps */}
+          <div className="mt-6 text-center space-y-2.5 max-w-sm w-full px-2">
+            <div>
+              <h3 className="text-xl font-bold text-white flex items-center justify-center gap-2">
+                <span>
+                  {currentLang === 'mr'
+                    ? 'भंगाराची तपासणी सुरू आहे...'
+                    : (currentLang === 'hi'
+                        ? 'कबाड़ की जांच हो रही है...'
+                        : 'Checking your scrap item...')}
+                </span>
+              </h3>
+              <p className="text-xs text-emerald-300/90 mt-0.5 font-medium">
+                {currentLang === 'mr'
+                  ? 'सामग्रीचा प्रकार ओळखून आजचा सर्वोत्तम दर शोधत आहे'
+                  : (currentLang === 'hi'
+                      ? 'सामग्री पहचान कर आज का सबसे अच्छा मंडी भाव निकाल रहे हैं'
+                      : 'Detecting scrap type & fetching today’s best mandi rate')}
+              </p>
+            </div>
+
+            {/* Live Visual Micro-Steps */}
+            <div className="flex items-center justify-center gap-2 pt-1 text-[11px]">
+              <span className={`px-2.5 py-1 rounded-lg font-semibold flex items-center gap-1 transition-all ${
+                scanStep >= 1 ? 'bg-primary/30 text-emerald-300 border border-primary/50' : 'bg-white/10 text-white/50'
+              }`}>
+                <span>{scanStep > 1 ? '✓' : '•'}</span>
+                <span>{currentLang === 'mr' ? 'प्रकार ओळख' : (currentLang === 'hi' ? 'प्रकार' : 'Material')}</span>
+              </span>
+              <span className={`px-2.5 py-1 rounded-lg font-semibold flex items-center gap-1 transition-all ${
+                scanStep >= 2 ? 'bg-primary/30 text-emerald-300 border border-primary/50' : 'bg-white/10 text-white/50'
+              }`}>
+                <span>{scanStep > 2 ? '✓' : '•'}</span>
+                <span>{currentLang === 'mr' ? 'दर्जा व वजन' : (currentLang === 'hi' ? 'दर्जा व वजन' : 'Grade & Weight')}</span>
+              </span>
+              <span className={`px-2.5 py-1 rounded-lg font-semibold flex items-center gap-1 transition-all ${
+                scanStep >= 3 ? 'bg-primary/30 text-emerald-300 border border-primary/50' : 'bg-white/10 text-white/50'
+              }`}>
+                <span>•</span>
+                <span>{currentLang === 'mr' ? 'डीलर दर' : (currentLang === 'hi' ? 'डीलर दर' : 'Dealer Rate')}</span>
+              </span>
+            </div>
+
+            {/* Real-World Reassurance Note */}
+            <p className="text-[11px] text-white/70 bg-white/5 border border-white/10 rounded-xl px-3 py-1.5 inline-block">
+              {currentLang === 'mr'
+                ? '💡 जवळच्या अधिकृत स्क्रॅप डीलरशी थेट संपर्क • तुरंत रोख रक्कम'
+                : (currentLang === 'hi'
+                    ? '💡 निकटतम अधिकृत कबाड़ डीलर से सीधा संपर्क • तुरंत नकद भुगतान'
+                    : '💡 Connects directly with verified local dealers for instant cash.')}
             </p>
           </div>
         </div>

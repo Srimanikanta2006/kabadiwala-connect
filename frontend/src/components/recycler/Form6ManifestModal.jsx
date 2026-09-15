@@ -48,11 +48,11 @@ export default function Form6ManifestModal({ isOpen, onClose, certData }) {
           {/* Parties 2-Column Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 border border-slate-300 p-3 rounded-lg bg-slate-50">
             <div className="space-y-1">
-              <span className="text-[10px] uppercase font-bold text-slate-500 block">1. SENDER (Origin / Aggregator)</span>
-              <p className="font-bold text-slate-900">{certData.collector || certData.collector_name || 'Ramesh K. (Peenya Aggregator)'}</p>
-              <p className="text-[11px] text-slate-700">Operating Territory: Peenya Industrial Cluster / Dharavi</p>
+              <span className="text-[10px] uppercase font-bold text-slate-500 block">1. SENDER (Origin / Aggregator Yard)</span>
+              <p className="font-bold text-slate-900">{certData.collector || certData.collector_name || 'Dilip Bhai (Peenya Aggregation Yard #04)'}</p>
+              <p className="text-[11px] text-slate-700">Operating Yard: {certData.dealerYardName || 'Peenya Industrial Aggregator Yard #04 / Dharavi'}</p>
               <span className="text-[10px] bg-emerald-100 text-emerald-800 font-semibold px-2 py-0.5 rounded inline-block mt-0.5">
-                CPCB Registered Informal Channel
+                {certData.dealerReg || 'CPCB Reg #KA-AGG-2024-118 (Authorized Aggregator)'}
               </span>
             </div>
 
@@ -63,6 +63,31 @@ export default function Form6ManifestModal({ isOpen, onClose, certData }) {
               <span className="text-[10px] bg-blue-100 text-blue-800 font-semibold px-2 py-0.5 rounded inline-block mt-0.5">
                 Tier-1 Dismantling &amp; Granulation Facility
               </span>
+            </div>
+          </div>
+
+          {/* 3-Tier Circular Provenance Tracking */}
+          <div className="p-3 bg-emerald-50/70 border border-emerald-200 rounded-lg space-y-1.5">
+            <span className="text-[10px] uppercase font-bold text-emerald-800 flex items-center gap-1">
+              <span className="w-2 h-2 rounded-full bg-emerald-600 animate-pulse"></span>
+              3-Tier Chain-of-Custody Provenance (Collector &rarr; Dealer/Aggregator &rarr; Recycler)
+            </span>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-[10px]">
+              <div className="bg-white p-2 rounded border border-emerald-100">
+                <span className="text-slate-500 font-bold block">1. Micro-Collectors</span>
+                <p className="font-semibold text-slate-800">Field Pickers (Babu Rao / 28 lots)</p>
+                <span className="text-slate-500 text-[9px]">&lt; 50 kg mobile scans</span>
+              </div>
+              <div className="bg-white p-2 rounded border border-emerald-100">
+                <span className="text-slate-500 font-bold block">2. Aggregator Yard</span>
+                <p className="font-semibold text-slate-800">{certData.dealerYardName || 'Peenya Yard #04 (Dilip Bhai)'}</p>
+                <span className="text-emerald-700 font-semibold text-[9px]">Calibrated HX711 Scale</span>
+              </div>
+              <div className="bg-white p-2 rounded border border-emerald-100">
+                <span className="text-slate-500 font-bold block">3. Smelter Weighbridge</span>
+                <p className="font-semibold text-slate-800">{certData.facility_name || 'EcoRecycle Plant'}</p>
+                <span className="text-blue-700 font-semibold text-[9px]">Statutory Form-6 Issued</span>
+              </div>
             </div>
           </div>
 

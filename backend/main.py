@@ -21,8 +21,9 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.db.supabase_client import get_supabase, get_materials, get_recyclers, get_prices, insert_lot
 from app.services.pricing_engine import calculate_valuation, REGIONAL_MANDI_CACHE
-from app.services.recycler_matcher import match_and_rank_recyclers
+from app.services.recycler_matcher import match_and_rank_recyclers, match_and_rank_dealers
 from pricing.price_board import get_price_board_data
+
 from app.services.bhashini_tts import synthesize_speech_bhashini
 from anomaly.detector import (
     evaluate_lot_anomaly,
@@ -441,18 +442,22 @@ def match_recyclers_endpoint(
 ):
     """
     GET /match-recyclers -> Chunk 6 (Production)
-    MCDA Recycler Matching Engine.
-    Hard filters out unauthorized recyclers.
-    Ranks authorized CPCB facilities by Price (35%), Distance (25%), Material Fit (20%),
-    Pickup Availability (10%), and Authorization Status (10%).
+    Returns both nearby local Aggregator / Dealer Yards (for micro-lots < 50 kg)
+    and authorized CPCB Recycler facilities (for bulk consignments).
     """
     try:
-        ranked = match_and_rank_recyclers(
+        ranked_recyclers = match_and_rank_recyclers(
             material_id=material_id,
             weight_kg=weight,
             collector_lat=lat,
             collector_lng=lng,
             require_pickup=require_pickup
+        )
+        ranked_dealers = match_and_rank_dealers(
+            material_id=material_id,
+            weight_kg=weight,
+            collector_lat=lat,
+            collector_lng=lng
         )
         return {
             "success": True,
@@ -460,8 +465,11 @@ def match_recyclers_endpoint(
             "material_id": material_id,
             "lot_weight_kg": weight,
             "collector_location": {"latitude": lat, "longitude": lng},
-            "total_matches": len(ranked),
-            "ranked_recyclers": ranked,
+            "total_matches": len(ranked_dealers) + len(ranked_recyclers),
+            "dealers": ranked_dealers,
+            "ranked_dealers": ranked_dealers,
+            "recyclers": ranked_recyclers,
+            "ranked_recyclers": ranked_recyclers,
             "timestamp": datetime.utcnow().isoformat()
         }
     except Exception as e:
@@ -475,6 +483,39 @@ def match_recyclers_endpoint(
                 "message_hi": "पुनर्चक्रणकर्ता मिलान विफल रहा।",
                 "message_mr": "पुनर्चक्रण केंद्र शोधणे अयशस्वी झाले."
             }
+        )
+
+
+@app.get("/match-dealers", tags=["Matching"])
+def match_dealers_endpoint(
+    material_id: str = Query("mat_pcb_high", description="Material category ID"),
+    weight: float = Query(10.0, description="Approximate lot weight in kg"),
+    lat: float = Query(19.0435, description="Collector GPS latitude"),
+    lng: float = Query(72.8567, description="Collector GPS longitude"),
+):
+    """
+    GET /match-dealers -> Nearest CPCB Registered Aggregator Yards (for street-level scrap handovers).
+    """
+    try:
+        ranked_dealers = match_and_rank_dealers(
+            material_id=material_id,
+            weight_kg=weight,
+            collector_lat=lat,
+            collector_lng=lng
+        )
+        return {
+            "success": True,
+            "status": "COMPLETED",
+            "material_id": material_id,
+            "weight_kg": weight,
+            "total_matches": len(ranked_dealers),
+            "dealers": ranked_dealers,
+            "timestamp": datetime.utcnow().isoformat()
+        }
+    except Exception as e:
+        logger.error(f"Dealer matching error: {e}", exc_info=True)
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
         )
 
 
@@ -1292,6 +1333,7 @@ def get_incoming_lots_for_recycler(
             "lot_id": lot_id,
             "handover_ref": handover_ref,
             "collector_id": lot.get("collector_id", "col_test_001"),
+            "collector_name": lot.get("collector_name") or "Babu Rao (Collector)",
             "material_id": mat_id,
             "material_category": lot.get("material_category", "PCB"),
             "approximate_weight": weight,

@@ -48,12 +48,12 @@ const HOME_TRANSLATIONS = {
     handoverConfirmed: 'हैंडओवर सत्यापित',
     offerReceived: 'ऑफर प्राप्त',
     noRecentLotsTitle: 'कोई पिछला लॉट नहीं है',
-    noRecentLotsDesc: 'कैमरा से कबाड़ स्कैन करें और सीधे अधिकृत रीसाइक्लर को बेचें।',
+    noRecentLotsDesc: 'कैमरा से कबाड़ स्कैन करें और तुरंत पास के अधिकृत डीलर को बेचें।',
     scanFirstLot: 'पहला लॉट स्कैन करें',
-    verifiedFacilities: 'क्षेत्र में सत्यापित संयंत्र',
-    facilitiesActive: '10 किमी में 14 सक्रिय',
-    facilitiesDesc: 'इको-रीसायकल एमएमआर (3.2 किमी), ग्रीन-सर्कल धारावी (1.8 किमी) और सेरेब्रा एमआईडीसी (7.4 किमी) आज उच्च ग्रेड पीसीबी और तांबे के तारों के लिए सक्रिय बोलियां लगा रहे हैं।',
-    exploreBids: 'लाइव रीसायकलर बोलियां देखें',
+    verifiedFacilities: 'क्षेत्र में अधिकृत स्क्रैप डीलर यार्ड',
+    facilitiesActive: '10 किमी में 14 सक्रिय यार्ड',
+    facilitiesDesc: 'पीन्या इंडस्ट्रियल यार्ड 04 (1.2 किमी), धारावी लिंक रोड यार्ड (1.8 किमी) और कुर्ला मंडी यार्ड (2.6 किमी) आज इलेक्ट्रॉनिक कांटे पर तुरंत नकद भुगतान के लिए सक्रिय हैं।',
+    exploreBids: 'पास के अधिकृत डीलर यार्ड देखें',
     lotNumber: 'लॉट #',
     mixedScrap: 'मिश्रित कबाड़'
   },
@@ -101,12 +101,12 @@ const HOME_TRANSLATIONS = {
     handoverConfirmed: 'हस्तांतरण प्रमाणित',
     offerReceived: 'ऑफर प्राप्त',
     noRecentLotsTitle: 'कोणतेही अलीकडील लॉट नाहीत',
-    noRecentLotsDesc: 'कॅमेऱ्याने भंगार स्कॅन करा आणि अधिकृत रिसायकलर्सना थेट विका.',
+    noRecentLotsDesc: 'कॅमेऱ्याने भंगार स्कॅन करा आणि थेट जवळच्या अधिकृत डीलरकडे विका.',
     scanFirstLot: 'पहिला लॉट स्कॅन करा',
-    verifiedFacilities: 'परिसरातील अधिकृत प्रकल्प',
-    facilitiesActive: '10 किमी मध्ये 14 सक्रिय',
-    facilitiesDesc: 'इको-रिसायकल एमएमआर (3.2 किमी), ग्रीन-सर्कल धारावी (1.8 किमी) आणि सेरेब्रा एमआयडीसी (7.4 किमी) आज उच्च-दर्जाच्या पीसीबी आणि तांब्याच्या केबल्ससाठी थेट दर देत आहेत.',
-    exploreBids: 'थेट रिसायकलर दर पहा',
+    verifiedFacilities: 'परिसरातील अधिकृत स्क्रॅप डीलर यार्ड',
+    facilitiesActive: '10 किमी मध्ये 14 सक्रिय यार्ड',
+    facilitiesDesc: 'पीन्या इंडस्ट्रियल यार्ड 04 (1.2 किमी), धारावी लिंक रोड यार्ड (1.8 किमी) आणि कुर्ला मंडी यार्ड (2.6 किमी) इलेक्ट्रॉनिक वजनकाट्यावर थेट रोख पेमेंटसाठी सक्रिय आहेत.',
+    exploreBids: 'जवळचे अधिकृत डीलर यार्ड पहा',
     lotNumber: 'लॉट #',
     mixedScrap: 'मिश्रित भंगार'
   },
@@ -154,12 +154,12 @@ const HOME_TRANSLATIONS = {
     handoverConfirmed: 'Handover Confirmed',
     offerReceived: 'Offer Received',
     noRecentLotsTitle: 'No Recent Lots',
-    noRecentLotsDesc: 'Scan scrap with camera and sell directly to authorized recyclers.',
+    noRecentLotsDesc: 'Scan scrap with camera and sell directly to verified local dealers for instant cash.',
     scanFirstLot: 'Scan First Lot',
-    verifiedFacilities: 'Verified Facilities in Area',
-    facilitiesActive: '14 Active in 10km',
-    facilitiesDesc: 'EcoRecycle MMR (3.2 km), GreenCircle Dharavi (1.8 km), and Cerebra MIDC (7.4 km) are actively quoting for high-grade PCBs and insulated copper cables today.',
-    exploreBids: 'Explore Live Recycler Bids',
+    verifiedFacilities: 'Verified Local Scrap Dealer Yards',
+    facilitiesActive: '14 Active Yards (< 10 km)',
+    facilitiesDesc: 'Peenya Industrial Yard #04 (1.2 km), Dharavi Link Road Yard (1.8 km), and Kurla Mandi Yard (2.6 km) are actively taking in scrap with instant cash/UPI payment on electronic scales.',
+    exploreBids: 'Explore Nearby Dealer Yards',
     lotNumber: 'Lot #',
     mixedScrap: 'Mixed Scrap'
   }
@@ -240,19 +240,60 @@ export default function Screen01Home({
     speakText(summary);
   };
 
+  const getSpokenRate = (idx) => {
+    const r = marketRates[idx]?.rate || (idx === 0 ? 265 : idx === 1 ? 385 : 190);
+    if (idx === 0) {
+      return safeLang === 'mr'
+        ? `सर्किट बोर्डचा बाजार भाव ${r} रुपये प्रति किलो आहे.`
+        : (safeLang === 'hi'
+            ? `सर्किट बोर्ड का मंडी भाव ${r} रुपये प्रति किलो है।`
+            : `Circuit board rate is ${r} rupees per kilogram.`);
+    }
+    if (idx === 1) {
+      return safeLang === 'mr'
+        ? `तांब्याच्या केबलचा बाजार भाव ${r} रुपये प्रति किलो आहे.`
+        : (safeLang === 'hi'
+            ? `तांबे के तार का भाव ${r} रुपये प्रति किलो है।`
+            : `Copper cable rate is ${r} rupees per kilogram.`);
+    }
+    return safeLang === 'mr'
+      ? `लिथियम बॅटरीचा बाजार भाव ${r} रुपये प्रति किलो आहे.`
+      : (safeLang === 'hi'
+          ? `लिथियम बैटरी का भाव ${r} रुपये प्रति किलो है।`
+          : `Lithium battery rate is ${r} rupees per kilogram.`);
+  };
+
   return (
     <div className="collector-shell bg-background text-on-background min-h-screen pb-24 relative overflow-x-hidden">
       {/* TopAppBar */}
       <header className="bg-surface dark:bg-on-background w-full sticky top-0 z-40 border-b border-outline-variant dark:border-outline">
         <div className="max-w-6xl mx-auto flex justify-between items-center w-full px-4 sm:px-6 h-16">
-          {/* Brand */}
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center text-on-primary font-bold shadow-sm">
+          {/* Brand & Clean Status Badge */}
+          <div className="flex items-center gap-2.5 sm:gap-3">
+            <div className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center text-on-primary font-bold shadow-sm shrink-0">
               <span className="material-symbols-outlined text-[22px]">recycling</span>
             </div>
             <div className="flex flex-col leading-tight">
-              <span className="font-headline-md text-lg sm:text-xl font-bold text-primary dark:text-primary-fixed-dim">RE:LINK</span>
-              <span className="text-[10px] text-primary/80 font-bold uppercase tracking-wider hidden sm:inline">{t.mandiTag}</span>
+              <span className="font-headline-md text-base sm:text-lg font-bold text-primary dark:text-primary-fixed-dim tracking-tight">
+                RE:LINK
+              </span>
+              <div className="flex items-center gap-1.5 text-[10px] font-semibold">
+                <span className="uppercase tracking-wider text-primary/90 font-bold">
+                  {t.mandiTag}
+                </span>
+                <span className="text-outline-variant">•</span>
+                {!syncStatus.isOnline || (syncStatus.unsyncedCount && syncStatus.unsyncedCount > 0) ? (
+                  <span className="inline-flex items-center gap-1 text-amber-700 dark:text-amber-400 font-bold">
+                    <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
+                    <span>{syncStatus.unsyncedCount || 1} {safeLang === 'mr' ? 'लॉट ऑफलाइन जतन • जोडल्यावर सिंक होईल' : (safeLang === 'hi' ? 'लॉट ऑफलाइन सुरक्षित • जुड़ने पर सिंक होगा' : 'lots saved offline • Syncing when connected')}</span>
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center gap-1 text-emerald-700 dark:text-emerald-400 font-medium">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                    <span>{safeLang === 'mr' ? 'ऑनलाइन' : (safeLang === 'hi' ? 'ऑनलाइन' : 'Online')}</span>
+                  </span>
+                )}
+              </div>
             </div>
           </div>
 
@@ -339,23 +380,6 @@ export default function Screen01Home({
               <span className="material-symbols-outlined text-sm text-primary">language</span>
               <span>{safeLang === 'hi' ? 'हिन्दी' : (safeLang === 'mr' ? 'मराठी' : 'EN')}</span>
             </button>
-
-            {/* Cloud Sync Status */}
-            <div
-              className={`flex items-center gap-1 h-10 px-2.5 rounded-full border text-xs font-semibold shrink-0 ${
-                syncStatus.isOnline
-                  ? 'bg-primary/10 border-primary/20 text-primary'
-                  : 'bg-amber-100 border-amber-300 text-amber-900'
-              }`}
-              title="Cloud Sync Status"
-            >
-              <span className="material-symbols-outlined text-[18px] filled">
-                {syncStatus.isOnline ? 'cloud_done' : 'cloud_off'}
-              </span>
-              <span className="hidden md:inline">
-                {syncStatus.isOnline ? t.syncLive : `${syncStatus.unsyncedCount || 1} ${t.syncOffline}`}
-              </span>
-            </div>
           </div>
         </div>
       </header>
@@ -412,7 +436,7 @@ export default function Screen01Home({
           <div className="grid grid-cols-2 gap-gutter-mobile">
             {/* PCB Card */}
             <div
-              onClick={() => speakText(marketRates[0].spoken)}
+              onClick={() => speakText(getSpokenRate(0))}
               className="bg-surface-container-low border border-outline-variant rounded-xl p-md shadow-sm relative overflow-hidden group cursor-pointer hover:border-primary transition-all"
             >
               <div className="absolute -right-4 -top-4 w-16 h-16 bg-primary/10 rounded-full pointer-events-none group-hover:scale-110 transition-transform"></div>
@@ -430,7 +454,7 @@ export default function Screen01Home({
 
             {/* Cable Card */}
             <div
-              onClick={() => speakText(marketRates[1].spoken)}
+              onClick={() => speakText(getSpokenRate(1))}
               className="bg-surface-container-low border border-outline-variant rounded-xl p-md shadow-sm relative overflow-hidden group cursor-pointer hover:border-primary transition-all"
             >
               <div className="absolute -right-4 -top-4 w-16 h-16 bg-primary/10 rounded-full pointer-events-none group-hover:scale-110 transition-transform"></div>
@@ -448,7 +472,7 @@ export default function Screen01Home({
 
             {/* Battery Card */}
             <div
-              onClick={() => speakText(marketRates[2].spoken)}
+              onClick={() => speakText(getSpokenRate(2))}
               className="col-span-2 bg-surface-container-low border border-outline-variant rounded-xl p-md shadow-sm relative overflow-hidden group flex justify-between items-center cursor-pointer hover:border-primary transition-all"
             >
               <div className="flex items-center gap-md relative z-10">

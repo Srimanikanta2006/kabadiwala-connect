@@ -6,7 +6,7 @@ import Form6ManifestModal from './recycler/Form6ManifestModal';
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
-export default function DealerDashboard({ onRoleSwitch }) {
+export default function DealerDashboard({ onRoleSwitch, currentLang: propLang, onLanguageChange: propOnLanguageChange }) {
   const { i18n } = useTranslation();
   const normalize = (lng) => {
     if (!lng) return 'hi';
@@ -16,15 +16,27 @@ export default function DealerDashboard({ onRoleSwitch }) {
     return 'hi';
   };
 
-  const [currentLang, setCurrentLang] = useState(() => normalize(i18n?.language || localStorage.getItem('relink_lang')));
+  const [internalLang, setInternalLang] = useState(() => normalize(propLang || i18n?.language || localStorage.getItem('relink_lang')));
+
+  useEffect(() => {
+    if (propLang) {
+      setInternalLang(normalize(propLang));
+    }
+  }, [propLang]);
+
+  const currentLang = normalize(propLang || internalLang);
 
   const handleLanguageCycle = () => {
     const cycle = { hi: 'mr', mr: 'en', en: 'hi' };
     const next = cycle[currentLang] || 'hi';
-    setCurrentLang(next);
-    localStorage.setItem('relink_lang', next);
-    if (i18n && i18n.changeLanguage) {
-      i18n.changeLanguage(next);
+    if (propOnLanguageChange) {
+      propOnLanguageChange(next);
+    } else {
+      setInternalLang(next);
+      localStorage.setItem('relink_lang', next);
+      if (i18n && i18n.changeLanguage) {
+        i18n.changeLanguage(next);
+      }
     }
   };
 
@@ -196,7 +208,65 @@ export default function DealerDashboard({ onRoleSwitch }) {
   });
   const [dealLocked, setDealLocked] = useState(false);
 
-  // Initialize Active Lot
+  // Initialize Active Lot & Sync Live Collector Inbound Lots
+  useEffect(() => {
+    try {
+      const liveLots = JSON.parse(localStorage.getItem('relink_inbound_dealer_lots') || '[]');
+      if (liveLots && liveLots.length > 0) {
+        setInboundLots(prev => {
+          const merged = [...liveLots];
+          for (const p of prev) {
+            if (!merged.some(m => m.lot_ref === p.lot_ref || m.id === p.id)) {
+              merged.push(p);
+            }
+          }
+          return merged;
+        });
+
+        // Set the most recently submitted queued live lot as active
+        const latestQueued = liveLots.find(l => l.status === 'QUEUED') || liveLots[0];
+        if (latestQueued) {
+          setActiveLot(latestQueued);
+          setActiveNetWeight(latestQueued.net_weight);
+          setActiveApprovedRate(latestQueued.approved_rate);
+        }
+      } else if (!activeLot && inboundLots.length > 0) {
+        const firstQueued = inboundLots.find(l => l.status === 'QUEUED') || inboundLots[0];
+        setActiveLot(firstQueued);
+        setActiveNetWeight(firstQueued.net_weight);
+        setActiveApprovedRate(firstQueued.approved_rate);
+      }
+    } catch (e) {
+      console.log('Error loading local live intake lots:', e);
+    }
+
+    // Fetch backend lots if available
+    async function fetchBackendLots() {
+      try {
+        const res = await fetch(`${API_BASE}/aggregator/lots?hub_id=hub_peenya_04`);
+        if (res.ok) {
+          const data = await res.json();
+          if (data.lots && data.lots.length > 0) {
+            setInboundLots(prev => {
+              const live = JSON.parse(localStorage.getItem('relink_inbound_dealer_lots') || '[]');
+              const combined = [...live];
+              for (const bl of data.lots) {
+                if (!combined.some(c => c.lot_ref === bl.lot_ref || c.id === bl.id)) {
+                  combined.push(bl);
+                }
+              }
+              return combined;
+            });
+          }
+        }
+      } catch (err) {
+        console.log('Backend aggregator lots offline fallback');
+      }
+    }
+    fetchBackendLots();
+  }, []);
+
+  // Update active lot selection
   useEffect(() => {
     if (!activeLot && inboundLots.length > 0) {
       const firstQueued = inboundLots.find(l => l.status === 'QUEUED') || inboundLots[0];
@@ -257,13 +327,40 @@ export default function DealerDashboard({ onRoleSwitch }) {
       // Deduct from working capital float
       setWorkingCapitalFloat(prev => Math.max(0, prev - totalAmount));
 
-      // Update lot in queue
+      // Update lot in queue state
       setInboundLots(prev => prev.map(l => l.id === activeLot.id ? {
         ...l,
         status: mode === 'CASH' ? 'PAID_CASH' : 'PAID_UPI',
         total_payout: totalAmount,
         payment_mode: mode
       } : l));
+
+      // Persist paid status in localStorage for cross-portal sync
+      try {
+        const stored = JSON.parse(localStorage.getItem('relink_inbound_dealer_lots') || '[]');
+        const updated = stored.map(l => (l.id === activeLot.id || l.lot_ref === activeLot.lot_ref) ? {
+          ...l,
+          status: mode === 'CASH' ? 'PAID_CASH' : 'PAID_UPI',
+          total_payout: totalAmount,
+          payment_mode: mode
+        } : l);
+        localStorage.setItem('relink_inbound_dealer_lots', JSON.stringify(updated));
+      } catch (e) {}
+
+      // Add to batch micro-lots in Tab 2 so Dealer can batch this newly bought lot!
+      setBatchMicroLots(prev => [
+        {
+          id: `micro_${activeLot.id}`,
+          ref: `#${activeLot.lot_ref}`,
+          collector: `${activeLot.collector_name} (${activeLot.collector_cluster || 'Peenya'})`,
+          grade: activeLot.material_name,
+          weight: activeNetWeight,
+          rate: activeApprovedRate,
+          selected: true
+        },
+        ...prev.filter(m => m.ref !== `#${activeLot.lot_ref}`)
+      ]);
+
 
       // Increment physical yard inventory
       const cat = activeLot.material_category;
@@ -337,6 +434,32 @@ export default function DealerDashboard({ onRoleSwitch }) {
       console.log('Wholesale lock notice:', e);
     }
 
+    // Save to shared localStorage so Recycler Dashboard immediately displays this pallet
+    try {
+      const palletRecord = {
+        id: 'batch_ka_pcb_104',
+        batch_number: 'BATCH-KA-PCB-104',
+        material_name: 'Grade-A PCB Palletized (Peenya Yard Consignment)',
+        material_category: 'PCB',
+        origin_hub: 'Peenya Industrial Aggregator Yard #04 (Dilip Bhai)',
+        origin_reg: 'CPCB Reg #KA-AGG-2024-118',
+        weight_kg: totalBatchWeight || 350.0,
+        approximate_weight: totalBatchWeight || 350.0,
+        quoted_price: Math.round((totalBatchWeight || 350.0) * agreedRate),
+        agreed_rate: agreedRate,
+        status: 'CONSIGNMENT_LOCKED',
+        buyer: buyerName,
+        micro_lots_count: selectedLots.length || 14,
+        cpcb_provenance_hash: 'CPCB-EPR-2026-KA-B104-F92E',
+        is_dealer_pallet: true,
+        created_at: new Date().toISOString()
+      };
+      const existingPallets = JSON.parse(localStorage.getItem('relink_dealer_pallets') || '[]');
+      localStorage.setItem('relink_dealer_pallets', JSON.stringify([palletRecord, ...existingPallets.filter(p => p.batch_number !== palletRecord.batch_number)]));
+    } catch (e) {
+      console.log('Error caching dealer pallet:', e);
+    }
+
     setDealLocked(true);
     showToast(
       'Wholesale Consignment Locked!',
@@ -370,7 +493,7 @@ export default function DealerDashboard({ onRoleSwitch }) {
       {/* TOP GLOBAL HEADER */}
       <header className="bg-surface-container-lowest border-b border-slate-200 sticky top-0 z-40 shadow-xs">
         <div className="px-4 sm:px-6 py-3 flex flex-wrap items-center justify-between gap-3">
-          {/* Yard Branding & CPCB Reg Details */}
+          {/* Yard Branding & Clean Attention Badge */}
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center text-on-primary shadow-sm shadow-primary/20">
               <span className="material-symbols-outlined text-[24px]">recycling</span>
@@ -378,12 +501,14 @@ export default function DealerDashboard({ onRoleSwitch }) {
             <div>
               <div className="flex items-center gap-2 flex-wrap">
                 <span className="font-extrabold text-[18px] tracking-tight text-on-surface">RE:LINK</span>
+                <span className="text-outline-variant">•</span>
                 <span className="px-2 py-0.5 rounded-md bg-emerald-50 text-primary border border-primary/20 text-[11px] font-bold uppercase tracking-wide">
-                  Yard Desk
+                  {currentLang === 'mr' ? 'यार्ड डेस्क' : (currentLang === 'hi' ? 'यार्ड डेस्क' : 'YARD DESK')}
                 </span>
-                <span className="hidden sm:inline-block w-1.5 h-1.5 rounded-full bg-slate-300"></span>
-                <span className="text-[13px] font-semibold text-slate-800">
-                  Peenya Yard 04 (Dilip Bhai's Yard)
+                <span className="text-outline-variant">•</span>
+                <span className="inline-flex items-center gap-1 text-emerald-700 text-xs font-semibold">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                  <span>{currentLang === 'mr' ? 'ऑनलाइन' : (currentLang === 'hi' ? 'ऑनलाइन' : 'Online')}</span>
                 </span>
               </div>
               <p className="text-[11.5px] text-secondary flex items-center gap-1.5 mt-0.5">
@@ -395,23 +520,15 @@ export default function DealerDashboard({ onRoleSwitch }) {
 
           {/* Operational Status & Working Capital Balance Float */}
           <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
-            {/* Live Calibration Badge */}
-            <div className="hidden xl:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-emerald-50/80 border border-emerald-200/60 text-emerald-900 text-[12px] font-medium">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-              <span>Weighbridge &amp; Scale #02 Calibrated</span>
-              <span className="text-slate-300">|</span>
-              <span className="text-emerald-700">Live Mandi Feed Synced</span>
-            </div>
-
             {/* Working Capital Float Pill */}
             <div className="flex items-center gap-2 px-3 sm:px-3.5 py-1.5 rounded-xl bg-slate-100 border border-slate-200/80 text-[12px]">
               <span className="material-symbols-outlined text-[17px] text-primary">account_balance_wallet</span>
               <div>
                 <span className="text-slate-500 block text-[10px] leading-tight font-medium uppercase tracking-wider">
-                  Cash/UPI Float
+                  {currentLang === 'mr' ? 'रोख / UPI निधी' : (currentLang === 'hi' ? 'नकद / UPI फ्लोट' : 'Cash/UPI Float')}
                 </span>
                 <span className="font-bold text-slate-900 text-[13px] leading-tight font-mono">
-                  ₹{workingCapitalFloat.toLocaleString('en-IN')} Reserve
+                  ₹{workingCapitalFloat.toLocaleString('en-IN')} {currentLang === 'mr' ? 'शिल्लक' : (currentLang === 'hi' ? 'आरक्षित' : 'Reserve')}
                 </span>
               </div>
             </div>
@@ -433,7 +550,7 @@ export default function DealerDashboard({ onRoleSwitch }) {
               title="Access CPCB Master Admin Tools"
             >
               <span className="material-symbols-outlined text-[16px] text-primary">admin_panel_settings</span>
-              <span className="hidden md:inline">Admin</span>
+              <span className="hidden md:inline">{currentLang === 'mr' ? 'प्रशासक' : (currentLang === 'hi' ? 'एडमिन' : 'Admin')}</span>
             </button>
 
             {/* Role Switcher */}
@@ -443,7 +560,7 @@ export default function DealerDashboard({ onRoleSwitch }) {
               title="Switch Role Portal"
             >
               <span className="material-symbols-outlined text-[16px]">switch_account</span>
-              <span className="hidden sm:inline">Switch Role</span>
+              <span className="hidden sm:inline">{currentLang === 'mr' ? 'भूमिका बदला' : (currentLang === 'hi' ? 'रोल बदलें' : 'Switch Role')}</span>
             </button>
 
             {/* Notification Bell */}
@@ -464,7 +581,7 @@ export default function DealerDashboard({ onRoleSwitch }) {
               </div>
               <div className="hidden lg:flex flex-col text-left">
                 <span className="text-[13px] font-bold text-slate-900 leading-tight">Dilip Bhai</span>
-                <span className="text-[11px] text-emerald-700 font-medium leading-tight">Yard Master Admin</span>
+                <span className="text-[11px] text-emerald-700 font-medium leading-tight">{currentLang === 'mr' ? 'यार्ड प्रमुख व्यवस्थापक' : (currentLang === 'hi' ? 'यार्ड प्रमुख प्रबंधक' : 'Yard Master Admin')}</span>
               </div>
             </div>
           </div>
@@ -481,7 +598,9 @@ export default function DealerDashboard({ onRoleSwitch }) {
             onClick={() => setActiveTab('tab-intake')}
           >
             <span className="material-symbols-outlined text-[20px]">input</span>
-            <span>1. Inbound Intake &amp; Cash Desk</span>
+            <span>
+              {currentLang === 'mr' ? '1. गेट आवक व रोख देयक' : (currentLang === 'hi' ? '1. गेट आवक एवं नकद डेस्क' : '1. Inbound Intake & Cash Desk')}
+            </span>
             <span className="ml-1 px-1.5 py-0.2 bg-emerald-100 text-emerald-800 rounded-full text-[11px] font-semibold">
               Live ({inboundLots.filter(l => l.status === 'QUEUED').length})
             </span>
@@ -496,7 +615,9 @@ export default function DealerDashboard({ onRoleSwitch }) {
             onClick={() => setActiveTab('tab-inventory')}
           >
             <span className="material-symbols-outlined text-[20px]">inventory_2</span>
-            <span>2. Yard Inventory &amp; Batch Engine</span>
+            <span>
+              {currentLang === 'mr' ? '2. यार्ड साठा व बॅच इंजिन' : (currentLang === 'hi' ? '2. यार्ड इन्वेंटरी एवं बैच इंजन' : '2. Yard Inventory & Batch Engine')}
+            </span>
             <span className="ml-1 px-1.5 py-0.2 bg-slate-100 text-slate-700 rounded-full text-[11px]">
               {totalBatchWeight.toFixed(0)} kg Ready
             </span>
@@ -511,7 +632,9 @@ export default function DealerDashboard({ onRoleSwitch }) {
             onClick={() => setActiveTab('tab-marketplace')}
           >
             <span className="material-symbols-outlined text-[20px]">local_shipping</span>
-            <span>3. Outbound B2B Recycler Marketplace</span>
+            <span>
+              {currentLang === 'mr' ? '3. B2B रिसायकलर बाजारपेठ' : (currentLang === 'hi' ? '3. B2B रीसायकलर बाज़ार' : '3. Outbound B2B Recycler Marketplace')}
+            </span>
             <span className="ml-1 px-1.5 py-0.2 bg-emerald-100 text-emerald-800 rounded-full text-[11px] font-bold">
               +{netSpreadMarginPct}% Spread
             </span>
@@ -526,7 +649,9 @@ export default function DealerDashboard({ onRoleSwitch }) {
             onClick={() => setActiveTab('tab-compliance')}
           >
             <span className="material-symbols-outlined text-[20px]">verified_user</span>
-            <span>4. Form-6 Compliance &amp; Provenance Tree</span>
+            <span>
+              {currentLang === 'mr' ? '4. फॉर्म-6 पूर्तता व कस्टडी ट्री' : (currentLang === 'hi' ? '4. फॉर्म-6 अनुपालन एवं कस्टडी ट्री' : '4. Form-6 Compliance & Provenance Tree')}
+            </span>
             <span className="ml-1 px-1.5 py-0.2 bg-blue-100 text-blue-800 rounded-full text-[11px] font-bold">
               CPCB 2022
             </span>
@@ -1804,21 +1929,44 @@ export default function DealerDashboard({ onRoleSwitch }) {
               <span className="text-[11px] text-slate-300 mt-2 font-mono">Align collector slip QR within box</span>
             </div>
 
-            <div className="space-y-2">
-              <button
-                onClick={() => {
-                  setShowScannerModal(false);
-                  const pcbLot = inboundLots[0];
-                  setActiveLot(pcbLot);
-                  setActiveNetWeight(pcbLot.net_weight);
-                  setActiveApprovedRate(pcbLot.approved_rate);
-                  showToast('QR Code Scanned!', `Loaded ${pcbLot.lot_ref} (${pcbLot.collector_name}) into weighbridge desk.`);
-                }}
-                className="w-full py-2.5 bg-primary hover:bg-emerald-800 text-white font-bold text-xs rounded-xl flex items-center justify-center gap-2 cursor-pointer shadow-sm transition-colors"
-              >
-                <span className="material-symbols-outlined text-[16px]">qr_code</span>
-                <span>Simulate Scan: Lot #RL-2026-00482 (Ramesh K.)</span>
-              </button>
+            <div className="space-y-2 max-h-56 overflow-y-auto pr-1">
+              <span className="text-[11px] font-bold text-secondary uppercase tracking-wider block">
+                Tap to Simulate QR Scan / Weighbridge Token:
+              </span>
+              {inboundLots.slice(0, 4).map((lot) => (
+                <button
+                  key={lot.id}
+                  onClick={() => {
+                    setShowScannerModal(false);
+                    setActiveLot(lot);
+                    setActiveNetWeight(lot.net_weight);
+                    setActiveApprovedRate(lot.approved_rate);
+                    showToast('QR Code Scanned!', `Loaded ${lot.lot_ref} (${lot.collector_name}) into weighbridge desk.`);
+                  }}
+                  className={`w-full py-2.5 px-3 rounded-xl flex items-center justify-between gap-2 text-xs font-bold transition-colors cursor-pointer border ${
+                    lot.is_new_live_intake
+                      ? 'bg-emerald-50 text-emerald-900 border-emerald-300 hover:bg-emerald-100'
+                      : 'bg-surface-container hover:bg-surface-container-high text-on-surface border-outline-variant/60'
+                  }`}
+                >
+                  <div className="flex items-center gap-2 text-left truncate">
+                    <span className="material-symbols-outlined text-[18px] text-primary">qr_code</span>
+                    <div>
+                      <span className="block leading-tight font-mono text-[11.5px]">{lot.lot_ref}</span>
+                      <span className="text-[10px] text-secondary font-normal block">{lot.collector_name} • {lot.net_weight} kg {lot.material_category}</span>
+                    </div>
+                  </div>
+                  {lot.is_new_live_intake ? (
+                    <span className="bg-emerald-600 text-white text-[9.5px] px-2 py-0.5 rounded-full font-bold uppercase shrink-0 animate-pulse">
+                      New Inbound
+                    </span>
+                  ) : (
+                    <span className="text-[10.5px] text-primary font-mono shrink-0">
+                      ₹{Math.round(lot.net_weight * lot.approved_rate).toLocaleString('en-IN')}
+                    </span>
+                  )}
+                </button>
+              ))}
             </div>
           </div>
         </div>

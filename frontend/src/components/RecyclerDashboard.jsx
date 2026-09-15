@@ -50,7 +50,7 @@ const INITIAL_FACILITIES = [
   }
 ];
 
-export default function RecyclerDashboard({ onRoleSwitch }) {
+export default function RecyclerDashboard({ onRoleSwitch, currentLang: propLang, onLanguageChange: propOnLanguageChange }) {
   const { i18n } = useTranslation();
   const normalize = (lng) => {
     if (!lng) return 'hi';
@@ -60,15 +60,27 @@ export default function RecyclerDashboard({ onRoleSwitch }) {
     return 'hi';
   };
 
-  const [currentLang, setCurrentLang] = useState(() => normalize(i18n?.language || localStorage.getItem('relink_lang')));
+  const [internalLang, setInternalLang] = useState(() => normalize(propLang || i18n?.language || localStorage.getItem('relink_lang')));
+
+  useEffect(() => {
+    if (propLang) {
+      setInternalLang(normalize(propLang));
+    }
+  }, [propLang]);
+
+  const currentLang = normalize(propLang || internalLang);
 
   const handleLanguageCycle = () => {
     const cycle = { hi: 'mr', mr: 'en', en: 'hi' };
     const next = cycle[currentLang] || 'hi';
-    setCurrentLang(next);
-    localStorage.setItem('relink_lang', next);
-    if (i18n && i18n.changeLanguage) {
-      i18n.changeLanguage(next);
+    if (propOnLanguageChange) {
+      propOnLanguageChange(next);
+    } else {
+      setInternalLang(next);
+      localStorage.setItem('relink_lang', next);
+      if (i18n && i18n.changeLanguage) {
+        i18n.changeLanguage(next);
+      }
     }
   };
 
@@ -219,8 +231,61 @@ export default function RecyclerDashboard({ onRoleSwitch }) {
         console.log('Local lots merge notice:', dbErr);
       }
 
-      // Merge backend & local lots with rich Stitch prototype cards
-      const mergedLots = mergeWithStitchLots(fetchedLots);
+      // Also check for Dealer Consolidated Pallets (Tier-2 Aggregator Yard -> Tier-1 Industrial Recycler)
+      let dealerPallets = [];
+      try {
+        const savedPallets = localStorage.getItem('relink_dealer_pallets');
+        if (savedPallets) {
+          const parsed = JSON.parse(savedPallets);
+          dealerPallets = (parsed || []).map(p => ({
+            ...p,
+            priority_label: (p.priority_label || '').replace(/Aggregator Bulk Pallet •\s*/i, '').trim() || 'Certified Inbound',
+            time_posted: (p.time_posted || '').includes('Fleet Dispatch') ? 'Ready for Dispatch' : p.time_posted,
+            ai_badge: (p.ai_badge || '').includes('Calibrated Scale') ? 'Scale Certified' : p.ai_badge
+          }));
+        }
+      } catch (e) {
+        console.log('Error parsing saved dealer pallets:', e);
+      }
+
+      if (!dealerPallets || dealerPallets.length === 0) {
+        dealerPallets = [
+          {
+            id: 'PLT-PEENYA-104',
+            handover_ref: 'PLT-KA-04-104',
+            title: 'Server & Telecom PCB Pallet',
+            subtitle: 'Peenya Yard #04 • CPCB Verified Pallet',
+            category: 'PCB',
+            category_code: 'ITEW1-PCB-HG',
+            priority_label: 'Certified Inbound',
+            time_posted: 'Ready for Dispatch',
+            image_url: 'https://lh3.googleusercontent.com/aida/AEtjO1Uibj7iPqmg9YKdnMYAfgjprFLErbb0FcOdAiLVCHgIpkj7gbP3YTmKP8zFMrg1kaOj63apJEhpOtxdLXe-93ri5nb5eVArP4y3X_auotJ1wePJz5s4YibZAvhuz-KAXyzC05MmFpsIy-yBUY4Mqu5yd0ohBBU3_J9_aC-nPfLKrNm8V66IvtxKehIH0e-8jnBWhBN-DbfYt6LisI-TlJcyw1QSl4R5LDqnipESfPn5rrrJ6LyUFidtmQ',
+            ai_badge: 'Scale Certified',
+            location_label: 'Peenya Yard #04',
+            distance_km: 4.8,
+            collector_name: 'Dilip Bhai (Peenya Yard #04)',
+            collector_rating: 4.95,
+            collector_history: 'CPCB Reg #KA-AGG-2024-118 • 112 Pallets',
+            net_weight_kg: 350.0,
+            collector_asking_rate: 780,
+            benchmark_min: 760,
+            benchmark_max: 785,
+            suggested_rate: 780,
+            status: 'PENDING',
+            isDealerPallet: true,
+            dealerYardName: 'Peenya Industrial Yard #04',
+            dealerOwner: 'Dilip Bhai',
+            dealerReg: 'CPCB Reg #KA-AGG-2024-118',
+            provenance: 'Consolidated from 28 Micro-Collector field lots'
+          }
+        ];
+        try {
+          localStorage.setItem('relink_dealer_pallets', JSON.stringify(dealerPallets));
+        } catch (e) {}
+      }
+
+      // Merge dealer pallets, backend & local lots with rich Stitch prototype cards
+      const mergedLots = mergeWithStitchLots(fetchedLots, dealerPallets);
       setLots(mergedLots);
 
       // Initialize default rates and fulfillment
@@ -254,24 +319,24 @@ export default function RecyclerDashboard({ onRoleSwitch }) {
     }
   };
 
-  const mergeWithStitchLots = (backendLots) => {
+  const mergeWithStitchLots = (backendLots, dealerPallets = []) => {
     const stitchLots = [
       {
         id: 'lot_stitch_00482',
         handover_ref: 'RL-2026-00482',
-        title: 'Printed Circuit Board (Grade A Motherboards)',
-        subtitle: 'Dual-Socket Server Boards, High-Gold Finger Connectors, ICs intact',
+        title: 'Circuit Boards (Motherboards)',
+        subtitle: 'Dual-Socket Server Boards, ICs intact',
         category: 'PCB',
         category_code: 'ITEW1-PCB-HG',
-        priority_label: 'High Priority • Grade A',
-        time_posted: 'Posted 14:15 IST (42m ago)',
+        priority_label: 'Grade A',
+        time_posted: '14:15 (42m ago)',
         image_url: 'https://lh3.googleusercontent.com/aida/AEtjO1Uibj7iPqmg9YKdnMYAfgjprFLErbb0FcOdAiLVCHgIpkj7gbP3YTmKP8zFMrg1kaOj63apJEhpOtxdLXe-93ri5nb5eVArP4y3X_auotJ1wePJz5s4YibZAvhuz-KAXyzC05MmFpsIy-yBUY4Mqu5yd0ohBBU3_J9_aC-nPfLKrNm8V66IvtxKehIH0e-8jnBWhBN-DbfYt6LisI-TlJcyw1QSl4R5LDqnipESfPn5rrrJ6LyUFidtmQ',
-        ai_badge: '92% AI Vision Verified',
-        location_label: 'Peenya Ind. Cluster (13.028°N, 77.518°E)',
+        ai_badge: '92% Verified',
+        location_label: 'Peenya Cluster',
         distance_km: 4.8,
-        collector_name: 'Ramesh K. (Peenya Aggregator)',
+        collector_name: 'Ramesh K. (Peenya)',
         collector_rating: 4.8,
-        collector_history: 'CPCB Registered Aggregator • 42 Handover Batches',
+        collector_history: '42 Handover Batches',
         net_weight_kg: 12.0,
         collector_asking_rate: 740,
         benchmark_min: 700,
@@ -282,19 +347,19 @@ export default function RecyclerDashboard({ onRoleSwitch }) {
       {
         id: 'lot_stitch_00483',
         handover_ref: 'RL-2026-00483',
-        title: 'Insulated Copper Wire & High-Tension Cables',
-        subtitle: 'Stripped telecom grade pure copper strands. Moisture free, tied bundle, no PVC insulation degradation.',
+        title: 'Insulated Copper Cables',
+        subtitle: 'Clean stripped telecom copper bundle',
         category: 'CABLES',
         category_code: 'ITEW-CBL-CU',
-        priority_label: 'Heavy Metals',
-        time_posted: 'Posted 13:30 IST (1h ago)',
+        priority_label: 'Copper Wire',
+        time_posted: '13:30 (1h ago)',
         image_url: 'https://lh3.googleusercontent.com/aida/AEtjO1WgXxj3PTs-7lfhFp-JK48EFoiQ6J122eiWOD5bFME_YW39QqWjSOtecSCCok96UgeiWft9i-8N-b4CLTLOt2TKYJpTgjDclW5fZ8pW2Ao12n1xdcxpIMTthmcakRwFYe5pJNiNHbEvQXiTZ6Dg62wI00Pp4LCfvkBxSm5ebeUHSLS26HhnhDK3yHfN-r9YHbPLIFxigyiHuXbRjgJuBMMKwgaWB7DxGJ8xsxedgkY1tTjZMRuMCZsxeAQ',
-        ai_badge: '89% AI Vision Verified',
-        location_label: 'Yeshwanthpur Yard (13.018°N, 77.545°E)',
+        ai_badge: '89% Verified',
+        location_label: 'Yeshwanthpur Yard',
         distance_km: 7.2,
         collector_name: 'Dilip S. (Yard Manager)',
         collector_rating: 4.9,
-        collector_history: 'Authorized Aggregator • 88 Batches',
+        collector_history: '88 Batches Handed Over',
         net_weight_kg: 35.0,
         collector_asking_rate: 410,
         benchmark_min: 400,
@@ -305,15 +370,15 @@ export default function RecyclerDashboard({ onRoleSwitch }) {
       {
         id: 'lot_stitch_00480',
         handover_ref: 'RL-2026-00480',
-        title: 'Laptop & Mobile Li-ion Cells & Battery Packs',
-        subtitle: 'Intact aluminum pouch cells, fire-safe storage container, terminals taped',
+        title: 'Li-ion Battery Packs',
+        subtitle: 'Intact cells in fire-safe container',
         category: 'BATTERIES',
         category_code: 'BATT-LI-ION',
-        priority_label: 'Hazardous • Fire Safe',
-        time_posted: 'Offer Sent • Awaiting Sign-off',
+        priority_label: 'Fire Safe',
+        time_posted: 'Offer Sent',
         image_url: '/assets/icons/batt_lead.svg',
-        ai_badge: '86% AI Vision Verified',
-        location_label: 'Rajajinagar Industrial (12.989°N, 77.553°E)',
+        ai_badge: '86% Verified',
+        location_label: 'Rajajinagar Industrial',
         distance_km: 5.1,
         collector_name: 'Imran Bhai',
         collector_rating: 4.7,
@@ -357,7 +422,7 @@ export default function RecyclerDashboard({ onRoleSwitch }) {
 
     const seenIds = new Set();
     const uniqueLots = [];
-    for (const lot of [...formattedBackend, ...stitchLots]) {
+    for (const lot of [...dealerPallets, ...formattedBackend, ...stitchLots]) {
       if (lot.id && !seenIds.has(lot.id)) {
         seenIds.add(lot.id);
         uniqueLots.push(lot);
@@ -382,6 +447,27 @@ export default function RecyclerDashboard({ onRoleSwitch }) {
   };
 
   const handleOpenWeighbridgeModal = (lot) => {
+    if (lot.status === 'CONFIRMED') {
+      setSelectedManifestData({
+        cert: `CPCB-EPR-2026-MH-${(lot.id || '994102').slice(-6).toUpperCase()}`,
+        certificate_id: `CPCB-EPR-2026-MH-${(lot.id || '994102').slice(-6).toUpperCase()}`,
+        lot: lot.handover_ref,
+        lot_ref: lot.handover_ref,
+        material: lot.title,
+        collector: lot.collector_name || (lot.isDealerPallet ? 'Dilip Bhai (Peenya Yard #04)' : 'Babu Rao (Collector)'),
+        facility_name: selectedFacility.name,
+        weight: lot.net_weight_kg,
+        verified_weight: lot.net_weight_kg,
+        payout: Math.round(lot.net_weight_kg * (rates[lot.id] || lot.suggested_rate)),
+        mode: settlementMode,
+        payment_mode: settlementMode,
+        isDealerPallet: lot.isDealerPallet,
+        dealerYardName: lot.dealerYardName,
+        dealerReg: lot.dealerReg,
+        provenance: lot.provenance
+      });
+      return;
+    }
     setInspectLot(lot);
     setWeighbridgeInput(lot.net_weight_kg.toString());
   };
@@ -391,6 +477,7 @@ export default function RecyclerDashboard({ onRoleSwitch }) {
     setIsSubmittingConfirm(true);
     const finalWeight = parseFloat(weighbridgeInput) || inspectLot.net_weight_kg;
 
+    let certId = `CPCB-EPR-2026-MH-${Date.now().toString().slice(-8)}`;
     try {
       const res = await fetch(`${API_BASE}/handover/confirm`, {
         method: 'POST',
@@ -405,42 +492,44 @@ export default function RecyclerDashboard({ onRoleSwitch }) {
 
       if (res.ok) {
         const data = await res.json();
-        setConfirmationNotice({
-          certificate_id: data.cpcb_certificate_id || `CPCB-EPR-2026-MH-${Date.now().toString().slice(-8)}`,
-          lot_ref: inspectLot.handover_ref,
-          material: inspectLot.title,
-          verified_weight: finalWeight,
-          payout: Math.round(finalWeight * (rates[inspectLot.id] || inspectLot.suggested_rate)),
-          payment_mode: settlementMode
-        });
-
-        // Update local status
-        setLots((prev) =>
-          prev.map((l) => (l.id === inspectLot.id ? { ...l, status: 'CONFIRMED' } : l))
-        );
-        setMetrics((prev) => ({
-          ...prev,
-          confirmed_count: prev.confirmed_count + 1,
-          total_verified_tonnage_mt: parseFloat((prev.total_verified_tonnage_mt + finalWeight / 1000).toFixed(2))
-        }));
-      } else {
-        // Fallback simulation
-        const fakeCert = `CPCB-EPR-2026-MH-${Date.now().toString().slice(-8)}`;
-        setConfirmationNotice({
-          certificate_id: fakeCert,
-          lot_ref: inspectLot.handover_ref,
-          material: inspectLot.title,
-          verified_weight: finalWeight,
-          payout: Math.round(finalWeight * (rates[inspectLot.id] || inspectLot.suggested_rate)),
-          payment_mode: settlementMode
-        });
-        setLots((prev) =>
-          prev.map((l) => (l.id === inspectLot.id ? { ...l, status: 'CONFIRMED' } : l))
-        );
+        if (data.cpcb_certificate_id) certId = data.cpcb_certificate_id;
       }
     } catch (err) {
-      console.error('Weighbridge confirm error:', err);
+      console.log('Weighbridge confirm offline fallback:', err);
     } finally {
+      const certData = {
+        certificate_id: certId,
+        cert: certId,
+        lot_ref: inspectLot.handover_ref,
+        lot: inspectLot.handover_ref,
+        material: inspectLot.title,
+        verified_weight: finalWeight,
+        weight: finalWeight,
+        payout: Math.round(finalWeight * (rates[inspectLot.id] || inspectLot.suggested_rate)),
+        payment_mode: settlementMode,
+        mode: settlementMode,
+        collector: inspectLot.collector_name || (inspectLot.isDealerPallet ? 'Dilip Bhai (Peenya Yard #04)' : 'Babu Rao (Collector)'),
+        facility_name: selectedFacility.name,
+        isDealerPallet: inspectLot.isDealerPallet,
+        dealerYardName: inspectLot.dealerYardName,
+        dealerReg: inspectLot.dealerReg,
+        provenance: inspectLot.provenance
+      };
+
+      setConfirmationNotice(certData);
+      setSelectedManifestData(certData);
+
+      // Update local status
+      setLots((prev) =>
+        prev.map((l) => (l.id === inspectLot.id ? { ...l, status: 'CONFIRMED' } : l))
+      );
+      setMetrics((prev) => ({
+        ...prev,
+        confirmed_count: prev.confirmed_count + 1,
+        total_verified_tonnage_mt: parseFloat((prev.total_verified_tonnage_mt + finalWeight / 1000).toFixed(2)),
+        cpcb_certificates_issued: prev.cpcb_certificates_issued + 1
+      }));
+
       setIsSubmittingConfirm(false);
       setInspectLot(null);
     }
@@ -621,12 +710,42 @@ export default function RecyclerDashboard({ onRoleSwitch }) {
   };
 
   const navItems = [
-    { id: 'incoming-lots', label: 'Incoming Lots', icon: 'inbox', badge: filteredLots.length },
-    { id: 'active-pickups', label: 'Active Pickups', icon: 'local_shipping', badge: '8' },
-    { id: 'material-inventory', label: 'Material Inventory', icon: 'inventory_2', badge: null },
-    { id: 'price-quotes', label: 'Price & Quotes', icon: 'currency_rupee', badge: null },
-    { id: 'traceability-epr', label: 'Traceability & EPR', icon: 'policy', badge: 'CPCB' },
-    { id: 'facility-settings', label: 'Facility Settings', icon: 'tune', badge: null }
+    {
+      id: 'incoming-lots',
+      label: currentLang === 'mr' ? 'येणारे लॉट्स' : (currentLang === 'hi' ? 'आवक लॉट्स' : 'Incoming Lots'),
+      icon: 'inbox',
+      badge: filteredLots.length
+    },
+    {
+      id: 'active-pickups',
+      label: currentLang === 'mr' ? 'सक्रिय पिकअप' : (currentLang === 'hi' ? 'सक्रिय पिकअप' : 'Active Pickups'),
+      icon: 'local_shipping',
+      badge: '8'
+    },
+    {
+      id: 'material-inventory',
+      label: currentLang === 'mr' ? 'सामग्री साठा' : (currentLang === 'hi' ? 'सामग्री इन्वेंटरी' : 'Material Inventory'),
+      icon: 'inventory_2',
+      badge: null
+    },
+    {
+      id: 'price-quotes',
+      label: currentLang === 'mr' ? 'खरेदी दर व कोट्स' : (currentLang === 'hi' ? 'खरीद दर एवं कोट्स' : 'Price & Quotes'),
+      icon: 'currency_rupee',
+      badge: null
+    },
+    {
+      id: 'traceability-epr',
+      label: currentLang === 'mr' ? 'ट्रेसेबिलिटी व CPCB' : (currentLang === 'hi' ? 'ट्रेसेबिलिटी एवं CPCB' : 'Traceability & EPR'),
+      icon: 'policy',
+      badge: 'CPCB'
+    },
+    {
+      id: 'facility-settings',
+      label: currentLang === 'mr' ? 'संयंत्र सेटिंग्ज' : (currentLang === 'hi' ? 'संयंत्र सेटिंग्स' : 'Facility Settings'),
+      icon: 'tune',
+      badge: null
+    }
   ];
 
   return (
@@ -656,8 +775,13 @@ export default function RecyclerDashboard({ onRoleSwitch }) {
                 <span className="font-headline-md text-headline-md tracking-tight text-primary font-bold leading-none">
                   RE:LINK
                 </span>
-                <span className="font-label-md text-[10px] text-on-surface-variant uppercase tracking-wider mt-0.5">
-                  Recycler Enterprise
+                <span className="font-label-md text-[10px] text-on-surface-variant uppercase tracking-wider mt-0.5 flex items-center gap-1">
+                  <span>{currentLang === 'mr' ? 'रिसायकलर' : (currentLang === 'hi' ? 'रीसायकलर' : 'Recycler')}</span>
+                  <span className="text-outline-variant">•</span>
+                  <span className="inline-flex items-center gap-1 text-emerald-700 font-bold lowercase">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                    <span>{currentLang === 'mr' ? 'ऑनलाइन' : (currentLang === 'hi' ? 'ऑनलाइन' : 'Online')}</span>
+                  </span>
                 </span>
               </div>
             </div>
@@ -676,7 +800,7 @@ export default function RecyclerDashboard({ onRoleSwitch }) {
               <div className="flex items-center gap-2">
                 <span className="material-symbols-outlined text-primary text-[18px]">verified</span>
                 <span className="font-label-md text-label-md text-on-surface font-semibold text-xs">
-                  Authorized Facility
+                  {currentLang === 'mr' ? 'अधिकृत संयंत्र' : (currentLang === 'hi' ? 'अधिकृत संयंत्र' : 'Authorized Facility')}
                 </span>
               </div>
               <span className="bg-primary-fixed text-on-primary-fixed-variant text-[10px] font-bold px-2 py-0.5 rounded-full uppercase">
@@ -726,7 +850,7 @@ export default function RecyclerDashboard({ onRoleSwitch }) {
           <div className="bg-surface-container-highest rounded-xl p-3.5 flex flex-col gap-2 border border-outline-variant/30">
             <div className="flex items-center justify-between">
               <span className="font-label-md text-[11px] uppercase tracking-wider text-on-surface-variant font-bold">
-                Monthly Quota
+                {currentLang === 'mr' ? 'मासिक कोटा' : (currentLang === 'hi' ? 'मासिक कोटा' : 'Monthly Quota')}
               </span>
               <span className="font-label-md text-xs text-primary font-bold">85.6%</span>
             </div>
@@ -734,7 +858,7 @@ export default function RecyclerDashboard({ onRoleSwitch }) {
               <div className="bg-primary h-full rounded-full transition-all duration-500" style={{ width: '85.6%' }}></div>
             </div>
             <span className="font-body-md text-[11px] text-on-surface-variant leading-tight">
-              Target: {metrics.total_verified_tonnage_mt || 42.8} / 50 MT
+              {currentLang === 'mr' ? 'लक्ष्य:' : (currentLang === 'hi' ? 'लक्ष्य:' : 'Target:')} {metrics.total_verified_tonnage_mt || 42.8} / 50 MT
             </span>
           </div>
         </div>
@@ -772,12 +896,6 @@ export default function RecyclerDashboard({ onRoleSwitch }) {
                 ))}
               </select>
             </div>
-
-            {/* System Status Pill */}
-            <div className="hidden sm:flex items-center gap-1.5 px-3 py-1 bg-primary-fixed/40 text-on-primary-fixed-variant rounded-full text-xs font-medium">
-              <span className="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
-              <span>Online • CPCB Synced</span>
-            </div>
           </div>
 
           <div className="flex items-center gap-2 sm:gap-3">
@@ -788,7 +906,7 @@ export default function RecyclerDashboard({ onRoleSwitch }) {
               title="Change Language (भाषा बदलें / भाषा बदला)"
             >
               <span className="material-symbols-outlined text-[16px]">translate</span>
-              <span>{currentLang === 'hi' ? 'हिन्दी' : currentLang === 'mr' ? 'मराठी' : 'EN'}</span>
+              <span>{currentLang === 'hi' ? 'हिन्दी' : (currentLang === 'mr' ? 'मराठी' : 'EN')}</span>
             </button>
 
             {/* Admin Tools Modal Button */}
@@ -798,7 +916,7 @@ export default function RecyclerDashboard({ onRoleSwitch }) {
               title="Access CPCB Master Admin Tools & Mandi Controls"
             >
               <span className="material-symbols-outlined text-[16px] text-primary">admin_panel_settings</span>
-              <span className="hidden sm:inline">Admin Tools</span>
+              <span className="hidden sm:inline">{currentLang === 'mr' ? 'प्रशासक साधने' : (currentLang === 'hi' ? 'एडमिन टूल्स' : 'Admin Tools')}</span>
             </button>
 
             {/* Role Switcher to Collector Mobile App */}
@@ -808,7 +926,7 @@ export default function RecyclerDashboard({ onRoleSwitch }) {
               title="Switch back to Collector Mobile View"
             >
               <span className="material-symbols-outlined text-[16px]">smartphone</span>
-              <span className="hidden sm:inline">Collector App</span>
+              <span className="hidden sm:inline">{currentLang === 'mr' ? 'कलेक्टर ॲप' : (currentLang === 'hi' ? 'कलेक्टर ऐप' : 'Collector App')}</span>
             </button>
 
             {/* Notification Bell */}
@@ -828,8 +946,8 @@ export default function RecyclerDashboard({ onRoleSwitch }) {
                 OP
               </div>
               <div className="hidden xl:flex flex-col text-left">
-                <span className="font-label-md text-xs text-on-surface font-semibold leading-tight">Plant Ops</span>
-                <span className="font-body-md text-[10px] text-on-surface-variant">Weighbridge Admin</span>
+                <span className="font-label-md text-xs text-on-surface font-semibold leading-tight">{currentLang === 'mr' ? 'प्लांट ऑपरेशन्स' : (currentLang === 'hi' ? 'प्लांट ऑपरेशंस' : 'Plant Ops')}</span>
+                <span className="font-body-md text-[10px] text-on-surface-variant">{currentLang === 'mr' ? 'वजनकाटा व्यवस्थापक' : (currentLang === 'hi' ? 'धर्मकांटा प्रबंधक' : 'Weighbridge Admin')}</span>
               </div>
             </div>
           </div>
@@ -843,12 +961,16 @@ export default function RecyclerDashboard({ onRoleSwitch }) {
             <div className="bg-surface-container-lowest rounded-xl p-4 shadow-sm flex flex-col justify-between border border-outline-variant/30 hover:shadow-md transition-shadow">
               <div className="flex items-start justify-between">
                 <div>
-                  <span className="font-label-md text-xs text-on-surface-variant font-medium">Incoming Lots</span>
+                  <span className="font-label-md text-xs text-on-surface-variant font-medium">
+                    {currentLang === 'mr' ? 'येणारे लॉट्स' : (currentLang === 'hi' ? 'आवक लॉट्स' : 'Incoming Lots')}
+                  </span>
                   <div className="flex items-baseline gap-1.5 mt-1">
                     <span className="font-headline-lg text-2xl sm:text-3xl text-on-surface font-bold">
                       {filteredLots.length}
                     </span>
-                    <span className="font-label-md text-xs text-primary font-semibold">Active</span>
+                    <span className="font-label-md text-xs text-primary font-semibold">
+                      {currentLang === 'mr' ? 'सक्रिय' : (currentLang === 'hi' ? 'सक्रिय' : 'Active')}
+                    </span>
                   </div>
                 </div>
                 <div className="w-10 h-10 rounded-lg bg-primary-fixed flex items-center justify-center text-on-primary-fixed-variant">
@@ -858,9 +980,9 @@ export default function RecyclerDashboard({ onRoleSwitch }) {
               <div className="mt-3 pt-2 flex items-center justify-between text-on-surface-variant text-[11px] border-t border-outline-variant/20">
                 <span className="flex items-center gap-1 text-primary font-medium">
                   <span className="w-1.5 h-1.5 rounded-full bg-primary"></span>
-                  5 urgent &lt; 10 km
+                  {currentLang === 'mr' ? '५ तातडीचे < १० किमी' : (currentLang === 'hi' ? '५ आवश्यक < १० किमी' : '5 urgent < 10 km')}
                 </span>
-                <span>Active Clusters</span>
+                <span>{currentLang === 'mr' ? 'सक्रिय क्लस्टर्स' : (currentLang === 'hi' ? 'सक्रिय क्लस्टर्स' : 'Active Clusters')}</span>
               </div>
             </div>
 
@@ -868,12 +990,16 @@ export default function RecyclerDashboard({ onRoleSwitch }) {
             <div className="bg-surface-container-lowest rounded-xl p-4 shadow-sm flex flex-col justify-between border border-outline-variant/30 hover:shadow-md transition-shadow">
               <div className="flex items-start justify-between">
                 <div>
-                  <span className="font-label-md text-xs text-on-surface-variant font-medium">Pending Quotes</span>
+                  <span className="font-label-md text-xs text-on-surface-variant font-medium">
+                    {currentLang === 'mr' ? 'प्रलंबित कोट्स' : (currentLang === 'hi' ? 'लंबित कोट्स' : 'Pending Quotes')}
+                  </span>
                   <div className="flex items-baseline gap-1.5 mt-1">
                     <span className="font-headline-lg text-2xl sm:text-3xl text-on-surface font-bold">
                       {metrics.pending_verification_count || 6}
                     </span>
-                    <span className="font-label-md text-xs text-tertiary font-semibold">In Bidding</span>
+                    <span className="font-label-md text-xs text-tertiary font-semibold">
+                      {currentLang === 'mr' ? 'बोली सुरू' : (currentLang === 'hi' ? 'बोली प्रगति पर' : 'In Bidding')}
+                    </span>
                   </div>
                 </div>
                 <div className="w-10 h-10 rounded-lg bg-tertiary-fixed flex items-center justify-center text-on-tertiary-fixed-variant">
@@ -881,8 +1007,8 @@ export default function RecyclerDashboard({ onRoleSwitch }) {
                 </div>
               </div>
               <div className="mt-3 pt-2 flex items-center justify-between text-on-surface-variant text-[11px] border-t border-outline-variant/20">
-                <span>Avg response: 12m</span>
-                <span className="text-primary font-medium">Negotiation Open</span>
+                <span>{currentLang === 'mr' ? 'सरासरी वेळ: १२ मि' : (currentLang === 'hi' ? 'औसत समय: १२ मि' : 'Avg response: 12m')}</span>
+                <span className="text-primary font-medium">{currentLang === 'mr' ? 'चर्चा खुली' : (currentLang === 'hi' ? 'सौदा चालू' : 'Negotiation Open')}</span>
               </div>
             </div>
 
@@ -890,10 +1016,14 @@ export default function RecyclerDashboard({ onRoleSwitch }) {
             <div className="bg-surface-container-lowest rounded-xl p-4 shadow-sm flex flex-col justify-between border border-outline-variant/30 hover:shadow-md transition-shadow">
               <div className="flex items-start justify-between">
                 <div>
-                  <span className="font-label-md text-xs text-on-surface-variant font-medium">Pickups Scheduled</span>
+                  <span className="font-label-md text-xs text-on-surface-variant font-medium">
+                    {currentLang === 'mr' ? 'नियोजित पिकअप' : (currentLang === 'hi' ? 'शेड्यूल पिकअप' : 'Pickups Scheduled')}
+                  </span>
                   <div className="flex items-baseline gap-1.5 mt-1">
                     <span className="font-headline-lg text-2xl sm:text-3xl text-on-surface font-bold">8</span>
-                    <span className="font-label-md text-xs text-secondary font-semibold">Runs Today</span>
+                    <span className="font-label-md text-xs text-secondary font-semibold">
+                      {currentLang === 'mr' ? 'आजच्या फेऱ्या' : (currentLang === 'hi' ? 'आज के फेरे' : 'Runs Today')}
+                    </span>
                   </div>
                 </div>
                 <div className="w-10 h-10 rounded-lg bg-secondary-fixed flex items-center justify-center text-on-secondary-fixed-variant">
@@ -901,8 +1031,8 @@ export default function RecyclerDashboard({ onRoleSwitch }) {
                 </div>
               </div>
               <div className="mt-3 pt-2 flex items-center justify-between text-on-surface-variant text-[11px] border-t border-outline-variant/20">
-                <span>5 Vans, 3 Dropoffs</span>
-                <span className="text-primary font-semibold">4 Completed</span>
+                <span>{currentLang === 'mr' ? '५ गाड्या, ३ ड्रॉपऑफ' : (currentLang === 'hi' ? '५ गाड़ियां, ३ ड्रॉपऑफ' : '5 Vans, 3 Dropoffs')}</span>
+                <span className="text-primary font-semibold">{currentLang === 'mr' ? '४ पूर्ण' : (currentLang === 'hi' ? '४ पूर्ण' : '4 Completed')}</span>
               </div>
             </div>
 
@@ -910,7 +1040,9 @@ export default function RecyclerDashboard({ onRoleSwitch }) {
             <div className="bg-surface-container-lowest rounded-xl p-4 shadow-sm flex flex-col justify-between border border-outline-variant/30 hover:shadow-md transition-shadow">
               <div className="flex items-start justify-between">
                 <div>
-                  <span className="font-label-md text-xs text-on-surface-variant font-medium">Monthly Sourced</span>
+                  <span className="font-label-md text-xs text-on-surface-variant font-medium">
+                    {currentLang === 'mr' ? 'मासिक खरेदी' : (currentLang === 'hi' ? 'मासिक खरीद' : 'Monthly Sourced')}
+                  </span>
                   <div className="flex items-baseline gap-1 mt-1">
                     <span className="font-headline-lg text-2xl sm:text-3xl text-on-surface font-bold">
                       {metrics.total_verified_tonnage_mt || 42.8}
@@ -924,7 +1056,7 @@ export default function RecyclerDashboard({ onRoleSwitch }) {
               </div>
               <div className="mt-3 pt-2 flex flex-col gap-1 border-t border-outline-variant/20">
                 <div className="flex justify-between items-center text-on-surface-variant text-[10px]">
-                  <span>Facility Quota</span>
+                  <span>{currentLang === 'mr' ? 'संयंत्र कोटा' : (currentLang === 'hi' ? 'संयंत्र कोटा' : 'Facility Quota')}</span>
                   <span className="font-bold text-primary">85.6%</span>
                 </div>
                 <div className="w-full bg-surface-container-high h-1.5 rounded-full overflow-hidden">
@@ -976,13 +1108,13 @@ export default function RecyclerDashboard({ onRoleSwitch }) {
                 <div className="flex flex-wrap items-center gap-2">
                   <span className="font-label-lg text-xs font-bold text-on-surface mr-1 flex items-center gap-1">
                     <span className="material-symbols-outlined text-primary text-[18px]">filter_list</span>
-                    Category:
+                    {currentLang === 'mr' ? 'वर्गवारी:' : (currentLang === 'hi' ? 'श्रेणी:' : 'Category:')}
                   </span>
                   {[
-                    { id: 'ALL', label: `All Lots (${lots.length})` },
-                    { id: 'PCB', label: 'Circuit Boards' },
-                    { id: 'CABLES', label: 'Copper Cables' },
-                    { id: 'BATTERIES', label: 'Batteries' }
+                    { id: 'ALL', label: currentLang === 'mr' ? `सर्व लॉट (${lots.length})` : (currentLang === 'hi' ? `सभी लॉट (${lots.length})` : `All Lots (${lots.length})`) },
+                    { id: 'PCB', label: currentLang === 'mr' ? 'सर्किट बोर्ड' : (currentLang === 'hi' ? 'सर्किट बोर्ड' : 'Circuit Boards') },
+                    { id: 'CABLES', label: currentLang === 'mr' ? 'तांब्याची केबल' : (currentLang === 'hi' ? 'तांबे की केबल' : 'Copper Cables') },
+                    { id: 'BATTERIES', label: currentLang === 'mr' ? 'बॅटऱ्या' : (currentLang === 'hi' ? 'बैटरियां' : 'Batteries') }
                   ].map((cat) => (
                     <button
                       key={cat.id}
@@ -1007,10 +1139,10 @@ export default function RecyclerDashboard({ onRoleSwitch }) {
                       onChange={(e) => setRadiusFilter(e.target.value)}
                       className="bg-transparent text-xs text-on-surface font-medium outline-none cursor-pointer"
                     >
-                      <option value="10">Within 10 km Radius</option>
-                      <option value="5">Within 5 km Radius</option>
-                      <option value="25">Within 25 km Radius</option>
-                      <option value="ALL">All Territory</option>
+                      <option value="10">{currentLang === 'mr' ? '१० किमी परिसरात' : (currentLang === 'hi' ? '१० किमी के दायरे में' : 'Within 10 km Radius')}</option>
+                      <option value="5">{currentLang === 'mr' ? '५ किमी परिसरात' : (currentLang === 'hi' ? '५ किमी के दायरे में' : 'Within 5 km Radius')}</option>
+                      <option value="25">{currentLang === 'mr' ? '२५ किमी परिसरात' : (currentLang === 'hi' ? '२५ किमी के दायरे में' : 'Within 25 km Radius')}</option>
+                      <option value="ALL">{currentLang === 'mr' ? 'संपूर्ण परिसर' : (currentLang === 'hi' ? 'पूरा क्षेत्र' : 'All Territory')}</option>
                     </select>
                   </div>
                 </div>
@@ -1023,15 +1155,17 @@ export default function RecyclerDashboard({ onRoleSwitch }) {
                   {filteredLots.length === 0 ? (
                     <div className="bg-surface-container-lowest rounded-xl p-8 text-center border border-outline-variant/30">
                       <span className="material-symbols-outlined text-4xl text-on-surface-variant">inbox</span>
-                      <p className="mt-2 text-sm font-semibold text-on-surface">No lots matching your filter</p>
+                      <p className="mt-2 text-sm font-semibold text-on-surface">
+                        {currentLang === 'mr' ? 'फिल्टरनुसार कोणतेही लॉट उपलब्ध नाहीत' : (currentLang === 'hi' ? 'फ़िल्टर से मेल खाता कोई लॉट नहीं मिला' : 'No lots matching your filter')}
+                      </p>
                       <button
                         onClick={() => {
                           setCategoryFilter('ALL');
                           setRadiusFilter('ALL');
                         }}
-                        className="mt-3 px-3 py-1.5 bg-primary text-on-primary text-xs font-bold rounded-lg"
+                        className="mt-3 px-3 py-1.5 bg-primary text-on-primary text-xs font-bold rounded-lg cursor-pointer"
                       >
-                        Reset Filters
+                        {currentLang === 'mr' ? 'फिल्टर्स पूर्ववत करा' : (currentLang === 'hi' ? 'फ़िल्टर रीसेट करें' : 'Reset Filters')}
                       </button>
                     </div>
                   ) : (
@@ -1054,17 +1188,27 @@ export default function RecyclerDashboard({ onRoleSwitch }) {
 
                           {/* Header Bar */}
                           <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
-                            <div className="flex items-center gap-2">
-                              <span className="bg-primary-fixed text-on-primary-fixed-variant text-[11px] font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider">
-                                {lot.priority_label || 'Grade A'}
+                            <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap min-w-0">
+                              {lot.isDealerPallet && (
+                                <span className="bg-amber-100 text-amber-900 dark:bg-amber-950 dark:text-amber-300 border border-amber-300 dark:border-amber-700 text-[10px] font-bold px-2 py-0.5 rounded-md uppercase tracking-wider flex items-center gap-1 whitespace-nowrap shrink-0">
+                                  <span className="material-symbols-outlined text-[13px]">warehouse</span>
+                                  {currentLang === 'mr' ? 'डीलर पॅलेट' : (currentLang === 'hi' ? 'डीलर पैलेट' : 'Dealer Pallet')}
+                                </span>
+                              )}
+                              <span className="bg-primary-fixed text-on-primary-fixed-variant text-[10px] sm:text-[11px] font-bold px-2 sm:px-2.5 py-0.5 rounded-full uppercase tracking-wider whitespace-nowrap shrink-0">
+                                {lot.isDealerPallet
+                                  ? (lot.priority_label?.replace(/Aggregator Bulk Pallet •\s*/i, '').trim() || 'Certified Inbound')
+                                  : (lot.priority_label || 'Grade A')}
                               </span>
-                              <span className="font-headline-md text-sm sm:text-base font-bold text-on-surface">
+                              <span className="font-headline-md text-xs sm:text-base font-bold text-on-surface whitespace-nowrap shrink-0">
                                 Lot #{lot.handover_ref}
                               </span>
                             </div>
-                            <div className="flex items-center gap-1 bg-surface-container-low px-2 py-0.5 rounded-md text-xs text-on-surface-variant font-medium">
-                              <span className="material-symbols-outlined text-primary text-[15px]">schedule</span>
-                              <span>{lot.time_posted}</span>
+                            <div className="flex items-center gap-1 bg-surface-container-low px-2 py-0.5 rounded-md text-[11px] sm:text-xs text-on-surface-variant font-medium whitespace-nowrap shrink-0 ml-auto">
+                              <span className="material-symbols-outlined text-primary text-[14px] shrink-0">schedule</span>
+                              <span className="whitespace-nowrap">
+                                {lot.time_posted === 'Ready for Fleet Dispatch (Yard 04)' ? 'Ready for Dispatch' : lot.time_posted}
+                              </span>
                             </div>
                           </div>
 
@@ -1083,7 +1227,9 @@ export default function RecyclerDashboard({ onRoleSwitch }) {
                                     <span className="material-symbols-outlined text-primary-fixed text-[14px]">psychology</span>
                                     AI Vision
                                   </span>
-                                  <span className="font-bold text-primary-fixed">{lot.ai_badge}</span>
+                                  <span className="font-bold text-primary-fixed whitespace-nowrap">
+                                    {lot.ai_badge === '100% Calibrated Scale Certified' ? 'Scale Certified' : lot.ai_badge}
+                                  </span>
                                 </div>
                               </div>
                               <div className="bg-surface-container-low rounded-md px-2 py-1 flex items-center justify-between text-on-surface-variant text-[11px]">
@@ -1109,23 +1255,23 @@ export default function RecyclerDashboard({ onRoleSwitch }) {
                                 <div className="bg-surface-container-low rounded-lg p-2.5 flex items-center justify-between mt-2.5">
                                   <div className="flex items-center gap-2 min-w-0">
                                     <div className="w-7 h-7 rounded-full bg-surface-container-highest text-on-surface font-bold text-xs flex items-center justify-center shrink-0">
-                                      {lot.collector_name.slice(0, 2).toUpperCase()}
+                                      {((lot.collector_name || (lot.isDealerPallet ? 'Dilip Bhai' : 'Babu Rao')) + '').slice(0, 2).toUpperCase()}
                                     </div>
                                     <div className="min-w-0">
                                       <div className="flex items-center gap-1">
                                         <span className="text-xs font-bold text-on-surface truncate">
-                                          {lot.collector_name}
+                                          {lot.collector_name || (lot.isDealerPallet ? 'Dilip Bhai (Peenya Yard #04 Aggregator)' : 'Babu Rao (Collector)')}
                                         </span>
                                         <span className="material-symbols-outlined text-primary text-[14px]">verified</span>
                                       </div>
                                       <span className="text-[10px] text-on-surface-variant block truncate">
-                                        {lot.collector_history}
+                                        {lot.collector_history || (lot.isDealerPallet ? 'CPCB Reg #KA-AGG-2024-118' : 'Verified Door-to-Door Picker')}
                                       </span>
                                     </div>
                                   </div>
                                   <div className="flex items-center gap-0.5 bg-surface-container-lowest px-2 py-0.5 rounded-full shadow-sm shrink-0">
                                     <span className="material-symbols-outlined text-amber-500 text-[13px]">star</span>
-                                    <span className="text-xs font-bold text-on-surface">{lot.collector_rating}</span>
+                                    <span className="text-xs font-bold text-on-surface">{lot.collector_rating || 4.8}</span>
                                   </div>
                                 </div>
 
@@ -1133,7 +1279,7 @@ export default function RecyclerDashboard({ onRoleSwitch }) {
                                 <div className="grid grid-cols-3 gap-1 bg-surface-container rounded-lg p-2 mt-2.5 text-center">
                                   <div className="border-r border-outline-variant/30">
                                     <span className="text-[10px] text-on-surface-variant uppercase font-medium block">
-                                      Net Weight
+                                      {currentLang === 'mr' ? 'निव्वळ वजन' : (currentLang === 'hi' ? 'शुद्ध वजन' : 'Net Weight')}
                                     </span>
                                     <p className="text-sm font-bold text-on-surface">
                                       {lot.net_weight_kg} <span className="text-[11px] font-normal text-on-surface-variant">kg</span>
@@ -1141,7 +1287,7 @@ export default function RecyclerDashboard({ onRoleSwitch }) {
                                   </div>
                                   <div className="border-r border-outline-variant/30">
                                     <span className="text-[10px] text-on-surface-variant uppercase font-medium block">
-                                      Collector Asking
+                                      {currentLang === 'mr' ? 'कलेक्टर मागणी' : (currentLang === 'hi' ? 'कलेक्टर मांग' : 'Collector Asking')}
                                     </span>
                                     <p className="text-sm font-bold text-on-surface">
                                       ₹{lot.collector_asking_rate} <span className="text-[11px] font-normal text-on-surface-variant">/kg</span>
@@ -1149,7 +1295,7 @@ export default function RecyclerDashboard({ onRoleSwitch }) {
                                   </div>
                                   <div>
                                     <span className="text-[10px] text-on-surface-variant uppercase font-medium block">
-                                      Market Range
+                                      {currentLang === 'mr' ? 'बाजार भाव' : (currentLang === 'hi' ? 'बाजार भाव' : 'Market Range')}
                                     </span>
                                     <p className="text-sm font-bold text-primary">
                                       ₹{lot.benchmark_min}–{lot.benchmark_max} <span className="text-[11px] font-normal text-on-surface-variant">/kg</span>
@@ -1164,7 +1310,7 @@ export default function RecyclerDashboard({ onRoleSwitch }) {
                                 <div className="flex items-center justify-between flex-wrap gap-1.5">
                                   <label className="text-xs font-bold text-on-surface flex items-center gap-1">
                                     <span className="material-symbols-outlined text-primary text-[16px]">calculate</span>
-                                    Quote Procurement Rate:
+                                    {currentLang === 'mr' ? 'खरेदी दर कोट करा:' : (currentLang === 'hi' ? 'खरीद दर कोट करें:' : 'Quote Procurement Rate:')}
                                   </label>
                                   <div className="flex items-center gap-1 bg-surface-container-lowest p-0.5 rounded-lg border border-outline-variant/30">
                                     <button
@@ -1176,7 +1322,7 @@ export default function RecyclerDashboard({ onRoleSwitch }) {
                                       }`}
                                       type="button"
                                     >
-                                      Van Pickup
+                                      {currentLang === 'mr' ? 'व्हॅन पिकअप' : (currentLang === 'hi' ? 'वैन पिकअप' : 'Van Pickup')}
                                     </button>
                                     <button
                                       onClick={() => handleFulfillmentToggle(lot.id, 'dropoff')}
@@ -1187,7 +1333,7 @@ export default function RecyclerDashboard({ onRoleSwitch }) {
                                       }`}
                                       type="button"
                                     >
-                                      Self Dropoff
+                                      {currentLang === 'mr' ? 'थेट डिलिव्हरी' : (currentLang === 'hi' ? 'स्वयं ड्रॉपऑफ' : 'Self Dropoff')}
                                     </button>
                                   </div>
                                 </div>
@@ -1207,7 +1353,9 @@ export default function RecyclerDashboard({ onRoleSwitch }) {
                                   </div>
 
                                   <div className="w-full sm:w-1/2 bg-surface-container-lowest rounded-lg h-10 px-3 flex items-center justify-between shadow-sm border border-outline-variant/30">
-                                    <span className="text-xs text-on-surface-variant font-medium">Total Value:</span>
+                                    <span className="text-xs text-on-surface-variant font-medium">
+                                      {currentLang === 'mr' ? 'एकूण मूल्य:' : (currentLang === 'hi' ? 'कुल मूल्य:' : 'Total Value:')}
+                                    </span>
                                     <span className="text-base font-bold text-primary font-mono">
                                       ₹{totalPayout.toLocaleString('en-IN')}
                                     </span>
@@ -1215,7 +1363,27 @@ export default function RecyclerDashboard({ onRoleSwitch }) {
                                 </div>
 
                                 {/* Action Buttons */}
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                <div className={`grid gap-2 ${lot.isDealerPallet ? 'grid-cols-1 sm:grid-cols-3' : 'grid-cols-1 sm:grid-cols-2'}`}>
+                                  {lot.isDealerPallet && (
+                                    <button
+                                      type="button"
+                                      onClick={() => {
+                                        setDispatchForm({
+                                          vehicle_no: 'KA-04-E-2091',
+                                          driver_name: 'Suresh M.',
+                                          driver_phone: '+91 98450 12891',
+                                          target_collector_hub: lot.location_label || 'Peenya Aggregation Yard (Yard 04)',
+                                          vehicle_type: 'Van (3-Wheeler / Tata Ace)',
+                                          capacity_kg: Math.max(800, Math.ceil(lot.net_weight_kg * 1.2))
+                                        });
+                                        setShowDispatchModal(true);
+                                      }}
+                                      className="h-10 text-xs font-bold rounded-lg bg-secondary/15 hover:bg-secondary/25 text-secondary flex items-center justify-center gap-1.5 transition-colors cursor-pointer active:scale-98"
+                                    >
+                                      <span className="material-symbols-outlined text-[16px]">local_shipping</span>
+                                      <span>{currentLang === 'mr' ? 'गाडी पाठवा' : (currentLang === 'hi' ? 'गाड़ी भेजें' : 'Dispatch Fleet')}</span>
+                                    </button>
+                                  )}
                                   <button
                                     onClick={() => handleSendCounterOffer(lot)}
                                     disabled={lot.status === 'OFFER_SENT' || lot.status === 'CONFIRMED'}
@@ -1229,7 +1397,9 @@ export default function RecyclerDashboard({ onRoleSwitch }) {
                                     <span className="material-symbols-outlined text-[16px]">
                                       {lot.status === 'OFFER_SENT' ? 'done_all' : 'reply'}
                                     </span>
-                                    {lot.status === 'OFFER_SENT' ? 'Offer Sent' : 'Counter-Offer'}
+                                    {lot.status === 'OFFER_SENT'
+                                      ? (currentLang === 'mr' ? 'ऑफर पाठवली' : (currentLang === 'hi' ? 'ऑफर भेजी गई' : 'Offer Sent'))
+                                      : (currentLang === 'mr' ? 'काउंटर ऑफर' : (currentLang === 'hi' ? 'काउंटर ऑफर' : 'Counter-Offer'))}
                                   </button>
                                   <button
                                     onClick={() => handleOpenWeighbridgeModal(lot)}
@@ -1243,7 +1413,9 @@ export default function RecyclerDashboard({ onRoleSwitch }) {
                                     <span className="material-symbols-outlined text-[18px]">
                                       {lot.status === 'CONFIRMED' ? 'verified' : 'check_circle'}
                                     </span>
-                                    {lot.status === 'CONFIRMED' ? 'View CPCB Cert' : 'Accept & Weighbridge'}
+                                    {lot.status === 'CONFIRMED'
+                                      ? (currentLang === 'mr' ? 'CPCB प्रमाणपत्र पहा' : (currentLang === 'hi' ? 'CPCB प्रमाण पत्र देखें' : 'View CPCB Cert'))
+                                      : (currentLang === 'mr' ? 'स्वीकारा व वजन काटा' : (currentLang === 'hi' ? 'स्वीकारें व धर्मकांटा' : 'Accept & Weighbridge'))}
                                   </button>
                                 </div>
                               </div>
@@ -1255,7 +1427,7 @@ export default function RecyclerDashboard({ onRoleSwitch }) {
                             <div className="flex items-center gap-3 flex-wrap">
                               <span className="flex items-center gap-1 text-primary font-medium">
                                 <span className="material-symbols-outlined text-[14px]">fact_check</span>
-                                Digital Log Ready
+                                {currentLang === 'mr' ? 'डिजिटल नोंद सज्ज' : (currentLang === 'hi' ? 'डिजिटल लॉग तैयार' : 'Digital Log Ready')}
                               </span>
                               <span className="flex items-center gap-1">
                                 <span className="material-symbols-outlined text-[14px]">tag</span>
@@ -1263,10 +1435,12 @@ export default function RecyclerDashboard({ onRoleSwitch }) {
                               </span>
                               <span className="flex items-center gap-1">
                                 <span className="material-symbols-outlined text-[14px]">verified</span>
-                                Scale Calibrated
+                                {currentLang === 'mr' ? 'वजनकाटा प्रमाणित' : (currentLang === 'hi' ? 'कांटा प्रमाणित' : 'Scale Calibrated')}
                               </span>
                             </div>
-                            <span className="text-[10px] text-on-surface-variant">EPR Verification Standard</span>
+                            <span className="text-[10px] text-on-surface-variant">
+                              {currentLang === 'mr' ? 'EPR पडताळणी मानक' : (currentLang === 'hi' ? 'EPR सत्यापन मानक' : 'EPR Verification Standard')}
+                            </span>
                           </div>
                         </article>
                       );
@@ -1281,10 +1455,12 @@ export default function RecyclerDashboard({ onRoleSwitch }) {
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-1.5">
                         <span className="material-symbols-outlined text-primary text-[20px]">route</span>
-                        <h3 className="font-headline-md text-sm font-bold text-on-surface">Today's Dispatch Line</h3>
+                        <h3 className="font-headline-md text-sm font-bold text-on-surface">
+                          {currentLang === 'mr' ? 'आजची डिस्पॅच लाइन' : (currentLang === 'hi' ? 'आज की डिस्पैच लाइन' : "Today's Dispatch Line")}
+                        </h3>
                       </div>
                       <span className="bg-primary-fixed font-bold text-on-primary-fixed-variant text-[10px] px-2 py-0.5 rounded-full">
-                        8 Scheduled
+                        {currentLang === 'mr' ? '८ नियोजित' : (currentLang === 'hi' ? '८ निर्धारित' : '8 Scheduled')}
                       </span>
                     </div>
 
@@ -1300,13 +1476,13 @@ export default function RecyclerDashboard({ onRoleSwitch }) {
                         </span>
                       </div>
                       <div className="text-on-surface-variant text-[11px]">
-                        <p><strong className="text-on-surface">Driver:</strong> Suresh M. (+91 98450 12891)</p>
-                        <p><strong className="text-on-surface">Destination:</strong> Ramesh K. / Peenya Industrial</p>
+                        <p><strong className="text-on-surface">{currentLang === 'mr' ? 'चालक:' : (currentLang === 'hi' ? 'चालक:' : 'Driver:')}</strong> Suresh M. (+91 98450 12891)</p>
+                        <p><strong className="text-on-surface">{currentLang === 'mr' ? 'गंतव्य:' : (currentLang === 'hi' ? 'गंतव्य:' : 'Destination:')}</strong> Ramesh K. / Peenya Industrial</p>
                       </div>
                       <div className="mt-1 pt-1 flex items-center justify-between text-[10px] text-on-surface-variant border-t border-outline-variant/20">
                         <span className="text-primary font-medium flex items-center gap-0.5">
                           <span className="material-symbols-outlined text-[12px]">scale</span>
-                          Calibrated Scale on-board
+                          {currentLang === 'mr' ? 'प्रमाणित वजनकाटा उपलब्ध' : (currentLang === 'hi' ? 'प्रमाणित कांटा उपलब्ध' : 'Calibrated Scale on-board')}
                         </span>
                         <span>Est. 18m transit</span>
                       </div>
@@ -1322,8 +1498,8 @@ export default function RecyclerDashboard({ onRoleSwitch }) {
                         <span className="text-[10px] font-semibold text-on-surface-variant">17:00 IST</span>
                       </div>
                       <div className="text-on-surface-variant text-[11px]">
-                        <p><strong className="text-on-surface">Driver:</strong> Anil Gowda (+91 94481 00214)</p>
-                        <p><strong className="text-on-surface">Mission:</strong> Yeshwanthpur Scrap Aggregators</p>
+                        <p><strong className="text-on-surface">{currentLang === 'mr' ? 'चालक:' : (currentLang === 'hi' ? 'चालक:' : 'Driver:')}</strong> Anil Gowda (+91 94481 00214)</p>
+                        <p><strong className="text-on-surface">{currentLang === 'mr' ? 'उद्दिष्ट:' : (currentLang === 'hi' ? 'मिशन:' : 'Mission:')}</strong> Yeshwanthpur Scrap Aggregators</p>
                       </div>
                       <div className="mt-1 pt-1 flex items-center justify-between text-[10px] text-on-surface-variant border-t border-outline-variant/20">
                         <span>Payload: 1,200 kg</span>
@@ -1334,13 +1510,13 @@ export default function RecyclerDashboard({ onRoleSwitch }) {
                     {/* Settlement Mode Picker */}
                     <div className="bg-surface-container rounded-lg p-2.5 space-y-1.5">
                       <span className="text-[10px] uppercase tracking-wider text-on-surface-variant font-bold block">
-                        Settlement &amp; Payment Method
+                        {currentLang === 'mr' ? 'पेमेंट आणि सेटलमेंट पद्धत' : (currentLang === 'hi' ? 'भुगतान एवं निपटान विधि' : 'Settlement & Payment Method')}
                       </span>
                       <div className="grid grid-cols-3 gap-1">
                         {[
-                          { id: 'CASH', label: '💵 Cash' },
+                          { id: 'CASH', label: currentLang === 'mr' ? '💵 रोख' : (currentLang === 'hi' ? '💵 नकद' : '💵 Cash') },
                           { id: 'UPI', label: '📱 UPI' },
-                          { id: 'BANK', label: '🏦 Bank' }
+                          { id: 'BANK', label: currentLang === 'mr' ? '🏦 बँक' : (currentLang === 'hi' ? '🏦 बैंक' : '🏦 Bank') }
                         ].map((m) => (
                           <button
                             key={m.id}
@@ -1357,7 +1533,7 @@ export default function RecyclerDashboard({ onRoleSwitch }) {
                         ))}
                       </div>
                       <span className="text-[10px] text-on-surface-variant block text-center mt-1">
-                        Payment signed off on physical weighbridge
+                        {currentLang === 'mr' ? 'वजनकाट्यावर पडताळणीनंतर थेट पेमेंट' : (currentLang === 'hi' ? 'धर्मकांटे पर सत्यापन उपरांत तुरंत भुगतान' : 'Payment signed off on physical weighbridge')}
                       </span>
                     </div>
                   </div>
@@ -1367,10 +1543,12 @@ export default function RecyclerDashboard({ onRoleSwitch }) {
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-1.5">
                         <span className="material-symbols-outlined text-primary text-[18px]">verified</span>
-                        <h4 className="font-headline-md text-sm font-bold text-on-surface">Traceability &amp; Audit</h4>
+                        <h4 className="font-headline-md text-sm font-bold text-on-surface">
+                          {currentLang === 'mr' ? 'ट्रेसेबिलिटी आणि ऑडिट' : (currentLang === 'hi' ? 'ट्रेसेबिलिटी एवं ऑडिट' : 'Traceability & Audit')}
+                        </h4>
                       </div>
                       <span className="bg-primary text-on-primary text-[9px] font-bold px-1.5 py-0.5 rounded uppercase">
-                        CPCB Audit Ready
+                        {currentLang === 'mr' ? 'CPCB ऑडिट सज्ज' : (currentLang === 'hi' ? 'CPCB ऑडिट तैयार' : 'CPCB Audit Ready')}
                       </span>
                     </div>
 
@@ -1378,29 +1556,45 @@ export default function RecyclerDashboard({ onRoleSwitch }) {
                       <li className="flex items-start gap-2 bg-surface-container-low p-2 rounded-lg">
                         <span className="text-base mt-0.5">📍</span>
                         <div>
-                          <span className="text-xs font-bold text-on-surface block">1. Verified GPS Origin</span>
-                          <p className="text-[11px] text-on-surface-variant">Handover coordinates locked at aggregator site.</p>
+                          <span className="text-xs font-bold text-on-surface block">
+                            {currentLang === 'mr' ? '१. सत्यापित GPS स्थान' : (currentLang === 'hi' ? '१. सत्यापित GPS स्थान' : '1. Verified GPS Origin')}
+                          </span>
+                          <p className="text-[11px] text-on-surface-variant">
+                            {currentLang === 'mr' ? 'संकलन केंद्रावर थेट अक्षांश-रेखांश नोंदणी.' : (currentLang === 'hi' ? 'संग्रहण केंद्र पर सीधे जीपीएस निर्देशांक लॉक किए गए।' : 'Handover coordinates locked at aggregator site.')}
+                          </p>
                         </div>
                       </li>
                       <li className="flex items-start gap-2 bg-surface-container-low p-2 rounded-lg">
                         <span className="text-base mt-0.5">⚖️</span>
                         <div>
-                          <span className="text-xs font-bold text-on-surface block">2. Calibrated Weighbridge</span>
-                          <p className="text-[11px] text-on-surface-variant">Gross and net weight stamped under Metrology Act.</p>
+                          <span className="text-xs font-bold text-on-surface block">
+                            {currentLang === 'mr' ? '२. प्रमाणित वजनकाटा' : (currentLang === 'hi' ? '२. प्रमाणित धर्मकांटा' : '2. Calibrated Weighbridge')}
+                          </span>
+                          <p className="text-[11px] text-on-surface-variant">
+                            {currentLang === 'mr' ? 'कायदेशीर मापनशास्त्र कायद्यानुसार स्थूल व निव्वळ वजन मुद्रांकित.' : (currentLang === 'hi' ? 'विधिक मापविज्ञान अधिनियम के अंतर्गत सकल व शुद्ध वजन प्रमाणित।' : 'Gross and net weight stamped under Metrology Act.')}
+                          </p>
                         </div>
                       </li>
                       <li className="flex items-start gap-2 bg-surface-container-low p-2 rounded-lg">
                         <span className="text-base mt-0.5">📷</span>
                         <div>
-                          <span className="text-xs font-bold text-on-surface block">3. Digital Handover Photos</span>
-                          <p className="text-[11px] text-on-surface-variant">Lot evidence captured before payout disbursement.</p>
+                          <span className="text-xs font-bold text-on-surface block">
+                            {currentLang === 'mr' ? '३. डिजिटल पुरावा फोटो' : (currentLang === 'hi' ? '३. डिजिटल साक्ष्य फोटो' : '3. Digital Handover Photos')}
+                          </span>
+                          <p className="text-[11px] text-on-surface-variant">
+                            {currentLang === 'mr' ? 'पेमेंट देण्यापूर्वी लॉटचा पुरावा कॅमेऱ्याने सुरक्षित.' : (currentLang === 'hi' ? 'भुगतान संवितरण से पूर्व लॉट का डिजिटल साक्ष्य रिकॉर्ड।' : 'Lot evidence captured before payout disbursement.')}
+                          </p>
                         </div>
                       </li>
                       <li className="flex items-start gap-2 bg-surface-container-low p-2 rounded-lg">
                         <span className="text-base mt-0.5">📄</span>
                         <div>
-                          <span className="text-xs font-bold text-on-surface block">4. CPCB EPR Certificate</span>
-                          <p className="text-[11px] text-on-surface-variant">Instant EPR credit compliance issuance.</p>
+                          <span className="text-xs font-bold text-on-surface block">
+                            {currentLang === 'mr' ? '४. CPCB EPR प्रमाणपत्र' : (currentLang === 'hi' ? '४. CPCB EPR प्रमाण पत्र' : '4. CPCB EPR Certificate')}
+                          </span>
+                          <p className="text-[11px] text-on-surface-variant">
+                            {currentLang === 'mr' ? 'तात्काळ EPR क्रेडिट अनुपालन जारी.' : (currentLang === 'hi' ? 'तत्काल EPR क्रेडिट अनुपालन प्रमाणपत्र जारी।' : 'Instant EPR credit compliance issuance.')}
+                          </p>
                         </div>
                       </li>
                     </ul>
@@ -1411,7 +1605,7 @@ export default function RecyclerDashboard({ onRoleSwitch }) {
                       type="button"
                     >
                       <span className="material-symbols-outlined text-[16px]">download</span>
-                      Download Transaction Ledger (CSV)
+                      {currentLang === 'mr' ? 'व्यवहार लेजर डाउनलोड करा (CSV)' : (currentLang === 'hi' ? 'लेनदेन लेज़र डाउनलोड करें (CSV)' : 'Download Transaction Ledger (CSV)')}
                     </button>
                   </div>
                 </div>
@@ -1776,7 +1970,7 @@ export default function RecyclerDashboard({ onRoleSwitch }) {
             <div className="flex items-start justify-between border-b border-outline-variant/60 pb-3">
               <div>
                 <span className="text-[11px] uppercase font-bold text-primary tracking-wider">
-                  Weighbridge Scale Verification
+                  {currentLang === 'mr' ? 'वजनकाटा तपासणी व प्रमाणीकरण' : (currentLang === 'hi' ? 'धर्मकांटा तौल सत्यापन एवं प्रमाणन' : 'Weighbridge Scale Verification')}
                 </span>
                 <h3 className="text-lg sm:text-xl font-bold text-on-surface mt-0.5">{inspectLot.title}</h3>
                 <span className="text-xs text-on-surface-variant font-mono">Ref: {inspectLot.handover_ref}</span>
@@ -1791,18 +1985,22 @@ export default function RecyclerDashboard({ onRoleSwitch }) {
 
             <div className="grid grid-cols-2 gap-3 bg-surface-container-low p-3 rounded-xl">
               <div>
-                <span className="text-[10px] text-on-surface-variant font-medium">Collector / Origin</span>
+                <span className="text-[10px] text-on-surface-variant font-medium">
+                  {currentLang === 'mr' ? 'कलेक्टर / मूळ स्थान' : (currentLang === 'hi' ? 'कलेक्टर / मूल स्रोत' : 'Collector / Origin')}
+                </span>
                 <p className="font-bold text-xs sm:text-sm text-on-surface truncate">{inspectLot.collector_name}</p>
               </div>
               <div>
-                <span className="text-[10px] text-on-surface-variant font-medium">Assigned Recycler</span>
+                <span className="text-[10px] text-on-surface-variant font-medium">
+                  {currentLang === 'mr' ? 'नियुक्त रिसायकलर' : (currentLang === 'hi' ? 'अधिकृत रीसायकलर' : 'Assigned Recycler')}
+                </span>
                 <p className="font-bold text-xs sm:text-sm text-primary truncate">{selectedFacility.name}</p>
               </div>
             </div>
 
             <div>
               <label className="text-xs font-bold text-on-surface block mb-1">
-                Calibrated Scale Actual Net Weight (kg):
+                {currentLang === 'mr' ? 'प्रमाणित काट्यावरील प्रत्यक्ष निव्वळ वजन (किलो):' : (currentLang === 'hi' ? 'प्रमाणित कांटे का वास्तविक शुद्ध वजन (किग्रा):' : 'Calibrated Scale Actual Net Weight (kg):')}
               </label>
               <div className="relative">
                 <input
@@ -1815,7 +2013,7 @@ export default function RecyclerDashboard({ onRoleSwitch }) {
                 <span className="absolute right-3 top-2.5 text-sm font-bold text-on-surface-variant">kg</span>
               </div>
               <span className="text-[10px] text-on-surface-variant mt-1 block">
-                Stated Collector Weight: {inspectLot.net_weight_kg} kg | Scale Variance: ±
+                {currentLang === 'mr' ? 'नोंदवलेले वजन:' : (currentLang === 'hi' ? 'कलेक्टर द्वारा दर्ज वजन:' : 'Stated Collector Weight:')} {inspectLot.net_weight_kg} kg | Scale Variance: ±
                 {Math.abs((parseFloat(weighbridgeInput) || 0) - inspectLot.net_weight_kg).toFixed(1)} kg
               </span>
 
@@ -1843,7 +2041,9 @@ export default function RecyclerDashboard({ onRoleSwitch }) {
             </div>
 
             <div className="bg-surface-container-lowest p-3 rounded-xl border border-outline-variant/40 flex items-center justify-between">
-              <span className="text-xs font-semibold text-on-surface">Settlement Amount ({settlementMode}):</span>
+              <span className="text-xs font-semibold text-on-surface">
+                {currentLang === 'mr' ? `सेटलमेंट रक्कम (${settlementMode}):` : (currentLang === 'hi' ? `निपटान राशि (${settlementMode}):` : `Settlement Amount (${settlementMode}):`)}
+              </span>
               <span className="text-lg font-bold text-primary font-mono">
                 ₹
                 {Math.round(
@@ -1856,11 +2056,11 @@ export default function RecyclerDashboard({ onRoleSwitch }) {
             <div className="space-y-1.5 text-xs text-on-surface-variant">
               <label className="flex items-center gap-2 cursor-pointer">
                 <input type="checkbox" defaultChecked className="rounded text-primary focus:ring-primary w-4 h-4" />
-                <span>Dual visual signoff completed between collector &amp; weighbridge operator</span>
+                <span>{currentLang === 'mr' ? 'कलेक्टर आणि वजनकाटा ऑपरेटर यांच्यात संयुक्त तपासणी पूर्ण' : (currentLang === 'hi' ? 'कलेक्टर एवं धर्मकांटा ऑपरेटर के बीच संयुक्त सत्यापन पूर्ण' : 'Dual visual signoff completed between collector & weighbridge operator')}</span>
               </label>
               <label className="flex items-center gap-2 cursor-pointer">
                 <input type="checkbox" defaultChecked className="rounded text-primary focus:ring-primary w-4 h-4" />
-                <span>Physical scale calibrated according to Legal Metrology Standards</span>
+                <span>{currentLang === 'mr' ? 'कायदेशीर मापनशास्त्र मानकांनुसार प्रमाणित वजनकाटा' : (currentLang === 'hi' ? 'विधिक मापविज्ञान मानकों के अनुसार प्रमाणित धर्मकांटा' : 'Physical scale calibrated according to Legal Metrology Standards')}</span>
               </label>
             </div>
 
@@ -1869,7 +2069,7 @@ export default function RecyclerDashboard({ onRoleSwitch }) {
                 onClick={() => setInspectLot(null)}
                 className="h-10 bg-surface-container hover:bg-surface-container-high text-on-surface font-bold text-xs rounded-xl cursor-pointer"
               >
-                Cancel
+                {currentLang === 'mr' ? 'रद्द करा' : (currentLang === 'hi' ? 'रद्द करें' : 'Cancel')}
               </button>
               <button
                 onClick={handleConfirmWeighbridge}
@@ -1877,7 +2077,11 @@ export default function RecyclerDashboard({ onRoleSwitch }) {
                 className="h-10 bg-primary hover:bg-primary-container text-on-primary font-bold text-xs rounded-xl shadow-md flex items-center justify-center gap-1.5 cursor-pointer active:scale-98 transition-transform"
               >
                 <span className="material-symbols-outlined text-[16px]">verified</span>
-                <span>{isSubmittingConfirm ? 'Issuing...' : 'Issue CPCB Certificate'}</span>
+                <span>
+                  {isSubmittingConfirm
+                    ? (currentLang === 'mr' ? 'जारी करत आहे...' : (currentLang === 'hi' ? 'जारी कर रहे हैं...' : 'Issuing...'))
+                    : (currentLang === 'mr' ? 'CPCB प्रमाणपत्र जारी करा' : (currentLang === 'hi' ? 'CPCB प्रमाण पत्र जारी करें' : 'Issue CPCB Certificate'))}
+                </span>
               </button>
             </div>
           </div>

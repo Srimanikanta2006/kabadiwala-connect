@@ -66,3 +66,24 @@
 .stitch-btn-active:active {
   transform: scale(0.97);
 }
+
+/* Continuous slow marquee ticker scrolling towards the left */
+@keyframes marqueeScroll {
+  0% {
+    transform: translateX(0%);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-marquee-slow {
+  display: inline-flex;
+  white-space: nowrap;
+  animation: marqueeScroll 35s linear infinite;
+  will-change: transform;
+}
+
+.animate-marquee-slow:hover {
+  animation-play-state: paused;
+}
