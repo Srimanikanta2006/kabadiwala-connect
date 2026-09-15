@@ -6,10 +6,10 @@ export const REGIONAL_MANDI_DATA = {
     name: 'Mumbai MMR (Dharavi / Kurla Yard)',
     multiplier: 1.0,
     categories: [
-      { id: 'mat_pcb_high', name: 'High-Grade PCB', sub: 'Server / Telecom Motherboards', rate: 265, range: '₹250 – ₹285', trend: 'UP', change: '+₹15', icon: 'memory', spoken: 'मुंबई मंडी: हाई-ग्रेड सर्किट बोर्ड का भाव 265 रुपये प्रति किलो है।' },
-      { id: 'mat_cables_copper', name: 'Copper Cables', sub: 'Insulated Wire Harness', rate: 420, range: '₹400 – ₹440', trend: 'UP', change: '+₹20', icon: 'cable', spoken: 'तांबे के तार का भाव 420 रुपये प्रति किलो है।' },
+      { id: 'mat_pcb_high', name: 'High-Grade PCB', sub: 'Server / Telecom Motherboards', rate: 240, range: '₹225 – ₹260', trend: 'UP', change: '+₹15', icon: 'memory', spoken: 'मुंबई मंडी: हाई-ग्रेड सर्किट बोर्ड का भाव 240 रुपये प्रति किलो है।' },
+      { id: 'mat_cables_copper', name: 'Copper Cables', sub: 'Insulated Wire Harness', rate: 380, range: '₹360 – ₹405', trend: 'UP', change: '+₹20', icon: 'cable', spoken: 'तांबे के तार का भाव 380 रुपये प्रति किलो है।' },
       { id: 'mat_batteries_lead', name: 'Lead-Acid Batteries', sub: 'Inverter / Auto Battery', rate: 105, range: '₹95 – ₹115', trend: 'STABLE', change: 'स्थिर', icon: 'battery_alert', spoken: 'लेड एसिड बैटरी का भाव 105 रुपये प्रति किलो है।' },
-      { id: 'mat_batteries_li_ion', name: 'Li-ion Batteries', sub: 'Mobile / Laptop Packs', rate: 110, range: '₹95 – ₹125', trend: 'UP', change: '+₹15', icon: 'battery_charging_full', spoken: 'लिथियम बैटरी का भाव 110 रुपये प्रति किलो है।' },
+      { id: 'mat_batteries_li_ion', name: 'Li-ion Batteries', sub: 'Mobile / Laptop Packs', rate: 185, range: '₹170 – ₹205', trend: 'UP', change: '+₹15', icon: 'battery_charging_full', spoken: 'लिथियम बैटरी का भाव 185 रुपये प्रति किलो है।' },
       { id: 'mat_crt_monitor', name: 'CRT TV / Monitors', sub: 'Cathode Ray Leaded Tube', rate: 15, range: '₹12 – ₹18', trend: 'STABLE', change: 'स्थिर', icon: 'tv', spoken: 'सीआरटी टीवी और मॉनिटर का भाव 15 रुपये प्रति किलो है।' },
       { id: 'mat_lcd_panel', name: 'LCD / LED Panels', sub: 'Flat Screen Displays', rate: 45, range: '₹35 – ₹55', trend: 'DOWN', change: '-₹5', icon: 'desktop_windows', spoken: 'एलसीडी और एलईडी स्क्रीन का भाव 45 रुपये प्रति किलो है।' },
       { id: 'mat_pcb_low', name: 'Low-Grade PCB', sub: 'Power Supply / Single Sided', rate: 55, range: '₹45 – ₹65', trend: 'STABLE', change: 'स्थिर', icon: 'developer_board', spoken: 'लो-ग्रेड सर्किट बोर्ड का भाव 55 रुपये प्रति किलो है।' },

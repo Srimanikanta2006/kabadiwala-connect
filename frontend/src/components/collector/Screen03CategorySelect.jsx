@@ -110,7 +110,7 @@ const CAT_TRANSLATIONS = {
   }
 };
 
-export default function Screen03CategorySelect({ onSelectCategory, onNavigate, currentLang: propLang, onLanguageChange }) {
+export default function Screen03CategorySelect({ onSelectCategory, onNavigate, onNavigateBack, currentLang: propLang, onLanguageChange }) {
   const { i18n } = useTranslation();
   const normalize = (lng) => {
     if (!lng) return 'hi';
@@ -153,7 +153,7 @@ export default function Screen03CategorySelect({ onSelectCategory, onNavigate, c
         <div className="flex justify-between items-center w-full px-margin-mobile h-touch-target-min">
           <div className="flex items-center gap-2">
             <button
-              onClick={() => onNavigate('ai_scan')}
+              onClick={() => (onNavigateBack ? onNavigateBack() : onNavigate('home'))}
               className="w-10 h-10 -ml-2 rounded-full flex items-center justify-center text-on-surface hover:bg-surface-container transition-colors cursor-pointer"
               aria-label="Back"
             >

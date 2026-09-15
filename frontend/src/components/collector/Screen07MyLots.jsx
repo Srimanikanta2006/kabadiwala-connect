@@ -5,7 +5,7 @@ const MYLOTS_TRANSLATIONS = {
   hi: {
     pageTitle: 'मेरे स्क्रैप लॉट्स',
     totalLotsTracked: 'कुल लॉट्स पंजीकृत',
-    newLotBtn: '+ नया लॉट',
+    newLotBtn: 'नया लॉट',
     filterAll: 'सभी लॉट्स',
     filterAwaiting: '🟡 बोलियों की प्रतीक्षा',
     filterAccepted: '🟢 स्वीकृत',
@@ -31,7 +31,7 @@ const MYLOTS_TRANSLATIONS = {
   mr: {
     pageTitle: 'माझे स्क्रॅप लॉट्स',
     totalLotsTracked: 'एकूण लॉट्स नोंदणीकृत',
-    newLotBtn: '+ नवीन लॉट',
+    newLotBtn: 'नवीन लॉट',
     filterAll: 'सर्व लॉट्स',
     filterAwaiting: '🟡 बोलींची प्रतीक्षा',
     filterAccepted: '🟢 स्वीकारलेले',
@@ -57,7 +57,7 @@ const MYLOTS_TRANSLATIONS = {
   en: {
     pageTitle: 'My Scrap Lots',
     totalLotsTracked: 'Total Lots Tracked',
-    newLotBtn: '+ New Lot',
+    newLotBtn: 'New Lot',
     filterAll: 'All Lots',
     filterAwaiting: '🟡 Awaiting Offers',
     filterAccepted: '🟢 Accepted',
@@ -87,6 +87,8 @@ export default function Screen07MyLots({
   onSelectLot,
   onNewScan,
   onNavigate,
+  onNavigateBack,
+  activeScreen = 'my_lots',
   syncStatus = { isOnline: true },
   currentLang: propLang,
   onLanguageChange
@@ -281,7 +283,7 @@ export default function Screen07MyLots({
         <div className="max-w-5xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-2">
             <button
-              onClick={() => onNavigate('home')}
+              onClick={() => (onNavigateBack ? onNavigateBack() : onNavigate('home'))}
               className="w-10 h-10 -ml-2 rounded-full flex items-center justify-center text-on-surface hover:bg-surface-container cursor-pointer transition-colors"
               aria-label="Back to home"
             >
@@ -310,10 +312,10 @@ export default function Screen07MyLots({
             )}
             <button
               onClick={onNewScan}
-              className="bg-primary hover:bg-primary-container text-on-primary font-bold text-xs px-3.5 py-2 rounded-xl flex items-center gap-1.5 shadow-sm active:scale-95 transition-all cursor-pointer"
+              className="bg-primary hover:bg-emerald-800 text-on-primary font-bold text-xs px-4 py-2 rounded-xl flex items-center gap-2 shadow-sm active:scale-95 transition-all cursor-pointer border border-primary/20"
             >
-              <span className="material-symbols-outlined text-[18px]">photo_camera</span>
-              <span>{t.newLotBtn}</span>
+              <span className="material-symbols-outlined text-[18px]">add_circle</span>
+              <span className="tracking-wide">{t.newLotBtn}</span>
             </button>
           </div>
         </div>
@@ -451,30 +453,38 @@ export default function Screen07MyLots({
       <nav className="fixed bottom-0 left-0 w-full z-50 flex md:hidden justify-around items-center px-2 py-2 bg-surface border-t border-outline-variant shadow-md rounded-t-xl">
         <button
           onClick={() => onNavigate('home')}
-          className="flex flex-col items-center justify-center p-2 text-on-surface-variant cursor-pointer"
+          className={`flex flex-col items-center justify-center p-2 cursor-pointer transition-colors ${
+            activeScreen === 'home' ? 'text-primary font-bold' : 'text-on-surface-variant'
+          }`}
         >
-          <span className="material-symbols-outlined">home</span>
+          <span className={`material-symbols-outlined ${activeScreen === 'home' ? 'filled' : ''}`}>home</span>
           <span className="font-label-md text-xs mt-1">{t.navHome}</span>
         </button>
         <button
           onClick={() => onNavigate('my_lots')}
-          className="flex flex-col items-center justify-center bg-primary-container text-on-primary-container rounded-full px-4 py-1 scale-90 cursor-pointer"
+          className={`flex flex-col items-center justify-center cursor-pointer transition-colors ${
+            activeScreen === 'my_lots' ? 'bg-primary-container text-on-primary-container rounded-full px-4 py-1 scale-90' : 'p-2 text-on-surface-variant'
+          }`}
         >
-          <span className="material-symbols-outlined filled">inventory_2</span>
+          <span className={`material-symbols-outlined ${activeScreen === 'my_lots' ? 'filled' : ''}`}>inventory_2</span>
           <span className="font-label-md text-xs font-bold mt-1">{t.navMyLots}</span>
         </button>
         <button
           onClick={() => onNavigate('earnings')}
-          className="flex flex-col items-center justify-center p-2 text-on-surface-variant cursor-pointer"
+          className={`flex flex-col items-center justify-center cursor-pointer transition-colors ${
+            activeScreen === 'earnings' ? 'bg-primary-container text-on-primary-container rounded-full px-4 py-1 scale-90' : 'p-2 text-on-surface-variant'
+          }`}
         >
-          <span className="material-symbols-outlined">payments</span>
+          <span className={`material-symbols-outlined ${activeScreen === 'earnings' ? 'filled' : ''}`}>payments</span>
           <span className="font-label-md text-xs mt-1">{t.navEarnings}</span>
         </button>
         <button
           onClick={() => onNavigate('safety')}
-          className="flex flex-col items-center justify-center p-2 text-on-surface-variant cursor-pointer"
+          className={`flex flex-col items-center justify-center p-2 cursor-pointer transition-colors ${
+            activeScreen === 'safety' ? 'text-primary font-bold' : 'text-on-surface-variant'
+          }`}
         >
-          <span className="material-symbols-outlined">info</span>
+          <span className={`material-symbols-outlined ${activeScreen === 'safety' ? 'filled' : ''}`}>info</span>
           <span className="font-label-md text-xs mt-1">{t.navSafety}</span>
         </button>
       </nav>

@@ -1,12 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
+import { speakVernacular } from '../utils/speechUtils';
 import './SafetyGuidance.css';
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
-export default function SafetyGuidance({ contextualCategory = null }) {
+export default function SafetyGuidance({ contextualCategory = null, currentLang: propLang }) {
   const { t, i18n } = useTranslation();
-  const currentLang = i18n.language || 'hi';
+  const normalize = (lng) => {
+    if (!lng) return 'hi';
+    const s = String(lng).toLowerCase();
+    if (s.startsWith('mr')) return 'mr';
+    if (s.startsWith('en')) return 'en';
+    return 'hi';
+  };
+
+  const currentLang = normalize(propLang || i18n?.language || localStorage.getItem('relink_lang'));
 
   const [cards, setCards] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState(contextualCategory || 'ALL');
@@ -155,25 +164,38 @@ export default function SafetyGuidance({ contextualCategory = null }) {
     }
   };
 
-  const playCardAudio = async (card) => {
+  const playCardAudio = (card) => {
+    // If currently playing this card, stop it immediately
+    if (activeAudioCard === card.card_id) {
+      if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+      }
+      setActiveAudioCard(null);
+      return;
+    }
+
     setActiveAudioCard(card.card_id);
-    const spokenText = card.audio_text || card.guidance;
 
-    if ('speechSynthesis' in window) {
-      window.speechSynthesis.cancel();
-      const utterance = new SpeechSynthesisUtterance(spokenText);
-      utterance.lang = currentLang === 'mr' ? 'mr-IN' : (currentLang === 'hi' ? 'hi-IN' : 'en-IN');
-      utterance.rate = 0.95;
-      utterance.onend = () => setActiveAudioCard(null);
-      utterance.onerror = () => setActiveAudioCard(null);
-      window.speechSynthesis.speak(utterance);
+    // Pick text that accurately matches the active UI language
+    let spokenText = '';
+    if (currentLang === 'en') {
+      spokenText = card.audio_text_en || card.guidance_en || card.guidance || card.title;
+      // If guidance has Devanagari characters while currentLang is English, use card.title
+      if (/[\u0900-\u097F]/.test(spokenText)) {
+        spokenText = card.title_en || card.title || 'Safety rule: handle with care and wear protective gear.';
+      }
+    } else if (currentLang === 'mr') {
+      spokenText = card.audio_text_mr || card.guidance_mr || card.audio_text || card.guidance;
+    } else {
+      spokenText = card.audio_text_hi || card.guidance_hi || card.audio_text || card.guidance;
     }
 
-    try {
-      await fetch(`${API_BASE}/safety/cards/${card.card_id}/audio?language=${currentLang}`);
-    } catch {
-      // Fallback
-    }
+    speakVernacular(
+      spokenText,
+      currentLang,
+      () => setActiveAudioCard(null),
+      () => setActiveAudioCard(null)
+    );
   };
 
   return (

@@ -58,9 +58,33 @@ export default function CollectorApp({ onSwitchRole, currentLang: propLang, onLa
   const fileInputRef = useRef(null);
 
   const [activeScreen, setActiveScreen] = useState('home'); // 'home' | 'ai_scan' | 'category_select' | 'lot_summary' | 'offers' | 'receipt' | 'earnings' | 'safety'
+  const [navHistory, setNavHistory] = useState(['home']);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [scanningPreview, setScanningPreview] = useState(null);
   const [scanStep, setScanStep] = useState(1);
+
+  const navigateTo = (newScreen) => {
+    setNavHistory((prev) => {
+      if (prev[prev.length - 1] === newScreen) return prev;
+      return [...prev, newScreen];
+    });
+    setActiveScreen(newScreen);
+  };
+
+  const navigateBack = () => {
+    setNavHistory((prev) => {
+      if (prev.length > 1) {
+        const nextStack = [...prev];
+        nextStack.pop();
+        const prevScreen = nextStack[nextStack.length - 1] || 'home';
+        setActiveScreen(prevScreen);
+        return nextStack;
+      } else {
+        setActiveScreen('home');
+        return ['home'];
+      }
+    });
+  };
   
   const normalize = (lng) => {
     if (!lng) return 'hi';
@@ -71,23 +95,29 @@ export default function CollectorApp({ onSwitchRole, currentLang: propLang, onLa
   };
 
   const [internalLang, setInternalLang] = useState(() => {
-    return normalize(propLang || localStorage.getItem('relink_lang') || i18n.language);
+    return normalize(propLang || localStorage.getItem('relink_lang') || i18n?.language);
   });
 
   useEffect(() => {
     if (propLang) {
-      setInternalLang(normalize(propLang));
+      const safe = normalize(propLang);
+      setInternalLang(safe);
+      localStorage.setItem('relink_lang', safe);
     }
   }, [propLang]);
 
   useEffect(() => {
     const handleLanguageChanged = (lng) => {
-      setInternalLang(normalize(lng));
+      const safe = normalize(lng);
+      setInternalLang(safe);
+      localStorage.setItem('relink_lang', safe);
     };
-    i18n.on('languageChanged', handleLanguageChanged);
-    return () => {
-      i18n.off('languageChanged', handleLanguageChanged);
-    };
+    if (i18n && i18n.on) {
+      i18n.on('languageChanged', handleLanguageChanged);
+      return () => {
+        i18n.off('languageChanged', handleLanguageChanged);
+      };
+    }
   }, [i18n]);
 
   const currentLang = normalize(propLang || internalLang);
@@ -222,12 +252,13 @@ export default function CollectorApp({ onSwitchRole, currentLang: propLang, onLa
 
   const handleLanguageChange = (lng) => {
     const safe = normalize(lng);
+    localStorage.setItem('relink_lang', safe);
+    setInternalLang(safe);
+    if (i18n && i18n.changeLanguage) {
+      i18n.changeLanguage(safe);
+    }
     if (propOnLanguageChange) {
       propOnLanguageChange(safe);
-    } else {
-      i18n.changeLanguage(safe);
-      localStorage.setItem('relink_lang', safe);
-      setInternalLang(safe);
     }
   };
 
@@ -515,14 +546,16 @@ export default function CollectorApp({ onSwitchRole, currentLang: propLang, onLa
       {activeScreen === 'home' && (
         <Screen01Home
           onScanClick={handleScanTrigger}
-          onNavigate={setActiveScreen}
+          onNavigate={navigateTo}
+          onNavigateBack={navigateBack}
+          activeScreen={activeScreen}
           onSelectLot={(lot) => {
             setLotDraft((prev) => ({
               ...prev,
               ...lot,
               materialTitle: lot.material_category || 'Printed Circuit Board (PCB)'
             }));
-            setActiveScreen('receipt');
+            navigateTo('receipt');
           }}
           recentLots={recentLots}
           syncStatus={syncStatus}
@@ -543,15 +576,17 @@ export default function CollectorApp({ onSwitchRole, currentLang: propLang, onLa
               materialTitle: lot.material_category || lot.materialTitle || 'Printed Circuit Board (PCB)'
             }));
             if (lot.status === 'AWAITING_OFFERS' || lot.status === 'CREATED') {
-              setActiveScreen('offers');
+              navigateTo('offers');
             } else if (lot.status === 'OFFER_ACCEPTED' || lot.status === 'READY_FOR_PICKUP') {
-              setActiveScreen('receipt');
+              navigateTo('receipt');
             } else {
-              setActiveScreen('receipt');
+              navigateTo('receipt');
             }
           }}
           onNewScan={handleScanTrigger}
-          onNavigate={setActiveScreen}
+          onNavigate={navigateTo}
+          onNavigateBack={navigateBack}
+          activeScreen={activeScreen}
           syncStatus={syncStatus}
           currentLang={currentLang}
           onLanguageChange={handleLanguageCycle}
@@ -563,7 +598,9 @@ export default function CollectorApp({ onSwitchRole, currentLang: propLang, onLa
         <Screen02AiIdentification
           lotDraft={lotDraft}
           onUpdateDraft={handleUpdateDraft}
-          onNavigate={setActiveScreen}
+          onNavigate={navigateTo}
+          onNavigateBack={navigateBack}
+          activeScreen={activeScreen}
           onRetakePhoto={handleScanTrigger}
           syncStatus={syncStatus}
           currentLang={currentLang}
@@ -575,7 +612,9 @@ export default function CollectorApp({ onSwitchRole, currentLang: propLang, onLa
       {activeScreen === 'category_select' && (
         <Screen03CategorySelect
           onSelectCategory={(cat) => handleUpdateDraft(cat)}
-          onNavigate={setActiveScreen}
+          onNavigate={navigateTo}
+          onNavigateBack={navigateBack}
+          activeScreen={activeScreen}
           currentLang={currentLang}
           onLanguageChange={handleLanguageCycle}
         />
@@ -585,9 +624,11 @@ export default function CollectorApp({ onSwitchRole, currentLang: propLang, onLa
       {activeScreen === 'lot_summary' && (
         <Screen03bDigitalSummary
           lotDraft={lotDraft}
-          onNavigate={setActiveScreen}
+          onNavigate={navigateTo}
+          onNavigateBack={navigateBack}
+          activeScreen={activeScreen}
           onSaveOffline={handleSaveDraftOffline}
-          onAddItem={() => setActiveScreen('ai_scan')}
+          onAddItem={() => navigateTo('ai_scan')}
           onRemoveItem={handleRemoveItemFromDraft}
           syncStatus={syncStatus}
           currentLang={currentLang}
@@ -600,7 +641,9 @@ export default function CollectorApp({ onSwitchRole, currentLang: propLang, onLa
         <Screen04PriceOffers
           lotDraft={lotDraft}
           onAcceptOffer={handleAcceptOffer}
-          onNavigate={setActiveScreen}
+          onNavigate={navigateTo}
+          onNavigateBack={navigateBack}
+          activeScreen={activeScreen}
           syncStatus={syncStatus}
           currentLang={currentLang}
           onLanguageChange={handleLanguageCycle}
@@ -611,7 +654,9 @@ export default function CollectorApp({ onSwitchRole, currentLang: propLang, onLa
       {activeScreen === 'receipt' && (
         <Screen05HandoverReceipt
           lotDraft={lotDraft}
-          onNavigate={setActiveScreen}
+          onNavigate={navigateTo}
+          onNavigateBack={navigateBack}
+          activeScreen={activeScreen}
           onResetLot={handleResetLot}
           syncStatus={syncStatus}
           currentLang={currentLang}
@@ -622,7 +667,9 @@ export default function CollectorApp({ onSwitchRole, currentLang: propLang, onLa
       {/* Screen 6: My Earnings History */}
       {activeScreen === 'earnings' && (
         <Screen06EarningsHistory
-          onNavigate={setActiveScreen}
+          onNavigate={navigateTo}
+          onNavigateBack={navigateBack}
+          activeScreen={activeScreen}
           syncStatus={syncStatus}
           currentLang={currentLang}
           onLanguageChange={handleLanguageCycle}
@@ -635,7 +682,7 @@ export default function CollectorApp({ onSwitchRole, currentLang: propLang, onLa
           <header className="bg-surface border-b border-outline-variant p-4 flex items-center justify-between sticky top-0 z-40">
             <div className="flex items-center gap-2">
               <button
-                onClick={() => setActiveScreen('home')}
+                onClick={navigateBack}
                 className="w-10 h-10 -ml-2 rounded-full flex items-center justify-center text-on-surface hover:bg-surface-container cursor-pointer"
               >
                 <span className="material-symbols-outlined">arrow_back</span>
@@ -662,27 +709,27 @@ export default function CollectorApp({ onSwitchRole, currentLang: propLang, onLa
           </div>
           {/* Bottom Nav (Mobile Only) */}
           <nav className="fixed bottom-0 left-0 w-full z-50 flex md:hidden justify-around items-center px-2 py-2 bg-surface border-t border-outline-variant shadow-md rounded-t-xl">
-            <button onClick={() => setActiveScreen('home')} className="flex flex-col items-center justify-center p-2 text-on-surface-variant cursor-pointer">
+            <button onClick={() => navigateTo('home')} className="flex flex-col items-center justify-center p-2 text-on-surface-variant cursor-pointer">
               <span className="material-symbols-outlined">home</span>
               <span className="font-label-md text-xs mt-1">
                 {currentLang === 'mr' ? 'मुख्य' : (currentLang === 'hi' ? 'होम' : 'Home')}
               </span>
             </button>
-            <button onClick={() => setActiveScreen('ai_scan')} className="flex flex-col items-center justify-center p-2 text-on-surface-variant cursor-pointer">
+            <button onClick={() => navigateTo('my_lots')} className="flex flex-col items-center justify-center p-2 text-on-surface-variant cursor-pointer">
               <span className="material-symbols-outlined">inventory_2</span>
               <span className="font-label-md text-xs mt-1">
-                {currentLang === 'mr' ? 'लॉट' : (currentLang === 'hi' ? 'बेचें/लॉट' : 'Sell/Lots')}
+                {currentLang === 'mr' ? 'माझे लॉट' : (currentLang === 'hi' ? 'मेरे लॉट' : 'My Lots')}
               </span>
             </button>
-            <button onClick={() => setActiveScreen('earnings')} className="flex flex-col items-center justify-center p-2 text-on-surface-variant cursor-pointer">
+            <button onClick={() => navigateTo('earnings')} className="flex flex-col items-center justify-center p-2 text-on-surface-variant cursor-pointer">
               <span className="material-symbols-outlined">payments</span>
               <span className="font-label-md text-xs mt-1">
                 {currentLang === 'mr' ? 'कमाई' : (currentLang === 'hi' ? 'कमाई' : 'Earnings')}
               </span>
             </button>
-            <button onClick={() => setActiveScreen('safety')} className="flex flex-col items-center justify-center bg-primary-container text-on-primary-container rounded-full px-4 py-1 scale-90 cursor-pointer">
-              <span className="material-symbols-outlined filled">info</span>
-              <span className="font-label-md text-xs font-bold mt-1">
+            <button onClick={() => navigateTo('safety')} className="flex flex-col items-center justify-center bg-primary text-on-primary rounded-full px-4 py-1 scale-95 shadow-xs cursor-pointer">
+              <span className="material-symbols-outlined filled">health_and_safety</span>
+              <span className="font-label-md text-[10px] font-bold mt-0.5">
                 {currentLang === 'mr' ? 'सुरक्षा' : (currentLang === 'hi' ? 'सुरक्षा' : 'Safety')}
               </span>
             </button>

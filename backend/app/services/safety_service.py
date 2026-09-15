@@ -23,6 +23,7 @@ SAFETY_CARDS: List[Dict[str, Any]] = [
         "guidance_en": "Never burn insulated copper cables in open fires. Burning releases toxic dioxins causing irreversible lung damage. Use a mechanical wire stripper.",
         "audio_text_hi": "तार को कभी न जलाएं। इसका धुआं जहरीला होता है और फेफड़ों को नुकसान पहुंचाता है। रीसायकलर को पूरी तार दें या स्ट्रिपर का इस्तेमाल करें।",
         "audio_text_mr": "केबल कधीही जाळू नका. त्यातील विषारी धूर फुफ्फुसांना घातक असतो. संपूर्ण केबल थेट रीसायकलरला द्या.",
+        "audio_text_en": "Never burn cables in open fire. Toxic dioxin smoke causes severe lung damage. Use a mechanical stripper.",
         "recommended_gear": "Mechanical wire stripper, Cotton gloves",
         "cpcb_rule_ref": "E-Waste Management Rules 2022 - Schedule IV (Prohibition of Open Burning)"
     },
@@ -40,6 +41,7 @@ SAFETY_CARDS: List[Dict[str, Any]] = [
         "guidance_en": "Never crush, puncture, or open lead-acid or lithium batteries manually. Acid causes severe chemical burns and lithium explodes upon atmospheric exposure.",
         "audio_text_hi": "बैटरी को कभी न तोड़ें। इसमें खतरनाक तेजाब और आग लगने का डर रहता है। इसे बंद हालत में सीधे अधिकृत रीसायकलर को दें।",
         "audio_text_mr": "बॅटरी कधीही फोडू नका. ऍसिड आणि स्फोटाचा धोका असतो. सुरक्षितपणे बंद स्थितीत रीसायकलरला द्या.",
+        "audio_text_en": "Never smash or crack open batteries. Acid and fire hazard. Hand over intact to an authorized recycler.",
         "recommended_gear": "Acid-resistant rubber gloves, Safety goggles",
         "cpcb_rule_ref": "Battery Waste Management Rules 2022 - Authorized Dismantling Protocols"
     },
@@ -57,6 +59,7 @@ SAFETY_CARDS: List[Dict[str, Any]] = [
         "guidance_en": "Old CRT television picture tubes contain up to 2 kg of toxic lead and toxic phosphors under vacuum. Smashing causes implosion and glass shrapnel.",
         "audio_text_hi": "सीआरटी टीवी को हथौड़े से कभी न फोड़ें। इसमें जहरीला सीसा होता है और कांच तेजी से उड़कर चोट पहुंचा सकता है।",
         "audio_text_mr": "सीआरटी स्क्रीन फोडू नका. यात घातक शिसे असते आणि काच उडून दुखापत होऊ शकते.",
+        "audio_text_en": "Never smash CRT television glass. It contains toxic lead and implodes violently into dangerous shards.",
         "recommended_gear": "Impact face shield, Thick leather gloves",
         "cpcb_rule_ref": "CPCB Guidelines for Environmentally Sound Dismantling of CRT Tubes"
     },
@@ -74,6 +77,7 @@ SAFETY_CARDS: List[Dict[str, Any]] = [
         "guidance_en": "Fiberglass edges of broken motherboards cause deep lacerations. Lead solder dust can contaminate open wounds.",
         "audio_text_hi": "सर्किट बोर्ड उठाते समय मोटे दस्ताने पहनें। इसके नुकीले किनारे हाथ काट सकते हैं और घाव में इंफेक्शन हो सकता है।",
         "audio_text_mr": "पीसीबी उचलताना जाड हातमोजे वापरा. कडा तीक्ष्ण असतात आणि हात कापू शकतो.",
+        "audio_text_en": "Wear cut-resistant gloves when handling circuit boards to avoid deep cuts and lead solder contamination.",
         "recommended_gear": "Heavy-duty cut-resistant gloves",
         "cpcb_rule_ref": "Occupational Safety Standard for Electronic Scrap Sorting"
     },
@@ -91,6 +95,7 @@ SAFETY_CARDS: List[Dict[str, Any]] = [
         "guidance_en": "Sorting electronic scrap generates toxic metal particulates. Always wear an N95 or double-layered mask to protect lungs.",
         "audio_text_hi": "छंटाई करते समय हमेशा मास्क लगाएं ताकि धातु की धूल फेफड़ों में न जाए और सांस की बीमारी न हो।",
         "audio_text_mr": "कचरा हाताळताना मास्क जरूर वापरा जेणेकरून धूळ फुफ्फुसात जाणार नाही.",
+        "audio_text_en": "Always wear an N95 mask while sorting scrap to protect lungs from toxic metal dust and particulates.",
         "recommended_gear": "N95 particulate respirator mask",
         "cpcb_rule_ref": "Worker Welfare & Occupational Health Mandate (Factory Act & CPCB Guidelines)"
     },
@@ -108,6 +113,7 @@ SAFETY_CARDS: List[Dict[str, Any]] = [
         "guidance_en": "Never store e-waste near drinking water or food supplies. Wash hands thoroughly with soap before eating to prevent heavy metal ingestion.",
         "audio_text_hi": "ई-कचरे को पानी और खाने की चीजों से दूर रखें और काम के बाद हाथ साबुन से धोए बिना भोजन न करें।",
         "audio_text_mr": "पाण्यापासून कचरा लांब ठेवा आणि काम झाल्यावर हात साबणाने धुवा.",
+        "audio_text_en": "Keep electronic scrap away from drinking water and food. Always wash hands thoroughly with soap before eating.",
         "recommended_gear": "Handwashing soap, Dedicated storage demarcation",
         "cpcb_rule_ref": "Heavy Metal Toxicity Prevention Protocol"
     },
@@ -125,6 +131,7 @@ SAFETY_CARDS: List[Dict[str, Any]] = [
         "guidance_en": "Large electrolytic capacitors in power supplies retain lethal charges up to 400V even when unplugged. Discharge with a resistor before handling.",
         "audio_text_hi": "बड़ी मशीनों के कंडेंसर को सीधे न छुएं, इसमें बिजली का झटका लग सकता है। इसे पहले डिस्चार्ज करें।",
         "audio_text_mr": "कॅपॅसिटर थेट हाताने स्पर्श करू नका, विजेचा झटका बसू शकतो.",
+        "audio_text_en": "Do not touch power capacitors directly. They store lethal electric charge. Discharge safely before handling.",
         "recommended_gear": "Insulated screwdrivers (1000V rated)",
         "cpcb_rule_ref": "Electrical Hazard Mitigation in Informal Scrap Dismantling"
     }
@@ -144,9 +151,9 @@ def get_all_safety_cards(language: str = "hi") -> List[Dict[str, Any]]:
             "hazard_level": card["hazard_level"],
             "icon": card["icon"],
             "icon_label": card["icon_label"],
-            "title": card.get(f"title_{lang}") or card["title_hi"],
-            "guidance": card.get(f"guidance_{lang}") or card["guidance_hi"],
-            "audio_text": card.get(f"audio_text_{lang}") or card["audio_text_hi"],
+            "title": card.get(f"title_{lang}") or card.get("title_en" if lang == "en" else "title_hi"),
+            "guidance": card.get(f"guidance_{lang}") or card.get("guidance_en" if lang == "en" else "guidance_hi"),
+            "audio_text": card.get(f"audio_text_{lang}") or (card.get("guidance_en") if lang == "en" else card.get("audio_text_hi")),
             "recommended_gear": card["recommended_gear"],
             "cpcb_rule_ref": card["cpcb_rule_ref"],
             "language": lang

@@ -75,6 +75,8 @@ const EARNINGS_TRANSLATIONS = {
 
 export default function Screen06EarningsHistory({
   onNavigate,
+  onNavigateBack,
+  activeScreen = 'earnings',
   syncStatus = { isOnline: true },
   currentLang: propLang,
   onLanguageChange
@@ -169,7 +171,7 @@ export default function Screen06EarningsHistory({
       <header className="docked full-width top-0 border-b border-outline-variant bg-surface text-primary flex justify-between items-center w-full px-margin-mobile h-touch-target-min z-40 sticky">
         <div className="flex items-center gap-2">
           <button
-            onClick={() => onNavigate('home')}
+            onClick={() => (onNavigateBack ? onNavigateBack() : onNavigate('home'))}
             aria-label="Back"
             className="flex items-center justify-center w-10 h-10 hover:bg-surface-container rounded-full text-on-surface-variant transition-colors cursor-pointer"
           >
@@ -317,20 +319,40 @@ export default function Screen06EarningsHistory({
 
       {/* BottomNavBar (Mobile Only) */}
       <nav className="fixed bottom-0 left-0 w-full z-50 flex md:hidden justify-around items-center px-2 py-2 bg-surface border-t border-outline-variant shadow-md rounded-t-xl">
-        <button onClick={() => onNavigate('home')} className="flex flex-col items-center justify-center p-2 text-on-surface-variant cursor-pointer">
-          <span className="material-symbols-outlined">home</span>
+        <button
+          onClick={() => onNavigate('home')}
+          className={`flex flex-col items-center justify-center p-2 cursor-pointer transition-colors ${
+            activeScreen === 'home' ? 'text-primary font-bold' : 'text-on-surface-variant'
+          }`}
+        >
+          <span className={`material-symbols-outlined ${activeScreen === 'home' ? 'filled' : ''}`}>home</span>
           <span className="font-label-md text-xs mt-1">{t.navHome}</span>
         </button>
-        <button onClick={() => onNavigate('ai_scan')} className="flex flex-col items-center justify-center p-2 text-on-surface-variant cursor-pointer">
-          <span className="material-symbols-outlined">inventory_2</span>
+        <button
+          onClick={() => onNavigate('my_lots')}
+          className={`flex flex-col items-center justify-center p-2 cursor-pointer transition-colors ${
+            activeScreen === 'my_lots' ? 'bg-primary-container text-on-primary-container rounded-full px-4 py-1 scale-90' : 'text-on-surface-variant'
+          }`}
+        >
+          <span className={`material-symbols-outlined ${activeScreen === 'my_lots' ? 'filled' : ''}`}>inventory_2</span>
           <span className="font-label-md text-xs mt-1">{t.navMyLots}</span>
         </button>
-        <button onClick={() => onNavigate('earnings')} className="flex flex-col items-center justify-center bg-primary-container text-on-primary-container rounded-full px-4 py-1 scale-90 cursor-pointer">
-          <span className="material-symbols-outlined filled">payments</span>
+        <button
+          onClick={() => onNavigate('earnings')}
+          className={`flex flex-col items-center justify-center cursor-pointer transition-colors ${
+            activeScreen === 'earnings' ? 'bg-primary-container text-on-primary-container rounded-full px-4 py-1 scale-90' : 'p-2 text-on-surface-variant'
+          }`}
+        >
+          <span className={`material-symbols-outlined ${activeScreen === 'earnings' ? 'filled' : ''}`}>payments</span>
           <span className="font-label-md text-xs font-bold mt-1">{t.navEarnings}</span>
         </button>
-        <button onClick={() => onNavigate('safety')} className="flex flex-col items-center justify-center p-2 text-on-surface-variant cursor-pointer">
-          <span className="material-symbols-outlined">info</span>
+        <button
+          onClick={() => onNavigate('safety')}
+          className={`flex flex-col items-center justify-center p-2 cursor-pointer transition-colors ${
+            activeScreen === 'safety' ? 'text-primary font-bold' : 'text-on-surface-variant'
+          }`}
+        >
+          <span className={`material-symbols-outlined ${activeScreen === 'safety' ? 'filled' : ''}`}>info</span>
           <span className="font-label-md text-xs mt-1">{t.navSafety}</span>
         </button>
       </nav>

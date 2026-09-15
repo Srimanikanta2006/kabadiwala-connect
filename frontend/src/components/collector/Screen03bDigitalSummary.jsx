@@ -130,6 +130,8 @@ const SUMMARY_TRANSLATIONS = {
 export default function Screen03bDigitalSummary({
   lotDraft,
   onNavigate,
+  onNavigateBack,
+  activeScreen = 'lot_summary',
   onSaveOffline,
   syncStatus = { isOnline: true },
   currentLang: propLang,
@@ -161,7 +163,7 @@ export default function Screen03bDigitalSummary({
     if (u === 'piece') {
       return matId === 'mat_pcb_high' ? 280 : (matId === 'mat_crt_monitor' ? 250 : (matId === 'mat_batteries_li_ion' ? 120 : (matId === 'mat_motors_magnets' ? 180 : 200)));
     }
-    return matId === 'mat_pcb_high' ? 265 : (matId === 'mat_cables_copper' ? 385 : (matId === 'mat_batteries_li_ion' ? 190 : (matId === 'mat_batteries_lead' ? 88 : (matId === 'mat_motors_magnets' ? 145 : 105))));
+    return matId === 'mat_pcb_high' ? 240 : (matId === 'mat_cables_copper' ? 380 : (matId === 'mat_batteries_li_ion' ? 185 : (matId === 'mat_batteries_lead' ? 88 : (matId === 'mat_motors_magnets' ? 145 : 105))));
   };
 
   const baseRate = getBaseRate(lotDraft.materialId, unit);
@@ -243,7 +245,7 @@ export default function Screen03bDigitalSummary({
         {/* Back Nav & Title Bar */}
         <div className="flex items-center justify-between py-1">
           <button
-            onClick={() => onNavigate('ai_scan')}
+            onClick={() => (onNavigateBack ? onNavigateBack() : onNavigate('home'))}
             aria-label="Go Back"
             className="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center text-on-surface hover:bg-surface-container-high transition-colors cursor-pointer"
             type="button"
