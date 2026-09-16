@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { speakVernacular } from '../../utils/speechUtils';
 import PriceBoardModal from './PriceBoardModal';
 import NotificationsModal from '../common/NotificationsModal';
+import YardHandoverModal from '../common/YardHandoverModal';
 
 const HOME_TRANSLATIONS = {
   hi: {
@@ -16,10 +17,9 @@ const HOME_TRANSLATIONS = {
     recyclerPortal: 'डीलर पोर्टल',
     syncLive: 'लाइव',
     syncOffline: 'ऑफलाइन',
-    scanTitle: 'एआई कबाड़ स्कैनर',
-    scanSubtitle: 'कैमरा से तुरंत पहचान व लाइव मंडी भाव',
-    openViewfinder: 'कबाड़ स्कैन करें (फोटो लें)',
-    manualGrid: 'श्रेणियां देखें',
+    scanTitle: 'कबाड़ स्कैन करें • तुरंत पहचानें',
+    scanSubtitle: 'एआई कैमरा पहचान • तुरंत भाव',
+    manualGrid: 'मैनुअल 7-श्रेणी ग्रिड',
     todaysHaulTitle: 'आज का काम व कमाई (Today\'s Haul)',
     todaysEarnings: 'आज की कमाई',
     todaysWeight: 'कुल वजन बेचा',
@@ -81,7 +81,8 @@ const HOME_TRANSLATIONS = {
     facilitiesDesc: 'पीन्या इंडस्ट्रियल यार्ड 04 (1.2 किमी), धारावी लिंक रोड यार्ड (1.8 किमी) और कुर्ला मंडी यार्ड (2.6 किमी) आज इलेक्ट्रॉनिक कांटे पर तुरंत नकद भुगतान के लिए सक्रिय हैं।',
     exploreBids: 'पास के अधिकृत डीलर यार्ड देखें',
     lotNumber: 'लॉट #',
-    mixedScrap: 'मिश्रित कबाड़'
+    mixedScrap: 'मिश्रित कबाड़',
+    instantCashSettlement: '⚡ 100% तुरंत नकद व UPI निपटारा'
   },
   mr: {
     mandiTag: 'कलेक्टर बाजार',
@@ -94,10 +95,9 @@ const HOME_TRANSLATIONS = {
     recyclerPortal: 'डीलर पोर्टल',
     syncLive: 'थेट',
     syncOffline: 'ऑफलाइन',
-    scanTitle: 'एआई भंगार स्कॅनर',
-    scanSubtitle: 'कॅमेऱ्याने तात्काळ ओळख व थेट बाजार दर',
-    openViewfinder: 'भंगार स्कॅन करा (फोटो घ्या)',
-    manualGrid: 'श्रेणी तक्ता',
+    scanTitle: 'भंगार स्कॅन करा • त्वरित ओळखा',
+    scanSubtitle: 'एआई कॅमेरा तपासणी • तात्काळ वजन व दर',
+    manualGrid: '7-श्रेणी मॅन्युअल ग्रिड',
     todaysHaulTitle: 'आजचे काम व कमाई (Today\'s Haul)',
     todaysEarnings: 'आजची कमाई',
     todaysWeight: 'एकूण वजन विकले',
@@ -159,7 +159,8 @@ const HOME_TRANSLATIONS = {
     facilitiesDesc: 'पीन्या इंडस्ट्रियल यार्ड 04 (1.2 किमी), धारावी लिंक रोड यार्ड (1.8 किमी) आणि कुर्ला मंडी यार्ड (2.6 किमी) इलेक्ट्रॉनिक वजनकाट्यावर थेट रोख पेमेंटसाठी सक्रिय आहेत.',
     exploreBids: 'जवळचे अधिकृत डीलर यार्ड पहा',
     lotNumber: 'लॉट #',
-    mixedScrap: 'मिश्रित भंगार'
+    mixedScrap: 'मिश्रित भंगार',
+    instantCashSettlement: '⚡ 100% त्वरित रोख व UPI जमा'
   },
   en: {
     mandiTag: 'Collector Mandi',
@@ -172,10 +173,9 @@ const HOME_TRANSLATIONS = {
     recyclerPortal: 'Dealer Portal',
     syncLive: 'Live',
     syncOffline: 'Offline',
-    scanTitle: 'AI Scrap Scanner',
-    scanSubtitle: 'Instant photo recognition & live market price',
-    openViewfinder: 'Scan Scrap (Take Photo)',
-    manualGrid: 'Categories',
+    scanTitle: 'Scan & Identify E-Waste',
+    scanSubtitle: 'AI Camera Detection • Instant Rate',
+    manualGrid: 'Manual 7-Category Grid',
     todaysHaulTitle: "Today's Work & Earnings",
     todaysEarnings: "Today's Earnings",
     todaysWeight: 'Total Weight Sold',
@@ -237,7 +237,8 @@ const HOME_TRANSLATIONS = {
     facilitiesDesc: 'Peenya Industrial Yard #04 (1.2 km), Dharavi Link Road Yard (1.8 km), and Kurla Mandi Yard (2.6 km) are actively taking in scrap with instant cash/UPI payment on electronic scales.',
     exploreBids: 'Explore Nearby Dealer Yards',
     lotNumber: 'Lot #',
-    mixedScrap: 'Mixed Scrap'
+    mixedScrap: 'Mixed Scrap',
+    instantCashSettlement: '⚡ 100% Instant Cash & UPI Settlement'
   }
 };
 
@@ -250,7 +251,8 @@ export default function Screen01Home({
   recentLots = [],
   syncStatus = { isOnline: true, unsyncedCount: 0 },
   currentLang: propLang,
-  onLanguageChange
+  onLanguageChange,
+  onSwitchRole
 }) {
   const { i18n } = useTranslation();
   const normalize = (lng) => {
@@ -266,6 +268,7 @@ export default function Screen01Home({
 
   const [showPriceBoardModal, setShowPriceBoardModal] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
+  const [showYardModal, setShowYardModal] = useState(false);
 
   // Doorstep Rate Calculator State
   const [calcMaterial, setCalcMaterial] = useState('mat_cables_copper');
@@ -473,73 +476,39 @@ export default function Screen01Home({
           {/* Left / Primary Column (col-span-7) */}
           <div className="lg:col-span-7 space-y-5">
             
-            {/* 1. AWESOME TACTILE SMART VIEWFINDER SCANNER HERO CONSOLE */}
-            <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-950 via-emerald-950 to-slate-900 text-white p-5 sm:p-6 shadow-xl border border-emerald-500/30 group">
-              {/* High-tech Grid Background Pattern & Glowing Ambience */}
-              <div className="absolute inset-0 opacity-15 pointer-events-none bg-[radial-gradient(#10b981_1px,transparent_1px)] [background-size:16px_16px]"></div>
-              <div className="absolute -top-16 -right-16 w-48 h-48 bg-emerald-500/20 rounded-full blur-3xl pointer-events-none"></div>
-              <div className="absolute -bottom-16 -left-16 w-48 h-48 bg-teal-500/20 rounded-full blur-3xl pointer-events-none"></div>
-
-              <div className="relative z-10 flex flex-col items-center text-center space-y-4">
-                {/* Header Badge */}
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/20 border border-emerald-400/40 text-emerald-300 text-xs font-bold tracking-wide backdrop-blur-md">
-                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
-                  <span className="material-symbols-outlined text-[15px]">auto_awesome</span>
-                  <span>{safeLang === 'mr' ? 'स्मार्ट एआई विज़न २.४' : (safeLang === 'hi' ? 'स्मार्ट एआई विज़न 2.4' : 'Smart AI Vision 2.4')}</span>
-                </div>
-
-                {/* Tactile Optical Viewfinder Centerpiece */}
-                <div
-                  onClick={onScanClick}
-                  className="relative w-28 h-28 sm:w-32 sm:h-32 rounded-3xl border-2 border-dashed border-emerald-400/60 bg-emerald-950/70 backdrop-blur-sm flex items-center justify-center cursor-pointer hover:border-emerald-300 hover:scale-105 transition-all shadow-inner"
-                  title={t.openViewfinder}
-                >
-                  {/* Optical Reticle Corner Brackets */}
-                  <span className="absolute top-2 left-2 w-3.5 h-3.5 border-t-2 border-l-2 border-emerald-400"></span>
-                  <span className="absolute top-2 right-2 w-3.5 h-3.5 border-t-2 border-r-2 border-emerald-400"></span>
-                  <span className="absolute bottom-2 left-2 w-3.5 h-3.5 border-b-2 border-l-2 border-emerald-400"></span>
-                  <span className="absolute bottom-2 right-2 w-3.5 h-3.5 border-b-2 border-r-2 border-emerald-400"></span>
-
-                  {/* Pulsing Optical Center Shutter Button */}
-                  <div className="w-16 h-16 rounded-full bg-gradient-to-tr from-emerald-500 to-teal-400 flex items-center justify-center text-slate-950 shadow-lg shadow-emerald-500/40 relative group-hover:scale-110 transition-transform">
-                    <span className="material-symbols-outlined text-[32px] font-bold">photo_camera</span>
-                    <span className="absolute inset-0 rounded-full border-2 border-emerald-300/80 animate-ping opacity-60 pointer-events-none"></span>
+            {/* Primary CTA: Scan & Identify E-Waste Centerpiece */}
+            <section>
+              <button
+                onClick={onScanClick}
+                className="w-full bg-gradient-to-r from-emerald-600 via-primary to-emerald-700 hover:from-emerald-500 hover:to-emerald-600 text-on-primary min-h-[80px] sm:min-h-[88px] py-4 px-5 sm:px-6 rounded-2xl flex items-center justify-between shadow-lg shadow-emerald-900/20 hover:shadow-xl hover:shadow-emerald-900/30 active:scale-[0.98] transition-all cursor-pointer border border-emerald-400/30"
+              >
+                <div className="flex items-center gap-3.5 sm:gap-4 text-left">
+                  <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-white/20 backdrop-blur-xs flex items-center justify-center shadow-inner shrink-0">
+                    <span className="material-symbols-outlined text-[30px] sm:text-[34px] text-white">photo_camera</span>
                   </div>
-
-                  {/* Laser Scanning Line Animation */}
-                  <div className="absolute left-3 right-3 h-[2px] bg-gradient-to-r from-transparent via-emerald-400 to-transparent animate-pulse opacity-90 pointer-events-none"></div>
+                  <div>
+                    <h2 className="font-headline-md font-black text-lg sm:text-2xl text-white tracking-tight leading-snug">
+                      {t.scanTitle}
+                    </h2>
+                    <span className="text-xs sm:text-sm text-emerald-100 font-medium flex items-center gap-1.5 mt-0.5">
+                      <span className="material-symbols-outlined text-[15px] text-emerald-300">auto_awesome</span>
+                      <span>{t.scanSubtitle}</span>
+                    </span>
+                  </div>
                 </div>
-
-                {/* Clear Headline & Subtitle */}
-                <div className="space-y-1 max-w-md">
-                  <h3 className="text-xl sm:text-2xl font-black tracking-tight text-white">
-                    {t.scanTitle}
-                  </h3>
-                  <p className="text-xs sm:text-sm text-emerald-200/85 font-medium leading-snug">
-                    {t.scanSubtitle}
-                  </p>
+                <div className="hidden sm:flex w-10 h-10 rounded-full bg-white/15 items-center justify-center text-white shrink-0">
+                  <span className="material-symbols-outlined text-[24px]">arrow_forward</span>
                 </div>
+              </button>
 
-                {/* Integrated Action Triggers */}
-                <div className="w-full grid grid-cols-1 sm:grid-cols-12 gap-2.5 pt-1 max-w-md">
-                  <button
-                    type="button"
-                    onClick={onScanClick}
-                    className="sm:col-span-8 bg-gradient-to-r from-emerald-500 to-teal-400 hover:from-emerald-400 hover:to-teal-300 text-slate-950 font-black text-sm py-3 px-5 rounded-2xl flex items-center justify-center gap-2 shadow-lg shadow-emerald-950/50 active:scale-98 transition-all cursor-pointer"
-                  >
-                    <span className="material-symbols-outlined text-[20px]">document_scanner</span>
-                    <span>{t.openViewfinder}</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => onNavigate('category_select')}
-                    className="sm:col-span-4 bg-white/10 hover:bg-white/15 border border-white/20 text-white font-bold text-xs py-3 px-3 rounded-2xl flex items-center justify-center gap-1.5 backdrop-blur-md active:scale-98 transition-all cursor-pointer"
-                  >
-                    <span className="material-symbols-outlined text-[18px] text-emerald-400">grid_view</span>
-                    <span>{t.manualGrid}</span>
-                  </button>
-                </div>
+              <div className="flex items-center justify-center pt-3">
+                <button
+                  onClick={() => onNavigate('category_select')}
+                  className="text-xs font-bold text-primary hover:underline flex items-center gap-1.5 px-3 py-1 rounded-full hover:bg-surface-container transition-colors cursor-pointer"
+                >
+                  <span className="material-symbols-outlined text-[16px]">grid_view</span>
+                  <span>{t.manualGrid}</span>
+                </button>
               </div>
             </section>
 
@@ -578,7 +547,7 @@ export default function Screen01Home({
               </div>
 
               <div className="flex items-center justify-between pt-0.5 text-xs">
-                <span className="text-emerald-900/80 font-medium">⚡ 100% तुरंत नकद व UPI निपटारा</span>
+                <span className="text-emerald-900/80 font-medium">{t.instantCashSettlement}</span>
                 <button
                   type="button"
                   onClick={() => onNavigate('earnings')}
@@ -591,20 +560,28 @@ export default function Screen01Home({
             </section>
 
             {/* 3. FEATURE: NEAREST ACTIVE SCRAP DEALER LIVE CARD */}
-            <section className="bg-surface rounded-2xl p-4 sm:p-5 border border-outline-variant/60 shadow-xs space-y-3">
+            <section
+              onClick={() => setShowYardModal(true)}
+              className="bg-surface rounded-2xl p-4 sm:p-5 border border-outline-variant/60 hover:border-primary/50 shadow-xs space-y-3 cursor-pointer transition-all hover:shadow-sm group"
+            >
               {/* Row 1: One big horizontal line with icon & yard name */}
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-amber-50 border border-amber-200/80 text-amber-800 flex items-center justify-center shrink-0 shadow-2xs">
-                  <span className="material-symbols-outlined text-[22px]">storefront</span>
+              <div className="flex items-center justify-between gap-3">
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="w-10 h-10 rounded-xl bg-amber-50 border border-amber-200/80 text-amber-800 flex items-center justify-center shrink-0 shadow-2xs group-hover:bg-amber-100 transition-colors">
+                    <span className="material-symbols-outlined text-[22px]">storefront</span>
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <span className="text-[10px] font-bold text-primary uppercase tracking-wider block">
+                      {t.nearestYardTitle}
+                    </span>
+                    <h4 className="text-base sm:text-lg font-bold text-on-surface truncate">
+                      {t.yardName}
+                    </h4>
+                  </div>
                 </div>
-                <div className="min-w-0 flex-1">
-                  <span className="text-[10px] font-bold text-primary uppercase tracking-wider block">
-                    {t.nearestYardTitle}
-                  </span>
-                  <h4 className="text-base sm:text-lg font-bold text-on-surface truncate">
-                    {t.yardName}
-                  </h4>
-                </div>
+                <span className="material-symbols-outlined text-secondary text-[20px] group-hover:text-primary group-hover:translate-x-0.5 transition-all shrink-0">
+                  arrow_forward_ios
+                </span>
               </div>
 
               {/* Row 2: One big HORIZONTAL line containing 1.2 km, open status, and electronic scale verified */}
@@ -633,7 +610,7 @@ export default function Screen01Home({
                     <span className="material-symbols-outlined text-primary text-[18px] shrink-0">memory</span>
                     <span className="text-xs font-semibold text-on-surface truncate">PCB</span>
                   </div>
-                  <span className="font-extrabold text-emerald-800 text-sm shrink-0">₹240/kg</span>
+                  <span className="font-extrabold text-emerald-800 text-sm shrink-0">₹755/kg</span>
                 </div>
 
                 {/* 2: Copper */}
@@ -642,7 +619,7 @@ export default function Screen01Home({
                     <span className="material-symbols-outlined text-amber-700 text-[18px] shrink-0">cable</span>
                     <span className="text-xs font-semibold text-on-surface truncate">{safeLang === 'mr' ? 'तांबे' : (safeLang === 'hi' ? 'तांबा' : 'Copper')}</span>
                   </div>
-                  <span className="font-extrabold text-emerald-800 text-sm shrink-0">₹380/kg</span>
+                  <span className="font-extrabold text-emerald-800 text-sm shrink-0">₹415/kg</span>
                 </div>
 
                 {/* 3: Battery */}
@@ -651,7 +628,7 @@ export default function Screen01Home({
                     <span className="material-symbols-outlined text-blue-700 text-[18px] shrink-0">battery_charging_full</span>
                     <span className="text-xs font-semibold text-on-surface truncate">{safeLang === 'mr' ? 'बॅटरी' : (safeLang === 'hi' ? 'बैटरी' : 'Battery')}</span>
                   </div>
-                  <span className="font-extrabold text-emerald-800 text-sm shrink-0">₹185/kg</span>
+                  <span className="font-extrabold text-emerald-800 text-sm shrink-0">₹240/kg</span>
                 </div>
 
                 {/* 4: Scale Verification / Instant Cash */}
@@ -668,7 +645,10 @@ export default function Screen01Home({
               <div className="grid grid-cols-2 gap-3 pt-1">
                 <button
                   type="button"
-                  onClick={() => window.open('tel:+919845012891')}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    window.open('tel:+919845012891');
+                  }}
                   className="py-3 px-4 rounded-xl border border-outline-variant/60 bg-surface hover:bg-surface-container text-on-surface font-bold text-xs sm:text-sm flex items-center justify-center gap-2 cursor-pointer shadow-2xs active:scale-98 transition-all"
                 >
                   <span className="material-symbols-outlined text-[18px] text-primary">call</span>
@@ -676,11 +656,14 @@ export default function Screen01Home({
                 </button>
                 <button
                   type="button"
-                  onClick={() => onNavigate('offers')}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setShowYardModal(true);
+                  }}
                   className="py-3 px-4 rounded-xl bg-primary hover:bg-emerald-800 text-on-primary font-bold text-xs sm:text-sm flex items-center justify-center gap-2 cursor-pointer shadow-sm active:scale-98 transition-all"
                 >
                   <span className="material-symbols-outlined text-[18px]">directions</span>
-                  <span>{t.getDirections}</span>
+                  <span>{safeLang === 'mr' ? 'यार्ड मार्ग व पिकअप' : (safeLang === 'hi' ? 'यार्ड मार्ग एवं पिकअप' : 'Drop / Pickup')}</span>
                 </button>
               </div>
             </section>
@@ -1159,6 +1142,20 @@ export default function Screen01Home({
         isOpen={showNotifications}
         onClose={() => setShowNotifications(false)}
         onSelectNotification={(screen) => onNavigate(screen)}
+      />
+
+      {/* Yard Handover & Real-world Dual Navigation Modal */}
+      <YardHandoverModal
+        isOpen={showYardModal}
+        onClose={() => setShowYardModal(false)}
+        onNavigate={(dest) => {
+          if (dest === 'dealer_portal' && onSwitchRole) {
+            onSwitchRole('dealer');
+          } else if (onNavigate) {
+            onNavigate(dest);
+          }
+        }}
+        currentLang={safeLang}
       />
     </div>
   );

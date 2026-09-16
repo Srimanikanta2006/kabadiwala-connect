@@ -82,6 +82,34 @@ const MYLOTS_TRANSLATIONS = {
   }
 };
 
+const MATERIAL_FALLBACK_IMAGES = {
+  mat_pcb_high: '/assets/categories/pcb_high.jpg',
+  mat_pcb_low: '/assets/categories/pcb_high.jpg',
+  mat_cables_copper: '/assets/categories/copper_cable.jpg',
+  mat_batteries_li_ion: '/assets/categories/battery_lead.jpg',
+  mat_batteries_lead: '/assets/categories/battery_lead.jpg',
+  mat_crt_monitor: '/assets/categories/crt_monitor.jpg',
+  mat_lcd_panel: '/assets/categories/lcd_panel.jpg',
+  mat_motors_magnets: '/assets/categories/motors_magnets.jpg',
+  mat_mixed_plastics: '/assets/categories/mixed_plastics.jpg'
+};
+
+const resolveLotImage = (lot) => {
+  if (lot.image_data_url && lot.image_data_url.startsWith('data:image')) return lot.image_data_url;
+  if (lot.photoUrl && !lot.photoUrl.includes('googleusercontent.com/aida')) return lot.photoUrl;
+  if (lot.photo_url && !lot.photo_url.includes('googleusercontent.com/aida')) return lot.photo_url;
+  if (lot.material_id && MATERIAL_FALLBACK_IMAGES[lot.material_id]) return MATERIAL_FALLBACK_IMAGES[lot.material_id];
+  const cat = String(lot.material_category || lot.materialTitle || '').toLowerCase();
+  if (cat.includes('pcb') || cat.includes('circuit') || cat.includes('board')) return '/assets/categories/pcb_high.jpg';
+  if (cat.includes('copper') || cat.includes('cable') || cat.includes('wire')) return '/assets/categories/copper_cable.jpg';
+  if (cat.includes('battery') || cat.includes('ion') || cat.includes('lead')) return '/assets/categories/battery_lead.jpg';
+  if (cat.includes('crt') || cat.includes('monitor') || cat.includes('tv')) return '/assets/categories/crt_monitor.jpg';
+  if (cat.includes('lcd') || cat.includes('display') || cat.includes('screen')) return '/assets/categories/lcd_panel.jpg';
+  if (cat.includes('motor') || cat.includes('magnet')) return '/assets/categories/motors_magnets.jpg';
+  if (cat.includes('plastic')) return '/assets/categories/mixed_plastics.jpg';
+  return '/assets/categories/pcb_high.jpg';
+};
+
 export default function Screen07MyLots({
   lots = [],
   onSelectLot,
@@ -119,7 +147,7 @@ export default function Screen07MyLots({
       agreedRate: 780,
       ai_confidence: 0.92,
       status: 'AWAITING_OFFERS',
-      photo_url: 'https://lh3.googleusercontent.com/aida/AEtjO1Uibj7iPqmg9YKdnMYAfgjprFLErbb0FcOdAiLVCHgIpkj7gbP3YTmKP8zFMrg1kaOj63apJEhpOtxdLXe-93ri5nb5eVArP4y3X_auotJ1wePJz5s4YibZAvhuz-KAXyzC05MmFpsIy-yBUY4Mqu5yd0ohBBU3_J9_aC-nPfLKrNm8V66IvtxKehIH0e-8jnBWhBN-DbfYt6LisI-TlJcyw1QSl4R5LDqnipESfPn5rrrJ6LyUFidtmQ',
+      photo_url: '/assets/categories/pcb_high.jpg',
       acceptedDealer: {
         name: 'Peenya Industrial Aggregator Yard #04 (Dilip Bhai)',
         cpcbNo: 'KA-AGG-2024-118',
@@ -143,7 +171,7 @@ export default function Screen07MyLots({
       agreedRate: 420,
       ai_confidence: 0.89,
       status: 'OFFER_ACCEPTED',
-      photo_url: 'https://lh3.googleusercontent.com/aida/AEtjO1WgXxj3PTs-7lfhFp-JK48EFoiQ6J122eiWOD5bFME_YW39QqWjSOtecSCCok96UgeiWft9i-8N-b4CLTLOt2TKYJpTgjDclW5fZ8pW2Ao12n1xdcxpIMTthmcakRwFYe5pJNiNHbEvQXiTZ6Dg62wI00Pp4LCfvkBxSm5ebeUHSLS26HhnhDK3yHfN-r9YHbPLIFxigyiHuXbRjgJuBMMKwgaWB7DxGJ8xsxedgkY1tTjZMRuMCZsxeAQ',
+      photo_url: '/assets/categories/copper_cable.jpg',
       acceptedDealer: {
         name: 'Dharavi Link Road Scrap Aggregation Center',
         cpcbNo: 'MH-AGG-2023-042',
@@ -167,7 +195,7 @@ export default function Screen07MyLots({
       agreedRate: 110,
       ai_confidence: 0.94,
       status: 'READY_FOR_PICKUP',
-      photo_url: 'https://lh3.googleusercontent.com/aida/AEtjO1UPtZp9W1V_v4d6u-w1k0p-x0',
+      photo_url: '/assets/categories/battery_lead.jpg',
       acceptedDealer: {
         name: 'Kurla E-Waste Yard & Mandi Hub',
         cpcbNo: 'MH-AGG-2024-091',
@@ -191,7 +219,7 @@ export default function Screen07MyLots({
       agreedRate: 780,
       ai_confidence: 0.96,
       status: 'COMPLETED',
-      photo_url: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBnrXAynZNALXyOl8wueunxDavXvrvwno8ShM4qL4CTD3UnF4MmWJ4LuV71LlqCfufAD8qkP3HoAHlCEuL7qoWrLSB0I4vFLT1hUpey49XO7COePpM-6at6f5FTV23fkqAjMDEO9Jg1r5sjRFSPBVvgkjtNYGN8HeK8__5iQzaZgcica5tUIT_hal2cwOajIdRrMqTOBd9zGHioWKGJwwIlmo-VT4oy01MOUIeUVPTlHh1ywxpynama',
+      photo_url: '/assets/categories/pcb_high.jpg',
       acceptedDealer: {
         name: 'Peenya Industrial Aggregator Yard #04 (Dilip Bhai)',
         cpcbNo: 'KA-AGG-2024-118',
@@ -373,7 +401,7 @@ export default function Screen07MyLots({
               const weightVal = lot.approximate_weight || lot.weight || 12.0;
               const priceVal = lot.quoted_price || lot.totalEst || 9360;
               const title = lot.material_category || lot.materialTitle || 'Printed Circuit Board';
-              const imgUrl = lot.photo_url || lot.photoUrl || lot.image_data_url || '/assets/icons/pcb_high.svg';
+              const imgUrl = resolveLotImage(lot);
               const confPct = Math.round((lot.ai_confidence || 0.92) * 100);
 
               return (
@@ -389,6 +417,13 @@ export default function Screen07MyLots({
                         src={imgUrl}
                         alt={title}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                        loading="lazy"
+                        onError={(e) => {
+                          const fallback = (lot.material_id && MATERIAL_FALLBACK_IMAGES[lot.material_id]) || '/assets/categories/pcb_high.jpg';
+                          if (e.currentTarget.src !== fallback) {
+                            e.currentTarget.src = fallback;
+                          }
+                        }}
                       />
                       <span className="absolute bottom-0 right-0 bg-inverse-surface/85 text-white text-[9px] font-bold px-1 rounded-tl">
                         {confPct}% AI

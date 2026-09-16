@@ -673,6 +673,7 @@ export default function CollectorApp({ onSwitchRole, currentLang: propLang, onLa
           syncStatus={syncStatus}
           currentLang={currentLang}
           onLanguageChange={handleLanguageCycle}
+          onSwitchRole={onSwitchRole}
         />
       )}
 
@@ -699,9 +700,6 @@ export default function CollectorApp({ onSwitchRole, currentLang: propLang, onLa
                 <span className="material-symbols-outlined text-sm text-primary">language</span>
                 <span>{currentLang === 'hi' ? 'हिन्दी' : (currentLang === 'mr' ? 'मराठी' : 'EN')}</span>
               </button>
-              <div className="w-8 h-8 rounded-full bg-primary/15 flex items-center justify-center border border-outline-variant text-primary font-bold text-xs">
-                👷‍♂️
-              </div>
             </div>
           </header>
           <div className="w-full max-w-5xl mx-auto p-4 sm:p-6 space-y-6">

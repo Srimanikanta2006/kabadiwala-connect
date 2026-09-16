@@ -79,7 +79,8 @@ export default function Screen06EarningsHistory({
   activeScreen = 'earnings',
   syncStatus = { isOnline: true },
   currentLang: propLang,
-  onLanguageChange
+  onLanguageChange,
+  onSwitchRole
 }) {
   const { i18n } = useTranslation();
   const normalize = (lng) => {
@@ -93,6 +94,7 @@ export default function Screen06EarningsHistory({
   const safeLang = normalize(propLang || i18n.language || localStorage.getItem('relink_lang'));
   const t = EARNINGS_TRANSLATIONS[safeLang] || EARNINGS_TRANSLATIONS.hi;
 
+  const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [earnings, setEarnings] = useState({
     totalCompleted: 18450,
     pendingDues: 5250,
@@ -190,8 +192,51 @@ export default function Screen06EarningsHistory({
               <span>{safeLang === 'hi' ? 'हिन्दी' : safeLang === 'mr' ? 'मराठी' : 'EN'}</span>
             </button>
           )}
-          <div className="w-8 h-8 rounded-full bg-primary/15 flex items-center justify-center border border-outline-variant text-primary font-bold text-xs">
-            👷‍♂️
+          <div className="relative">
+            <button
+              type="button"
+              onClick={() => setShowProfileMenu(prev => !prev)}
+              aria-label="Collector Profile & Account Options"
+              className="w-8 h-8 rounded-full bg-primary/15 hover:bg-primary/25 active:scale-95 flex items-center justify-center border border-primary/30 text-primary font-bold text-xs cursor-pointer shadow-2xs transition-all"
+              title="Collector Profile & Role Switching"
+            >
+              👷‍♂️
+            </button>
+
+            {showProfileMenu && (
+              <div className="absolute right-0 mt-2 w-64 bg-surface rounded-2xl shadow-xl border border-outline-variant p-3 z-50 animate-in fade-in zoom-in-95 duration-150 space-y-3">
+                <div className="flex items-center gap-2.5 pb-2 border-b border-outline-variant/60">
+                  <div className="w-10 h-10 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center text-lg shrink-0">
+                    👷‍♂️
+                  </div>
+                  <div className="leading-tight">
+                    <p className="font-bold text-xs text-on-surface">Ramesh Kumar</p>
+                    <p className="text-[10px] text-secondary">Peenya Cluster 3 • Collector</p>
+                    <span className="inline-block text-[9px] bg-emerald-100 text-emerald-800 font-extrabold px-1.5 py-0.5 rounded mt-0.5">
+                      KYC VERIFIED
+                    </span>
+                  </div>
+                </div>
+
+                <div className="space-y-1 text-xs">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowProfileMenu(false);
+                      if (onSwitchRole) {
+                        onSwitchRole();
+                      } else if (onNavigate) {
+                        onNavigate('welcome');
+                      }
+                    }}
+                    className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-rose-700 hover:bg-rose-50 dark:hover:bg-rose-950/30 font-bold cursor-pointer transition-colors text-left"
+                  >
+                    <span className="material-symbols-outlined text-[18px]">logout</span>
+                    <span>{safeLang === 'mr' ? 'लॉग आउट करा / भूमिका बदला' : (safeLang === 'hi' ? 'लॉग आउट करें / रोल बदलें' : 'Log Out / Switch Role')}</span>
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </header>

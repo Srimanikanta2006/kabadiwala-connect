@@ -37,7 +37,7 @@ const AI_TRANSLATIONS = {
     changeCategory: 'श्रेणी बदलें',
     isCorrect: 'क्या इस कबाड़ की सही पहचान हुई है?',
     yesConfirm: 'हाँ, पुष्टि करें',
-    confirmed: '✓ पुष्टि हो गई',
+    confirmed: 'पुष्टि हो गई',
     aiVerified: 'एआई द्वारा सत्यापित',
     localDraftReady: 'स्थानीय ड्राफ्ट तैयार',
     offlineActive: 'ऑफ़लाइन डेटा सुरक्षित।',
@@ -78,7 +78,7 @@ const AI_TRANSLATIONS = {
     changeCategory: 'श्रेणी बदला',
     isCorrect: 'या मालाची योग्य ओळख झाली आहे का?',
     yesConfirm: 'होय, निश्चित करा',
-    confirmed: '✓ निश्चित झाले',
+    confirmed: 'निश्चित झाले',
     aiVerified: 'एआई सत्यापित',
     localDraftReady: 'स्थानिक मसुदा तयार',
     offlineActive: 'ऑफलाइन डेटा सुरक्षित.',
@@ -119,12 +119,23 @@ const AI_TRANSLATIONS = {
     changeCategory: 'Change Category',
     isCorrect: 'Is this material identified correctly?',
     yesConfirm: 'Yes, Confirm',
-    confirmed: '✓ Confirmed',
+    confirmed: 'Confirmed',
     aiVerified: 'AI Verified',
     localDraftReady: 'Local draft ready',
     offlineActive: 'offline persistence active.',
     scrap: 'scrap'
   }
+};
+
+const MATERIAL_DEFAULT_PHOTOS = {
+  mat_crt_monitor: '/assets/categories/crt_monitor.jpg',
+  mat_lcd_panel: '/assets/categories/lcd_panel.jpg',
+  mat_cables_copper: '/assets/categories/copper_cable.jpg',
+  mat_batteries_lead: '/assets/categories/battery_lead.jpg',
+  mat_batteries_li_ion: '/assets/categories/battery_lead.jpg',
+  mat_pcb_high: '/assets/categories/pcb_high.jpg',
+  mat_motors_magnets: '/assets/categories/motors_magnets.jpg',
+  mat_mixed_plastics: '/assets/categories/mixed_plastics.jpg'
 };
 
 export default function Screen02AiIdentification({
@@ -305,7 +316,12 @@ export default function Screen02AiIdentification({
               <img
                 alt="Scanned E-Waste Scrap"
                 className="w-full h-full object-cover opacity-90"
-                src={lotDraft.photoUrl || '/assets/icons/pcb_high.svg'}
+                src={lotDraft.photoUrl || MATERIAL_DEFAULT_PHOTOS[materialId] || '/assets/categories/pcb_high.jpg'}
+                onError={(e) => {
+                  if (MATERIAL_DEFAULT_PHOTOS[materialId] && e.currentTarget.src !== MATERIAL_DEFAULT_PHOTOS[materialId]) {
+                    e.currentTarget.src = MATERIAL_DEFAULT_PHOTOS[materialId];
+                  }
+                }}
               />
               {/* Dashed Bounding Box */}
               <div className="absolute inset-6 border-2 border-primary-fixed border-dashed rounded-xl pointer-events-none flex flex-col justify-between p-3">
@@ -525,52 +541,40 @@ export default function Screen02AiIdentification({
           </div>
         )}
 
-        {/* Low Confidence Fallback Banner (<60%) */}
-        {confidence < 60 && (
-          <div className="bg-amber-500/10 border-2 border-amber-500/50 rounded-xl p-3.5 flex flex-col gap-2 shadow-sm animate-in fade-in">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2 text-amber-700 dark:text-amber-400 font-bold text-sm">
-                <span className="material-symbols-outlined text-[20px] text-amber-600">warning</span>
-                <span>
-                  {safeLang === 'mr'
-                    ? `${confidence}% कमी अचूकता — कृपया श्रेणी तपासा`
-                    : (safeLang === 'hi'
-                        ? `${confidence}% कम सटीकता — कृपया श्रेणी की पुष्टि करें`
-                        : `${confidence}% Low Confidence — Please Verify Category`)}
+        {/* Consolidated Confirmation & Category Verification Card */}
+        <div className={`border rounded-2xl p-4 sm:p-5 shadow-sm transition-all ${
+          confidence < 60
+            ? 'bg-amber-500/10 border-2 border-amber-500/50'
+            : 'bg-surface border-outline-variant'
+        }`}>
+          {/* Contextual Low Confidence Warning (Only shown if < 60%) */}
+          {confidence < 60 && (
+            <div className="mb-3.5 space-y-1.5 pb-3 border-b border-amber-500/30">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2 text-amber-700 dark:text-amber-400 font-bold text-sm">
+                  <span className="material-symbols-outlined text-[20px] text-amber-600">warning</span>
+                  <span>
+                    {safeLang === 'mr'
+                      ? `${confidence}% कमी अचूकता — कृपया श्रेणी तपासा`
+                      : (safeLang === 'hi'
+                          ? `${confidence}% कम सटीकता — कृपया श्रेणी की पुष्टि करें`
+                          : `${confidence}% Low Confidence — Please Verify Category`)}
+                  </span>
+                </div>
+                <span className="text-[10px] font-bold bg-amber-500/20 text-amber-800 dark:text-amber-300 px-2 py-0.5 rounded-full uppercase">
+                  {t.reviewRequired}
                 </span>
               </div>
-              <span className="text-[10px] font-bold bg-amber-500/20 text-amber-800 dark:text-amber-300 px-2 py-0.5 rounded-full uppercase">
-                {t.reviewRequired}
-              </span>
+              <p className="text-xs text-on-surface-variant leading-relaxed">
+                {safeLang === 'mr'
+                  ? `अचूक सरकारी दरासाठी श्रेणी ग्रिडमधून खात्री करा किंवा हीच श्रेणी निश्चित करा.`
+                  : (safeLang === 'hi'
+                      ? `सही सरकारी भाव पाने के लिए श्रेणी ग्रिड से चुनें या इसी श्रेणी की पुष्टि करें।`
+                      : `Please verify category from the 7-category grid or confirm if correct.`)}
+              </p>
             </div>
-            <p className="text-xs text-on-surface-variant leading-relaxed">
-              {safeLang === 'mr'
-                ? `कमी अचूकता (${confidence}%). अचूक सरकारी दरासाठी श्रेणी ग्रिडमधून खात्री करा.`
-                : (safeLang === 'hi'
-                    ? `कम सटीकता (${confidence}%)। सही सरकारी भाव पाने के लिए कृपया श्रेणी ग्रिड से चुनें।`
-                    : `Estimated confidence is ${confidence}%. Please verify category from the 7-category grid.`)}
-            </p>
-            <div className="grid grid-cols-2 gap-2 mt-1">
-              <button
-                onClick={() => onNavigate('category_select')}
-                className="bg-amber-600 hover:bg-amber-700 active:scale-98 text-white font-bold py-2.5 px-3 rounded-lg text-xs flex items-center justify-center gap-1.5 shadow cursor-pointer transition-transform"
-              >
-                <span className="material-symbols-outlined text-[18px]">grid_view</span>
-                <span>{t.changeCategory}</span>
-              </button>
-              <button
-                onClick={handleConfirm}
-                className="bg-surface hover:bg-surface-container border border-amber-500/50 text-amber-900 dark:text-amber-200 font-bold py-2.5 px-3 rounded-lg text-xs flex items-center justify-center gap-1 cursor-pointer"
-              >
-                <span className="material-symbols-outlined text-[16px]">check</span>
-                <span>{t.confirmAnyway}</span>
-              </button>
-            </div>
-          </div>
-        )}
+          )}
 
-        {/* Confirmation Card */}
-        <div className="bg-surface border border-outline-variant rounded-xl p-md shadow-sm">
           <h3 className="font-label-lg text-label-lg text-on-surface font-semibold mb-3 text-center">
             {t.isCorrect}
           </h3>
@@ -578,18 +582,20 @@ export default function Screen02AiIdentification({
             <button
               onClick={handleConfirm}
               className={`h-touch-target-min font-bold rounded-xl flex items-center justify-center gap-2 shadow transition-colors active:scale-[0.98] cursor-pointer ${
-                isConfirmed ? 'bg-emerald-700 text-white' : 'bg-primary hover:bg-primary-container text-on-primary'
+                isConfirmed
+                  ? 'bg-emerald-700 text-white'
+                  : (confidence < 60 ? 'bg-amber-600 hover:bg-amber-700 text-white' : 'bg-primary hover:bg-primary-container text-on-primary')
               }`}
             >
               <span className="material-symbols-outlined text-[20px] font-bold">check</span>
-              <span>{isConfirmed ? t.confirmed : t.yesConfirm}</span>
+              <span>{isConfirmed ? t.confirmed : (confidence < 60 ? t.confirmAnyway : t.yesConfirm)}</span>
             </button>
             <button
               onClick={() => onNavigate('category_select')}
-              className={`h-touch-target-min font-semibold border rounded-xl flex items-center justify-center gap-2 transition-colors active:scale-[0.98] cursor-pointer ${
+              className={`h-touch-target-min font-bold rounded-xl flex items-center justify-center gap-2 transition-colors active:scale-[0.98] cursor-pointer ${
                 confidence < 60
-                  ? 'bg-amber-50 dark:bg-amber-950/30 text-amber-800 dark:text-amber-300 border-amber-300 font-bold'
-                  : 'bg-surface hover:bg-surface-container text-secondary border-outline-variant'
+                  ? 'bg-white hover:bg-amber-50 text-amber-800 dark:text-amber-300 border-2 border-amber-400 shadow-xs'
+                  : 'bg-surface hover:bg-surface-container text-secondary border border-outline-variant'
               }`}
             >
               <span className="material-symbols-outlined text-[18px]">edit</span>
@@ -715,12 +721,7 @@ export default function Screen02AiIdentification({
             </span>
           </div>
 
-          <div className="bg-surface-container-low border border-outline-variant/60 rounded-lg p-2.5 flex items-center gap-2">
-            <span className="material-symbols-outlined text-primary text-[18px]">cloud_sync</span>
-            <div className="text-[11px] text-on-surface-variant">
-              <span className="font-semibold text-on-surface">{t.localDraftReady}</span> — {t.offlineActive}
-            </div>
-          </div>
+
         </div>
 
         {/* Proceed Action Bar */}

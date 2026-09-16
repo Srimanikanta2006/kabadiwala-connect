@@ -492,38 +492,6 @@ export default function Screen03bDigitalSummary({
             </div>
           </div>
         </div>
-
-        {/* Minimal Bottom Nav (Mobile Only) */}
-        <nav className="sticky bottom-2 left-0 right-0 mt-4 bg-surface-container-lowest/95 backdrop-blur-md rounded-2xl shadow-lg p-1.5 flex md:hidden items-center justify-around z-30 border border-surface-container-high">
-          <button
-            onClick={() => onNavigate('ai_scan')}
-            className="flex flex-col items-center gap-0.5 py-1 px-3 rounded-lg text-primary font-bold cursor-pointer"
-          >
-            <span className="material-symbols-outlined text-[20px]">photo_camera</span>
-            <span className="font-label-md text-[10px]">{t.navScan}</span>
-          </button>
-          <button
-            onClick={() => onNavigate('my_lots')}
-            className="flex flex-col items-center gap-0.5 py-1 px-3 rounded-lg text-on-surface-variant hover:text-on-surface cursor-pointer"
-          >
-            <span className="material-symbols-outlined text-[20px]">format_list_bulleted</span>
-            <span className="font-label-md text-[10px]">{t.navMyLots}</span>
-          </button>
-          <button
-            onClick={() => onNavigate('earnings')}
-            className="flex flex-col items-center gap-0.5 py-1 px-3 rounded-lg text-on-surface-variant hover:text-on-surface cursor-pointer"
-          >
-            <span className="material-symbols-outlined text-[20px]">account_balance_wallet</span>
-            <span className="font-label-md text-[10px]">{t.navEarnings}</span>
-          </button>
-          <button
-            onClick={() => onNavigate('safety')}
-            className="flex flex-col items-center gap-0.5 py-1 px-3 rounded-lg text-on-surface-variant hover:text-on-surface cursor-pointer"
-          >
-            <span className="material-symbols-outlined text-[20px]">support_agent</span>
-            <span className="font-label-md text-[10px]">{t.navSupport}</span>
-          </button>
-        </nav>
       </main>
     </div>
   );

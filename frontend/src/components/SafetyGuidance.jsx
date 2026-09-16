@@ -54,7 +54,9 @@ export default function SafetyGuidance({ contextualCategory = null, currentLang:
                 : 'Never burn cables in open fire. Toxic dioxin smoke causes severe lung damage. Use a mechanical stripper.'),
           audio_text: lang === 'mr'
             ? 'केबल कधीही जाळू नका. विषारी धुरापासून स्वतःचा बचाव करा.'
-            : 'तार को कभी न जलाएं। इसका धुआं जहरीला होता है।',
+            : (lang === 'en'
+                ? 'Never burn insulated cables in open fire. Protect yourself from toxic dioxin fumes.'
+                : 'तार को कभी न जलाएं। इसका धुआं जहरीला होता है।'),
           recommended_gear: 'Wire stripper, Cut-resistant gloves'
         },
         {
@@ -70,7 +72,9 @@ export default function SafetyGuidance({ contextualCategory = null, currentLang:
                 : 'Never crack open lead-acid or lithium batteries. Acid causes chemical burns and lithium combusts violently.'),
           audio_text: lang === 'mr'
             ? 'बॅटरी कधीही फोडू नका. ऍसिडचा धोका असतो.'
-            : 'बैटरी को कभी न तोड़ें। इसमें खतरनाक तेजाब होता है।',
+            : (lang === 'en'
+                ? 'Do not open batteries manually. Acid can cause chemical burns and lithium explosions.'
+                : 'बैटरी को कभी न तोड़ें। इसमें खतरनाक तेजाब होता है।'),
           recommended_gear: 'Acid-resistant gloves, Eye goggles'
         },
         {
@@ -86,7 +90,9 @@ export default function SafetyGuidance({ contextualCategory = null, currentLang:
                 : 'Old CRT monitors contain up to 2kg of toxic lead and implode violently when smashed with a hammer.'),
           audio_text: lang === 'mr'
             ? 'सीआरटी स्क्रीन फोडू नका. यात घातक शिसे असते.'
-            : 'सीआरटी टीवी को हथौड़े से न फोड़ें। इसमें जहरीला सीसा होता है।',
+            : (lang === 'en'
+                ? 'Never smash old CRT monitors. They contain toxic lead and can implode violently.'
+                : 'सीआरटी टीवी को हथौड़े से न फोड़ें। इसमें जहरीला सीसा होता है।'),
           recommended_gear: 'Impact face shield, Leather gloves'
         },
         {
@@ -102,7 +108,9 @@ export default function SafetyGuidance({ contextualCategory = null, currentLang:
                 : 'Circuit board fiberglass edges cause deep cuts. Always wear heavy-duty puncture-resistant gloves.'),
           audio_text: lang === 'mr'
             ? 'पीसीबी उचलताना जाड हातमोजे वापरा.'
-            : 'सर्किट बोर्ड उठाते समय मोटे दस्ताने पहनें। इसके नुकीले किनारे हाथ काट सकते हैं।',
+            : (lang === 'en'
+                ? 'Wear heavy puncture-resistant gloves when handling circuit boards to avoid deep cuts.'
+                : 'सर्किट बोर्ड उठाते समय मोटे दस्ताने पहनें। इसके नुकीले किनारे हाथ काट सकते हैं।'),
           recommended_gear: 'Heavy duty gloves'
         },
         {
@@ -118,7 +126,9 @@ export default function SafetyGuidance({ contextualCategory = null, currentLang:
                 : 'Always wear an N95 particulate mask while sorting e-waste to protect lungs from toxic heavy metal dust.'),
           audio_text: lang === 'mr'
             ? 'कचरा हाताळताना मास्क जरूर वापरा.'
-            : 'छंटाई करते समय हमेशा मास्क लगाएं ताकि धातु की धूल फेफड़ों में न जाए।',
+            : (lang === 'en'
+                ? 'Always wear a protective dust mask while sorting e-waste to safeguard your lungs.'
+                : 'छंटाई करते समय हमेशा मास्क लगाएं ताकि धातु की धूल फेफड़ों में न जाए।'),
           recommended_gear: 'N95 respirator mask'
         },
         {
@@ -134,7 +144,9 @@ export default function SafetyGuidance({ contextualCategory = null, currentLang:
                 : 'Never store electronic scrap near drinking water or cooking areas. Wash hands with soap thoroughly.'),
           audio_text: lang === 'mr'
             ? 'पाण्यापासून कचरा लांब ठेवा आणि काम झाल्यावर हात साबणाने धुवा.'
-            : 'ई-कचरे को पानी और खाने से दूर रखें और काम के बाद हाथ जरूर धोएं।',
+            : (lang === 'en'
+                ? 'Keep e-waste separated from food and water, and thoroughly wash hands with soap after work.'
+                : 'ई-कचरे को पानी और खाने से दूर रखें और काम के बाद हाथ जरूर धोएं।'),
           recommended_gear: 'Handwashing soap'
         },
         {
@@ -150,7 +162,9 @@ export default function SafetyGuidance({ contextualCategory = null, currentLang:
                 : 'Large capacitors retain dangerous lethal electrical charges. Discharge before touching directly.'),
           audio_text: lang === 'mr'
             ? 'कॅपॅसिटर थेट हाताने स्पर्श करू नका.'
-            : 'बड़ी मशीनों के कंडेंसर को सीधे न छुएं, इसमें बिजली का झटका लग सकता है।',
+            : (lang === 'en'
+                ? 'Never touch large power capacitors directly without discharging them first to prevent high voltage shocks.'
+                : 'बड़ी मशीनों के कंडेंसर को सीधे न छुएं, इसमें बिजली का झटका लग सकता है।'),
           recommended_gear: '1000V Insulated tool'
         }
       ];

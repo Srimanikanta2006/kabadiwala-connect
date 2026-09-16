@@ -560,33 +560,6 @@ export default function Screen04PriceOffers({
           </button>
         </div>
 
-        {/* Transparent 3-Tier Supply Chain Roadmap */}
-        <div className="bg-gradient-to-r from-emerald-50 via-teal-50 to-emerald-50 dark:from-surface-container-low dark:to-surface-container-low border border-emerald-200/80 dark:border-emerald-800/40 rounded-2xl p-3.5 text-xs space-y-2">
-          <div className="flex items-center justify-between font-bold text-emerald-950 dark:text-emerald-300">
-            <span className="flex items-center gap-1.5">
-              <span className="material-symbols-outlined text-primary text-[18px]">verified</span>
-              <span>{t.supplyChainTitle}</span>
-            </span>
-            <span className="text-[10px] bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300 px-2.5 py-0.5 rounded-full font-extrabold">
-              {t.supplyChainBadge}
-            </span>
-          </div>
-          <div className="grid grid-cols-3 gap-2 text-center pt-1">
-            <div className="bg-white/80 dark:bg-surface-container p-2 rounded-xl border border-emerald-100 dark:border-outline-variant/30">
-              <span className="text-primary font-bold block text-[11px]">1. {t.step1Title}</span>
-              <span className="text-[10px] text-secondary">{t.step1Desc}</span>
-            </div>
-            <div className="bg-white/80 dark:bg-surface-container p-2 rounded-xl border border-emerald-100 dark:border-outline-variant/30">
-              <span className="text-primary font-bold block text-[11px]">2. {t.step2Title}</span>
-              <span className="text-[10px] text-secondary">{t.step2Desc}</span>
-            </div>
-            <div className="bg-white/80 dark:bg-surface-container p-2 rounded-xl border border-emerald-100 dark:border-outline-variant/30">
-              <span className="text-primary font-bold block text-[11px]">3. {t.step3Title}</span>
-              <span className="text-[10px] text-secondary">{t.step3Desc}</span>
-            </div>
-          </div>
-        </div>
-
         {/* Informational Guidance Alert */}
         <div className="p-3.5 rounded-xl border flex items-start gap-2.5 text-xs font-medium bg-emerald-50/80 border-emerald-200 text-emerald-900 dark:bg-surface-container-low dark:border-outline-variant dark:text-on-surface">
           <span className="material-symbols-outlined text-[18px] shrink-0 mt-0.5 text-primary">verified</span>

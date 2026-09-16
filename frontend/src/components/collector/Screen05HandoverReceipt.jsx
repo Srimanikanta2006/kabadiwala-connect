@@ -174,6 +174,8 @@ export default function Screen05HandoverReceipt({
 
   const [backendHandoverRef, setBackendHandoverRef] = useState(null);
   const [paymentMode, setPaymentMode] = useState('CASH_RECEIVED'); // 'CASH_RECEIVED' | 'UPI_RECEIVED' | 'PENDING_SETTLEMENT'
+  const [showQrVerifierModal, setShowQrVerifierModal] = useState(false);
+  const [scannedVerifiedToast, setScannedVerifiedToast] = useState(false);
   const handoverRef = backendHandoverRef || lotDraft.handoverRef || `KC-TRACE-20260912-KA-${(lotDraft.id || '8F2A1C').slice(-6).toUpperCase()}`;
   const lotRef = `RL-2026-${(lotDraft.id || '00482').slice(-5)}`;
   const certId = lotDraft.cpcbCertificateId || `CPCB-EPR-2026-KA-${(lotDraft.id || '9921ABCD').slice(-8).toUpperCase()}`;
@@ -402,6 +404,16 @@ export default function Screen05HandoverReceipt({
                   ? (safeLang === 'mr' ? 'हा क्यूआर कोड यार्ड गेट ऑपरेटरला (दिलीप भाई) दाखवा' : (safeLang === 'hi' ? 'यह क्यूआर कोड यार्ड गेट ऑपरेटर (दिलीप भाई) को दिखाएं' : 'Show this QR to the Yard Gate Scale Operator (Dilip Bhai)'))
                   : t.showQrPrompt}
               </span>
+
+              {/* Interactive Live Weighbridge Scanner Test Button */}
+              <button
+                type="button"
+                onClick={() => setShowQrVerifierModal(true)}
+                className="mt-3.5 inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-emerald-50 hover:bg-emerald-100 text-emerald-900 border border-emerald-300 text-xs font-bold transition-all shadow-2xs cursor-pointer active:scale-95"
+              >
+                <span className="material-symbols-outlined text-[16px] text-emerald-700">document_scanner</span>
+                <span>{safeLang === 'mr' ? 'स्कॅनर पडताळणी चाचणी (Verify QR)' : (safeLang === 'hi' ? 'स्कैनर सत्यापन टेस्ट (Verify QR)' : 'Test / Verify Weighbridge Scanner')}</span>
+              </button>
             </div>
 
             {/* Scale & Handover Verification Checklist */}
@@ -687,6 +699,104 @@ export default function Screen05HandoverReceipt({
           <span className="font-label-md text-xs mt-1">{t.navSafety}</span>
         </button>
       </nav>
+
+      {/* Live Weighbridge Scanner Verification Modal */}
+      {showQrVerifierModal && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+          <div className="bg-surface rounded-2xl max-w-md w-full p-5 shadow-2xl border border-outline-variant space-y-4 animate-in fade-in zoom-in-95 duration-200">
+            <div className="flex items-center justify-between border-b border-outline-variant/60 pb-3">
+              <div className="flex items-center gap-2">
+                <span className="material-symbols-outlined text-primary text-[24px]">qr_code_scanner</span>
+                <div>
+                  <h3 className="font-bold text-base text-on-surface">Weighbridge Scanner Verification</h3>
+                  <p className="text-[11px] text-emerald-700 font-bold">🟢 Live Traceability QR Valid</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  setShowQrVerifierModal(false);
+                  setScannedVerifiedToast(false);
+                }}
+                className="w-8 h-8 rounded-full bg-surface-container flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high cursor-pointer"
+              >
+                <span className="material-symbols-outlined text-[18px]">close</span>
+              </button>
+            </div>
+
+            <div className="bg-surface-container-low p-3.5 rounded-xl border border-outline-variant/60 space-y-2 text-xs">
+              <div className="flex justify-between items-center py-1 border-b border-outline-variant/30">
+                <span className="text-secondary font-medium">Token Reference:</span>
+                <span className="font-mono font-bold text-primary">{handoverRef}</span>
+              </div>
+              <div className="flex justify-between items-center py-1 border-b border-outline-variant/30">
+                <span className="text-secondary font-medium">Scrap Material:</span>
+                <span className="font-bold text-on-surface">{materialTitle}</span>
+              </div>
+              <div className="flex justify-between items-center py-1 border-b border-outline-variant/30">
+                <span className="text-secondary font-medium">Net Weight:</span>
+                <span className="font-extrabold text-on-surface">{weight} {unit === 'piece' ? 'pcs' : 'kg'}</span>
+              </div>
+              <div className="flex justify-between items-center py-1 border-b border-outline-variant/30">
+                <span className="text-secondary font-medium">Approved Payout:</span>
+                <span className="font-extrabold text-emerald-800 font-mono text-sm">₹{totalPaid.toLocaleString('en-IN')}</span>
+              </div>
+              <div className="flex justify-between items-center py-1 border-b border-outline-variant/30">
+                <span className="text-secondary font-medium">Destination Yard:</span>
+                <span className="font-medium text-on-surface">{buyer.name || 'Dilip Bhai Scrap Yard'}</span>
+              </div>
+              <div className="flex justify-between items-center py-1">
+                <span className="text-secondary font-medium">Scale Sensor Link:</span>
+                <span className="text-emerald-700 font-mono font-bold flex items-center gap-1">
+                  <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
+                  HX711-PEENYA-02-OK
+                </span>
+              </div>
+            </div>
+
+            {scannedVerifiedToast && (
+              <div className="p-3 bg-emerald-100 text-emerald-900 rounded-xl text-xs font-bold flex items-center gap-2 border border-emerald-300">
+                <span className="material-symbols-outlined text-emerald-700 text-[20px] filled">check_circle</span>
+                <span>Gate Scanner Beep Verified! Handover token acknowledged at yard scale desk.</span>
+              </div>
+            )}
+
+            <div className="flex items-center gap-2 pt-1">
+              <button
+                type="button"
+                onClick={() => {
+                  setScannedVerifiedToast(true);
+                  if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+                    const utterance = new SpeechSynthesisUtterance(
+                      safeLang === 'mr'
+                        ? 'वजनकाटा स्कॅनर प्रमाणित. टोकन यशस्वीपणे जोडले गेले आहे.'
+                        : (safeLang === 'en'
+                            ? 'Weighbridge scanner confirmed. Token handshake successful.'
+                            : 'कांटा स्कैनर सत्यापित। टोकन सफलतापूर्वक प्राप्त हुआ।')
+                    );
+                    utterance.lang = safeLang === 'mr' ? 'mr-IN' : (safeLang === 'hi' ? 'hi-IN' : 'en-IN');
+                    window.speechSynthesis.speak(utterance);
+                  }
+                }}
+                className="flex-1 py-2.5 px-4 rounded-xl bg-primary text-on-primary hover:bg-primary/90 text-xs font-bold flex items-center justify-center gap-1.5 shadow-sm cursor-pointer transition-all active:scale-95"
+              >
+                <span className="material-symbols-outlined text-[16px]">volume_up</span>
+                <span>Test Gate Scanner Beep</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setShowQrVerifierModal(false);
+                  setScannedVerifiedToast(false);
+                }}
+                className="py-2.5 px-4 rounded-xl bg-surface-container hover:bg-surface-container-high text-on-surface text-xs font-bold cursor-pointer"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

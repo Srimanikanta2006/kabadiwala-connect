@@ -1,10 +1,239 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import NotificationsModal from './common/NotificationsModal';
 import AdminToolsModal from './common/AdminToolsModal';
 import Form6ManifestModal from './recycler/Form6ManifestModal';
+import DealerNavigationModal from './common/DealerNavigationModal';
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+
+const DEALER_TRANSLATIONS = {
+  hi: {
+    brandSubtitle: 'यार्ड डेस्क',
+    synced: 'सिंक हुआ',
+    yardDeskLive: 'YARD DESK LIVE',
+    peenyaYard: 'PEENYA-YARD-04',
+    workingFloat: 'Working Float',
+    avail: 'Avail',
+    cashDeskReserve: 'रोकड़ शेष (Cash Desk)',
+    hx711Digital: 'HX711 DIGITAL',
+    calibrated: 'Calibrated (±0.1)',
+    tabGatePay: 'Gate & Pay',
+    tabStockBays: 'Stock & Bays',
+    tabArbitrage: 'Arbitrage',
+    tabForm6: 'Form-6',
+    pickupRequests: 'पिकअप अनुरोध',
+    viewLot: 'लॉट देखें',
+    acceptPickup: 'पिकअप स्वीकारें',
+    pickupAccepted: 'पिकअप स्वीकृत ✓',
+    startNavigation: 'नेविगेशन शुरू करें',
+    searchPlaceholder: 'लॉट # या कबाड़ी का नाम दर्ज करें (उदा. RL-2026-00482)...',
+    scanCamera: 'कैमरा स्कैन',
+    fetchVoucher: 'वाउचर खोजें',
+    recentInboundQueue: 'हाल की आवक कतार',
+    activeLots: 'सक्रिय लॉट',
+    today: 'आज',
+    activeGateWeighment: 'सक्रिय गेट वजन एवं तुरंत भुगतान',
+    lotNo: 'लॉट #',
+    queued: 'कतार में',
+    weighbridgeSensor: 'इलेक्ट्रॉनिक कांटा सेंसर',
+    grossWeight: 'सकल वजन (Gross)',
+    tareDeduction: 'कांटा घटाव (Tare)',
+    netPayableWeight: 'शुद्ध वजन (Net)',
+    netVerifiedWeight: 'शुद्ध सत्यापित वजन',
+    mandiBenchmark: 'मंडी बेंचमार्क',
+    scaleCalibratedISO: 'कांटा #02 कैलिब्रेटेड (ISO/IEC)',
+    zeroTareVerified: 'शून्य टेयर सत्यापित',
+    calculatedPayoutDue: 'कुल देय नकद राशि',
+    tdsDeductions: 'टीडीएस कटौती: छूट प्राप्त (ई-कचरा नीति के तहत <₹10,000)',
+    askingRate: 'मांग भाव',
+    approvedRate: 'स्वीकृत भाव',
+    totalCashPayout: 'कुल नकद भुगतान',
+    payCash: '💵 नकद भुगतान करें',
+    payUpi: '📱 UPI तुरंत भेजें',
+    settling: 'भुगतान जारी...',
+    collectorLedgerSynced: 'कलेक्टर बहीखाता सिंक ✓',
+    soundboxTitle: 'पेटीएम / फोनपे यार्ड साउंडबॉक्स (सुनने के लिए टैप करें):',
+    todaysGateInbound: 'आज का गेट इनबाउंड',
+    disbursed: 'वितरित',
+    verifiedCollectors: 'सत्यापित कबाड़ीवाले',
+    activeToday: 'आज सक्रिय',
+    liveMandiTicker: 'लाइव मंडी दैनिक भाव',
+    scanCollectorLotQr: 'कलेक्टर लॉट QR स्कैन करें',
+    gateInboundReader: 'गेट इनबाउंड इलेक्ट्रॉनिक कांटा रीडर',
+    alignCollectorSlip: 'कलेक्टर पर्ची का QR बॉक्स के अंदर रखें',
+    simulateQrScan: 'QR स्कैन / वजनकाटा टोकन लोड करने के लिए टैप करें:',
+    load: 'लोड करें',
+    pasteQrPlaceholder: 'QR पेलोड या लॉट # दर्ज करें (उदा. RL-2026-00482)...',
+    outboundConsignment: 'आउटबाउंड बैच प्रेषण',
+    batchNo: 'बैच #04',
+    gradePcb: 'ग्रेड-ए पीसीबी',
+    lotsCount: 'लॉट',
+    recycler: 'रीसायकलर:',
+    pickupAvailable: 'पिकअप: उपलब्ध',
+    requestRecyclerPickup: 'रीसायकलर पिकअप',
+    selfTransport: 'स्वयं ट्रांसपोर्ट →',
+    selfTransportSelected: 'स्वयं ट्रांसपोर्ट मोड (+₹10/किग्रा मालभाड़ा छूट)',
+    lockDeal: 'थोक सौदा तय करें एवं डिस्पैच करें',
+    dealLocked: 'सौदा तय हुआ ✓ (माल रवाना)',
+    yardBaysTitle: 'यार्ड बे एवं इन्वेंटरी स्टॉक',
+    form6Title: 'CPCB फॉर्म-6 अनुपालन एवं ईपीआर ट्रैसेबिलिटी',
+    yardMasterAdmin: 'यार्ड प्रमुख प्रबंधक',
+    cpcbAdminTools: 'CPCB मास्टर एडमिन टूल्स',
+    alertsNotifs: 'अलर्ट एवं सूचनाएं',
+    logOutRole: 'लॉग आउट करें / रोल बदलें'
+  },
+  mr: {
+    brandSubtitle: 'यार्ड डेस्क',
+    synced: 'सिंक झाले',
+    yardDeskLive: 'YARD DESK LIVE',
+    peenyaYard: 'PEENYA-YARD-04',
+    workingFloat: 'Working Float',
+    avail: 'Avail',
+    cashDeskReserve: 'रोख शिल्लक (Cash Desk)',
+    hx711Digital: 'HX711 DIGITAL',
+    calibrated: 'Calibrated (±0.1)',
+    tabGatePay: 'Gate & Pay',
+    tabStockBays: 'Stock & Bays',
+    tabArbitrage: 'Arbitrage',
+    tabForm6: 'Form-6',
+    pickupRequests: 'पिकअप विनंत्या',
+    viewLot: 'लॉट पहा',
+    acceptPickup: 'पिकअप स्वीकारा',
+    pickupAccepted: 'पिकअप स्वीकारले ✓',
+    startNavigation: 'नेव्हिगेशन सुरू करा',
+    searchPlaceholder: 'लॉट # किंवा कबाडी नाव टाका (उदा. RL-2026-00482)...',
+    scanCamera: 'कॅमेरा स्कॅन',
+    fetchVoucher: 'व्हाउचर शोधा',
+    recentInboundQueue: 'अलीकडील आवक रांग',
+    activeLots: 'सक्रिय लॉट',
+    today: 'आज',
+    activeGateWeighment: 'सक्रिय गेट वजन व तत्काळ पेमेंट',
+    lotNo: 'लॉट #',
+    queued: 'रांगेत',
+    weighbridgeSensor: 'इलेक्ट्रॉनिक वजनकाटा सेन्सर',
+    grossWeight: 'एकूण वजन (Gross)',
+    tareDeduction: 'काटा वजावट (Tare)',
+    netPayableWeight: 'निव्वळ वजन (Net)',
+    netVerifiedWeight: 'निव्वळ सत्यापित वजन',
+    mandiBenchmark: 'मंडी बेंचमार्क',
+    scaleCalibratedISO: 'काटा #02 कॅलिब्रेटेड (ISO/IEC)',
+    zeroTareVerified: 'शून्य टेअर सत्यापित',
+    calculatedPayoutDue: 'एकूण देय रोख रक्कम',
+    tdsDeductions: 'टीडीएस कपात: सूट (<₹10,000 ई-कचरा धोरणानुसार)',
+    askingRate: 'मागणी दर',
+    approvedRate: 'मंजूर दर',
+    totalCashPayout: 'एकूण रोख रक्कम',
+    payCash: '💵 रोख पेमेंट करा',
+    payUpi: '📱 UPI तत्काळ पाठवा',
+    settling: 'पेमेंट प्रक्रिया...',
+    collectorLedgerSynced: 'कलेक्टर लेजर सिंक ✓',
+    soundboxTitle: 'पेटीएम / फोनपे यार्ड साउंडबॉक्स (ऐकण्यासाठी टॅप करा):',
+    todaysGateInbound: 'आजचे गेट इनबाउंड',
+    disbursed: 'वितरित',
+    verifiedCollectors: 'सत्यापित कलेक्टर्स',
+    activeToday: 'आज सक्रिय',
+    liveMandiTicker: 'लाइव्ह मंडी दैनिक दर',
+    scanCollectorLotQr: 'कलेक्टर लॉट QR स्कॅन करा',
+    gateInboundReader: 'गेट इनबाउंड वजनकाटा रीडर',
+    alignCollectorSlip: 'कलेक्टर पावतीचा QR बॉक्समध्ये धरा',
+    simulateQrScan: 'QR स्कॅन / वजनकाटा टोकन लोड करण्यासाठी टॅप करा:',
+    load: 'लोड करा',
+    pasteQrPlaceholder: 'QR पेलोड किंवा लॉट # टाका (उदा. RL-2026-00482)...',
+    outboundConsignment: 'आउटबाउंड बॅच डिस्पॅच',
+    batchNo: 'बॅच #04',
+    gradePcb: 'ग्रेड-ए पीसीबी',
+    lotsCount: 'लॉट',
+    recycler: 'रिसायकलर:',
+    pickupAvailable: 'पिकअप: उपलब्ध',
+    requestRecyclerPickup: 'रिसायकलर पिकअप',
+    selfTransport: 'स्वतः ट्रान्सपोर्ट →',
+    selfTransportSelected: 'स्वतः ट्रान्सपोर्ट मोड (+₹10/किलो सूट)',
+    lockDeal: 'घाऊक सौदा निश्चित करा व डिस्पॅच करा',
+    dealLocked: 'सौदा निश्चित ✓ (माल रवाना)',
+    yardBaysTitle: 'यार्ड बे व इन्व्हेंटरी साठा',
+    form6Title: 'CPCB फॉर्म-6 पूर्तता व ईपीआर ट्रॅसेबिलिटी',
+    yardMasterAdmin: 'यार्ड प्रमुख व्यवस्थापक',
+    cpcbAdminTools: 'CPCB मास्टर ॲडमिन टूल्स',
+    alertsNotifs: 'सूचना व अलर्ट',
+    logOutRole: 'लॉग आउट करा / भूमिका बदला'
+  },
+  en: {
+    brandSubtitle: 'Yard Desk',
+    synced: 'Synced',
+    yardDeskLive: 'YARD DESK LIVE',
+    peenyaYard: 'PEENYA-YARD-04',
+    workingFloat: 'Working Float',
+    avail: 'Avail',
+    cashDeskReserve: 'Cash Desk Reserve',
+    hx711Digital: 'HX711 DIGITAL',
+    calibrated: 'Calibrated (±0.1)',
+    tabGatePay: 'Gate & Pay',
+    tabStockBays: 'Stock & Bays',
+    tabArbitrage: 'Arbitrage',
+    tabForm6: 'Form-6',
+    pickupRequests: 'Pickup Requests',
+    viewLot: 'View Lot',
+    acceptPickup: 'Accept Pickup',
+    pickupAccepted: 'Pickup Accepted ✓',
+    startNavigation: 'Start Navigation',
+    searchPlaceholder: 'Enter Lot # or Collector Name (e.g. RL-2026-00482)...',
+    scanCamera: 'Scan Camera',
+    fetchVoucher: 'Fetch Voucher',
+    recentInboundQueue: 'Recent Inbound Queue',
+    activeLots: 'Active Lots',
+    today: 'Today',
+    activeGateWeighment: 'ACTIVE GATE WEIGHMENT & PAYOUT',
+    lotNo: 'Lot #',
+    queued: 'Queued',
+    weighbridgeSensor: 'Weighbridge Digital Sensor',
+    grossWeight: 'Gross Weight',
+    tareDeduction: 'Tare Deduction',
+    netPayableWeight: 'Net Payable Weight',
+    netVerifiedWeight: 'Net Verified Weight',
+    mandiBenchmark: 'Mandi Benchmark',
+    scaleCalibratedISO: 'Scale #02 Calibrated (ISO/IEC)',
+    zeroTareVerified: 'Zero Tare Verified',
+    calculatedPayoutDue: 'Calculated Payout Due',
+    tdsDeductions: 'TDS Deductions: Exempt (<₹10,000 threshold under e-waste yard policy)',
+    askingRate: 'Asking Rate',
+    approvedRate: 'Approved Rate',
+    totalCashPayout: 'Total Cash Payout',
+    payCash: '💵 Pay Cash & Confirm',
+    payUpi: '📱 UPI Instant',
+    settling: 'Settling...',
+    collectorLedgerSynced: 'Collector Ledger Synced ✓',
+    soundboxTitle: 'Paytm / PhonePe Yard Soundbox (Tap to Play):',
+    todaysGateInbound: "Today's Gate Inbound",
+    disbursed: 'Disbursed',
+    verifiedCollectors: 'Verified Collectors',
+    activeToday: 'Active today',
+    liveMandiTicker: 'Live Mandi Daily Ticker',
+    scanCollectorLotQr: 'Scan Collector Lot QR',
+    gateInboundReader: 'Gate Inbound Weighbridge Reader',
+    alignCollectorSlip: 'Align collector slip QR within box',
+    simulateQrScan: 'Tap to Simulate QR Scan / Weighbridge Token:',
+    load: 'Load',
+    pasteQrPlaceholder: 'Paste QR payload or Lot # (e.g. RL-2026-00482)...',
+    outboundConsignment: 'Consolidated Batch Consignment',
+    batchNo: 'Batch #04',
+    gradePcb: 'Grade-A PCB',
+    lotsCount: 'Lots',
+    recycler: 'Recycler:',
+    pickupAvailable: 'Pickup: Available',
+    requestRecyclerPickup: 'Request Recycler Pickup',
+    selfTransport: 'Self Transport →',
+    selfTransportSelected: 'Self-Transport Mode (+₹10/kg Freight Rebate)',
+    lockDeal: 'Lock Wholesale Deal & Dispatch',
+    dealLocked: 'Deal Locked ✓ (Consignment Dispatched)',
+    yardBaysTitle: 'Yard Bays & Inventory Stock',
+    form6Title: 'CPCB Form-6 Manifests & EPR Provenance',
+    yardMasterAdmin: 'Yard Master Admin',
+    cpcbAdminTools: 'CPCB Master Admin Tools',
+    alertsNotifs: 'Alerts & Notifications',
+    logOutRole: 'Log Out / Switch Role'
+  }
+};
 
 export default function DealerDashboard({ onRoleSwitch, currentLang: propLang, onLanguageChange: propOnLanguageChange }) {
   const { i18n } = useTranslation();
@@ -25,18 +254,18 @@ export default function DealerDashboard({ onRoleSwitch, currentLang: propLang, o
   }, [propLang]);
 
   const currentLang = normalize(propLang || internalLang);
+  const t = DEALER_TRANSLATIONS[currentLang] || DEALER_TRANSLATIONS.hi;
 
   const handleLanguageCycle = () => {
     const cycle = { hi: 'mr', mr: 'en', en: 'hi' };
     const next = cycle[currentLang] || 'hi';
+    setInternalLang(next);
+    localStorage.setItem('relink_lang', next);
+    if (i18n && i18n.changeLanguage) {
+      i18n.changeLanguage(next);
+    }
     if (propOnLanguageChange) {
       propOnLanguageChange(next);
-    } else {
-      setInternalLang(next);
-      localStorage.setItem('relink_lang', next);
-      if (i18n && i18n.changeLanguage) {
-        i18n.changeLanguage(next);
-      }
     }
   };
 
@@ -46,6 +275,19 @@ export default function DealerDashboard({ onRoleSwitch, currentLang: propLang, o
   const [showAdminModal, setShowAdminModal] = useState(false);
   const [selectedManifestData, setSelectedManifestData] = useState(null);
   const [toastMessage, setToastMessage] = useState(null);
+  const [showDealerNav, setShowDealerNav] = useState(false);
+  const [navModalMode, setNavModalMode] = useState('INBOUND_PICKUP');
+  const [navLotData, setNavLotData] = useState(null);
+  const [navBatchData, setNavBatchData] = useState(null);
+  const [pickupAcceptedMap, setPickupAcceptedMap] = useState({ 'lot_rl_00482': true });
+  const [showProfileMenu, setShowProfileMenu] = useState(false);
+
+  // Camera & QR Scanner State
+  const videoRef = useRef(null);
+  const [cameraActive, setCameraActive] = useState(false);
+  const [manualQrInput, setManualQrInput] = useState('');
+  const [showScannerModal, setShowScannerModal] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
 
   // Financial & Operational State
   const [workingCapitalFloat, setWorkingCapitalFloat] = useState(385000);
@@ -148,14 +390,153 @@ export default function DealerDashboard({ onRoleSwitch, currentLang: propLang, o
   const [activeLot, setActiveLot] = useState(null);
   const [activeNetWeight, setActiveNetWeight] = useState(12.0);
   const [activeApprovedRate, setActiveApprovedRate] = useState(755);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [showScannerModal, setShowScannerModal] = useState(false);
   const [lastSoundboxMessage, setLastSoundboxMessage] = useState({
     hi: '₹9,060 नकद भुगतान सफल - कबाड़ीवाला कनेक्ट',
     mr: '₹9,060 रोख देण्यात आले - कबाड़ीवाला कनेक्ट',
     en: 'Rupees 9,060 cash payment confirmed.'
   });
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
+
+  // Enhanced cross-portal Voucher Loader & QR Decoder
+  const handleFetchOrScanVoucher = (queryOrPayload) => {
+    if (!queryOrPayload) return;
+    const q = typeof queryOrPayload === 'string' ? queryOrPayload.trim() : '';
+
+    let targetRef = q;
+    let payloadObj = null;
+    if (q.startsWith('{') && q.includes('}')) {
+      try {
+        payloadObj = JSON.parse(q);
+        targetRef = payloadObj.lot_id || payloadObj.handover_ref || '';
+      } catch (e) {}
+    }
+
+    // 1. Search memory inboundLots
+    let found = inboundLots.find(l =>
+      (targetRef && (l.lot_ref === targetRef || l.id === targetRef)) ||
+      l.lot_ref.toLowerCase().includes(q.toLowerCase()) ||
+      l.collector_name.toLowerCase().includes(q.toLowerCase())
+    );
+
+    // 2. Search localStorage relink_inbound_dealer_lots
+    if (!found) {
+      try {
+        const storedInbound = JSON.parse(localStorage.getItem('relink_inbound_dealer_lots') || '[]');
+        found = storedInbound.find(l =>
+          (targetRef && (l.lot_ref === targetRef || l.id === targetRef)) ||
+          l.lot_ref.toLowerCase().includes(q.toLowerCase()) ||
+          l.collector_name.toLowerCase().includes(q.toLowerCase())
+        );
+      } catch (e) {}
+    }
+
+    // 3. Search localStorage relink_lots
+    if (!found) {
+      try {
+        const storedLots = JSON.parse(localStorage.getItem('relink_lots') || '[]');
+        const matched = storedLots.find(l =>
+          (targetRef && (l.id === targetRef || l.handoverRef === targetRef)) ||
+          (l.id && l.id.toLowerCase().includes(q.toLowerCase())) ||
+          (l.materialTitle && l.materialTitle.toLowerCase().includes(q.toLowerCase()))
+        );
+        if (matched) {
+          found = {
+            id: matched.id,
+            lot_ref: matched.handoverRef || `RL-2026-${(matched.id || '00482').slice(-5)}`,
+            collector_id: 'col_collector_live',
+            collector_name: 'Ramesh Kumar',
+            collector_cluster: 'Peenya Cluster 3',
+            rating: 4.8,
+            kyc_verified: true,
+            material_category: (matched.materialId || 'pcb').includes('pcb') ? 'PCB' : 'CABLES',
+            material_name: matched.materialTitle || 'Grade-A PCB',
+            ai_confidence: 0.94,
+            asking_rate: matched.agreedRate || 755,
+            approved_rate: matched.agreedRate || 755,
+            tare_weight: 0.40,
+            gross_weight: Number(((matched.weight || 12.0) + 0.40).toFixed(2)),
+            net_weight: Number((matched.weight || 12.0).toFixed(2)),
+            sensor_id: 'HX711-PEENYA-02-OK',
+            status: 'QUEUED',
+            queued_time: 'Just now',
+            image_url: matched.photoUrl || '/assets/icons/pcb_high.svg',
+            is_new_live_intake: true
+          };
+        }
+      } catch (e) {}
+    }
+
+    // 4. If payloadObj contains details (direct QR code scan/paste) but wasn't in storage
+    if (!found && payloadObj && (payloadObj.handover_ref || payloadObj.lot_id)) {
+      const weightVal = Number(payloadObj.weight_kg || payloadObj.weight || 12.0);
+      const rateVal = Number(payloadObj.rate_inr || payloadObj.agreedRate || 755);
+      found = {
+        id: payloadObj.lot_id || `lot_${Date.now()}`,
+        lot_ref: payloadObj.handover_ref || payloadObj.lot_id,
+        collector_id: payloadObj.collector_id || 'col_collector_live',
+        collector_name: payloadObj.collector_name || 'Ramesh Kumar',
+        collector_cluster: payloadObj.collector_cluster || 'Peenya Cluster 3',
+        rating: 4.8,
+        kyc_verified: true,
+        material_category: (payloadObj.material || 'PCB').toUpperCase().includes('PCB') ? 'PCB' : 'CABLES',
+        material_name: payloadObj.material || 'Grade-A PCB',
+        ai_confidence: 0.94,
+        asking_rate: rateVal,
+        approved_rate: rateVal,
+        tare_weight: 0.40,
+        gross_weight: Number((weightVal + 0.40).toFixed(2)),
+        net_weight: Number(weightVal.toFixed(2)),
+        sensor_id: 'HX711-PEENYA-02-OK',
+        status: 'QUEUED',
+        queued_time: 'Scanned via QR',
+        image_url: '/assets/icons/pcb_high.svg',
+        is_new_live_intake: true
+      };
+    }
+
+    if (found) {
+      setInboundLots(prev => {
+        if (!prev.some(l => l.id === found.id || l.lot_ref === found.lot_ref)) {
+          return [found, ...prev];
+        }
+        return prev;
+      });
+      setActiveLot(found);
+      setActiveNetWeight(found.net_weight);
+      setActiveApprovedRate(found.approved_rate);
+      setShowScannerModal(false);
+      setSearchQuery('');
+      setManualQrInput('');
+      showToast('Voucher Loaded ✓', `Loaded #${found.lot_ref} (${found.collector_name}) into weighbridge desk.`);
+    } else {
+      showToast('Search Notice', `No collector lot voucher matching "${q}" found.`);
+    }
+  };
+
+  useEffect(() => {
+    let streamRef = null;
+    if (showScannerModal && navigator.mediaDevices?.getUserMedia) {
+      navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
+        .then(stream => {
+          streamRef = stream;
+          if (videoRef.current) {
+            videoRef.current.srcObject = stream;
+            setCameraActive(true);
+          }
+        })
+        .catch(err => {
+          console.log('Camera access notice:', err);
+          setCameraActive(false);
+        });
+    } else {
+      setCameraActive(false);
+    }
+    return () => {
+      if (streamRef) {
+        streamRef.getTracks().forEach(tr => tr.stop());
+      }
+    };
+  }, [showScannerModal]);
 
   // TAB 2: Physical Inventory & Consolidation State
   const [inventoryStock, setInventoryStock] = useState({
@@ -199,7 +580,7 @@ export default function DealerDashboard({ onRoleSwitch, currentLang: propLang, o
   ]);
 
   // TAB 3: Marketplace & Arbitrage State
-  const [selectedBidder, setSelectedBidder] = useState('bid_eparisaraa_01');
+  const [selectedBidder, setSelectedBidder] = useState('bid_cerebra_01');
   const [logisticsType, setLogisticsType] = useState('RECYCLER_PICKUP');
   const [checklist, setChecklist] = useState({
     tareVerified: true,
@@ -413,10 +794,60 @@ export default function DealerDashboard({ onRoleSwitch, currentLang: propLang, o
   const totalBatchCost = selectedLots.reduce((sum, item) => sum + (item.weight * item.rate), 0);
   const avgBatchBuyRate = totalBatchWeight > 0 ? Math.round(totalBatchCost / totalBatchWeight) : 742;
 
+  // Official Karnataka Authorized Recyclers (from CPCB / KSPCB official registry)
+  const biddersList = [
+    {
+      id: 'bid_cerebra_01',
+      code: 'CI',
+      name: 'M/s. Cerebra Integrated Technologies Ltd',
+      desc: 'KSPCB Authorised Smelter • Narasapura / Kolar (39,000 MTA)',
+      rate: 820,
+      badge: 'High Bid',
+      bgBadge: 'bg-emerald-200 text-emerald-900'
+    },
+    {
+      id: 'bid_eparisaraa_02',
+      code: 'EP',
+      name: 'M/s. E-Parisaraa Pvt Ltd',
+      desc: 'R2 / CPCB Registered Smelter • Dabaspet Hub (9,288 MTA)',
+      rate: 815,
+      badge: 'Certified R2',
+      bgBadge: 'bg-blue-100 text-blue-900'
+    },
+    {
+      id: 'bid_sriram_03',
+      code: 'SR',
+      name: 'M/s. Sriram Eco Raksha Computer Services Pvt Ltd',
+      desc: 'KSPCB Authorised Recycler • Bommasandra (360 MTA)',
+      rate: 805,
+      badge: 'Valid 3h',
+      bgBadge: 'bg-slate-100 text-slate-700'
+    },
+    {
+      id: 'bid_trishyirya_04',
+      code: 'TR',
+      name: 'M/s. Trishyirya Recycling India Pvt Ltd',
+      desc: 'CPCB Reg #KA/E-WASTE/019 • Peenya 4th Phase (360 MTA)',
+      rate: 802,
+      badge: 'Local Peenya',
+      bgBadge: 'bg-emerald-100 text-emerald-800'
+    },
+    {
+      id: 'bid_ehasiru_05',
+      code: 'EH',
+      name: 'M/s. E-Hasiru',
+      desc: 'Authorised Dismantler • Peenya 3rd Phase (300 MTA)',
+      rate: 795,
+      badge: 'Ex-Yard',
+      bgBadge: 'bg-slate-100 text-slate-700'
+    }
+  ];
+
   // Wholesale Deal Lock (Tab 3)
   const handleLockWholesaleDeal = async () => {
-    const agreedRate = selectedBidder === 'bid_eparisaraa_01' ? 815 : (selectedBidder === 'bid_ecorecycle_02' ? 808 : 795);
-    const buyerName = selectedBidder === 'bid_eparisaraa_01' ? 'E-Parisaraa Pvt Ltd' : (selectedBidder === 'bid_ecorecycle_02' ? 'EcoRecycle CleanTech' : 'Metaloop Resources');
+    const selectedB = biddersList.find(b => b.id === selectedBidder) || biddersList[0];
+    const agreedRate = selectedB.rate;
+    const buyerName = selectedB.name;
 
     try {
       await fetch(`${API_BASE}/aggregator/marketplace/deal`, {
@@ -468,7 +899,8 @@ export default function DealerDashboard({ onRoleSwitch, currentLang: propLang, o
   };
 
   // Calculated Arbitrage Numbers (Tab 3)
-  const topBidRate = selectedBidder === 'bid_eparisaraa_01' ? 815 : (selectedBidder === 'bid_ecorecycle_02' ? 808 : 795);
+  const currentBidderObj = biddersList.find(b => b.id === selectedBidder) || biddersList[0];
+  const topBidRate = currentBidderObj.rate;
   const netSpreadPerKg = topBidRate - avgBatchBuyRate;
   const netSpreadMarginPct = ((netSpreadPerKg / avgBatchBuyRate) * 100).toFixed(1);
   const netYardGain = Math.round((totalBatchWeight || 350) * netSpreadPerKg);
@@ -490,171 +922,225 @@ export default function DealerDashboard({ onRoleSwitch, currentLang: propLang, o
         </div>
       )}
 
-      {/* TOP GLOBAL HEADER */}
+      {/* TOP GLOBAL HEADER (Exact Match to Collector Style & Compact App Layout) */}
       <header className="bg-surface-container-lowest border-b border-slate-200 sticky top-0 z-40 shadow-xs">
-        <div className="px-4 sm:px-6 py-3 flex flex-wrap items-center justify-between gap-3">
-          {/* Yard Branding & Clean Attention Badge */}
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center text-on-primary shadow-sm shadow-primary/20">
-              <span className="material-symbols-outlined text-[24px]">recycling</span>
+        {/* Top Branding & Quick Actions Bar */}
+        <div className="px-3 sm:px-6 py-2 flex items-center justify-between gap-2 border-b border-slate-100">
+          {/* Brand Logo & Name (Matching Collector Page Exactly) */}
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-xl bg-primary flex items-center justify-center text-on-primary font-bold shadow-sm shrink-0">
+              <span className="material-symbols-outlined text-[20px]">recycling</span>
             </div>
-            <div>
-              <div className="flex items-center gap-2 flex-wrap">
-                <span className="font-extrabold text-[18px] tracking-tight text-on-surface">RE:LINK</span>
-                <span className="text-outline-variant">•</span>
-                <span className="px-2 py-0.5 rounded-md bg-emerald-50 text-primary border border-primary/20 text-[11px] font-bold uppercase tracking-wide">
-                  {currentLang === 'mr' ? 'यार्ड डेस्क' : (currentLang === 'hi' ? 'यार्ड डेस्क' : 'YARD DESK')}
-                </span>
-                <span className="text-outline-variant">•</span>
-                <span className="inline-flex items-center gap-1 text-emerald-700 text-xs font-semibold">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                  <span>{currentLang === 'mr' ? 'ऑनलाइन' : (currentLang === 'hi' ? 'ऑनलाइन' : 'Online')}</span>
-                </span>
-              </div>
-              <p className="text-[11.5px] text-secondary flex items-center gap-1.5 mt-0.5">
-                <span className="material-symbols-outlined text-[14px] text-emerald-600">verified</span>
-                <span>Peenya Industrial Area, Yard #04 • CPCB Aggregator Reg <b>#KA-AGG-2024-118</b></span>
-              </p>
-            </div>
+            <span className="font-headline-md text-base sm:text-lg font-bold text-primary tracking-tight">
+              RE:LINK
+            </span>
           </div>
 
-          {/* Operational Status & Working Capital Balance Float */}
-          <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
-            {/* Working Capital Float Pill */}
-            <div className="flex items-center gap-2 px-3 sm:px-3.5 py-1.5 rounded-xl bg-slate-100 border border-slate-200/80 text-[12px]">
-              <span className="material-symbols-outlined text-[17px] text-primary">account_balance_wallet</span>
-              <div>
-                <span className="text-slate-500 block text-[10px] leading-tight font-medium uppercase tracking-wider">
-                  {currentLang === 'mr' ? 'रोख / UPI निधी' : (currentLang === 'hi' ? 'नकद / UPI फ्लोट' : 'Cash/UPI Float')}
-                </span>
-                <span className="font-bold text-slate-900 text-[13px] leading-tight font-mono">
-                  ₹{workingCapitalFloat.toLocaleString('en-IN')} {currentLang === 'mr' ? 'शिल्लक' : (currentLang === 'hi' ? 'आरक्षित' : 'Reserve')}
-                </span>
-              </div>
+          {/* Right Status Pills & User Profile */}
+          <div className="flex items-center gap-1.5 sm:gap-2">
+            {/* Synced Status Pill (Matching Collector Page) */}
+            <div
+              className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-emerald-300 bg-emerald-50 text-emerald-800 text-[11px] font-semibold shrink-0"
+              title="Application is Synced"
+            >
+              <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
+              <span>{t.synced}</span>
             </div>
 
-            {/* Trilingual Language Toggle Button */}
+            {/* Language Switcher Button (Matching Collector Page Exactly) */}
             <button
               onClick={handleLanguageCycle}
-              className="bg-surface-container hover:bg-surface-container-high text-on-surface text-xs font-bold px-2.5 sm:px-3 py-1.5 rounded-full flex items-center gap-1.5 border border-outline-variant transition-all cursor-pointer shadow-sm"
+              aria-label="Switch Language"
+              className="flex items-center gap-1 h-8 sm:h-9 px-2.5 sm:px-3 rounded-full bg-surface-container border border-outline-variant text-on-surface hover:bg-surface-container-high transition-colors text-xs font-bold cursor-pointer shrink-0"
               title="Switch Language (Hindi / Marathi / English)"
             >
-              <span className="material-symbols-outlined text-[16px] text-primary">language</span>
+              <span className="material-symbols-outlined text-sm text-primary">language</span>
               <span>{currentLang === 'hi' ? 'हिन्दी' : (currentLang === 'mr' ? 'मराठी' : 'EN')}</span>
             </button>
 
-            {/* Admin Tools Modal Button */}
-            <button
-              onClick={() => setShowAdminModal(true)}
-              className="bg-surface-container hover:bg-surface-container-high text-on-surface text-xs font-bold px-2.5 sm:px-3 py-1.5 rounded-full flex items-center gap-1.5 border border-outline-variant transition-all cursor-pointer shadow-sm"
-              title="Access CPCB Master Admin Tools"
-            >
-              <span className="material-symbols-outlined text-[16px] text-primary">admin_panel_settings</span>
-              <span className="hidden md:inline">{currentLang === 'mr' ? 'प्रशासक' : (currentLang === 'hi' ? 'एडमिन' : 'Admin')}</span>
-            </button>
+            {/* User Profile Button with Interactive Dropdown (Matching Collector Page) */}
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => setShowProfileMenu(prev => !prev)}
+                className="w-8 h-8 rounded-full bg-primary/15 hover:bg-primary/25 active:scale-95 flex items-center justify-center border border-primary/30 text-primary font-bold text-xs cursor-pointer shadow-2xs transition-all shrink-0"
+                title="Yard Master Profile & Account Options"
+                aria-label="Yard Master Profile"
+              >
+                <span className="material-symbols-outlined text-[18px]">person</span>
+              </button>
 
-            {/* Role Switcher */}
-            <button
-              onClick={onRoleSwitch}
-              className="bg-primary/10 hover:bg-primary/20 text-primary text-xs font-bold px-3 py-1.5 rounded-full flex items-center gap-1.5 border border-primary/20 transition-all cursor-pointer shadow-sm active:scale-95"
-              title="Switch Role Portal"
-            >
-              <span className="material-symbols-outlined text-[16px]">switch_account</span>
-              <span className="hidden sm:inline">{currentLang === 'mr' ? 'भूमिका बदला' : (currentLang === 'hi' ? 'रोल बदलें' : 'Switch Role')}</span>
-            </button>
+              {/* Profile Menu Dropdown */}
+              {showProfileMenu && (
+                <div className="absolute right-0 mt-2 w-72 bg-white rounded-2xl shadow-2xl border border-slate-200 p-4 z-50 animate-in fade-in zoom-in-95 duration-150 space-y-3">
+                  <div className="flex items-center gap-3 pb-3 border-b border-slate-100">
+                    <div className="w-11 h-11 rounded-2xl bg-primary/20 text-primary flex items-center justify-center text-base font-bold shrink-0">
+                      DB
+                    </div>
+                    <div className="leading-tight flex-1 truncate">
+                      <p className="font-bold text-sm text-slate-900 truncate">Dilip Bhai</p>
+                      <p className="text-[11px] text-emerald-800 font-semibold">{t.yardMasterAdmin}</p>
+                      <div className="flex items-center gap-1.5 mt-1">
+                        <span className="inline-block text-[9px] bg-emerald-100 text-emerald-800 font-extrabold px-1.5 py-0.5 rounded">
+                          KYC VERIFIED
+                        </span>
+                        <span className="text-[9.5px] font-mono text-slate-500 truncate">
+                          #KA-AGG-2024-118
+                        </span>
+                      </div>
+                    </div>
+                  </div>
 
-            {/* Notification Bell */}
-            <button
-              onClick={() => setShowNotifications(true)}
-              className="w-9 h-9 flex items-center justify-center rounded-xl border border-slate-200 text-secondary hover:text-on-surface hover:bg-slate-50 transition-colors relative cursor-pointer"
-              title="Notifications"
-              type="button"
-            >
-              <span className="material-symbols-outlined text-[20px]">notifications</span>
-              <span className="absolute top-2 right-2 w-2 h-2 bg-error rounded-full border-2 border-white"></span>
-            </button>
+                  <div className="space-y-1.5 text-xs font-semibold">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowProfileMenu(false);
+                        setShowAdminModal(true);
+                      }}
+                      className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 hover:bg-slate-50 transition-colors cursor-pointer text-left"
+                    >
+                      <span className="material-symbols-outlined text-[18px] text-emerald-700">admin_panel_settings</span>
+                      <span>{t.cpcbAdminTools}</span>
+                    </button>
 
-            {/* Profile Avatar */}
-            <div className="flex items-center gap-2 pl-2 border-l border-slate-200">
-              <div className="w-9 h-9 rounded-full bg-emerald-800 text-white font-bold text-[13px] flex items-center justify-center shadow-xs">
-                DB
-              </div>
-              <div className="hidden lg:flex flex-col text-left">
-                <span className="text-[13px] font-bold text-slate-900 leading-tight">Dilip Bhai</span>
-                <span className="text-[11px] text-emerald-700 font-medium leading-tight">{currentLang === 'mr' ? 'यार्ड प्रमुख व्यवस्थापक' : (currentLang === 'hi' ? 'यार्ड प्रमुख प्रबंधक' : 'Yard Master Admin')}</span>
-              </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowProfileMenu(false);
+                        setShowNotifications(true);
+                      }}
+                      className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 hover:bg-slate-50 transition-colors cursor-pointer text-left"
+                    >
+                      <span className="material-symbols-outlined text-[18px] text-slate-600">notifications</span>
+                      <span>{t.alertsNotifs}</span>
+                    </button>
+
+                    <div className="pt-1 border-t border-slate-100">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setShowProfileMenu(false);
+                          if (onRoleSwitch) onRoleSwitch();
+                        }}
+                        className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-rose-700 hover:bg-rose-50 font-bold transition-colors cursor-pointer text-left"
+                      >
+                        <span className="material-symbols-outlined text-[18px]">logout</span>
+                        <span>{t.logOutRole}</span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
 
-        {/* 4-TAB NAVIGATION BAR */}
-        <div className="px-4 sm:px-6 bg-surface-container-lowest border-t border-slate-100 flex items-center gap-1 overflow-x-auto scrollbar-none">
+        {/* Subheader: Yard Desk Live & Facility Reg */}
+        <div className="px-3 sm:px-6 pt-2 pb-0.5 flex items-center justify-between">
+          <span className="text-teal-950 font-black tracking-wider text-[11px] sm:text-xs uppercase">
+            {t.yardDeskLive}
+          </span>
+          <span className="text-slate-600 font-mono font-bold text-[11px] sm:text-xs tracking-wider uppercase">
+            {t.peenyaYard}
+          </span>
+        </div>
+
+        {/* Dual Hero Cards: Always 2-Columns Side-by-Side (Working Float & Calibrated Scale) */}
+        <div className="px-3 sm:px-6 py-1.5 grid grid-cols-2 gap-2 sm:gap-3">
+          {/* Card 1: Working Float */}
+          <div className="bg-[#f0f4f9] p-2.5 sm:p-3.5 rounded-xl sm:rounded-2xl border border-slate-200/90 shadow-2xs flex flex-col justify-between">
+            <div className="flex items-center justify-between gap-1">
+              <span className="text-slate-700 font-bold text-[11px] sm:text-xs tracking-tight truncate">{t.workingFloat}</span>
+              <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-lg border border-teal-700/20 text-teal-800 bg-teal-50 flex items-center justify-center shrink-0">
+                <span className="material-symbols-outlined text-[15px] sm:text-[17px]">account_balance_wallet</span>
+              </div>
+            </div>
+            <div className="my-1 flex items-baseline gap-1 truncate">
+              <span className="text-lg sm:text-2xl font-black text-slate-900 font-mono tracking-tight leading-none">
+                ₹{workingCapitalFloat.toLocaleString('en-IN')}
+              </span>
+              <span className="text-[10px] sm:text-xs text-slate-600 font-bold">{t.avail}</span>
+            </div>
+            <span className="text-slate-500 text-[9.5px] sm:text-[11px] font-medium truncate">
+              {t.cashDeskReserve}
+            </span>
+          </div>
+
+          {/* Card 2: HX711 DIGITAL */}
+          <div className="bg-[#0b3829] text-white p-2.5 sm:p-3.5 rounded-xl sm:rounded-2xl border border-emerald-900 shadow-2xs flex flex-col justify-between">
+            <div className="flex items-center justify-between gap-1">
+              <span className="text-emerald-300 font-black tracking-wider text-[10.5px] sm:text-xs uppercase truncate">
+                {t.hx711Digital}
+              </span>
+              <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-lg text-emerald-300 flex items-center justify-center shrink-0">
+                <span className="material-symbols-outlined text-[16px] sm:text-[18px]">scale</span>
+              </div>
+            </div>
+            <div className="my-1 flex items-center gap-1.5 truncate">
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shrink-0"></span>
+              <span className="text-[12px] sm:text-base font-black text-white leading-none tracking-tight truncate">
+                {t.calibrated}
+              </span>
+            </div>
+            <span className="text-emerald-400/80 font-mono text-[9px] sm:text-[10px] tracking-wider truncate">
+              HX711-PEENYA-02-OK
+            </span>
+          </div>
+        </div>
+
+        {/* 4-TAB NAVIGATION BAR (Compact & Clean) */}
+        <div className="px-3 sm:px-6 pt-0.5 pb-2 grid grid-cols-4 gap-1 sm:gap-2 border-b border-slate-200">
+          {/* Tab 1: Gate & Pay */}
           <button
-            className={`tab-btn flex items-center gap-2 px-4 py-3 border-b-2 text-[13.5px] transition-all whitespace-nowrap cursor-pointer ${
-              activeTab === 'tab-intake'
-                ? 'border-primary text-primary font-bold'
-                : 'border-transparent text-slate-600 hover:text-slate-900 font-semibold'
-            }`}
             onClick={() => setActiveTab('tab-intake')}
+            className={`flex flex-col items-center justify-center py-1.5 sm:py-2 px-1 rounded-xl transition-all cursor-pointer ${
+              activeTab === 'tab-intake'
+                ? 'bg-[#0b3829] text-white shadow-sm font-bold'
+                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100 font-semibold'
+            }`}
           >
-            <span className="material-symbols-outlined text-[20px]">input</span>
-            <span>
-              {currentLang === 'mr' ? '1. गेट आवक व रोख देयक' : (currentLang === 'hi' ? '1. गेट आवक एवं नकद डेस्क' : '1. Inbound Intake & Cash Desk')}
-            </span>
-            <span className="ml-1 px-1.5 py-0.2 bg-emerald-100 text-emerald-800 rounded-full text-[11px] font-semibold">
-              Live ({inboundLots.filter(l => l.status === 'QUEUED').length})
-            </span>
+            <span className="material-symbols-outlined text-[19px] sm:text-[22px]">login</span>
+            <span className="text-[10px] sm:text-[11.5px] font-bold mt-0.5 tracking-tight truncate">{t.tabGatePay}</span>
           </button>
 
+          {/* Tab 2: Stock & Bays */}
           <button
-            className={`tab-btn flex items-center gap-2 px-4 py-3 border-b-2 text-[13.5px] transition-all whitespace-nowrap cursor-pointer ${
-              activeTab === 'tab-inventory'
-                ? 'border-primary text-primary font-bold'
-                : 'border-transparent text-slate-600 hover:text-slate-900 font-semibold'
-            }`}
             onClick={() => setActiveTab('tab-inventory')}
+            className={`flex flex-col items-center justify-center py-1.5 sm:py-2 px-1 rounded-xl transition-all cursor-pointer ${
+              activeTab === 'tab-inventory'
+                ? 'bg-[#0b3829] text-white shadow-sm font-bold'
+                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100 font-semibold'
+            }`}
           >
-            <span className="material-symbols-outlined text-[20px]">inventory_2</span>
-            <span>
-              {currentLang === 'mr' ? '2. यार्ड साठा व बॅच इंजिन' : (currentLang === 'hi' ? '2. यार्ड इन्वेंटरी एवं बैच इंजन' : '2. Yard Inventory & Batch Engine')}
-            </span>
-            <span className="ml-1 px-1.5 py-0.2 bg-slate-100 text-slate-700 rounded-full text-[11px]">
-              {totalBatchWeight.toFixed(0)} kg Ready
-            </span>
+            <span className="material-symbols-outlined text-[19px] sm:text-[22px]">warehouse</span>
+            <span className="text-[10px] sm:text-[11.5px] font-bold mt-0.5 tracking-tight truncate">{t.tabStockBays}</span>
           </button>
 
+          {/* Tab 3: Arbitrage */}
           <button
-            className={`tab-btn flex items-center gap-2 px-4 py-3 border-b-2 text-[13.5px] transition-all whitespace-nowrap cursor-pointer ${
-              activeTab === 'tab-marketplace'
-                ? 'border-primary text-primary font-bold'
-                : 'border-transparent text-slate-600 hover:text-slate-900 font-semibold'
-            }`}
             onClick={() => setActiveTab('tab-marketplace')}
+            className={`flex flex-col items-center justify-center py-1.5 sm:py-2 px-1 rounded-xl transition-all cursor-pointer ${
+              activeTab === 'tab-marketplace'
+                ? 'bg-[#0b3829] text-white shadow-sm font-bold'
+                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100 font-semibold'
+            }`}
           >
-            <span className="material-symbols-outlined text-[20px]">local_shipping</span>
-            <span>
-              {currentLang === 'mr' ? '3. B2B रिसायकलर बाजारपेठ' : (currentLang === 'hi' ? '3. B2B रीसायकलर बाज़ार' : '3. Outbound B2B Recycler Marketplace')}
-            </span>
-            <span className="ml-1 px-1.5 py-0.2 bg-emerald-100 text-emerald-800 rounded-full text-[11px] font-bold">
-              +{netSpreadMarginPct}% Spread
-            </span>
+            <span className="material-symbols-outlined text-[19px] sm:text-[22px]">trending_up</span>
+            <span className="text-[10px] sm:text-[11.5px] font-bold mt-0.5 tracking-tight truncate">{t.tabArbitrage}</span>
           </button>
 
+          {/* Tab 4: Form-6 */}
           <button
-            className={`tab-btn flex items-center gap-2 px-4 py-3 border-b-2 text-[13.5px] transition-all whitespace-nowrap cursor-pointer ${
-              activeTab === 'tab-compliance'
-                ? 'border-primary text-primary font-bold'
-                : 'border-transparent text-slate-600 hover:text-slate-900 font-semibold'
-            }`}
             onClick={() => setActiveTab('tab-compliance')}
+            className={`flex flex-col items-center justify-center py-1.5 sm:py-2 px-1 rounded-xl transition-all cursor-pointer ${
+              activeTab === 'tab-compliance'
+                ? 'bg-[#0b3829] text-white shadow-sm font-bold'
+                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100 font-semibold'
+            }`}
           >
-            <span className="material-symbols-outlined text-[20px]">verified_user</span>
-            <span>
-              {currentLang === 'mr' ? '4. फॉर्म-6 पूर्तता व कस्टडी ट्री' : (currentLang === 'hi' ? '4. फॉर्म-6 अनुपालन एवं कस्टडी ट्री' : '4. Form-6 Compliance & Provenance Tree')}
-            </span>
-            <span className="ml-1 px-1.5 py-0.2 bg-blue-100 text-blue-800 rounded-full text-[11px] font-bold">
-              CPCB 2022
-            </span>
+            <span className="material-symbols-outlined text-[19px] sm:text-[22px]">verified_user</span>
+            <span className="text-[10px] sm:text-[11.5px] font-bold mt-0.5 tracking-tight truncate">{t.tabForm6}</span>
           </button>
         </div>
       </header>
@@ -671,12 +1157,12 @@ export default function DealerDashboard({ onRoleSwitch, currentLang: propLang, o
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               <div className="bg-surface-container-lowest p-4 rounded-2xl border border-slate-200/80 shadow-xs flex items-center justify-between">
                 <div>
-                  <span className="text-[11px] uppercase tracking-wider font-semibold text-secondary">Today's Gate Inbound</span>
+                  <span className="text-[11px] uppercase tracking-wider font-semibold text-secondary">{t.todaysGateInbound}</span>
                   <div className="flex items-baseline gap-1 mt-1">
                     <span className="text-2xl font-black text-slate-900">342.0</span>
                     <span className="text-xs font-semibold text-slate-500">kg (18 Lots)</span>
                   </div>
-                  <span className="text-[11.5px] text-emerald-700 font-medium">₹1,42,887 Disbursed</span>
+                  <span className="text-[11.5px] text-emerald-700 font-medium">₹1,42,887 {t.disbursed}</span>
                 </div>
                 <div className="w-10 h-10 rounded-xl bg-emerald-50 text-primary flex items-center justify-center">
                   <span className="material-symbols-outlined">scale</span>
@@ -685,10 +1171,10 @@ export default function DealerDashboard({ onRoleSwitch, currentLang: propLang, o
 
               <div className="bg-surface-container-lowest p-4 rounded-2xl border border-slate-200/80 shadow-xs flex items-center justify-between">
                 <div>
-                  <span className="text-[11px] uppercase tracking-wider font-semibold text-secondary">Verified Collectors</span>
+                  <span className="text-[11px] uppercase tracking-wider font-semibold text-secondary">{t.verifiedCollectors}</span>
                   <div className="flex items-baseline gap-1 mt-1">
                     <span className="text-2xl font-black text-slate-900">14</span>
-                    <span className="text-xs font-semibold text-slate-500">Active today</span>
+                    <span className="text-xs font-semibold text-slate-500">{t.activeToday}</span>
                   </div>
                   <span className="text-[11.5px] text-slate-600 font-medium">100% CPCB KYC registered</span>
                 </div>
@@ -739,9 +1225,10 @@ export default function DealerDashboard({ onRoleSwitch, currentLang: propLang, o
                     <input
                       className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-[13px] font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-primary focus:bg-white transition-all"
                       type="text"
-                      placeholder="Enter Lot # or Collector Name (e.g. RL-2026-00482)..."
+                      placeholder={t.searchPlaceholder}
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
+                      onKeyDown={(e) => e.key === 'Enter' && handleFetchOrScanVoucher(searchQuery)}
                     />
                   </div>
                   <div className="flex items-center gap-2 w-full sm:w-auto">
@@ -750,27 +1237,14 @@ export default function DealerDashboard({ onRoleSwitch, currentLang: propLang, o
                       className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-4 py-2.5 bg-emerald-50 text-primary border border-emerald-200 font-semibold text-[13px] rounded-xl hover:bg-emerald-100 transition-colors cursor-pointer"
                     >
                       <span className="material-symbols-outlined text-[18px]">photo_camera</span>
-                      <span>Scan Camera</span>
+                      <span>{t.scanCamera}</span>
                     </button>
                     <button
-                      onClick={() => {
-                        const found = inboundLots.find(l =>
-                          l.lot_ref.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                          l.collector_name.toLowerCase().includes(searchQuery.toLowerCase())
-                        );
-                        if (found) {
-                          setActiveLot(found);
-                          setActiveNetWeight(found.net_weight);
-                          setActiveApprovedRate(found.approved_rate);
-                          showToast('Voucher Loaded', `Loaded ${found.lot_ref} for ${found.collector_name}`);
-                        } else {
-                          showToast('Search Notice', `No lot matching "${searchQuery}" found.`);
-                        }
-                      }}
+                      onClick={() => handleFetchOrScanVoucher(searchQuery)}
                       className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-4 py-2.5 bg-primary text-white font-semibold text-[13px] rounded-xl shadow-xs hover:bg-emerald-800 transition-colors cursor-pointer"
                     >
                       <span className="material-symbols-outlined text-[18px]">search</span>
-                      <span>Fetch Voucher</span>
+                      <span>{t.fetchVoucher}</span>
                     </button>
                   </div>
                 </div>
@@ -785,14 +1259,14 @@ export default function DealerDashboard({ onRoleSwitch, currentLang: propLang, o
                           <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                           <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
                         </span>
-                        <span className="font-bold text-[14px] tracking-wide">ACTIVE GATE WEIGHMENT &amp; PAYOUT</span>
+                        <span className="font-bold text-[14px] tracking-wide">{t.activeGateWeighment}</span>
                         <span className="px-2 py-0.5 rounded bg-emerald-800 text-emerald-200 text-[11px] font-mono">
-                          Lot #{activeLot.lot_ref}
+                          {t.lotNo} {activeLot.lot_ref}
                         </span>
                       </div>
                       <div className="text-[12px] text-emerald-200 flex items-center gap-1">
                         <span className="material-symbols-outlined text-[15px]">timer</span>
-                        <span>Queued {activeLot.queued_time}</span>
+                        <span>{t.queued} {activeLot.queued_time}</span>
                       </div>
                     </div>
 
@@ -812,7 +1286,7 @@ export default function DealerDashboard({ onRoleSwitch, currentLang: propLang, o
                               </span>
                             </div>
                             <p className="text-[12.5px] text-slate-500">
-                              Itinerant Informal Collector • {activeLot.collector_cluster} • Aadhaar KYC Verified ✓
+                              {activeLot.collector_cluster} • Aadhaar KYC Verified ✓
                             </p>
                           </div>
                         </div>
@@ -836,17 +1310,17 @@ export default function DealerDashboard({ onRoleSwitch, currentLang: propLang, o
                           <div className="flex items-center justify-between text-slate-400 text-[12px] mb-2">
                             <span className="flex items-center gap-1.5 text-emerald-400 font-semibold font-mono uppercase">
                               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                              Scale #02 Calibrated (ISO/IEC)
+                              {t.scaleCalibratedISO}
                             </span>
                             <span className="font-mono">
-                              Tare: {activeLot.tare_weight.toFixed(2)} kg | Gross: {(activeNetWeight + activeLot.tare_weight).toFixed(2)} kg
+                              {t.tareDeduction}: {activeLot.tare_weight.toFixed(2)} kg | {t.grossWeight}: {(activeNetWeight + activeLot.tare_weight).toFixed(2)} kg
                             </span>
                           </div>
 
                           <div className="flex items-baseline justify-between my-2">
                             <div>
                               <span className="text-slate-400 text-[11px] uppercase tracking-wider block font-semibold">
-                                Net Verified Weight
+                                {t.netVerifiedWeight}
                               </span>
                               <div className="flex items-center gap-2">
                                 <span className="text-4xl sm:text-5xl font-black font-mono tracking-tight text-emerald-400">
@@ -875,7 +1349,7 @@ export default function DealerDashboard({ onRoleSwitch, currentLang: propLang, o
 
                             <div className="text-right">
                               <span className="text-slate-400 text-[11px] uppercase tracking-wider block font-semibold">
-                                Mandi Benchmark
+                                {t.mandiBenchmark}
                               </span>
                               <div className="flex items-baseline justify-end gap-1">
                                 <span className="text-2xl font-bold font-mono text-white">
@@ -890,7 +1364,7 @@ export default function DealerDashboard({ onRoleSwitch, currentLang: propLang, o
                           <div className="mt-3 pt-3 border-t border-slate-800 flex items-center justify-between text-[11.5px] text-slate-400">
                             <span>Digital Sensor Signature: <code className="text-slate-200">{activeLot.sensor_id}</code></span>
                             <span className="text-emerald-400 font-medium flex items-center gap-1">
-                              <span className="material-symbols-outlined text-[15px]">lock</span> Zero Tare Verified
+                              <span className="material-symbols-outlined text-[15px]">lock</span> {t.zeroTareVerified}
                             </span>
                           </div>
                         </div>
@@ -912,8 +1386,8 @@ export default function DealerDashboard({ onRoleSwitch, currentLang: propLang, o
                             </div>
                           </div>
                           <div className="flex items-center justify-between text-[12px] px-1">
-                            <span className="text-slate-500 font-medium">Asking: ₹{activeLot.asking_rate} / kg</span>
-                            <span className="text-primary font-bold">Approved: ₹{activeApprovedRate} / kg</span>
+                            <span className="text-slate-500 font-medium">{t.askingRate}: ₹{activeLot.asking_rate} / kg</span>
+                            <span className="text-primary font-bold">{t.approvedRate}: ₹{activeApprovedRate} / kg</span>
                           </div>
                         </div>
                       </div>
@@ -921,7 +1395,7 @@ export default function DealerDashboard({ onRoleSwitch, currentLang: propLang, o
                       {/* Payout Summary & Big 1-Tap Payment Buttons */}
                       <div className="bg-gradient-to-br from-emerald-50/70 to-slate-50 p-5 rounded-2xl border border-emerald-200/80 flex flex-col sm:flex-row items-center justify-between gap-5">
                         <div>
-                          <span className="text-[11px] uppercase tracking-wider font-bold text-slate-500">Calculated Payout Due</span>
+                          <span className="text-[11px] uppercase tracking-wider font-bold text-slate-500">{t.calculatedPayoutDue}</span>
                           <div className="flex items-baseline gap-2">
                             <span className="text-3xl sm:text-4xl font-black text-slate-900 font-mono">
                               ₹{Math.round(activeNetWeight * activeApprovedRate).toLocaleString('en-IN')}
@@ -931,7 +1405,7 @@ export default function DealerDashboard({ onRoleSwitch, currentLang: propLang, o
                             </span>
                           </div>
                           <p className="text-[11.5px] text-slate-500 mt-0.5">
-                            TDS Deductions: Exempt (&lt;₹10,000 threshold under e-waste yard policy)
+                            {t.tdsDeductions}
                           </p>
                         </div>
 
@@ -947,7 +1421,7 @@ export default function DealerDashboard({ onRoleSwitch, currentLang: propLang, o
                             type="button"
                           >
                             <span className="material-symbols-outlined text-[20px] text-emerald-400">payments</span>
-                            <span>{isProcessingPayment ? 'Settling...' : '💵 Pay Cash & Confirm'}</span>
+                            <span>{isProcessingPayment ? t.settling : t.payCash}</span>
                           </button>
 
                           <button
@@ -961,7 +1435,7 @@ export default function DealerDashboard({ onRoleSwitch, currentLang: propLang, o
                             type="button"
                           >
                             <span className="material-symbols-outlined text-[20px]">qr_code_2</span>
-                            <span>{isProcessingPayment ? 'Settling...' : '📱 UPI Instant'}</span>
+                            <span>{isProcessingPayment ? t.settling : t.payUpi}</span>
                           </button>
                         </div>
                       </div>
@@ -971,8 +1445,8 @@ export default function DealerDashboard({ onRoleSwitch, currentLang: propLang, o
                         {/* Soundbox Simulation Pill */}
                         <div
                           onClick={() => {
-                            const speechText = currentLang === 'mr' ? lastSoundboxMessage.mr : lastSoundboxMessage.hi;
-                            speakAnnouncement(speechText, currentLang === 'mr' ? 'mr-IN' : 'hi-IN');
+                            const speechText = currentLang === 'mr' ? lastSoundboxMessage.mr : (currentLang === 'en' ? lastSoundboxMessage.en : lastSoundboxMessage.hi);
+                            speakAnnouncement(speechText, currentLang === 'mr' ? 'mr-IN' : (currentLang === 'en' ? 'en-IN' : 'hi-IN'));
                             showToast('Soundbox Replay', speechText);
                           }}
                           className="flex items-center gap-3 p-3 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 text-[12px] cursor-pointer hover:bg-amber-100 transition-colors"
@@ -982,9 +1456,9 @@ export default function DealerDashboard({ onRoleSwitch, currentLang: propLang, o
                             <span className="material-symbols-outlined text-[18px]">volume_up</span>
                           </div>
                           <div>
-                            <span className="font-bold block text-[12.5px]">Paytm / PhonePe Yard Soundbox (Tap to Play):</span>
+                            <span className="font-bold block text-[12.5px]">{t.soundboxTitle}</span>
                             <span className="italic text-amber-800">
-                              "{currentLang === 'mr' ? lastSoundboxMessage.mr : lastSoundboxMessage.hi}"
+                              "{currentLang === 'mr' ? lastSoundboxMessage.mr : (currentLang === 'en' ? lastSoundboxMessage.en : lastSoundboxMessage.hi)}"
                             </span>
                           </div>
                         </div>
@@ -995,7 +1469,7 @@ export default function DealerDashboard({ onRoleSwitch, currentLang: propLang, o
                             <span className="material-symbols-outlined text-[18px]">receipt_long</span>
                           </div>
                           <div>
-                            <span className="font-bold block text-[12.5px]">Collector Ledger Synced ✓</span>
+                            <span className="font-bold block text-[12.5px]">{t.collectorLedgerSynced}</span>
                             <span className="text-emerald-800">
                               Receipt #RCP-{activeLot.lot_ref.slice(-5)} SMS/Token Sent to +91 98450-XXXXX
                             </span>
@@ -1009,17 +1483,103 @@ export default function DealerDashboard({ onRoleSwitch, currentLang: propLang, o
 
               {/* Right: Recent Inbound Queue & Live Mandi Ticker */}
               <div className="lg:col-span-4 space-y-6">
+                {/* 🚛 Doorstep Pickup Requests Card (Contextual Inbound Navigation) */}
+                <div className="bg-surface-container-lowest p-5 rounded-2xl border-2 border-amber-500/30 shadow-xs space-y-3 bg-gradient-to-br from-amber-50/40 to-white">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div className="w-8 h-8 rounded-xl bg-amber-100 text-amber-900 flex items-center justify-center font-bold">
+                        <span className="material-symbols-outlined text-[18px]">local_shipping</span>
+                      </div>
+                      <h3 className="font-bold text-[14.5px] text-slate-900">
+                        🚛 {t.pickupRequests}
+                      </h3>
+                    </div>
+                    <span className="px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-900 font-extrabold text-[11px]">
+                      3
+                    </span>
+                  </div>
+
+                  {/* Active Doorstep Request Item */}
+                  <div className="p-3.5 rounded-xl border border-amber-200/80 bg-white space-y-2.5 shadow-2xs">
+                    <div className="flex items-start justify-between">
+                      <div>
+                        <span className="font-bold text-slate-900 text-[13.5px] block">Ramesh Kumar</span>
+                        <span className="text-xs text-slate-600 block mt-0.5">
+                          PCB • <b>12 kg</b>
+                        </span>
+                        <span className="text-[11.5px] text-amber-800 font-medium flex items-center gap-1 mt-1">
+                          <span className="material-symbols-outlined text-[14px]">location_on</span>
+                          <span>📍 1.8 km away • Peenya Sector 2</span>
+                        </span>
+                      </div>
+                      <span className="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 font-mono text-[11px] font-bold">
+                        Est. ₹9,060
+                      </span>
+                    </div>
+
+                    <div className="pt-2 border-t border-slate-100">
+                      {!pickupAcceptedMap['lot_rl_00482'] ? (
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={() => {
+                              const rameshLot = inboundLots.find(l => l.id === 'lot_rl_00482') || inboundLots[0];
+                              setActiveLot(rameshLot);
+                              setActiveNetWeight(rameshLot.net_weight);
+                              setActiveApprovedRate(rameshLot.approved_rate);
+                              showToast('Viewing Lot', `Loaded ${rameshLot.lot_ref} for Ramesh Kumar`);
+                            }}
+                            className="flex-1 py-2 px-3 rounded-xl border border-slate-300 text-slate-700 font-bold text-xs hover:bg-slate-50 cursor-pointer text-center transition-colors"
+                          >
+                            [{t.viewLot}]
+                          </button>
+                          <button
+                            onClick={() => {
+                              setPickupAcceptedMap(prev => ({ ...prev, 'lot_rl_00482': true }));
+                              showToast('Pickup Accepted ✓', 'Assigned Driver Rajesh Kumar. Click Start Navigation to route.');
+                            }}
+                            className="flex-1 py-2 px-3 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs shadow-xs cursor-pointer text-center transition-colors"
+                          >
+                            [{t.acceptPickup}]
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="space-y-2">
+                          <div className="flex items-center justify-between text-xs text-emerald-800 bg-emerald-50 px-2.5 py-1.5 rounded-lg border border-emerald-200">
+                            <span className="font-bold flex items-center gap-1">
+                              <span className="material-symbols-outlined text-[14px]">check_circle</span>
+                              <span>{t.pickupAccepted}</span>
+                            </span>
+                            <span className="font-mono text-[11px]">1.8 km</span>
+                          </div>
+                          <button
+                            onClick={() => {
+                              const rameshLot = inboundLots.find(l => l.id === 'lot_rl_00482') || inboundLots[0];
+                              setNavLotData(rameshLot);
+                              setNavModalMode('INBOUND_PICKUP');
+                              setShowDealerNav(true);
+                            }}
+                            className="w-full py-2.5 px-4 bg-emerald-900 hover:bg-emerald-800 text-white text-xs font-bold rounded-xl flex items-center justify-center gap-2 shadow-xs cursor-pointer transition-all active:scale-98"
+                          >
+                            <span className="material-symbols-outlined text-[16px] text-emerald-300">navigation</span>
+                            <span>[{t.startNavigation}]</span>
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
                 {/* Recent Inbound Queue Card */}
                 <div className="bg-surface-container-lowest p-5 rounded-2xl border border-slate-200/80 shadow-xs space-y-4">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <h3 className="font-bold text-[15px] text-slate-900">Recent Inbound Queue</h3>
+                      <h3 className="font-bold text-[15px] text-slate-900">{t.recentInboundQueue}</h3>
                       <span className="px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 text-[11px] font-semibold">
-                        Today
+                        {t.today}
                       </span>
                     </div>
                     <span className="text-[12px] text-primary font-semibold">
-                      {inboundLots.length} Active Lots
+                      {inboundLots.length} {t.activeLots}
                     </span>
                   </div>
 
@@ -1050,16 +1610,29 @@ export default function DealerDashboard({ onRoleSwitch, currentLang: propLang, o
                                 <span className="font-bold text-[13.5px] text-slate-900 block leading-tight">
                                   {lot.collector_name}
                                 </span>
-                                <span className="text-[11px] text-slate-500 leading-tight">
-                                  {lot.collector_cluster} • {lot.lot_ref}
+                                <span className="text-[11px] text-slate-500 leading-tight flex items-center gap-1 mt-0.5">
+                                  {lot.handover_type === 'DOORSTEP_PICKUP' || lot.status === 'PICKUP_SCHEDULED' ? (
+                                    <span className="text-amber-800 font-semibold flex items-center gap-0.5 bg-amber-50 px-1.5 py-0.2 rounded border border-amber-200">
+                                      <span className="material-symbols-outlined text-[12px]">local_shipping</span>
+                                      <span>Pickup ({lot.driver_eta || '35m'})</span>
+                                    </span>
+                                  ) : (
+                                    <span className="text-emerald-800 font-semibold flex items-center gap-0.5 bg-emerald-50 px-1.5 py-0.2 rounded border border-emerald-200">
+                                      <span className="material-symbols-outlined text-[12px]">storefront</span>
+                                      <span>Gate Drop</span>
+                                    </span>
+                                  )}
+                                  <span>• {lot.lot_ref}</span>
                                 </span>
                               </div>
                             </div>
-                            <span className={`px-2 py-0.5 rounded text-[10.5px] font-bold ${
+                            <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${
                               lot.status === 'PAID_CASH'
                                 ? 'bg-emerald-100 text-emerald-800'
                                 : lot.status === 'PAID_UPI'
                                 ? 'bg-blue-100 text-blue-800'
+                                : lot.status === 'PICKUP_SCHEDULED'
+                                ? 'bg-amber-100 text-amber-900 border border-amber-300'
                                 : lot.status === 'INSPECTION'
                                 ? 'bg-amber-100 text-amber-800'
                                 : 'bg-slate-200 text-slate-700'
@@ -1507,35 +2080,7 @@ export default function DealerDashboard({ onRoleSwitch, currentLang: propLang, o
                   </span>
 
                   <div className="divide-y divide-slate-100 border border-slate-200 rounded-xl overflow-hidden">
-                    {[
-                      {
-                        id: 'bid_eparisaraa_01',
-                        code: 'EP',
-                        name: 'E-Parisaraa Pvt Ltd',
-                        desc: 'R2 / CPCB Registered Smelter • Dobbaspet Hub',
-                        rate: 815,
-                        badge: 'High Bid',
-                        bgBadge: 'bg-emerald-200 text-emerald-900'
-                      },
-                      {
-                        id: 'bid_ecorecycle_02',
-                        code: 'ER',
-                        name: 'EcoRecycle CleanTech',
-                        desc: 'KSPCB Authorized Refiner • Bidadi',
-                        rate: 808,
-                        badge: 'Valid 3h',
-                        bgBadge: 'bg-slate-100 text-slate-700'
-                      },
-                      {
-                        id: 'bid_metaloop_03',
-                        code: 'MR',
-                        name: 'Metaloop Resources',
-                        desc: 'Industrial Scrap Trader • Whitefield',
-                        rate: 795,
-                        badge: 'Ex-Yard',
-                        bgBadge: 'bg-slate-100 text-slate-700'
-                      }
-                    ].map((b) => {
+                    {biddersList.map((b) => {
                       const isBidSelected = selectedBidder === b.id;
                       return (
                         <div
@@ -1582,61 +2127,94 @@ export default function DealerDashboard({ onRoleSwitch, currentLang: propLang, o
                     <span>Logistics &amp; Smelter Dispatch Mode</span>
                   </h3>
 
-                  {/* Logistics switch selection */}
-                  <div className="space-y-2.5">
-                    <label
-                      onClick={() => setLogisticsType('RECYCLER_PICKUP')}
-                      className={`p-3.5 rounded-xl border-2 flex items-start gap-3 cursor-pointer transition-colors ${
-                        logisticsType === 'RECYCLER_PICKUP'
-                          ? 'border-primary bg-emerald-50/50'
-                          : 'border-slate-200 hover:border-slate-300'
-                      }`}
-                    >
-                      <input
-                        type="radio"
-                        name="logistics_type"
-                        checked={logisticsType === 'RECYCLER_PICKUP'}
-                        onChange={() => setLogisticsType('RECYCLER_PICKUP')}
-                        className="mt-1 text-primary focus:ring-primary"
-                      />
-                      <div className="flex-1">
-                        <div className="flex items-center justify-between">
-                          <span className="font-bold text-[13.5px] text-slate-900">Recycler Fleet Pickup</span>
-                          <span className="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 text-[10.5px] font-bold">
-                            Recommended
-                          </span>
-                        </div>
-                        <p className="text-[12px] text-slate-600 mt-0.5">
-                          E-Parisaraa EV Truck scheduled for <b>Today at 15:30 IST</b> directly at Peenya Yard 04 Gate.
+                  {/* 📦 Outbound Bulk Batch Consignment Card (Contextual Navigation Architecture) */}
+                  <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-2xs space-y-3">
+                    <div className="flex items-start justify-between">
+                      <div>
+                        <span className="font-mono text-[11px] font-bold text-slate-500 block uppercase tracking-wider">
+                          Consolidated Batch Consignment
+                        </span>
+                        <h4 className="font-black text-sm sm:text-base text-slate-900 mt-0.5">
+                          📦 Batch #04
+                        </h4>
+                        <p className="text-xs text-slate-600 mt-0.5">
+                          Grade-A PCB • <b>{totalBatchWeight.toFixed(0)} kg</b> ({batchMicroLots.filter(m => m.selected).length || 14} Lots)
                         </p>
                       </div>
-                    </label>
+                      <span className="px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800 text-[11px] font-bold font-mono">
+                        ₹{grossConsignmentValue.toLocaleString('en-IN')}
+                      </span>
+                    </div>
 
-                    <label
-                      onClick={() => setLogisticsType('SELF_TRANSPORT')}
-                      className={`p-3.5 rounded-xl border-2 flex items-start gap-3 cursor-pointer transition-colors ${
-                        logisticsType === 'SELF_TRANSPORT'
-                          ? 'border-primary bg-emerald-50/50'
-                          : 'border-slate-200 hover:border-slate-300'
-                      }`}
-                    >
-                      <input
-                        type="radio"
-                        name="logistics_type"
-                        checked={logisticsType === 'SELF_TRANSPORT'}
-                        onChange={() => setLogisticsType('SELF_TRANSPORT')}
-                        className="mt-1 text-primary focus:ring-primary"
-                      />
-                      <div className="flex-1">
-                        <div className="flex items-center justify-between">
-                          <span className="font-bold text-[13.5px] text-slate-900">Self-Transport to Smelter</span>
-                          <span className="text-[11.5px] text-slate-500">+₹1.50/kg Freight Allowance</span>
-                        </div>
-                        <p className="text-[12px] text-slate-600 mt-0.5">
-                          Yard sends own 1-tonne vehicle to Dobbaspet Smelter Facility.
-                        </p>
+                    <div className="p-3 rounded-xl bg-slate-50 border border-slate-200/80 flex items-center justify-between text-xs">
+                      <div>
+                        <span className="text-slate-500 text-[11px] block">Recycler:</span>
+                        <span className="font-bold text-slate-900 block">{currentBidderObj.name}</span>
+                        <span className="text-emerald-800 text-[11.5px] font-medium flex items-center gap-1 mt-0.5">
+                          <span className="material-symbols-outlined text-[13px]">location_on</span>
+                          <span>📍 14.8 km away • Dabaspet Smelter</span>
+                        </span>
                       </div>
-                    </label>
+                      <span className="text-[10px] bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded font-bold uppercase border border-emerald-200">
+                        Pickup: Available
+                      </span>
+                    </div>
+
+                    {/* Quick Mode Buttons */}
+                    <div className="grid grid-cols-2 gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setLogisticsType('RECYCLER_PICKUP')}
+                        className={`py-2 px-3 rounded-xl text-xs font-bold transition-all cursor-pointer border text-center ${
+                          logisticsType === 'RECYCLER_PICKUP'
+                            ? 'bg-[#0d3b2e] text-white border-[#0d3b2e] shadow-2xs'
+                            : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-50'
+                        }`}
+                      >
+                        [Request Recycler Pickup]
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setLogisticsType('SELF_TRANSPORT')}
+                        className={`py-2 px-3 rounded-xl text-xs font-bold transition-all cursor-pointer border text-center ${
+                          logisticsType === 'SELF_TRANSPORT'
+                            ? 'bg-[#0d3b2e] text-white border-[#0d3b2e] shadow-2xs'
+                            : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-50'
+                        }`}
+                      >
+                        [Self Transport →]
+                      </button>
+                    </div>
+
+                    {/* Contextual Navigation Trigger (Shown if Self-Transport selected) */}
+                    {logisticsType === 'SELF_TRANSPORT' && (
+                      <div className="pt-2 border-t border-slate-100 space-y-2 animate-in fade-in duration-200">
+                        <div className="flex items-center justify-between text-xs text-emerald-900 bg-emerald-50 px-2.5 py-1.5 rounded-lg border border-emerald-200">
+                          <span className="font-bold flex items-center gap-1">
+                            <span className="material-symbols-outlined text-[15px] text-emerald-700">local_shipping</span>
+                            <span>Self-Transport Mode (+₹10/kg Freight Rebate)</span>
+                          </span>
+                          <span className="font-mono text-[11px]">14.8 km route</span>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setNavBatchData({
+                              batch_number: 'BATCH-KA-PCB-104',
+                              weight_kg: totalBatchWeight || 350.0,
+                              recycler_name: currentBidderObj.name,
+                              recycler_location: 'Plot 41-43, Dabaspet Industrial Area, NH 48, Bengaluru Rural'
+                            });
+                            setNavModalMode('OUTBOUND_DISPATCH');
+                            setShowDealerNav(true);
+                          }}
+                          className="w-full py-2.5 px-4 bg-emerald-900 hover:bg-emerald-800 text-white text-xs font-bold rounded-xl flex items-center justify-center gap-2 shadow-xs cursor-pointer transition-all active:scale-98"
+                        >
+                          <span className="material-symbols-outlined text-[16px] text-emerald-300">navigation</span>
+                          <span>[Start Navigation]</span>
+                        </button>
+                      </div>
+                    )}
                   </div>
 
                   {/* Pre-dispatch inspection checklist */}
@@ -1901,72 +2479,119 @@ export default function DealerDashboard({ onRoleSwitch, currentLang: propLang, o
         )}
       </main>
 
-      {/* Camera / QR Code Scanner Simulation Modal */}
+      {/* Camera / QR Code Scanner Modal (Live Camera + Cross-Portal Collector Lots) */}
       {showScannerModal && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-surface rounded-2xl max-w-md w-full p-6 shadow-2xl border border-outline-variant space-y-4 animate-in fade-in zoom-in-95 duration-200">
+          <div className="bg-surface rounded-2xl max-w-md w-full p-5 sm:p-6 shadow-2xl border border-outline-variant space-y-4 animate-in fade-in zoom-in-95 duration-200">
+            {/* Header */}
             <div className="flex items-center justify-between border-b border-outline-variant/60 pb-3">
               <div className="flex items-center gap-2">
                 <span className="material-symbols-outlined text-primary text-[24px]">qr_code_scanner</span>
                 <div>
-                  <h3 className="font-bold text-base text-on-surface">Scan Collector Lot QR</h3>
-                  <p className="text-[11px] text-on-surface-variant">Gate Inbound Weighbridge Reader</p>
+                  <h3 className="font-bold text-base text-on-surface">{t.scanCollectorLotQr}</h3>
+                  <p className="text-[11px] text-on-surface-variant">{t.gateInboundReader}</p>
                 </div>
               </div>
               <button
                 onClick={() => setShowScannerModal(false)}
-                className="w-8 h-8 rounded-full bg-surface-container flex items-center justify-center text-on-surface-variant cursor-pointer"
+                className="w-8 h-8 rounded-full bg-surface-container hover:bg-surface-container-high flex items-center justify-center text-on-surface-variant cursor-pointer transition-colors"
               >
                 <span className="material-symbols-outlined text-[18px]">close</span>
               </button>
             </div>
 
-            <div className="relative rounded-xl overflow-hidden h-48 bg-slate-900 flex flex-col items-center justify-center border-2 border-dashed border-emerald-500/50">
-              <div className="w-32 h-32 border-2 border-emerald-400 rounded-lg relative flex items-center justify-center">
-                <div className="absolute inset-x-0 h-0.5 bg-emerald-400 animate-pulse top-1/2"></div>
-                <span className="material-symbols-outlined text-4xl text-emerald-400/40">qr_code_2</span>
+            {/* Live Camera Viewfinder or Simulated Box */}
+            <div className="relative rounded-xl overflow-hidden h-52 bg-slate-950 flex flex-col items-center justify-center border-2 border-dashed border-emerald-500/50 shadow-inner">
+              {cameraActive ? (
+                <video
+                  ref={videoRef}
+                  autoPlay
+                  playsInline
+                  muted
+                  className="w-full h-full object-cover"
+                />
+              ) : null}
+
+              {/* Viewfinder Reticle & Laser Scan Line Overlay */}
+              <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none bg-black/20">
+                <div className="w-36 h-36 border-2 border-emerald-400 rounded-xl relative flex items-center justify-center shadow-[0_0_15px_rgba(52,211,153,0.4)]">
+                  <div className="absolute inset-x-0 h-0.5 bg-emerald-400 animate-pulse top-1/2 shadow-[0_0_8px_#34d399]"></div>
+                  {!cameraActive && (
+                    <span className="material-symbols-outlined text-4xl text-emerald-400/40">qr_code_2</span>
+                  )}
+                </div>
+                <span className="text-[11px] text-emerald-300 mt-2 font-mono bg-black/60 px-2 py-0.5 rounded">
+                  {cameraActive ? `📷 Camera Active • ${t.alignCollectorSlip}` : t.alignCollectorSlip}
+                </span>
               </div>
-              <span className="text-[11px] text-slate-300 mt-2 font-mono">Align collector slip QR within box</span>
             </div>
 
+            {/* Manual QR Token / Voucher Code Input */}
+            <div className="flex items-center gap-2">
+              <input
+                type="text"
+                value={manualQrInput}
+                onChange={(e) => setManualQrInput(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleFetchOrScanVoucher(manualQrInput)}
+                placeholder={t.pasteQrPlaceholder}
+                className="flex-1 px-3 py-2 text-xs bg-surface-container rounded-xl border border-outline-variant font-mono text-on-surface focus:outline-none focus:border-primary"
+              />
+              <button
+                type="button"
+                onClick={() => handleFetchOrScanVoucher(manualQrInput)}
+                className="px-3.5 py-2 bg-primary text-white text-xs font-bold rounded-xl shadow-xs hover:bg-emerald-800 cursor-pointer shrink-0 transition-all active:scale-95"
+              >
+                {t.load}
+              </button>
+            </div>
+
+            {/* List of Live Available Vouchers from Memory and LocalStorage */}
             <div className="space-y-2 max-h-56 overflow-y-auto pr-1">
               <span className="text-[11px] font-bold text-secondary uppercase tracking-wider block">
-                Tap to Simulate QR Scan / Weighbridge Token:
+                {t.simulateQrScan}
               </span>
-              {inboundLots.slice(0, 4).map((lot) => (
-                <button
-                  key={lot.id}
-                  onClick={() => {
-                    setShowScannerModal(false);
-                    setActiveLot(lot);
-                    setActiveNetWeight(lot.net_weight);
-                    setActiveApprovedRate(lot.approved_rate);
-                    showToast('QR Code Scanned!', `Loaded ${lot.lot_ref} (${lot.collector_name}) into weighbridge desk.`);
-                  }}
-                  className={`w-full py-2.5 px-3 rounded-xl flex items-center justify-between gap-2 text-xs font-bold transition-colors cursor-pointer border ${
-                    lot.is_new_live_intake
-                      ? 'bg-emerald-50 text-emerald-900 border-emerald-300 hover:bg-emerald-100'
-                      : 'bg-surface-container hover:bg-surface-container-high text-on-surface border-outline-variant/60'
-                  }`}
-                >
-                  <div className="flex items-center gap-2 text-left truncate">
-                    <span className="material-symbols-outlined text-[18px] text-primary">qr_code</span>
-                    <div>
-                      <span className="block leading-tight font-mono text-[11.5px]">{lot.lot_ref}</span>
-                      <span className="text-[10px] text-secondary font-normal block">{lot.collector_name} • {lot.net_weight} kg {lot.material_category}</span>
+              {(() => {
+                let combined = [...inboundLots];
+                try {
+                  const stored = JSON.parse(localStorage.getItem('relink_inbound_dealer_lots') || '[]');
+                  stored.forEach(sl => {
+                    if (!combined.some(l => l.lot_ref === sl.lot_ref || l.id === sl.id)) {
+                      combined.unshift(sl);
+                    }
+                  });
+                } catch (e) {}
+                return combined.slice(0, 5).map((lot) => (
+                  <button
+                    key={lot.id || lot.lot_ref}
+                    type="button"
+                    onClick={() => handleFetchOrScanVoucher(lot.lot_ref || lot.id)}
+                    className={`w-full py-2.5 px-3 rounded-xl flex items-center justify-between gap-2 text-xs font-bold transition-colors cursor-pointer border text-left ${
+                      lot.is_new_live_intake
+                        ? 'bg-emerald-50 text-emerald-900 border-emerald-300 hover:bg-emerald-100'
+                        : 'bg-surface-container hover:bg-surface-container-high text-on-surface border-outline-variant/60'
+                    }`}
+                  >
+                    <div className="flex items-center gap-2 truncate">
+                      <span className="material-symbols-outlined text-[18px] text-primary shrink-0">qr_code</span>
+                      <div className="truncate">
+                        <span className="block leading-tight font-mono text-[11.5px] truncate">{lot.lot_ref}</span>
+                        <span className="text-[10px] text-secondary font-normal block truncate">
+                          {lot.collector_name} • {lot.net_weight} kg {lot.material_name || lot.material_category}
+                        </span>
+                      </div>
                     </div>
-                  </div>
-                  {lot.is_new_live_intake ? (
-                    <span className="bg-emerald-600 text-white text-[9.5px] px-2 py-0.5 rounded-full font-bold uppercase shrink-0 animate-pulse">
-                      New Inbound
-                    </span>
-                  ) : (
-                    <span className="text-[10.5px] text-primary font-mono shrink-0">
-                      ₹{Math.round(lot.net_weight * lot.approved_rate).toLocaleString('en-IN')}
-                    </span>
-                  )}
-                </button>
-              ))}
+                    {lot.is_new_live_intake ? (
+                      <span className="bg-emerald-600 text-white text-[9px] px-2 py-0.5 rounded-full font-bold uppercase shrink-0 animate-pulse">
+                        Collector Slip
+                      </span>
+                    ) : (
+                      <span className="text-[10.5px] text-primary font-mono shrink-0">
+                        ₹{Math.round(lot.net_weight * lot.approved_rate).toLocaleString('en-IN')}
+                      </span>
+                    )}
+                  </button>
+                ));
+              })()}
             </div>
           </div>
         </div>
@@ -1993,6 +2618,29 @@ export default function DealerDashboard({ onRoleSwitch, currentLang: propLang, o
         isOpen={Boolean(selectedManifestData)}
         onClose={() => setSelectedManifestData(null)}
         certData={selectedManifestData}
+      />
+
+      {/* Contextual Dealer Navigation Modal (Inbound Pickup & Outbound Dispatch) */}
+      <DealerNavigationModal
+        isOpen={showDealerNav}
+        onClose={() => setShowDealerNav(false)}
+        mode={navModalMode}
+        lotData={navLotData}
+        batchData={navBatchData}
+        currentLang={currentLang}
+        onArrivedAtCollector={(lot) => {
+          setActiveTab('tab-intake');
+          if (lot) {
+            setActiveLot(lot);
+            setActiveNetWeight(lot.net_weight);
+            setActiveApprovedRate(lot.approved_rate);
+          }
+          showToast('Arrived at Collector Doorstep', `Electronic scale ready for ${lot?.collector_name || 'Ramesh Kumar'}`);
+        }}
+        onDeliveryConfirmed={(batch) => {
+          setDealLocked(true);
+          showToast('Consignment Delivered to Smelter!', `Form-6 digital signed at ${batch?.recycler_name || 'Cerebra Smelter'}`);
+        }}
       />
     </div>
   );

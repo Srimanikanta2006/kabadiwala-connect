@@ -7,7 +7,8 @@ const CATEGORIES = [
     title: 'CRT Monitor',
     hindi: 'टीवी / मॉनिटर',
     marathi: 'टीव्ही / मॉनिटर',
-    photo: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBfYXZOuB0w32hdrpQ2hYu7MVLU8m3cb89Gn0E9N-0rF7mlK3I_zH4McJKioU7GV6LkYs0MgX3ZOt4xUJKQuc7mI2xypFa252gRD_ILuT1SqcSPiVtP4kexadwGvNTfifSpR0a0MPoyjX1pHC5ZZSJBZVtiVfX71rYGkLG_P11GdIEnSynAaO1-GvKUJUpH31Oy0WhFJABoLHnKp-VdscW18dhDq22-2YldYCi4I2UR4EMnHnKWS7kr',
+    photo: '/assets/categories/crt_monitor.jpg',
+    onlinePhoto: 'https://images.unsplash.com/photo-1593305841991-05c297ba4575?w=600&auto=format&fit=crop&q=80',
     spoken_hi: 'सीआरटी मॉनिटर या टीवी',
     spoken_mr: 'सीआरटी मॉनिटर किंवा टीव्ही',
     spoken_en: 'CRT Monitor or Television'
@@ -17,7 +18,8 @@ const CATEGORIES = [
     title: 'LCD / LED Screen',
     hindi: 'स्क्रीन / डिस्प्ले',
     marathi: 'स्क्रीन / डिस्प्ले',
-    photo: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDtEyOx8Ugyz1nXho5fqUpiAW_WTkC35IVfkF1VUKYsAIOopYVt6L8_O6RP33VAsoFzvakBfdLpcWUGRdPSdcZNcx72doDS3frx4wRQK4gI5vzc7Z_H5q42Wbzve5gYgv-3yN9HHuIvQTjolyFR-EYm2Hw50HiSRcuxJ7tYg38ocUKhCbfSklLondnIy9vGWL0WUCY_f8MrxXuKYIO0iBuoA_c0iFbfCwuvLY_ptaYcvw1T7IcusJ1',
+    photo: '/assets/categories/lcd_panel.jpg',
+    onlinePhoto: 'https://images.unsplash.com/photo-1527443224154-c4a3942d3acf?w=600&auto=format&fit=crop&q=80',
     spoken_hi: 'एलसीडी या एलईडी स्क्रीन',
     spoken_mr: 'एलसीडी किंवा एलईडी स्क्रीन',
     spoken_en: 'LCD or LED Display Screen'
@@ -27,7 +29,8 @@ const CATEGORIES = [
     title: 'Copper Cable',
     hindi: 'तांबे के तार',
     marathi: 'तांब्याची केबल',
-    photo: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBGKj8KRJRJgco4b7M7Pgpxibea-Lq10FqtUsobeplyXqvXdougegxuKhCZbLIfPqFJvtfEoU_bV3llxV_Jzw5_e-n2phYvAKXYYzFbGCVkudTiABQa66aokYpWo4Rnvmk5WkKHAQjXPpaDTU47xwcvKSZPqs5BT2n0FnbtRJB0s-1MW4HFiooFluRkYKFY4HY0LtXIXLQhHkH3kVfgKL-3XfXleL3drRbYwpwBKEdi8qKmIibEmXh6',
+    photo: '/assets/categories/copper_cable.jpg',
+    onlinePhoto: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBGKj8KRJRJgco4b7M7Pgpxibea-Lq10FqtUsobeplyXqvXdougegxuKhCZbLIfPqFJvtfEoU_bV3llxV_Jzw5_e-n2phYvAKXYYzFbGCVkudTiABQa66aokYpWo4Rnvmk5WkKHAQjXPpaDTU47xwcvKSZPqs5BT2n0FnbtRJB0s-1MW4HFiooFluRkYKFY4HY0LtXIXLQhHkH3kVfgKL-3XfXleL3drRbYwpwBKEdi8qKmIibEmXh6',
     spoken_hi: 'तांबे के बिजली के तार',
     spoken_mr: 'तांब्याची वीज केबल आणि वायर',
     spoken_en: 'Insulated Copper Wire and Cables'
@@ -37,7 +40,8 @@ const CATEGORIES = [
     title: 'Battery',
     hindi: 'बैटरी (लीड / लीथियम)',
     marathi: 'बॅटरी (लेड / लिथियम)',
-    photo: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBwlAe9K0CDtXrpz1da7B9u44Kn2Zw0zqIjV1zIlMd_1Lf3CzSig2iVXRxeroSAuNL3xhQ4VYmGcerwdcJznw0K-W5kMaBYwahmb3gSoEPauZYi_clPjMZaNiPh_xAA5xI5EA3St9CH4iNaOtF1hlUSR6So93DuLpLy9FhAvsVAsAsJ4T9li2nAiM2I4YVTbBKM0A0im7QWEAcVJnAo7mgzkuh2SYAHI0q75UgFEeRreTZZhjefUI2p',
+    photo: '/assets/categories/battery_lead.jpg',
+    onlinePhoto: 'https://images.unsplash.com/photo-1619725002198-6a689b72f41d?w=600&auto=format&fit=crop&q=80',
     spoken_hi: 'लेड-एसिड या लिथियम बैटरी',
     spoken_mr: 'लेड-अ‍ॅसिड किंवा लिथियम बॅटरी',
     spoken_en: 'Lead Acid or Lithium Battery'
@@ -47,7 +51,8 @@ const CATEGORIES = [
     title: 'Circuit Board (PCB)',
     hindi: 'प्लेट / मदरबोर्ड',
     marathi: 'सर्किट बोर्ड / मदरबोर्ड',
-    photo: 'https://lh3.googleusercontent.com/aida-public/AB6AXuA0_YqtMM-8LZ6BsfCuCKu_Q8Lz9odO_Cv1n6Ui4H-5CYV-MQUkulZKEaKM2J-WY8bN0qRZMWYQhBD8MnFPX2TkxprUQWMAvVoWTUOgvm6x6A1-6T7pdXLr56WhOB-T2spijs9QajElCjExBnpy15voycK6noqBphs_VcM0Bflgdl426ozPfdmJaB2xxZCwcJ4eT0K3GXrLX_ZnN6i4Rr0ttbToM7uynjbQe3dAgG2ZoGrku5RXkTmn',
+    photo: '/assets/categories/pcb_high.jpg',
+    onlinePhoto: 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=600&auto=format&fit=crop&q=80',
     spoken_hi: 'सर्किट बोर्ड या मदरबोर्ड',
     spoken_mr: 'सर्किट बोर्ड किंवा मदरबोर्ड',
     spoken_en: 'Printed Circuit Board and Motherboard'
@@ -57,7 +62,8 @@ const CATEGORIES = [
     title: 'Electric Motor',
     hindi: 'मोटर / तांबा कोर',
     marathi: 'इलेक्ट्रिक मोटर / कोर',
-    photo: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAtvdmbxQII78S5QBPq-vnuvZsisgOAHpw5ZD39_drLoPC-Kel4c17WXqBPjSqs6LlWw8aHNJTQ_oI4ky57UobXk-UhLgOix26_3jymR7S_FKjc9-uKk5em_6Sm-_HEsbhBIKMypXH9hj9tAjOxO6eFv5s-LUJFR_eNx7DsUPQ37-tbl7z9KKBe-Y63eeiMf4cmiXX3O3fHWSKYdfsiS07g6FnZQYp7jzvQljtmQSuoRGEQdqUJO1Kx',
+    photo: '/assets/categories/motors_magnets.jpg',
+    onlinePhoto: 'https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=600&auto=format&fit=crop&q=80',
     spoken_hi: 'इलेक्ट्रिक मोटर या चुंबक',
     spoken_mr: 'इलेक्ट्रिक मोटर किंवा तांब्याचा गाभा',
     spoken_en: 'Electric Motor or Copper Core'
@@ -67,7 +73,8 @@ const CATEGORIES = [
     title: 'Mixed Engineering Plastics',
     hindi: 'टेक्निकल प्लास्टिक (ABS/HIPS)',
     marathi: 'तांत्रिक प्लास्टिक (ABS/HIPS)',
-    photo: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDT-wPZ_m35b2v9c_4h_3',
+    photo: '/assets/categories/mixed_plastics.jpg',
+    onlinePhoto: 'https://images.unsplash.com/photo-1605600659908-0ef719419d41?w=600&auto=format&fit=crop&q=80',
     spoken_hi: 'मिक्स्ड इंजीनियरिंग प्लास्टिक',
     spoken_mr: 'मिश्रित अभियांत्रिकी प्लास्टिक',
     spoken_en: 'Mixed Engineering Plastics'
@@ -141,7 +148,8 @@ export default function Screen03CategorySelect({ onSelectCategory, onNavigate, o
       materialId: cat.id,
       materialTitle: primaryName,
       materialSub: subName,
-      confidence: 100
+      confidence: 100,
+      photoUrl: cat.photo
     });
     onNavigate('ai_scan');
   };
@@ -174,9 +182,6 @@ export default function Screen03CategorySelect({ onSelectCategory, onNavigate, o
                 <span>{safeLang === 'hi' ? 'हिन्दी' : (safeLang === 'mr' ? 'मराठी' : 'EN')}</span>
               </button>
             )}
-            <div className="w-8 h-8 rounded-full bg-primary/15 flex items-center justify-center border border-outline-variant text-primary font-bold text-xs">
-              👷‍♂️
-            </div>
           </div>
         </div>
       </header>
@@ -223,6 +228,12 @@ export default function Screen03CategorySelect({ onSelectCategory, onNavigate, o
                   alt={cat.title}
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
                   src={cat.photo}
+                  loading="lazy"
+                  onError={(e) => {
+                    if (cat.onlinePhoto && e.currentTarget.src !== cat.onlinePhoto) {
+                      e.currentTarget.src = cat.onlinePhoto;
+                    }
+                  }}
                 />
                 <div className="absolute top-2 right-2 z-20">
                   <span

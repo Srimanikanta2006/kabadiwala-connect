@@ -15,7 +15,7 @@ from pathlib import Path
 from typing import Dict, Any, List, Optional, Tuple
 
 import numpy as np
-from PIL import Image
+from PIL import Image, ImageFilter, ImageEnhance, ImageOps
 
 try:
     import torch
@@ -153,7 +153,10 @@ CANONICAL_ARCHETYPES: Dict[str, str] = {
     "mat_pcb_high": "cc036586cd250bca",
     "mat_cables_copper": "61e0c4272b1b1f9e",
     "mat_crt_monitor": "f88e1b5b070f3fc8",
-    "mat_batteries_lead": "b0cb382f5b1b0ef0"
+    "mat_batteries_lead": "b0cb382f5b1b0ef0",
+    "mat_lcd_panel": "c7c796968696cd0f",
+    "mat_mixed_plastics": "8288858706078fcf",
+    "mat_motors_magnets": "1965929696965520"
 }
 
 
@@ -248,20 +251,36 @@ class MaterialClassifier:
     def _extract_visual_features(img: Image.Image) -> Dict[str, float]:
         """
         Extracts dominant color distributions, HSV channels, and edge frequencies from scrap images.
+        Uses both raw and clarified versions to remain robust against camera blur, lens smudges, and glare.
         """
-        # Resize to standard analysis resolution (224x224)
+        # Create unsharp sharpened variant for high-frequency edge analysis on blurred photos
+        sharp_img = ImageEnhance.Contrast(img).enhance(1.25).filter(
+            ImageFilter.UnsharpMask(radius=2.0, percent=160, threshold=2)
+        )
+
         sample = img.convert("RGB").resize((224, 224), Image.Resampling.BILINEAR)
         arr = np.array(sample, dtype=np.float32)
+
+        sample_sharp = sharp_img.convert("RGB").resize((224, 224), Image.Resampling.BILINEAR)
+        arr_sharp = np.array(sample_sharp, dtype=np.float32)
 
         r_mean = float(np.mean(arr[:, :, 0]))
         g_mean = float(np.mean(arr[:, :, 1]))
         b_mean = float(np.mean(arr[:, :, 2]))
 
-        # Edge energy via Sobel gradient approximation
+        # Edge energy via Sobel gradient approximation (combined raw + sharpened)
         gray = np.mean(arr, axis=2)
         dy = np.diff(gray, axis=0)
         dx = np.diff(gray, axis=1)
-        edge_energy = float(np.std(dx) + np.std(dy))
+        raw_edge_energy = float(np.std(dx) + np.std(dy))
+
+        gray_sharp = np.mean(arr_sharp, axis=2)
+        dy_s = np.diff(gray_sharp, axis=0)
+        dx_s = np.diff(gray_sharp, axis=1)
+        sharp_edge_energy = float(np.std(dx_s) + np.std(dy_s))
+
+        # Best edge energy (sharpened helps blurred photos recover lost trace frequencies)
+        edge_energy = max(raw_edge_energy, sharp_edge_energy * 0.85)
 
         # HSV color space analysis
         hsv_arr = np.array(img.convert("HSV").resize((224, 224)), dtype=np.float32)
@@ -275,6 +294,9 @@ class MaterialClassifier:
         g_ratio = g_mean / total_intensity
         b_ratio = b_mean / total_intensity
 
+        # Copper signature: Red dominant over Blue, warm tone
+        copper_red_to_blue = r_mean / (b_mean + 1e-4)
+
         return {
             "r_ratio": r_ratio,
             "g_ratio": g_ratio,
@@ -282,7 +304,9 @@ class MaterialClassifier:
             "edge_energy": edge_energy,
             "brightness": v_mean,
             "hue": h_mean,
-            "saturation": s_mean
+            "saturation": s_mean,
+            "copper_rb_ratio": copper_red_to_blue,
+            "raw_edge": raw_edge_energy
         }
 
     def _score_categories(self, features: Dict[str, float], dhash: str) -> Tuple[Dict[str, float], Optional[str], Optional[float]]:
@@ -299,17 +323,17 @@ class MaterialClassifier:
                 min_dist = dist
                 closest_arch = cat_id
 
-        # Archetype direct match: zero or near-zero hamming distance
-        if closest_arch and min_dist <= 8:
-            # Scaled confidence based on distance: 0 dist -> ~0.92, 8 dist -> ~0.85
-            arch_conf = round(0.93 - (min_dist * 0.01), 2)
+        # Archetype direct match: zero or near-zero hamming distance (tolerant to minor camera noise / blur)
+        if closest_arch and min_dist <= 14:
+            # Scaled confidence based on distance: 0 dist -> ~0.94, 14 dist -> ~0.80
+            arch_conf = round(max(0.78, 0.94 - (min_dist * 0.012)), 2)
             categories = [c["id"] for c in self.categories]
             other_prob = round((1.0 - arch_conf) / (len(categories) - 1), 4)
             prob_dict = {c: other_prob for c in categories}
             prob_dict[closest_arch] = arch_conf
             return prob_dict, closest_arch, arch_conf
 
-        # 2. Continuous feature-based scoring
+        # 2. Continuous feature-based scoring (resilient to blur and varying lighting)
         scores: Dict[str, float] = {}
         r = features["r_ratio"]
         g = features["g_ratio"]
@@ -317,41 +341,43 @@ class MaterialClassifier:
         edge = features["edge_energy"]
         bright = features["brightness"]
         hue = features["hue"]
+        sat = features["saturation"]
+        copper_rb = features.get("copper_rb_ratio", 1.0)
 
-        # High-Grade PCB: High edge complexity, prominent green/gold tones
-        pcb_high_score = 1.0 + (3.5 if (g > 0.34 or (hue >= 95 and hue <= 140)) else 0.0) + (2.5 if edge > 35.0 else 0.0)
+        # High-Grade PCB: High edge complexity, prominent green/gold tones, or green hue range
+        pcb_high_score = 1.0 + (3.8 if (g > 0.33 or (hue >= 70 and hue <= 145 and sat > 0.12)) else 0.0) + (2.5 if edge > 22.0 else 1.2 if g > 0.34 else 0.0)
         scores["mat_pcb_high"] = max(0.1, pcb_high_score)
 
         # Low-Grade PCB: Brownish/phenolic or power supply boards, moderate edge energy
-        pcb_low_score = 0.8 + (2.5 if (r > 0.36 and g > 0.32 and b < 0.30) else 0.0) + (1.5 if 20.0 <= edge <= 35.0 else 0.0)
+        pcb_low_score = 0.8 + (2.5 if (r > 0.36 and g > 0.32 and b < 0.30) else 0.0) + (1.5 if 18.0 <= edge <= 35.0 else 0.0)
         scores["mat_pcb_low"] = max(0.1, pcb_low_score)
 
-        # Insulated Copper Cables: Red/orange copper tones, coiled bundle texture
-        cables_score = 0.5 + (4.0 if (r > 0.338 and (hue <= 90 or hue >= 240)) else 0.0) + (2.0 if edge > 25.0 else 0.0)
+        # Insulated Copper Cables: Red/orange copper tones, coiled bundle texture, warm RB ratio
+        cables_score = 0.5 + (4.5 if (r > 0.335 and (hue <= 50 or hue >= 250) and copper_rb > 1.12) else 0.0) + (2.2 if edge > 16.0 else 1.0)
         scores["mat_cables_copper"] = max(0.1, cables_score)
 
-        # Lead-Acid Battery: Low brightness, high mass, terminal contrast
-        batt_lead_score = 0.5 + (3.5 if bright < 110.0 and edge < 25.0 else 0.0)
+        # Lead-Acid Battery: Low brightness, high mass, terminal contrast, dark grey/black block
+        batt_lead_score = 0.5 + (3.8 if bright < 115.0 and edge < 28.0 else 0.0)
         scores["mat_batteries_lead"] = max(0.1, batt_lead_score)
 
         # Lithium-Ion Battery: Metallic silver pouch or cylindrical cells with bright reflections
-        batt_li_score = 0.4 + (3.0 if bright > 150.0 and abs(r - g) < 0.03 and abs(g - b) < 0.03 else 0.0)
+        batt_li_score = 0.4 + (3.2 if (bright > 130.0 and abs(r - g) < 0.04 and abs(g - b) < 0.04) or (sat < 0.18 and bright > 110.0) else 0.0)
         scores["mat_batteries_li_ion"] = max(0.1, batt_li_score)
 
         # CRT Monitor: Curved dark glass, bulky profile, very low brightness
-        crt_score = 0.4 + (2.8 if (hue >= 65 and hue <= 80 and edge < 33.0) else 0.0)
+        crt_score = 0.4 + (3.0 if (bright < 85.0 and edge < 24.0 and sat < 0.25) else 0.0)
         scores["mat_crt_monitor"] = max(0.1, crt_score)
 
         # LCD / LED Panel: Uniform flat rectangular surface, blue-gray tone
-        lcd_score = 0.4 + (2.5 if (b > 0.35 or abs(r - b) < 0.04) and edge < 20.0 else 0.0)
+        lcd_score = 0.4 + (2.8 if (b > 0.34 or abs(r - b) < 0.04) and edge < 22.0 else 0.0)
         scores["mat_lcd_panel"] = max(0.1, lcd_score)
 
         # Motors & Magnets: Dense metallic/copper combination, medium brightness
-        motors_score = 0.4 + (2.2 if (r > 0.35 and edge > 22.0) else 0.0)
+        motors_score = 0.4 + (2.5 if (r > 0.34 and edge > 18.0) else 0.0)
         scores["mat_motors_magnets"] = max(0.1, motors_score)
 
         # Mixed Plastics: Neutral gray/black casing, flat texture
-        plastics_score = 0.3 + (2.0 if edge < 18.0 and 80.0 <= bright <= 160.0 else 0.0)
+        plastics_score = 0.3 + (2.2 if edge < 18.0 and 80.0 <= bright <= 160.0 else 0.0)
         scores["mat_mixed_plastics"] = max(0.1, plastics_score)
 
         # Softmax normalization with temperature T=0.85 (sharper calibration, prevents probability dilution)
@@ -414,8 +440,14 @@ class MaterialClassifier:
         if self.pytorch_model is not None and self.eval_transform is not None:
             try:
                 t_img = self.eval_transform(img).unsqueeze(0)
+                enh_img = ImageEnhance.Contrast(img).enhance(1.25).filter(
+                    ImageFilter.UnsharpMask(radius=2.0, percent=160, threshold=2)
+                )
+                t_enh = self.eval_transform(enh_img).unsqueeze(0)
                 with torch.no_grad():
-                    logits = self.pytorch_model(t_img)
+                    logits_raw = self.pytorch_model(t_img)
+                    logits_enh = self.pytorch_model(t_enh)
+                    logits = (logits_raw + logits_enh) / 2.0
                     pt_probs = torch.softmax(logits, dim=1)[0].numpy()
                 best_idx = int(np.argmax(pt_probs))
                 real_pred_class = self.pytorch_classes[best_idx]

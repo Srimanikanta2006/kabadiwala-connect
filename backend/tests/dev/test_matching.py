@@ -141,7 +141,7 @@ def test_7_fastapi_match_recyclers_endpoint():
     assert body["success"] is True
     assert body["status"] == "COMPLETED"
     assert body["total_matches"] >= 2
-    assert len(body["ranked_recyclers"]) == body["total_matches"]
+    assert len(body["ranked_recyclers"]) + len(body.get("ranked_dealers", [])) == body["total_matches"]
 
     # Verify no unauthorized facility in HTTP response
     for rec in body["ranked_recyclers"]:
