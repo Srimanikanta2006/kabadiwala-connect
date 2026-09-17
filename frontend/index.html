@@ -6,6 +6,16 @@
     <link rel="icon" type="image/png" sizes="192x192" href="/pwa-192x192.png" />
     <link rel="shortcut icon" href="/favicon.svg" />
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js').catch(function(err) {
+            console.log('ServiceWorker registration optional fallback', err);
+          });
+        });
+      }
+    </script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <meta name="theme-color" content="#16a34a" />
     <meta name="description" content="Offline-first AI-assisted e-waste pricing, aggregation & EPR traceability platform" />

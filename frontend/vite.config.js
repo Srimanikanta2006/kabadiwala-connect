@@ -9,31 +9,64 @@ export default defineConfig({
     VitePWA({
       registerType: 'autoUpdate',
       injectRegister: 'auto',
-      includeAssets: ['favicon.svg', 'pwa-192x192.png', 'pwa-512x512.png', 'apple-touch-icon.png'],
+      includeAssets: [
+        'favicon.svg',
+        'pwa-192x192.png',
+        'pwa-512x512.png',
+        'pwa-maskable-512x512.png',
+        'apple-touch-icon.png',
+        'screenshot-mobile.png',
+        'screenshot-desktop.png'
+      ],
       manifest: {
+        id: '/',
         name: 'Kabadiwala Connect • RE:LINK',
         short_name: 'Kabadiwala',
         description: 'Offline-first AI-assisted e-waste pricing, aggregation & EPR traceability',
         theme_color: '#16a34a',
         background_color: '#0f172a',
+        start_url: '/',
+        scope: '/',
         display: 'standalone',
-        orientation: 'portrait',
+        display_override: ['standalone', 'window-controls-overlay'],
+        orientation: 'any',
+        dir: 'ltr',
+        lang: 'en',
+        categories: ['business', 'productivity', 'utilities'],
         icons: [
           {
-            src: 'pwa-192x192.png',
+            src: '/pwa-192x192.png',
             sizes: '192x192',
-            type: 'image/png'
+            type: 'image/png',
+            purpose: 'any'
           },
           {
-            src: 'pwa-512x512.png',
-            sizes: '512x512',
-            type: 'image/png'
-          },
-          {
-            src: 'pwa-512x512.png',
+            src: '/pwa-512x512.png',
             sizes: '512x512',
             type: 'image/png',
-            purpose: 'any maskable'
+            purpose: 'any'
+          },
+          {
+            src: '/pwa-maskable-512x512.png',
+            sizes: '512x512',
+            type: 'image/png',
+            purpose: 'maskable'
+          }
+        ],
+        screenshots: [
+          {
+            src: '/screenshot-mobile.png',
+            sizes: '540x960',
+            type: 'image/png',
+            form_factor: 'narrow',
+            label: 'Kabadiwala Connect Mobile Collector View'
+          },
+          {
+            src: '/screenshot-desktop.png',
+            sizes: '1280x720',
+            type: 'image/png',
+            form_factor: 'wide',
+            label: 'Kabadiwala Connect Dealer Marketplace'
           }
         ]
       },
