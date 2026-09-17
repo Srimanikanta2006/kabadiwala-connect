@@ -4,11 +4,13 @@ import NotificationsModal from './common/NotificationsModal';
 import AdminToolsModal from './common/AdminToolsModal';
 import Form6ManifestModal from './recycler/Form6ManifestModal';
 import DealerNavigationModal from './common/DealerNavigationModal';
+import DealerProSubscriptionModal from './dealer/DealerProSubscriptionModal';
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
 const DEALER_TRANSLATIONS = {
   hi: {
+    pro: 'प्रो • Pro',
     brandSubtitle: 'यार्ड डेस्क',
     synced: 'सिंक हुआ',
     yardDeskLive: 'YARD DESK LIVE',
@@ -84,6 +86,7 @@ const DEALER_TRANSLATIONS = {
     logOutRole: 'लॉग आउट करें / रोल बदलें'
   },
   mr: {
+    pro: 'प्रो • Pro',
     brandSubtitle: 'यार्ड डेस्क',
     synced: 'सिंक झाले',
     yardDeskLive: 'YARD DESK LIVE',
@@ -159,6 +162,7 @@ const DEALER_TRANSLATIONS = {
     logOutRole: 'लॉग आउट करा / भूमिका बदला'
   },
   en: {
+    pro: 'Pro',
     brandSubtitle: 'Yard Desk',
     synced: 'Synced',
     yardDeskLive: 'YARD DESK LIVE',
@@ -281,6 +285,7 @@ export default function DealerDashboard({ onRoleSwitch, currentLang: propLang, o
   const [navBatchData, setNavBatchData] = useState(null);
   const [pickupAcceptedMap, setPickupAcceptedMap] = useState({ 'lot_rl_00482': true });
   const [showProfileMenu, setShowProfileMenu] = useState(false);
+  const [showProSubscription, setShowProSubscription] = useState(false);
 
   // Live Mandi Rates synced with Recycler Broadcast
   const [broadcastMandiRates, setBroadcastMandiRates] = useState(() => {
@@ -975,14 +980,15 @@ export default function DealerDashboard({ onRoleSwitch, currentLang: propLang, o
 
           {/* Right Status Pills & User Profile */}
           <div className="flex items-center gap-1.5 sm:gap-2">
-            {/* Synced Status Pill (Matching Collector Page) */}
-            <div
-              className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-emerald-300 bg-emerald-50 text-emerald-800 text-[11px] font-semibold shrink-0"
-              title="Application is Synced"
+            {/* Dealer Pro Subscription Pill Button */}
+            <button
+              onClick={() => setShowProSubscription(true)}
+              className="flex items-center gap-1.5 h-8 sm:h-9 px-3 rounded-full bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 shadow-xs transition-all text-xs font-black cursor-pointer shrink-0 border border-amber-300 active:scale-95"
+              title="RE:LINK Dealer Pro Subscription & Advanced RFQs"
             >
-              <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
-              <span>{t.synced}</span>
-            </div>
+              <span className="material-symbols-outlined text-[16px] text-slate-950">stars</span>
+              <span>{t.pro || 'Pro'}</span>
+            </button>
 
             {/* Language Switcher Button (Matching Collector Page Exactly) */}
             <button
@@ -1029,6 +1035,18 @@ export default function DealerDashboard({ onRoleSwitch, currentLang: propLang, o
                   </div>
 
                   <div className="space-y-1.5 text-xs font-semibold">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowProfileMenu(false);
+                        setShowProSubscription(true);
+                      }}
+                      className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-amber-950 bg-amber-50/90 hover:bg-amber-100 transition-colors cursor-pointer text-left font-bold border border-amber-200/80"
+                    >
+                      <span className="material-symbols-outlined text-[18px] text-amber-600">stars</span>
+                      <span>RE:LINK Pro ({t.pro || 'Pro'})</span>
+                    </button>
+
                     <button
                       type="button"
                       onClick={() => {
@@ -2678,6 +2696,13 @@ export default function DealerDashboard({ onRoleSwitch, currentLang: propLang, o
           setDealLocked(true);
           showToast('Consignment Delivered to Smelter!', `Form-6 digital signed at ${batch?.recycler_name || 'Cerebra Smelter'}`);
         }}
+      />
+
+      {/* RE:LINK Dealer Pro Subscription Modal (Imported from Stitch) */}
+      <DealerProSubscriptionModal
+        isOpen={showProSubscription}
+        onClose={() => setShowProSubscription(false)}
+        currentLang={currentLang}
       />
     </div>
   );

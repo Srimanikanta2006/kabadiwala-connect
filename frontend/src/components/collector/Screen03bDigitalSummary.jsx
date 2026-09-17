@@ -128,7 +128,7 @@ const SUMMARY_TRANSLATIONS = {
 };
 
 export default function Screen03bDigitalSummary({
-  lotDraft,
+  lotDraft = {},
   onNavigate,
   onNavigateBack,
   activeScreen = 'lot_summary',
@@ -150,13 +150,13 @@ export default function Screen03bDigitalSummary({
   const t = SUMMARY_TRANSLATIONS[safeLang] || SUMMARY_TRANSLATIONS.hi;
   const [saveMessage, setSaveMessage] = useState(null);
 
-  const unit = lotDraft.unit || 'kg';
-  const weight = lotDraft.weight || (unit === 'piece' ? 5 : 12.0);
-  const condition = lotDraft.condition || 'Good / Intact';
-  const confidence = lotDraft.confidence || 92;
-  const materialTitle = lotDraft.materialTitle || 'Printed Circuit Board (PCB)';
-  const materialSub = lotDraft.materialSub || 'Grade A Telecom / Server Grade';
-  const handoverRef = lotDraft.handoverRef || `RL-MH-2026-00482`;
+  const unit = lotDraft?.unit || 'kg';
+  const weight = lotDraft?.weight || (unit === 'piece' ? 5 : 12.0);
+  const condition = lotDraft?.condition || 'Good / Intact';
+  const confidence = lotDraft?.confidence || 92;
+  const materialTitle = lotDraft?.materialTitle || 'Printed Circuit Board (PCB)';
+  const materialSub = lotDraft?.materialSub || 'Grade A Telecom / Server Grade';
+  const handoverRef = lotDraft?.handoverRef || `RL-MH-2026-00482`;
 
   // Dynamic baseline CPCB market rate lookup
   const getBaseRate = (matId, u) => {
@@ -166,23 +166,23 @@ export default function Screen03bDigitalSummary({
     return matId === 'mat_pcb_high' ? 240 : (matId === 'mat_cables_copper' ? 380 : (matId === 'mat_batteries_li_ion' ? 185 : (matId === 'mat_batteries_lead' ? 88 : (matId === 'mat_motors_magnets' ? 145 : 105))));
   };
 
-  const baseRate = getBaseRate(lotDraft.materialId, unit);
+  const baseRate = getBaseRate(lotDraft?.materialId, unit);
   const conditionMult = condition.includes('Good') || condition.includes('Intact') ? 1.05 : (condition.includes('Damaged') ? 0.75 : 0.95);
   const baseVal = Math.round(weight * baseRate * conditionMult);
 
   // Multi-item consignment aggregation
-  const items = (lotDraft.items && lotDraft.items.length > 0)
+  const items = (lotDraft?.items && lotDraft.items.length > 0)
     ? lotDraft.items
     : [{
         id: 'item_1',
-        materialId: lotDraft.materialId || 'mat_pcb_high',
+        materialId: lotDraft?.materialId || 'mat_pcb_high',
         materialTitle,
         materialSub,
         weight,
         unit,
         condition,
-        lowEst: lotDraft.lowEst || Math.round(baseVal * 0.95),
-        highEst: lotDraft.highEst || Math.round(baseVal * 1.05)
+        lowEst: lotDraft?.lowEst || Math.round(baseVal * 0.95),
+        highEst: lotDraft?.highEst || Math.round(baseVal * 1.05)
       }];
 
   const totalLowEst = items.reduce((sum, item) => sum + (item.lowEst || Math.round((item.weight || 1) * getBaseRate(item.materialId, item.unit) * 0.95)), 0);

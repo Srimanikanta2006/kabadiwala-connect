@@ -361,23 +361,6 @@ export default function Screen00WelcomeRole({ onSelectRole, currentLang: propLan
               <span className="w-2 h-2 rounded-full animate-pulse shrink-0 bg-primary"></span>
               <span>{t.synced}</span>
             </div>
-
-            {/* Sign In Quick Focus Button */}
-            <button
-              onClick={() => {
-                const inputEl = document.getElementById('mobile-input-field');
-                if (inputEl) {
-                  inputEl.focus();
-                  inputEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                }
-              }}
-              className="px-3.5 py-1.5 rounded-full text-xs font-bold shadow-xs active:scale-95 transition-all cursor-pointer flex items-center gap-1.5 shrink-0 bg-primary hover:bg-emerald-800 text-on-primary"
-              title={t.signIn}
-              type="button"
-            >
-              <span className="material-symbols-outlined text-[16px]">login</span>
-              <span>{t.signIn}</span>
-            </button>
           </div>
         </div>
       </header>

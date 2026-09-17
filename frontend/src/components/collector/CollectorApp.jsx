@@ -549,13 +549,13 @@ export default function CollectorApp({ onSwitchRole, currentLang: propLang, onLa
           onNavigate={navigateTo}
           onNavigateBack={navigateBack}
           activeScreen={activeScreen}
-          onSelectLot={(lot) => {
+          onSelectLot={(lot, targetScreen = 'lot_summary') => {
             setLotDraft((prev) => ({
               ...prev,
               ...lot,
-              materialTitle: lot.material_category || 'Printed Circuit Board (PCB)'
+              materialTitle: lot.material_category || lot.materialTitle || 'Printed Circuit Board (PCB)'
             }));
-            navigateTo('receipt');
+            navigateTo(targetScreen);
           }}
           recentLots={recentLots}
           syncStatus={syncStatus}

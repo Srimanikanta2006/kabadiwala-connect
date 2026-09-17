@@ -4,6 +4,7 @@ import { speakVernacular } from '../../utils/speechUtils';
 import PriceBoardModal from './PriceBoardModal';
 import NotificationsModal from '../common/NotificationsModal';
 import YardHandoverModal from '../common/YardHandoverModal';
+import VoiceLotModal from './VoiceLotModal';
 
 const HOME_TRANSLATIONS = {
   hi: {
@@ -19,6 +20,9 @@ const HOME_TRANSLATIONS = {
     syncOffline: 'ऑफलाइन',
     scanTitle: 'कबाड़ स्कैन करें • तुरंत पहचानें',
     scanSubtitle: 'एआई कैमरा पहचान • तुरंत भाव',
+    voiceAiTitle: 'बोलकर लॉट बनाएं • वॉइस AI',
+    voiceAiSubtitle: 'बस बोलें: क्या स्क्रैप है, कितना वजन — लॉट अपने आप बनेगा',
+    voiceAiTag: 'हाथ मुक्त (Hands-Free)',
     manualGrid: 'मैनुअल 7-श्रेणी ग्रिड',
     todaysHaulTitle: 'आज का काम व कमाई (Today\'s Haul)',
     todaysEarnings: 'आज की कमाई',
@@ -97,6 +101,9 @@ const HOME_TRANSLATIONS = {
     syncOffline: 'ऑफलाइन',
     scanTitle: 'भंगार स्कॅन करा • त्वरित ओळखा',
     scanSubtitle: 'एआई कॅमेरा तपासणी • तात्काळ वजन व दर',
+    voiceAiTitle: 'बोलून लॉट बनवा • व्हॉइस AI',
+    voiceAiSubtitle: 'फक्त बोला: काय भंगार, किती वजन — लॉट आपोआप तयार होईल',
+    voiceAiTag: 'हँड्स-फ्री (Hands-Free)',
     manualGrid: '7-श्रेणी मॅन्युअल ग्रिड',
     todaysHaulTitle: 'आजचे काम व कमाई (Today\'s Haul)',
     todaysEarnings: 'आजची कमाई',
@@ -175,6 +182,9 @@ const HOME_TRANSLATIONS = {
     syncOffline: 'Offline',
     scanTitle: 'Scan & Identify E-Waste',
     scanSubtitle: 'AI Camera Detection • Instant Rate',
+    voiceAiTitle: 'Speak to Create Lot • Voice AI',
+    voiceAiSubtitle: 'Just speak: scrap type, weight in kg — AI does everything',
+    voiceAiTag: 'Hands-Free AI',
     manualGrid: 'Manual 7-Category Grid',
     todaysHaulTitle: "Today's Work & Earnings",
     todaysEarnings: "Today's Earnings",
@@ -269,6 +279,25 @@ export default function Screen01Home({
   const [showPriceBoardModal, setShowPriceBoardModal] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const [showYardModal, setShowYardModal] = useState(false);
+  const [showVoiceModal, setShowVoiceModal] = useState(false);
+
+  // Live browser online / offline state detection
+  const [isNetworkOnline, setIsNetworkOnline] = useState(
+    typeof navigator !== 'undefined' ? navigator.onLine : true
+  );
+
+  useEffect(() => {
+    const handleOnline = () => setIsNetworkOnline(true);
+    const handleOffline = () => setIsNetworkOnline(false);
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
+
+  const effectiveOnline = isNetworkOnline && (syncStatus?.isOnline !== false);
 
   // Doorstep Rate Calculator State
   const [calcMaterial, setCalcMaterial] = useState('mat_cables_copper');
@@ -468,15 +497,15 @@ export default function Screen01Home({
           <div className="flex items-center gap-2">
             {/* Small Compact Online/Offline Status Box */}
             <div
-              className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-xs font-semibold shrink-0 ${
-                syncStatus.isOnline
+              className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-xs font-semibold shrink-0 transition-colors ${
+                effectiveOnline
                   ? 'bg-emerald-50 border-emerald-300 text-emerald-800'
-                  : 'bg-amber-50 border-amber-300 text-amber-800'
+                  : 'bg-rose-50 border-rose-300 text-rose-700'
               }`}
-              title={syncStatus.isOnline ? 'Application is Online' : 'Application is Offline'}
+              title={effectiveOnline ? 'Application is Online' : 'Network is Offline'}
             >
-              <span className={`w-2 h-2 rounded-full ${syncStatus.isOnline ? 'bg-emerald-500' : 'bg-amber-500 animate-pulse'}`}></span>
-              <span>{syncStatus.isOnline ? (safeLang === 'mr' ? 'ऑनलाइन' : safeLang === 'hi' ? 'ऑनलाइन' : 'Online') : (safeLang === 'mr' ? 'ऑफलाइन' : safeLang === 'hi' ? 'ऑफलाइन' : 'Offline')}</span>
+              <span className={`w-2 h-2 rounded-full ${effectiveOnline ? 'bg-emerald-500' : 'bg-rose-500 animate-pulse'}`}></span>
+              <span>{effectiveOnline ? (safeLang === 'mr' ? 'ऑनलाइन' : safeLang === 'hi' ? 'ऑनलाइन' : 'Online') : (safeLang === 'mr' ? 'ऑफलाइन' : safeLang === 'hi' ? 'ऑफलाइन' : 'Offline')}</span>
             </div>
 
             {/* Notifications Bell */}
@@ -529,9 +558,6 @@ export default function Screen01Home({
                       <span>{t.scanSubtitle}</span>
                     </span>
                   </div>
-                </div>
-                <div className="hidden sm:flex w-10 h-10 rounded-full bg-white/15 items-center justify-center text-white shrink-0">
-                  <span className="material-symbols-outlined text-[24px]">arrow_forward</span>
                 </div>
               </button>
 
@@ -1190,6 +1216,34 @@ export default function Screen01Home({
           }
         }}
         currentLang={safeLang}
+      />
+
+      {/* Small Floating Voice AI Button on Bottom Right */}
+      <button
+        onClick={() => setShowVoiceModal(true)}
+        type="button"
+        className="fixed bottom-20 sm:bottom-8 right-4 sm:right-6 z-40 w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-gradient-to-tr from-emerald-600 via-primary to-teal-500 hover:scale-105 active:scale-95 text-white shadow-xl shadow-emerald-950/40 flex items-center justify-center border-2 border-emerald-300/70 cursor-pointer transition-transform group"
+        title="Voice AI: बोलकर लॉट बनाएं"
+        aria-label="Voice AI"
+      >
+        <div className="relative flex items-center justify-center">
+          <span className="absolute -inset-1.5 rounded-full bg-emerald-400/30 animate-ping opacity-75"></span>
+          <span className="material-symbols-outlined text-[24px] sm:text-[28px] text-white">mic</span>
+        </div>
+      </button>
+
+      {/* Hands-Free Voice AI Light Pop-up */}
+      <VoiceLotModal
+        isOpen={showVoiceModal}
+        onClose={() => setShowVoiceModal(false)}
+        currentLang={safeLang}
+        onLotCreated={(lot) => {
+          if (onSelectLot) {
+            onSelectLot(lot, 'lot_summary');
+          } else if (onNavigate) {
+            onNavigate('lot_summary');
+          }
+        }}
       />
     </div>
   );
