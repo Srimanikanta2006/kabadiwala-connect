@@ -418,12 +418,12 @@ export default function YardHandoverModal({
                   </div>
 
                   {/* QR Code Container */}
-                  <div className="bg-surface-container-lowest p-6 rounded-2xl border-2 border-emerald-500/40 text-center shadow-sm flex flex-col items-center justify-center gap-3">
-                    <div className="p-3 bg-white rounded-xl border border-slate-200 shadow-inner">
+                  <div className="bg-surface-container-lowest p-4 rounded-2xl border-2 border-emerald-500/40 text-center shadow-sm flex flex-col items-center justify-center gap-2">
+                    <div className="p-2 bg-white rounded-xl border border-slate-200 shadow-inner">
                       <img
-                        src={`https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=RELINK-INBOUND-PEENYA04-${Date.now()}`}
+                        src={`https://api.qrserver.com/v1/create-qr-code/?size=140x140&data=RELINK-INBOUND-PEENYA04-${Date.now()}`}
                         alt="Inbound Lot QR Voucher"
-                        className="w-40 h-40 object-contain mx-auto"
+                        className="w-32 h-32 object-contain mx-auto"
                       />
                     </div>
                     <span className="font-mono text-xs font-black tracking-widest text-slate-800 bg-slate-100 px-3 py-1 rounded-lg">
@@ -445,22 +445,19 @@ export default function YardHandoverModal({
                     <button
                       type="button"
                       onClick={() => setShowVoucher(false)}
-                      className="w-full py-2.5 px-4 rounded-xl border border-outline-variant bg-surface hover:bg-surface-container text-on-surface font-semibold text-xs transition-colors cursor-pointer"
+                      className="w-full py-2.5 px-4 rounded-xl border border-outline-variant bg-surface hover:bg-surface-container text-on-surface font-semibold text-xs transition-colors cursor-pointer flex items-center justify-center gap-1.5"
                     >
-                      {t.closeVoucher}
+                      <span className="material-symbols-outlined text-[16px]">arrow_back</span>
+                      <span>{t.closeVoucher}</span>
                     </button>
-                    {onNavigate && (
-                      <button
-                        type="button"
-                        onClick={() => {
-                          onClose();
-                          onNavigate('dealer_portal');
-                        }}
-                        className="w-full py-2.5 px-4 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs transition-colors cursor-pointer"
-                      >
-                        ⚡ Open Dealer Hub (Simulate Intake)
-                      </button>
-                    )}
+                    <button
+                      type="button"
+                      onClick={onClose}
+                      className="w-full py-2.5 px-4 rounded-xl bg-primary hover:bg-primary/90 text-on-primary font-bold text-xs transition-colors cursor-pointer flex items-center justify-center gap-1.5"
+                    >
+                      <span className="material-symbols-outlined text-[16px]">check_circle</span>
+                      <span>{safeLang === 'mr' ? 'झाले (काटा पावती)' : (safeLang === 'en' ? 'Done (Ready for Scale)' : 'पूर्ण (कांटा पर्ची तैयार)')}</span>
+                    </button>
                   </div>
                 </div>
               )}

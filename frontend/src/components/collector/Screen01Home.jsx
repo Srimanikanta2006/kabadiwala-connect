@@ -274,24 +274,53 @@ export default function Screen01Home({
   const [calcMaterial, setCalcMaterial] = useState('mat_cables_copper');
   const [calcWeight, setCalcWeight] = useState(5);
 
-  const [marketRates, setMarketRates] = useState([
-    { id: 'mat_pcb_high', name: 'Circuit Boards', sub: 'A-Grade PCB', rate: 240, unit: 'kg', icon: 'memory' },
-    { id: 'mat_cables_copper', name: 'Copper Cables', sub: 'Insulated Wire', rate: 380, unit: 'kg', icon: 'cable' },
-    { id: 'mat_batteries_li_ion', name: 'Li-ion Batteries', sub: 'Mixed lot', rate: 185, unit: 'kg', icon: 'battery_charging_full' }
-  ]);
+  const [marketRates, setMarketRates] = useState(() => {
+    try {
+      const broadcast = JSON.parse(localStorage.getItem('relink_broadcast_rates') || '{}');
+      return [
+        { id: 'mat_pcb_high', name: 'Circuit Boards', sub: 'A-Grade PCB', rate: broadcast.pcb || 240, unit: 'kg', icon: 'memory' },
+        { id: 'mat_cables_copper', name: 'Copper Cables', sub: 'Insulated Wire', rate: broadcast.copper || 380, unit: 'kg', icon: 'cable' },
+        { id: 'mat_batteries_li_ion', name: 'Li-ion Batteries', sub: 'Mixed lot', rate: broadcast.battery || 185, unit: 'kg', icon: 'battery_charging_full' }
+      ];
+    } catch (e) {
+      return [
+        { id: 'mat_pcb_high', name: 'Circuit Boards', sub: 'A-Grade PCB', rate: 240, unit: 'kg', icon: 'memory' },
+        { id: 'mat_cables_copper', name: 'Copper Cables', sub: 'Insulated Wire', rate: 380, unit: 'kg', icon: 'cable' },
+        { id: 'mat_batteries_li_ion', name: 'Li-ion Batteries', sub: 'Mixed lot', rate: 185, unit: 'kg', icon: 'battery_charging_full' }
+      ];
+    }
+  });
 
-  // Load live prices from backend if available
+  // Load live prices from backend & sync with live recycler rates
   useEffect(() => {
+    const syncLiveRates = () => {
+      try {
+        const broadcast = JSON.parse(localStorage.getItem('relink_broadcast_rates') || '{}');
+        if (broadcast.pcb || broadcast.copper || broadcast.battery) {
+          setMarketRates(prev => [
+            { ...prev[0], rate: broadcast.pcb || prev[0].rate },
+            { ...prev[1], rate: broadcast.copper || prev[1].rate },
+            { ...prev[2], rate: broadcast.battery || prev[2].rate }
+          ]);
+        }
+      } catch (e) {}
+    };
+
+    syncLiveRates();
+    window.addEventListener('storage', syncLiveRates);
+    window.addEventListener('relink_rates_updated', syncLiveRates);
+
     async function loadPrices() {
       try {
         const res = await fetch('http://localhost:8000/prices/board?location=IN-MH-MUM');
         if (res.ok) {
           const data = await res.json();
           if (data.categories && data.categories.length >= 3) {
+            const broadcast = JSON.parse(localStorage.getItem('relink_broadcast_rates') || '{}');
             setMarketRates([
-              { id: 'mat_pcb_high', name: 'Circuit Boards', sub: 'A-Grade PCB', rate: 240, unit: 'kg', icon: 'memory' },
-              { id: 'mat_cables_copper', name: 'Copper Cables', sub: 'Insulated Wire', rate: 380, unit: 'kg', icon: 'cable' },
-              { id: 'mat_batteries_li_ion', name: 'Li-ion Batteries', sub: 'Mixed lot', rate: 185, unit: 'kg', icon: 'battery_charging_full' }
+              { id: 'mat_pcb_high', name: 'Circuit Boards', sub: 'A-Grade PCB', rate: broadcast.pcb || 240, unit: 'kg', icon: 'memory' },
+              { id: 'mat_cables_copper', name: 'Copper Cables', sub: 'Insulated Wire', rate: broadcast.copper || 380, unit: 'kg', icon: 'cable' },
+              { id: 'mat_batteries_li_ion', name: 'Li-ion Batteries', sub: 'Mixed lot', rate: broadcast.battery || 185, unit: 'kg', icon: 'battery_charging_full' }
             ]);
           }
         }
@@ -300,6 +329,11 @@ export default function Screen01Home({
       }
     }
     loadPrices();
+
+    return () => {
+      window.removeEventListener('storage', syncLiveRates);
+      window.removeEventListener('relink_rates_updated', syncLiveRates);
+    };
   }, []);
 
   const speakText = (text) => {

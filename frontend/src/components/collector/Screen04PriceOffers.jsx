@@ -169,6 +169,14 @@ export default function Screen04PriceOffers({
   const materialId = lotDraft.materialId || 'mat_pcb_high';
 
   const getBaseRate = (matId, u) => {
+    try {
+      const broadcast = JSON.parse(localStorage.getItem('relink_broadcast_rates') || '{}');
+      if (matId === 'mat_pcb_high' && broadcast.pcb) return broadcast.pcb;
+      if (matId === 'mat_cables_copper' && broadcast.copper) return broadcast.copper;
+      if (matId === 'mat_batteries_li_ion' && broadcast.battery) return broadcast.battery;
+      if (matId === 'mat_batteries_lead' && broadcast.lead) return broadcast.lead;
+    } catch (e) {}
+
     if (u === 'piece') {
       return matId === 'mat_pcb_high' ? 280 : (matId === 'mat_crt_monitor' ? 250 : (matId === 'mat_batteries_li_ion' ? 120 : (matId === 'mat_motors_magnets' ? 180 : 200)));
     }

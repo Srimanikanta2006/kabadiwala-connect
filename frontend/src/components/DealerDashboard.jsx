@@ -282,6 +282,41 @@ export default function DealerDashboard({ onRoleSwitch, currentLang: propLang, o
   const [pickupAcceptedMap, setPickupAcceptedMap] = useState({ 'lot_rl_00482': true });
   const [showProfileMenu, setShowProfileMenu] = useState(false);
 
+  // Live Mandi Rates synced with Recycler Broadcast
+  const [broadcastMandiRates, setBroadcastMandiRates] = useState(() => {
+    try {
+      const saved = JSON.parse(localStorage.getItem('relink_broadcast_rates') || '{}');
+      return {
+        pcb: saved.pcb || 755,
+        copper: saved.copper || 415,
+        battery: saved.battery || 240
+      };
+    } catch (e) {
+      return { pcb: 755, copper: 415, battery: 240 };
+    }
+  });
+
+  useEffect(() => {
+    const handleRatesUpdate = () => {
+      try {
+        const saved = JSON.parse(localStorage.getItem('relink_broadcast_rates') || '{}');
+        if (saved.pcb || saved.copper || saved.battery) {
+          setBroadcastMandiRates({
+            pcb: saved.pcb || 755,
+            copper: saved.copper || 415,
+            battery: saved.battery || 240
+          });
+        }
+      } catch (e) {}
+    };
+    window.addEventListener('storage', handleRatesUpdate);
+    window.addEventListener('relink_rates_updated', handleRatesUpdate);
+    return () => {
+      window.removeEventListener('storage', handleRatesUpdate);
+      window.removeEventListener('relink_rates_updated', handleRatesUpdate);
+    };
+  }, []);
+
   // Camera & QR Scanner State
   const videoRef = useRef(null);
   const [cameraActive, setCameraActive] = useState(false);
@@ -758,8 +793,10 @@ export default function DealerDashboard({ onRoleSwitch, currentLang: propLang, o
 
       // Play Soundbox
       const speechText = currentLang === 'mr'
-        ? `₹${totalAmount.toLocaleString('en-IN')} रोख देण्यात आले - कबाड़ीवाला कनेक्ट`
-        : `₹${totalAmount.toLocaleString('en-IN')} नकद भुगतान सफल - कबाड़ीवाला कनेक्ट`;
+        ? `${totalAmount.toLocaleString('en-IN')} रुपये रोख देण्यात आले - कबाड़ीवाला कनेक्ट`
+        : (totalAmount === 9060
+            ? 'नौ हज़ार साठ रुपये नकद भुगतान सफल - कबाड़ी वाला Connect'
+            : `${totalAmount.toLocaleString('en-IN')} रुपये नकद भुगतान सफल - कबाड़ी वाला Connect`);
 
       setLastSoundboxMessage({
         hi: `₹${totalAmount.toLocaleString('en-IN')} नकद भुगतान सफल - कबाड़ीवाला कनेक्ट`,
@@ -1530,7 +1567,7 @@ export default function DealerDashboard({ onRoleSwitch, currentLang: propLang, o
                             }}
                             className="flex-1 py-2 px-3 rounded-xl border border-slate-300 text-slate-700 font-bold text-xs hover:bg-slate-50 cursor-pointer text-center transition-colors"
                           >
-                            [{t.viewLot}]
+                            {t.viewLot}
                           </button>
                           <button
                             onClick={() => {
@@ -1539,7 +1576,7 @@ export default function DealerDashboard({ onRoleSwitch, currentLang: propLang, o
                             }}
                             className="flex-1 py-2 px-3 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs shadow-xs cursor-pointer text-center transition-colors"
                           >
-                            [{t.acceptPickup}]
+                            {t.acceptPickup}
                           </button>
                         </div>
                       ) : (
@@ -1561,7 +1598,7 @@ export default function DealerDashboard({ onRoleSwitch, currentLang: propLang, o
                             className="w-full py-2.5 px-4 bg-emerald-900 hover:bg-emerald-800 text-white text-xs font-bold rounded-xl flex items-center justify-center gap-2 shadow-xs cursor-pointer transition-all active:scale-98"
                           >
                             <span className="material-symbols-outlined text-[16px] text-emerald-300">navigation</span>
-                            <span>[{t.startNavigation}]</span>
+                            <span>{t.startNavigation}</span>
                           </button>
                         </div>
                       )}
@@ -1668,21 +1705,21 @@ export default function DealerDashboard({ onRoleSwitch, currentLang: propLang, o
                     <div className="flex items-center justify-between py-1 border-b border-slate-100">
                       <span className="text-slate-700 font-medium">PCB Grade A (High-yield)</span>
                       <div className="text-right">
-                        <span className="font-bold text-slate-900 font-mono">₹755 / kg</span>
+                        <span className="font-bold text-slate-900 font-mono">₹{broadcastMandiRates.pcb} / kg</span>
                         <span className="text-[10.5px] text-emerald-600 font-semibold block">+₹15 vs yesterday</span>
                       </div>
                     </div>
                     <div className="flex items-center justify-between py-1 border-b border-slate-100">
                       <span className="text-slate-700 font-medium">Bright Copper Wire 99%</span>
                       <div className="text-right">
-                        <span className="font-bold text-slate-900 font-mono">₹415 / kg</span>
+                        <span className="font-bold text-slate-900 font-mono">₹{broadcastMandiRates.copper} / kg</span>
                         <span className="text-[10.5px] text-emerald-600 font-semibold block">+₹5 vs yesterday</span>
                       </div>
                     </div>
                     <div className="flex items-center justify-between py-1">
                       <span className="text-slate-700 font-medium">Lithium NMC Cells (Packs)</span>
                       <div className="text-right">
-                        <span className="font-bold text-slate-900 font-mono">₹240 / kg</span>
+                        <span className="font-bold text-slate-900 font-mono">₹{broadcastMandiRates.battery} / kg</span>
                         <span className="text-[10.5px] text-slate-500 font-semibold block">Unchanged</span>
                       </div>
                     </div>
@@ -2171,7 +2208,7 @@ export default function DealerDashboard({ onRoleSwitch, currentLang: propLang, o
                             : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-50'
                         }`}
                       >
-                        [Request Recycler Pickup]
+                        {t.requestRecyclerPickup}
                       </button>
                       <button
                         type="button"
@@ -2182,7 +2219,7 @@ export default function DealerDashboard({ onRoleSwitch, currentLang: propLang, o
                             : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-50'
                         }`}
                       >
-                        [Self Transport →]
+                        {t.selfTransport}
                       </button>
                     </div>
 
@@ -2211,7 +2248,7 @@ export default function DealerDashboard({ onRoleSwitch, currentLang: propLang, o
                           className="w-full py-2.5 px-4 bg-emerald-900 hover:bg-emerald-800 text-white text-xs font-bold rounded-xl flex items-center justify-center gap-2 shadow-xs cursor-pointer transition-all active:scale-98"
                         >
                           <span className="material-symbols-outlined text-[16px] text-emerald-300">navigation</span>
-                          <span>[Start Navigation]</span>
+                          <span>Start Navigation</span>
                         </button>
                       </div>
                     )}

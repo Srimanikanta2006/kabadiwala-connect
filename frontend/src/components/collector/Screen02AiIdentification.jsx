@@ -392,31 +392,55 @@ export default function Screen02AiIdentification({
                   : `Identified: ${materialTitle} (${confidence}% match).`)}</span>
           </div>
 
-          {lotDraft.boundingBoxes && lotDraft.boundingBoxes.length > 0 && (
-            <div className="mt-3 pt-3 border-t border-outline-variant/60">
-              <div className="flex items-center justify-between text-[11px] font-semibold text-on-surface-variant mb-2">
-                <span className="flex items-center gap-1 text-primary font-bold">
-                  <span className="material-symbols-outlined text-[16px]">view_in_ar</span>
-                  <span>{t.detectedItems} ({lotDraft.boundingBoxes.length})</span>
-                </span>
-              </div>
-              <div className="flex flex-wrap gap-1.5">
-                {lotDraft.boundingBoxes.map((b, idx) => (
-                  <button
-                    key={b.detection_id || idx}
-                    type="button"
-                    onClick={() => handleSelectAlternative(b.name_en, b.cpcb_code, b.category_id, Math.round(b.confidence * 100))}
-                    className="text-xs px-2.5 py-1 rounded-lg border border-primary/30 bg-primary/5 hover:bg-primary/15 text-on-surface flex items-center gap-1.5 transition-colors cursor-pointer"
-                  >
-                    <span className="font-semibold text-primary">{b.raw_class}</span>
-                    <span className="text-[10px] bg-surface px-1.5 py-0.5 rounded border border-outline-variant/60 text-on-surface-variant font-bold">
-                      {Math.round(b.confidence * 100)}%
+          {(() => {
+            const distinctDetections = lotDraft.boundingBoxes && lotDraft.boundingBoxes.length > 0
+              ? Object.values(
+                  lotDraft.boundingBoxes.reduce((acc, b) => {
+                    const key = (b.raw_class || b.category_id || b.name_en || '').trim().toLowerCase();
+                    if (!key) return acc;
+                    if (!acc[key] || (b.confidence || 0) > (acc[key].confidence || 0)) {
+                      acc[key] = { ...b, count: (acc[key]?.count || 0) + 1 };
+                    } else {
+                      acc[key].count = (acc[key].count || 1) + 1;
+                    }
+                    return acc;
+                  }, {})
+                ).sort((a, b) => (b.confidence || 0) - (a.confidence || 0))
+              : [];
+
+            if (distinctDetections.length === 0) return null;
+
+            return (
+              <div className="mt-3 pt-3 border-t border-outline-variant/60">
+                <div className="flex items-center justify-between text-[11px] font-semibold text-on-surface-variant mb-2">
+                  <span className="flex items-center gap-1 text-primary font-bold">
+                    <span className="material-symbols-outlined text-[16px]">view_in_ar</span>
+                    <span>{t.detectedItems} ({distinctDetections.length})</span>
+                  </span>
+                  {lotDraft.boundingBoxes && lotDraft.boundingBoxes.length > distinctDetections.length && (
+                    <span className="text-[10px] text-on-surface-variant bg-surface-container px-2 py-0.5 rounded-full font-medium">
+                      {lotDraft.boundingBoxes.length} {safeLang === 'mr' ? 'घटक ओळखले' : (safeLang === 'hi' ? 'घटक पहचाने गए' : 'instances')}
                     </span>
-                  </button>
-                ))}
+                  )}
+                </div>
+                <div className="flex flex-wrap gap-1.5">
+                  {distinctDetections.map((b, idx) => (
+                    <button
+                      key={b.detection_id || idx}
+                      type="button"
+                      onClick={() => handleSelectAlternative(b.name_en, b.cpcb_code, b.category_id, Math.round(b.confidence * 100))}
+                      className="text-xs px-2.5 py-1 rounded-lg border border-primary/30 bg-primary/5 hover:bg-primary/15 text-on-surface flex items-center gap-1.5 transition-colors cursor-pointer"
+                    >
+                      <span className="font-semibold text-primary">{b.raw_class}</span>
+                      <span className="text-[10px] bg-surface px-1.5 py-0.5 rounded border border-outline-variant/60 text-on-surface-variant font-bold">
+                        {Math.round(b.confidence * 100)}%
+                      </span>
+                    </button>
+                  ))}
+                </div>
               </div>
-            </div>
-          )}
+            );
+          })()}
 
           <div className="mt-3">
             <div className="text-[11px] font-semibold text-on-surface-variant mb-1.5 uppercase tracking-wide">
