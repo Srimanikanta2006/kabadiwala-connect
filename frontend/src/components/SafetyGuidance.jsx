@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { speakVernacular } from '../utils/speechUtils';
+import { API_BASE } from '../services/apiConfig';
 import './SafetyGuidance.css';
-
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
 export default function SafetyGuidance({ contextualCategory = null, currentLang: propLang }) {
   const { t, i18n } = useTranslation();

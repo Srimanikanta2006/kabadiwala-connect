@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { API_BASE } from '../../services/apiConfig';
 
 const OFFERS_TRANSLATIONS = {
   hi: {
@@ -304,7 +305,7 @@ export default function Screen04PriceOffers({
     async function fetchMatches() {
       setIsLoading(true);
       try {
-        const res = await fetch(`http://localhost:8000/match-recyclers?material_id=${materialId}&weight=${weight}&lat=13.0285&lng=77.5195`);
+        const res = await fetch(`${API_BASE}/match-recyclers?material_id=${materialId}&weight=${weight}&lat=13.0285&lng=77.5195`);
         if (res.ok) {
           const data = await res.json();
           // Load dealers

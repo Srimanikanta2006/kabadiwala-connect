@@ -5,8 +5,7 @@ import AdminToolsModal from './common/AdminToolsModal';
 import Form6ManifestModal from './recycler/Form6ManifestModal';
 import DealerNavigationModal from './common/DealerNavigationModal';
 import DealerProSubscriptionModal from './dealer/DealerProSubscriptionModal';
-
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+import { API_BASE } from '../services/apiConfig';
 
 const DEALER_TRANSLATIONS = {
   hi: {

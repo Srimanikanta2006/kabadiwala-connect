@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { API_BASE } from '../../services/apiConfig';
 
 const EARNINGS_TRANSLATIONS = {
   hi: {
@@ -117,7 +118,7 @@ export default function Screen06EarningsHistory({
   useEffect(() => {
     async function fetchLedger() {
       try {
-        const res = await fetch('http://localhost:8000/earnings/col_test_001');
+        const res = await fetch(`${API_BASE}/earnings/col_test_001`);
         if (res.ok) {
           const data = await res.json();
           if (data && data.success) {

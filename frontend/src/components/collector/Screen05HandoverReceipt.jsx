@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { QRCodeSVG } from 'qrcode.react';
+import { API_BASE } from '../../services/apiConfig';
 
 const RECEIPT_TRANSLATIONS = {
   hi: {
@@ -241,7 +242,7 @@ export default function Screen05HandoverReceipt({
           facility_type: buyer.facilityType || (isDealer ? 'Authorised Aggregator Yard' : 'Recycler'),
           payment_mode: paymentMode
         };
-        const res = await fetch('http://localhost:8000/handover/initiate', {
+        const res = await fetch(`${API_BASE}/handover/initiate`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)

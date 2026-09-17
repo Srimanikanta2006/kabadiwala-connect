@@ -5,6 +5,7 @@ import PriceBoardModal from './PriceBoardModal';
 import NotificationsModal from '../common/NotificationsModal';
 import YardHandoverModal from '../common/YardHandoverModal';
 import VoiceLotModal from './VoiceLotModal';
+import { API_BASE } from '../../services/apiConfig';
 
 const HOME_TRANSLATIONS = {
   hi: {
@@ -341,7 +342,7 @@ export default function Screen01Home({
 
     async function loadPrices() {
       try {
-        const res = await fetch('http://localhost:8000/prices/board?location=IN-MH-MUM');
+        const res = await fetch(`${API_BASE}/prices/board?location=IN-MH-MUM`);
         if (res.ok) {
           const data = await res.json();
           if (data.categories && data.categories.length >= 3) {

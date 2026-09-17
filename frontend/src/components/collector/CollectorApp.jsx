@@ -12,6 +12,7 @@ import Screen07MyLots from './Screen07MyLots';
 import SafetyGuidance from '../SafetyGuidance';
 import { saveOfflineLot, saveOfflineHandover, getRecentOfflineLots } from '../../db/offlineDb';
 import { syncEngine } from '../../services/syncEngine';
+import { API_BASE } from '../../services/apiConfig';
 import './collectorStyles.css';
 
 const DEFAULT_LOT_DRAFT = {
@@ -209,7 +210,7 @@ export default function CollectorApp({ onSwitchRole, currentLang: propLang, onLa
       try {
         const formData = new FormData();
         formData.append('file', file);
-        const res = await fetch('http://localhost:8000/classify', {
+        const res = await fetch(`${API_BASE}/classify`, {
           method: 'POST',
           body: formData
         });
