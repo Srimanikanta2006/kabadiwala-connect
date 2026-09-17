@@ -11,7 +11,7 @@ export default defineConfig({
       injectRegister: 'auto',
       includeAssets: ['favicon.svg', 'pwa-192x192.png', 'pwa-512x512.png', 'apple-touch-icon.png'],
       manifest: {
-        name: 'Kabadiwala Connect - E-Waste PWA',
+        name: 'Kabadiwala Connect • RE:LINK',
         short_name: 'Kabadiwala',
         description: 'Offline-first AI-assisted e-waste pricing, aggregation & EPR traceability',
         theme_color: '#16a34a',
